@@ -12,4 +12,5 @@ export interface ICard {
   readonly defense?: number;   // Opcional
   readonly imageUrl?: string;  // Opcional: URL de la imagen (Supabase Storage)
   readonly effectId?: string;  // Opcional: ID de una habilidad especial
+  
 }

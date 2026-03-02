@@ -1,18 +1,17 @@
-"use client"; // Necesario para Framer Motion y eventos onClick en App Router
+// src/components/game/Card.tsx
+"use client";
 
 import { motion } from "framer-motion";
 import { Shield, Sword, Zap } from "lucide-react";
 import { ICard, Faction } from "@/core/entities/ICard";
 import { cn } from "@/lib/utils";
 
-/**
- * Mapeo de colores y gradientes espectaculares basados en la facción.
- */
-const FACTION_STYLES: Record<Faction, string> = {
-  OPEN_SOURCE: "from-emerald-500/20 to-emerald-900/80 border-emerald-500/50 shadow-emerald-500/20",
-  BIG_TECH: "from-blue-500/20 to-blue-900/80 border-blue-500/50 shadow-blue-500/20",
-  NO_CODE: "from-purple-500/20 to-purple-900/80 border-purple-500/50 shadow-purple-500/20",
-  NEUTRAL: "from-zinc-500/20 to-zinc-900/80 border-zinc-500/50 shadow-zinc-500/20",
+// Ahora definimos el color del "borde exterior" y el "núcleo interior"
+const FACTION_STYLES: Record<Faction, { wrapper: string; inner: string }> = {
+  OPEN_SOURCE: { wrapper: "bg-gradient-to-br from-emerald-400 to-emerald-900 shadow-emerald-500/30", inner: "from-emerald-950 via-zinc-950 to-black" },
+  BIG_TECH: { wrapper: "bg-gradient-to-br from-blue-400 to-blue-900 shadow-blue-500/30", inner: "from-blue-950 via-zinc-950 to-black" },
+  NO_CODE: { wrapper: "bg-gradient-to-br from-purple-400 to-purple-900 shadow-purple-500/30", inner: "from-purple-950 via-zinc-950 to-black" },
+  NEUTRAL: { wrapper: "bg-gradient-to-br from-zinc-400 to-zinc-700 shadow-zinc-500/30", inner: "from-zinc-900 via-zinc-950 to-black" },
 };
 
 interface CardProps {
@@ -21,69 +20,76 @@ interface CardProps {
   isSelected?: boolean;
 }
 
-/**
- * Componente visual de una Carta del juego.
- * Implementa animaciones con Framer Motion y diseño responsivo.
- */
 export function Card({ card, onClick, isSelected = false }: CardProps) {
-  const factionStyle = FACTION_STYLES[card.faction] || FACTION_STYLES.NEUTRAL;
+  const faction = FACTION_STYLES[card.faction] || FACTION_STYLES.NEUTRAL;
+
+  // Cortes calculados en píxeles fijos para que no se deformen
+  const clipPathOuter = "polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px)";
+  const clipPathInner = "polygon(19px 0, 100% 0, 100% calc(100% - 19px), calc(100% - 19px) 100%, 0 100%, 0 19px)";
 
   return (
     <motion.div
       onClick={() => onClick && onClick(card)}
-      // Animaciones de Framer Motion
-      whileHover={{ scale: 1.05, y: -10 }}
-      whileTap={{ scale: 0.95 }}
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      // Estilos base de la carta
+      whileHover={{ scale: 1.05, y: -5 }}
+      whileTap={{ scale: 0.98 }}
+      initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: "spring", stiffness: 800, damping: 20 }}
+      // WRAPPER EXTERNO (ACTÚA COMO BORDE DE 2px)
+      style={{ clipPath: clipPathOuter }}
       className={cn(
-        "relative w-64 h-80 rounded-2xl p-4 cursor-pointer select-none",
-        "bg-gradient-to-br backdrop-blur-md border",
-        "flex flex-col justify-between overflow-hidden transition-shadow duration-300",
-        isSelected ? "ring-4 ring-white shadow-2xl" : "hover:shadow-xl",
-        factionStyle
+        "relative w-[260px] h-[340px] p-[2px] cursor-pointer select-none",
+        "transition-all duration-150 backdrop-blur-3xl",
+        isSelected ? "shadow-[0_0_50px_rgba(255,255,255,0.4)] ring-offset-black" : `shadow-2xl shadow-black ${faction.wrapper}`,
+        isSelected && "bg-gradient-to-br from-cyan-400 via-white to-blue-500" // Brillo al seleccionar
       )}
     >
-      {/* Coste de Energía (Arriba a la izquierda) */}
-      <div className="absolute top-3 left-3 flex items-center justify-center w-10 h-10 rounded-full bg-black/60 border border-yellow-400/50 text-yellow-400 font-bold z-10 shadow-[0_0_15px_rgba(250,204,21,0.5)]">
-        <Zap className="absolute opacity-30 w-8 h-8" />
-        <span className="relative z-10 text-lg">{card.cost}</span>
-      </div>
+      {/* NÚCLEO INTERNO (LA CARTA REAL) */}
+      <div 
+        style={{ clipPath: clipPathInner }}
+        className={cn("w-full h-full relative flex flex-col justify-between bg-gradient-to-br overflow-hidden", faction.inner)}
+      >
+        {/* Fondo holográfico animado interno */}
+        <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent_0%,rgba(255,255,255,0.03)_50%,transparent_100%)] bg-[length:200%_200%] animate-[pulse_4s_ease-in-out_infinite] pointer-events-none" />
 
-      {/* Tipo de Carta (Arriba a la derecha) */}
-      <div className="absolute top-4 right-4 text-xs font-bold tracking-wider text-white/60 uppercase">
-        {card.type}
-      </div>
-
-      {/* Título y Arte (Simulado) */}
-      <div className="mt-8 text-center flex-grow flex flex-col items-center justify-center">
-        <div className="w-24 h-24 mb-4 rounded-xl bg-gradient-to-tr from-white/5 to-white/20 border border-white/10 flex items-center justify-center shadow-inner">
-           {/* Aquí irá la imagen de Supabase en el futuro */}
-           <span className="text-white/30 text-xs">NO IMAGE</span>
+        {/* Cabecera: Coste y Tipo */}
+        <div className="flex justify-between items-start px-2 pt-2 relative z-10">
+          <div className="flex items-center justify-center w-12 h-12 bg-black border border-yellow-500/80 text-yellow-400 font-black z-10 shadow-[0_0_15px_rgba(234,179,8,0.4)]" style={{ clipPath: "polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px)" }}>
+            <Zap className="absolute opacity-20 w-8 h-8" />
+            <span className="relative z-10 text-xl">{card.cost}</span>
+          </div>
+          <div className="bg-black/90 px-3 py-1.5 text-[10px] font-black tracking-widest text-white/70 uppercase border border-white/10 rounded-sm">
+            {card.type}
+          </div>
         </div>
-        <h2 className="text-xl font-extrabold text-white tracking-tight leading-tight line-clamp-2">
-          {card.name}
-        </h2>
-      </div>
 
-      {/* Descripción */}
-      <div className="bg-black/40 rounded-lg p-3 mt-2 border border-white/10 h-20 overflow-y-auto">
-        <p className="text-sm text-zinc-300 italic leading-snug">
-          {card.description}
-        </p>
-      </div>
-
-      {/* Stats: Ataque y Defensa (Abajo) */}
-      <div className="flex justify-between mt-3 px-1">
-        <div className="flex items-center space-x-1 text-red-400 font-bold text-lg drop-shadow-[0_0_8px_rgba(248,113,113,0.8)]">
-          <Sword className="w-5 h-5" />
-          <span>{card.attack ?? 0}</span>
+        {/* Arte */}
+        <div className="flex-grow flex flex-col items-center justify-center relative z-10 mt-2 px-3">
+          <div className="w-full h-32 mb-2 bg-black/80 border border-white/10 flex items-center justify-center shadow-[inset_0_0_30px_rgba(0,0,0,1)] relative overflow-hidden group rounded-sm">
+             <div className="absolute inset-0 bg-cyan-500/5 mix-blend-overlay" />
+             <div className="absolute top-0 w-full h-0.5 bg-cyan-400/50 opacity-0 group-hover:opacity-100 group-hover:animate-[ping_2s_infinite]" />
+             <span className="text-white/30 text-xs font-mono tracking-widest">DATA_CORE</span>
+          </div>
+          <h2 className="text-xl font-black text-white tracking-tighter uppercase w-full text-center truncate drop-shadow-[0_2px_5px_rgba(0,0,0,1)]">
+            {card.name}
+          </h2>
         </div>
-        <div className="flex items-center space-x-1 text-blue-400 font-bold text-lg drop-shadow-[0_0_8px_rgba(96,165,250,0.8)]">
-          <Shield className="w-5 h-5" />
-          <span>{card.defense ?? 0}</span>
+
+        {/* Panel de Datos y Stats */}
+        <div className="bg-black/80 border-t border-white/10 p-3 relative z-10 flex flex-col justify-between h-[105px]">
+          <p className="text-[11px] text-zinc-300 font-mono leading-relaxed line-clamp-3">
+            {card.description}
+          </p>
+          
+          <div className="flex justify-between items-end mt-1">
+            <div className="flex items-center space-x-2 text-red-500 font-black text-2xl drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]">
+              <Sword className="w-5 h-5" />
+              <span>{card.attack ?? 0}</span>
+            </div>
+            <div className="flex items-center space-x-2 text-blue-500 font-black text-2xl drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]">
+              <Shield className="w-5 h-5" />
+              <span>{card.defense ?? 0}</span>
+            </div>
+          </div>
         </div>
       </div>
     </motion.div>
