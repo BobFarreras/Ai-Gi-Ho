@@ -20,7 +20,6 @@ const PHASE_DESCRIPTIONS: Record<string, string> = {
   'END': 'FIN DEL TURNO'
 };
 
-// Componente Timer super limpio y sin re-renders en cascada
 function TurnTimer({ onTimeUp }: { onTimeUp: () => void }) {
   const [timeLeft, setTimeLeft] = useState(30);
 
@@ -45,7 +44,8 @@ function TurnTimer({ onTimeUp }: { onTimeUp: () => void }) {
 
 export function Board() {
   const {
-    gameState, selectedCard, playingCard, isHistoryOpen, activeAttackerId,
+    gameState, selectedCard, playingCard, isHistoryOpen, activeAttackerId, 
+    revealedEntities, // <-- EXPORTADO DEL HOOK CORRECTAMENTE
     setIsHistoryOpen, toggleCardSelection, clearSelection, executePlayAction, handleEntityClick, advancePhase
   } = useBoard();
 
@@ -66,7 +66,6 @@ export function Board() {
               Turno {gameState.turn}
             </span>
           </div>
-          {/* EL PATRÓN DE LA LLAVE MAGICA: Re-monta el componente entero en lugar de hacer setState en su interior */}
           <TurnTimer key={`${gameState.turn}-${gameState.phase}`} onTimeUp={advancePhase} />
         </div>
 
@@ -140,6 +139,7 @@ export function Board() {
           opponentGraveyardCount={opponent.graveyard.length} 
           activeAttackerId={activeAttackerId}
           selectedCard={selectedCard}
+          revealedEntities={revealedEntities} // <-- ENVIADO AL COMPONENTE AQUÍ
           onEntityClick={handleEntityClick}
         />
       </div>
