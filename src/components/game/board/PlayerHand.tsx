@@ -20,7 +20,6 @@ interface PlayerHandProps {
 
 export function PlayerHand({ hand, playingCard, hasSummoned, onCardClick, onPlayAction }: PlayerHandProps) {
   return (
-    // LA SOLUCIÓN: Subimos la altura del contenedor a h-[500px] para que las cartas no se corten por arriba
     <div className="absolute bottom-0 left-0 w-full h-[500px] flex justify-center items-end z-40 pointer-events-none perspective-[1200px] pb-4">
       <div className="flex justify-center -space-x-12 pointer-events-auto">
         {hand.map((card, i) => (
@@ -47,12 +46,21 @@ export function PlayerHand({ hand, playingCard, hasSummoned, onCardClick, onPlay
 
             <motion.div 
               layoutId={`card-animation-${card.id}`}
-              // Reducimos el tamaño global a 0.8 para que sean manejables en pantalla
-              initial={{ y: 200, scale: 0.8 }} 
-              animate={{ y: playingCard?.id === card.id ? -20 : 60, rotate: playingCard?.id === card.id ? 0 : 0, scale: 0.8 }}
-              whileHover={{ y: playingCard?.id === card.id ? -20 : -40, x: playingCard?.id === card.id ? 0 : -10, rotate: playingCard?.id === card.id ? 0 : -4, scale: 0.9, zIndex: 100 }}
+              initial={{ y: 200, scale: 0.6 }} 
+              animate={{ 
+                y: playingCard?.id === card.id ? -40 : 120, 
+                rotate: playingCard?.id === card.id ? 0 : (i - hand.length / 2) * 2, 
+                scale: playingCard?.id === card.id ? 1 : 0.6 
+              }}
+              whileHover={{ 
+                y: playingCard?.id === card.id ? -40 : -20, 
+                scale: playingCard?.id === card.id ? 1 : 0.8, 
+                zIndex: 100 
+              }}
+              // TRANSICIÓN FLUIDA PARA EVITAR EL GLITCH VISUAL
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
               onClick={(e) => onCardClick(card, e)}
-              className="transition-transform duration-75 cursor-pointer origin-bottom-right"
+              className="cursor-pointer origin-bottom"
               style={{ zIndex: playingCard?.id === card.id ? 100 : i }}
             >
               <Card card={card} isSelected={playingCard?.id === card.id} />

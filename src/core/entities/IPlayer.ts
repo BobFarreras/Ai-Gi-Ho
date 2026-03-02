@@ -23,7 +23,7 @@ export interface IPlayer {
   // Zonas del jugador
   readonly deck: string[];       
   readonly hand: ICard[];        
-  readonly graveyard: string[];  
+  readonly graveyard: ICard[];  
   
   // Zonas de Batalla Actualizadas
   readonly activeEntities: IBoardEntity[];   // <- Ahora usan IBoardEntity

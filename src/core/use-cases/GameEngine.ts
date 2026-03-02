@@ -13,9 +13,6 @@ export interface GameState {
 
 export class GameEngine {
   
-  /**
-   * INVOCAR / COLOCAR CARTA EN EL TABLERO
-   */
   public static playEntityCard(state: GameState, playerId: string, cardId: string, mode: BattleMode): GameState {
     if (state.activePlayerId !== playerId) throw new Error("No es tu turno.");
     if (state.phase !== 'MAIN_1' && state.phase !== 'MAIN_2') throw new Error("Solo puedes invocar en la Main Phase.");
@@ -54,26 +51,44 @@ export class GameEngine {
     };
   }
 
-  /**
-   * ATACAR A UNA ENTIDAD
-   */
   public static executeAttack(
     state: GameState, 
     attackerPlayerId: string, 
     attackerInstanceId: string, 
-    defenderInstanceId: string
+    defenderInstanceId?: string 
   ): GameState {
     const isAttackerA = state.playerA.id === attackerPlayerId;
     const attacker = isAttackerA ? state.playerA : state.playerB;
     const defender = isAttackerA ? state.playerB : state.playerA;
 
     const attackerEntity = attacker.activeEntities.find(c => c.instanceId === attackerInstanceId);
-    const defenderEntity = defender.activeEntities.find(c => c.instanceId === defenderInstanceId);
-
     if (!attackerEntity) throw new Error("La carta atacante no está en el campo");
-    if (!defenderEntity) throw new Error("La carta defensora no está en el campo");
     if (attackerEntity.mode !== 'ATTACK') throw new Error("Solo las cartas en modo ATAQUE pueden atacar");
     if (attackerEntity.hasAttackedThisTurn) throw new Error("Esta carta ya ha atacado este turno");
+
+    // ATAQUE DIRECTO
+    if (!defenderInstanceId) {
+      if (defender.activeEntities.length > 0) {
+        throw new Error("No puedes atacar directamente si el oponente tiene entidades en el campo.");
+      }
+      const damage = attackerEntity.card.attack ?? 0;
+      const newAttackerEntities = attacker.activeEntities.map(c => 
+        c.instanceId === attackerInstanceId ? { ...c, hasAttackedThisTurn: true } : c
+      );
+      return {
+        ...state,
+        playerA: isAttackerA 
+          ? { ...attacker, activeEntities: newAttackerEntities } 
+          : { ...defender, healthPoints: Math.max(0, defender.healthPoints - damage) },
+        playerB: isAttackerA 
+          ? { ...defender, healthPoints: Math.max(0, defender.healthPoints - damage) } 
+          : { ...attacker, activeEntities: newAttackerEntities }
+      };
+    }
+
+    // ATAQUE A ENTIDAD
+    const defenderEntity = defender.activeEntities.find(c => c.instanceId === defenderInstanceId);
+    if (!defenderEntity) throw new Error("La carta defensora no está en el campo");
 
     const isDefenderInDefense = defenderEntity.mode === 'DEFENSE' || defenderEntity.mode === 'SET';
     const defenderStat = isDefenderInDefense 
@@ -88,6 +103,7 @@ export class GameEngine {
 
     const result = CombatService.calculateBattle(ctx);
 
+    // Procesar Atacante
     let newAttackerEntities = attacker.activeEntities.map(c => 
       c.instanceId === attackerInstanceId ? { ...c, hasAttackedThisTurn: true } : c
     );
@@ -95,7 +111,7 @@ export class GameEngine {
     
     if (result.attackerDestroyed) {
       newAttackerEntities = newAttackerEntities.filter(c => c.instanceId !== attackerInstanceId);
-      newAttackerGraveyard = [...newAttackerGraveyard, attackerEntity.card.id];
+      newAttackerGraveyard = [...newAttackerGraveyard, attackerEntity.card]; // SE GUARDA LA CARTA
     }
 
     const newAttacker: IPlayer = {
@@ -105,14 +121,14 @@ export class GameEngine {
       graveyard: newAttackerGraveyard
     };
 
+    // Procesar Defensor
     let newDefenderEntities = defender.activeEntities;
     let newDefenderGraveyard = defender.graveyard;
 
     if (result.defenderDestroyed) {
       newDefenderEntities = newDefenderEntities.filter(c => c.instanceId !== defenderInstanceId);
-      newDefenderGraveyard = [...newDefenderGraveyard, defenderEntity.card.id];
+      newDefenderGraveyard = [...newDefenderGraveyard, defenderEntity.card]; // SE GUARDA LA CARTA
     } else if (defenderEntity.mode === 'SET') {
-      // Si estaba boca abajo y sobrevive, se voltea boca arriba
       newDefenderEntities = newDefenderEntities.map(c => 
         c.instanceId === defenderInstanceId ? { ...c, mode: 'DEFENSE' } : c
       );
@@ -132,22 +148,13 @@ export class GameEngine {
     };
   }
 
-  // Añade esta función estática dentro de tu clase GameEngine en src/core/use-cases/GameEngine.ts
-
-  /**
-   * AVANZAR A LA SIGUIENTE FASE / TURNO
-   */
   public static nextPhase(state: GameState): GameState {
     const phases: Array<'DRAW' | 'MAIN_1' | 'BATTLE' | 'MAIN_2' | 'END'> = ['DRAW', 'MAIN_1', 'BATTLE', 'MAIN_2', 'END'];
     const currentIndex = phases.indexOf(state.phase);
 
     if (state.phase === 'END') {
-      // CAMBIO DE TURNO
       const nextActivePlayerId = state.activePlayerId === state.playerA.id ? state.playerB.id : state.playerA.id;
-      
-      // Reseteamos estados temporales de las cartas al pasar el turno
-      const resetEntities = (entities: IBoardEntity[]) => 
-        entities.map(e => ({ ...e, hasAttackedThisTurn: false, isNewlySummoned: false }));
+      const resetEntities = (entities: IBoardEntity[]) => entities.map(e => ({ ...e, hasAttackedThisTurn: false, isNewlySummoned: false }));
 
       return {
         ...state,
@@ -155,24 +162,10 @@ export class GameEngine {
         phase: 'DRAW',
         activePlayerId: nextActivePlayerId,
         hasNormalSummonedThisTurn: false,
-        playerA: {
-          ...state.playerA,
-          currentEnergy: state.playerA.maxEnergy, // Regenerar energía
-          activeEntities: resetEntities(state.playerA.activeEntities)
-        },
-        playerB: {
-          ...state.playerB,
-          currentEnergy: state.playerB.maxEnergy, // Regenerar energía
-          activeEntities: resetEntities(state.playerB.activeEntities)
-        }
+        playerA: { ...state.playerA, currentEnergy: state.playerA.maxEnergy, activeEntities: resetEntities(state.playerA.activeEntities) },
+        playerB: { ...state.playerB, currentEnergy: state.playerB.maxEnergy, activeEntities: resetEntities(state.playerB.activeEntities) }
       };
     }
-
-    // SIGUIENTE FASE (Mismo Turno)
-    return {
-      ...state,
-      phase: phases[currentIndex + 1]
-    };
+    return { ...state, phase: phases[currentIndex + 1] };
   }
 }
-

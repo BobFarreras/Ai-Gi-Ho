@@ -1,12 +1,11 @@
-// src/components/game/Card.tsx
+// src/components/game/card/Card.tsx
 "use client";
 
-import { motion } from "framer-motion";
 import { Shield, Sword, Zap } from "lucide-react";
 import { ICard, Faction } from "@/core/entities/ICard";
 import { cn } from "@/lib/utils";
 
-// Ahora definimos el color del "borde exterior" y el "núcleo interior"
+// Definimos el color del "borde exterior" y el "núcleo interior"
 const FACTION_STYLES: Record<Faction, { wrapper: string; inner: string }> = {
   OPEN_SOURCE: { wrapper: "bg-gradient-to-br from-emerald-400 to-emerald-900 shadow-emerald-500/30", inner: "from-emerald-950 via-zinc-950 to-black" },
   BIG_TECH: { wrapper: "bg-gradient-to-br from-blue-400 to-blue-900 shadow-blue-500/30", inner: "from-blue-950 via-zinc-950 to-black" },
@@ -23,35 +22,29 @@ interface CardProps {
 export function Card({ card, onClick, isSelected = false }: CardProps) {
   const faction = FACTION_STYLES[card.faction] || FACTION_STYLES.NEUTRAL;
 
-  // Cortes calculados en píxeles fijos para que no se deformen
   const clipPathOuter = "polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px)";
   const clipPathInner = "polygon(19px 0, 100% 0, 100% calc(100% - 19px), calc(100% - 19px) 100%, 0 100%, 0 19px)";
 
   return (
-    <motion.div
+    <div
       onClick={() => onClick && onClick(card)}
-      whileHover={{ scale: 1.05, y: -5 }}
-      whileTap={{ scale: 0.98 }}
-      initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-      transition={{ type: "spring", stiffness: 800, damping: 20 }}
-      // WRAPPER EXTERNO (ACTÚA COMO BORDE DE 2px)
       style={{ clipPath: clipPathOuter }}
       className={cn(
         "relative w-[260px] h-[340px] p-[2px] cursor-pointer select-none",
-        "transition-all duration-150 backdrop-blur-3xl",
-        isSelected ? "shadow-[0_0_50px_rgba(255,255,255,0.4)] ring-offset-black" : `shadow-2xl shadow-black ${faction.wrapper}`,
-        isSelected && "bg-gradient-to-br from-cyan-400 via-white to-blue-500" // Brillo al seleccionar
+        "transition-all duration-300 backdrop-blur-3xl",
+        // Si está seleccionada, le damos un brillo cian intenso a los bordes
+        isSelected ? "shadow-[0_0_50px_rgba(34,211,238,0.8)] ring-2 ring-cyan-400 ring-offset-black" : `shadow-2xl shadow-black ${faction.wrapper}`,
+        isSelected && "bg-gradient-to-br from-cyan-400 via-white to-blue-500" 
       )}
     >
-      {/* NÚCLEO INTERNO (LA CARTA REAL) */}
+      {/* NÚCLEO INTERNO */}
       <div 
         style={{ clipPath: clipPathInner }}
         className={cn("w-full h-full relative flex flex-col justify-between bg-gradient-to-br overflow-hidden", faction.inner)}
       >
-        {/* Fondo holográfico animado interno */}
         <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent_0%,rgba(255,255,255,0.03)_50%,transparent_100%)] bg-[length:200%_200%] animate-[pulse_4s_ease-in-out_infinite] pointer-events-none" />
 
-        {/* Cabecera: Coste y Tipo */}
+        {/* Cabecera */}
         <div className="flex justify-between items-start px-2 pt-2 relative z-10">
           <div className="flex items-center justify-center w-12 h-12 bg-black border border-yellow-500/80 text-yellow-400 font-black z-10 shadow-[0_0_15px_rgba(234,179,8,0.4)]" style={{ clipPath: "polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px)" }}>
             <Zap className="absolute opacity-20 w-8 h-8" />
@@ -92,6 +85,6 @@ export function Card({ card, onClick, isSelected = false }: CardProps) {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
