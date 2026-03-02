@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ICard } from "@/core/entities/ICard";
 import { GameEngine, GameState } from "@/core/use-cases/GameEngine";
 import { HeuristicOpponentStrategy } from "@/core/services/opponent/HeuristicOpponentStrategy";
-import { runOpponentStep } from "@/core/services/opponent/runOpponentStep";
 import { initialGameState } from "./internal/boardInitialState";
 import { IBoardUiError, toBoardUiError } from "./internal/boardError";
+import { useOpponentTurn } from "./internal/useOpponentTurn";
 import { usePlayerActions } from "./internal/usePlayerActions";
 
 export function useBoard() {
@@ -62,21 +62,14 @@ export function useBoard() {
     return () => clearTimeout(timeoutId);
   }, [lastError]);
 
-  useEffect(() => {
-    if (isAnimating || gameState.activePlayerId !== gameState.playerB.id) {
-      return;
-    }
-
-    const timeoutId = setTimeout(() => {
-      const nextState = applyTransition((state) => runOpponentStep(state, state.playerB.id, opponentStrategy));
-      if (nextState && nextState.activePlayerId === nextState.playerA.id) {
-        clearSelection();
-        clearError();
-      }
-    }, 700);
-
-    return () => clearTimeout(timeoutId);
-  }, [applyTransition, clearError, clearSelection, gameState, isAnimating, opponentStrategy]);
+  useOpponentTurn({
+    gameState,
+    isAnimating,
+    strategy: opponentStrategy,
+    applyTransition,
+    clearSelection,
+    clearError,
+  });
 
   const advancePhase = useCallback(() => {
     if (isAnimating || !assertPlayerTurn()) {

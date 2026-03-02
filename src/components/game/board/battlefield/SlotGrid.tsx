@@ -42,7 +42,9 @@ export function SlotGrid({
             style={{ transformStyle: "preserve-3d" }}
             className="relative w-24 h-36 border-2 border-cyan-500/30 rounded-lg bg-cyan-950/40 flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.15)_inset] group hover:border-cyan-300 transition-colors duration-300"
           >
-            {entity?.mode === "ACTIVATE" && <DigitalBeam onComplete={() => undefined} />}
+            {entity?.mode === "ACTIVATE" && (
+              <DigitalBeam direction={isOpponentSide ? "towards-player" : "towards-opponent"} onComplete={() => undefined} />
+            )}
 
             <AnimatePresence>
               {entity ? (

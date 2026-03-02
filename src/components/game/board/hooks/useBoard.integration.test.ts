@@ -1,6 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { IBoardEntity } from "@/core/entities/IPlayer";
 import { useBoard } from "./useBoard";
 
 function createMouseEvent(): React.MouseEvent {
@@ -36,7 +35,7 @@ describe("useBoard integración", () => {
     expect(result.current.gameState.playerA.graveyard.some((card) => card.id === "card-spell-ddos")).toBe(true);
   });
 
-  it("debería bloquear ataque del jugador inicial durante el primer turno", async () => {
+  it("debería bloquear ataque directo del jugador inicial durante el primer turno", async () => {
     const { result } = renderHook(() => useBoard());
     const entityCard = result.current.gameState.playerA.hand.find((card) => card.id === "card-p1-gemini");
 
@@ -61,20 +60,12 @@ describe("useBoard integración", () => {
       await result.current.handleEntityClick(attacker, false, createMouseEvent());
     });
 
-    const defender = result.current.gameState.playerB.activeEntities.find(
-      (entity) => entity.instanceId === "inst-weak-bug-002",
-    ) as IBoardEntity;
-
     await act(async () => {
-      const pendingAction = result.current.handleEntityClick(defender, true, createMouseEvent());
-      await vi.advanceTimersByTimeAsync(800);
+      const pendingAction = result.current.handleEntityClick(null, true, createMouseEvent());
       await pendingAction;
     });
 
-    expect(result.current.gameState.playerB.activeEntities.some((entity) => entity.instanceId === "inst-weak-bug-002")).toBe(
-      true,
-    );
-    expect(result.current.gameState.playerB.graveyard.some((card) => card.id === "op-weak")).toBe(false);
+    expect(result.current.gameState.playerB.healthPoints).toBe(8000);
     expect(result.current.lastError?.code).toBe("GAME_RULE_ERROR");
     expect(result.current.lastError?.message).toContain("no puede atacar durante el primer turno");
     expect(result.current.activeAttackerId).toBeNull();

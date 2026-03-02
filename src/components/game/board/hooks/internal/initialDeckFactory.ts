@@ -1,5 +1,4 @@
 import { ICard } from "@/core/entities/ICard";
-import { IBoardEntity } from "@/core/entities/IPlayer";
 
 const cardP1Gemini: ICard = {
   id: "card-p1-gemini",
@@ -100,45 +99,3 @@ export function createPlayerDeckA(): ICard[] {
 export function createPlayerDeckB(): ICard[] {
   return [cardP2Llama, cardP2Shield, cardP2Pulse, ...createFillerDeck("p2", 17)];
 }
-
-export function createOpponentInitialEntities(): IBoardEntity[] {
-  return [
-    {
-      instanceId: "inst-gpt4-boss-001",
-      card: {
-        id: "op1",
-        name: "GPT-4",
-        type: "ENTITY",
-        faction: "BIG_TECH",
-        cost: 4,
-        attack: 3000,
-        defense: 2500,
-        description: "Top tier LLM.",
-        bgUrl: "/assets/bgs/bg-tech.jpg",
-        renderUrl: "/assets/renders/chatgpt.png",
-      },
-      mode: "ATTACK",
-      hasAttackedThisTurn: false,
-      isNewlySummoned: false,
-    },
-    {
-      instanceId: "inst-weak-bug-002",
-      card: {
-        id: "op-weak",
-        name: "OpenClaw",
-        type: "ENTITY",
-        faction: "OPEN_SOURCE",
-        cost: 1,
-        attack: 1000,
-        defense: 500,
-        description: "Fácil de aplastar.",
-        bgUrl: "/assets/bgs/bg-tech.jpg",
-        renderUrl: "/assets/renders/openclaw.png",
-      },
-      mode: "DEFENSE",
-      hasAttackedThisTurn: false,
-      isNewlySummoned: false,
-    },
-  ];
-}
-

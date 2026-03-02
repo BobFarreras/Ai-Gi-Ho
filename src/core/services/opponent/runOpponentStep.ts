@@ -1,6 +1,19 @@
 import { GameEngine, GameState } from "@/core/use-cases/GameEngine";
 import { IOpponentStrategy } from "./types";
 
+function resolveActivatedExecution(state: GameState, opponentId: string, activatedCardId: string): GameState {
+  const opponent = state.playerA.id === opponentId ? state.playerA : state.playerB;
+  const execution = [...opponent.activeExecutions]
+    .reverse()
+    .find((entity) => entity.card.id === activatedCardId && entity.mode === "ACTIVATE");
+
+  if (!execution) {
+    return state;
+  }
+
+  return GameEngine.resolveExecution(state, opponentId, execution.instanceId);
+}
+
 export function runOpponentStep(state: GameState, opponentId: string, strategy: IOpponentStrategy): GameState {
   if (state.activePlayerId !== opponentId) {
     return state;
@@ -9,10 +22,17 @@ export function runOpponentStep(state: GameState, opponentId: string, strategy: 
   switch (state.phase) {
     case "MAIN_1": {
       const playDecision = strategy.choosePlay(state, opponentId);
-      const stateAfterPlay = playDecision
-        ? GameEngine.playCard(state, opponentId, playDecision.cardId, playDecision.mode)
-        : state;
-      return GameEngine.nextPhase(stateAfterPlay);
+      if (!playDecision) {
+        return GameEngine.nextPhase(state);
+      }
+
+      const stateAfterPlay = GameEngine.playCard(state, opponentId, playDecision.cardId, playDecision.mode);
+      const stateAfterResolve =
+        playDecision.mode === "ACTIVATE"
+          ? resolveActivatedExecution(stateAfterPlay, opponentId, playDecision.cardId)
+          : stateAfterPlay;
+      const hasAnotherPlay = strategy.choosePlay(stateAfterResolve, opponentId) !== null;
+      return hasAnotherPlay ? stateAfterResolve : GameEngine.nextPhase(stateAfterResolve);
     }
     case "BATTLE": {
       const attackDecision = strategy.chooseAttack(state, opponentId);

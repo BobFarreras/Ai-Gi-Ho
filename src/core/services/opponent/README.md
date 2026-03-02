@@ -18,11 +18,14 @@ Estrategias de toma de decisiones para el rival.
 2. `runOpponentStep.ts`
    - Ejecuta un paso del turno rival según fase.
    - Ciclo actual: `MAIN_1 -> BATTLE -> cambio de turno`.
+   - En `MAIN_1` puede encadenar varias jugadas en pasos consecutivos mientras sigan siendo válidas.
+   - En `BATTLE` mantiene el turno hasta agotar atacantes disponibles.
    - Usa `GameEngine` para aplicar la acción elegida.
 
 3. `HeuristicOpponentStrategy.ts`
    - Implementación actual sin IA generativa.
    - Selecciona jugadas con heurísticas de valor/coste.
+   - Evalúa ataques por resultado esperado (intercambio de mesa + daño) en lugar de elegir el primer objetivo.
 
 ## Dificultad (roadmap)
 

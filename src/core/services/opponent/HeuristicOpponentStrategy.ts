@@ -1,6 +1,7 @@
-import { IBoardEntity, IPlayer } from "@/core/entities/IPlayer";
+import { IPlayer } from "@/core/entities/IPlayer";
 import { GameState } from "@/core/use-cases/GameEngine";
 import { IOpponentAttackDecision, IOpponentPlayDecision, IOpponentStrategy } from "./types";
+import { chooseBestAttack } from "./attackEvaluator";
 
 function getPlayers(state: GameState, opponentId: string): { opponent: IPlayer; target: IPlayer } {
   if (state.playerA.id === opponentId) {
@@ -28,20 +29,6 @@ function scoreExecution(card: IPlayer["hand"][number]): number {
   }
 
   return 10 - card.cost * 100;
-}
-
-function chooseBestDefender(targetEntities: IBoardEntity[]): IBoardEntity | null {
-  if (targetEntities.length === 0) {
-    return null;
-  }
-
-  return targetEntities.reduce((best, current) => {
-    const bestStat = best.mode === "DEFENSE" || best.mode === "SET" ? best.card.defense ?? 0 : best.card.attack ?? 0;
-    const currentStat =
-      current.mode === "DEFENSE" || current.mode === "SET" ? current.card.defense ?? 0 : current.card.attack ?? 0;
-
-    return currentStat < bestStat ? current : best;
-  });
 }
 
 export class HeuristicOpponentStrategy implements IOpponentStrategy {
@@ -88,21 +75,13 @@ export class HeuristicOpponentStrategy implements IOpponentStrategy {
 
   public chooseAttack(state: GameState, opponentId: string): IOpponentAttackDecision | null {
     const { opponent, target } = getPlayers(state, opponentId);
+    const normalizedOpponent: IPlayer = {
+      ...opponent,
+      activeEntities: opponent.activeEntities.map((entity) =>
+        entity.isNewlySummoned ? { ...entity, isNewlySummoned: false } : entity,
+      ),
+    };
 
-    const attacker = opponent.activeEntities.find(
-      (entity) => entity.mode === "ATTACK" && !entity.hasAttackedThisTurn && !entity.isNewlySummoned,
-    );
-
-    if (!attacker) {
-      return null;
-    }
-
-    const defender = chooseBestDefender(target.activeEntities);
-
-    if (!defender) {
-      return { attackerInstanceId: attacker.instanceId };
-    }
-
-    return { attackerInstanceId: attacker.instanceId, defenderInstanceId: defender.instanceId };
+    return chooseBestAttack(normalizedOpponent, target);
   }
 }

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { IBoardEntity } from "@/core/entities/IPlayer";
 import { GameState } from "@/core/use-cases/GameEngine";
 import { HeuristicOpponentStrategy } from "./HeuristicOpponentStrategy";
 import { runOpponentStep } from "./runOpponentStep";
@@ -89,5 +90,210 @@ describe("HeuristicOpponentStrategy", () => {
 
     state = runOpponentStep(state, "p2", strategy);
     expect(state.playerA.activeEntities.length).toBe(0);
+  });
+
+  it("debería mantener MAIN_1 mientras existan jugadas útiles", () => {
+    const strategy = new HeuristicOpponentStrategy();
+    const state: GameState = {
+      ...createState(),
+      playerB: {
+        ...createState().playerB,
+        hand: [
+          {
+            id: "bot-ddos",
+            name: "Bot DDoS",
+            description: "Daño directo",
+            type: "EXECUTION",
+            faction: "NO_CODE",
+            cost: 2,
+            effect: { action: "DAMAGE", target: "OPPONENT", value: 600 },
+          },
+          {
+            id: "bot-entity-2",
+            name: "Bot Titan",
+            description: "Entidad de campo",
+            type: "ENTITY",
+            faction: "BIG_TECH",
+            cost: 3,
+            attack: 2400,
+            defense: 1500,
+          },
+        ],
+      },
+    };
+
+    const nextState = runOpponentStep(state, "p2", strategy);
+    expect(nextState.phase).toBe("MAIN_1");
+    expect(nextState.playerB.hand.length).toBe(1);
+    expect(nextState.playerB.activeEntities.length + nextState.playerB.activeExecutions.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("debería encadenar múltiples ataques en BATTLE y cerrar turno al terminar", () => {
+    const strategy = new HeuristicOpponentStrategy();
+
+    let state: GameState = {
+      ...createState(),
+      phase: "BATTLE",
+      playerA: {
+        ...createState().playerA,
+        activeEntities: [
+          {
+            instanceId: "p1-low-1",
+            card: {
+              id: "p1-low-card-1",
+              name: "Defender 1",
+              description: "Defensa baja",
+              type: "ENTITY",
+              faction: "BIG_TECH",
+              cost: 1,
+              attack: 700,
+              defense: 700,
+            },
+            mode: "ATTACK",
+            hasAttackedThisTurn: false,
+            isNewlySummoned: false,
+          },
+          {
+            instanceId: "p1-low-2",
+            card: {
+              id: "p1-low-card-2",
+              name: "Defender 2",
+              description: "Defensa baja",
+              type: "ENTITY",
+              faction: "OPEN_SOURCE",
+              cost: 1,
+              attack: 600,
+              defense: 600,
+            },
+            mode: "DEFENSE",
+            hasAttackedThisTurn: false,
+            isNewlySummoned: false,
+          },
+        ],
+      },
+      playerB: {
+        ...createState().playerB,
+        hand: [],
+        activeEntities: [
+          {
+            instanceId: "p2-atk-1",
+            card: {
+              id: "p2-atk-card-1",
+              name: "Attacker 1",
+              description: "Ataque medio",
+              type: "ENTITY",
+              faction: "OPEN_SOURCE",
+              cost: 2,
+              attack: 1500,
+              defense: 1000,
+            },
+            mode: "ATTACK",
+            hasAttackedThisTurn: false,
+            isNewlySummoned: false,
+          },
+          {
+            instanceId: "p2-atk-2",
+            card: {
+              id: "p2-atk-card-2",
+              name: "Attacker 2",
+              description: "Ataque alto",
+              type: "ENTITY",
+              faction: "BIG_TECH",
+              cost: 3,
+              attack: 2300,
+              defense: 1600,
+            },
+            mode: "ATTACK",
+            hasAttackedThisTurn: false,
+            isNewlySummoned: false,
+          },
+        ] as IBoardEntity[],
+      },
+    };
+
+    state = runOpponentStep(state, "p2", strategy);
+    expect(state.playerA.activeEntities).toHaveLength(1);
+    expect(state.phase).toBe("BATTLE");
+
+    state = runOpponentStep(state, "p2", strategy);
+    expect(state.playerA.activeEntities).toHaveLength(0);
+    expect(state.phase).toBe("BATTLE");
+
+    state = runOpponentStep(state, "p2", strategy);
+    expect(state.activePlayerId).toBe("p1");
+    expect(state.phase).toBe("MAIN_1");
+  });
+
+  it("debería atacar directamente al jugador cuando no hay defensores", () => {
+    const strategy = new HeuristicOpponentStrategy();
+    const state: GameState = {
+      ...createState(),
+      phase: "BATTLE",
+      playerA: {
+        ...createState().playerA,
+        activeEntities: [],
+        healthPoints: 8000,
+      },
+      playerB: {
+        ...createState().playerB,
+        hand: [],
+        activeEntities: [
+          {
+            instanceId: "p2-direct-1",
+            card: {
+              id: "p2-direct-card-1",
+              name: "Direct Striker",
+              description: "Atacante directo",
+              type: "ENTITY",
+              faction: "BIG_TECH",
+              cost: 3,
+              attack: 1900,
+              defense: 1000,
+            },
+            mode: "ATTACK",
+            hasAttackedThisTurn: false,
+            isNewlySummoned: false,
+          },
+        ],
+      },
+    };
+
+    const nextState = runOpponentStep(state, "p2", strategy);
+    expect(nextState.playerA.healthPoints).toBe(6100);
+  });
+
+  it("debería resolver ejecución ACTIVADA del rival, aplicar daño y enviarla al cementerio", () => {
+    const strategy = new HeuristicOpponentStrategy();
+    const state: GameState = {
+      ...createState(),
+      phase: "MAIN_1",
+      playerA: {
+        ...createState().playerA,
+        healthPoints: 8000,
+      },
+      playerB: {
+        ...createState().playerB,
+        currentEnergy: 4,
+        hand: [
+          {
+            id: "bot-spell-dmg",
+            name: "Bot Damage Script",
+            description: "Daño directo",
+            type: "EXECUTION",
+            faction: "NO_CODE",
+            cost: 2,
+            effect: { action: "DAMAGE", target: "OPPONENT", value: 900 },
+          },
+        ],
+        graveyard: [],
+        activeEntities: [],
+        activeExecutions: [],
+      },
+    };
+
+    const nextState = runOpponentStep(state, "p2", strategy);
+    expect(nextState.playerA.healthPoints).toBe(7100);
+    expect(nextState.playerB.activeExecutions).toHaveLength(0);
+    expect(nextState.playerB.graveyard.some((card) => card.id === "bot-spell-dmg")).toBe(true);
   });
 });

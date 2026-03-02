@@ -1,5 +1,5 @@
 import { GameEngine, GameState } from "@/core/use-cases/GameEngine";
-import { createOpponentInitialEntities, createPlayerDeckA, createPlayerDeckB } from "./initialDeckFactory";
+import { createPlayerDeckA, createPlayerDeckB } from "./initialDeckFactory";
 
 function createInitialBoardState(): GameState {
   const baseState = GameEngine.createInitialGameState({
@@ -16,14 +16,7 @@ function createInitialBoardState(): GameState {
     starterPlayerId: "p1",
   });
 
-  return {
-    ...baseState,
-    playerB: {
-      ...baseState.playerB,
-      activeEntities: createOpponentInitialEntities(),
-    },
-  };
+  return baseState;
 }
 
 export const initialGameState: GameState = createInitialBoardState();
-
