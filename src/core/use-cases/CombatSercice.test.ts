@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { CombatService, CombatContext, CombatResult } from './CombatService';
+import { CombatService, CombatContext } from './CombatService';
 
 describe('CombatService - Motor de Reglas Core', () => {
   

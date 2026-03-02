@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI-GI-OH!
 
-## Getting Started
+Juego de cartas táctico en Next.js con un motor de reglas desacoplado en TypeScript.
 
-First, run the development server:
+## Stack
+
+1. Next.js (App Router)
+2. React
+3. TypeScript estricto
+4. Vitest + Testing Library
+
+## Comandos
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
 pnpm dev
-# or
-bun dev
+pnpm lint
+pnpm test
+pnpm build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Arquitectura
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. `src/components`: UI y composición visual.
+2. `src/core/entities`: contratos y tipos de dominio.
+3. `src/core/use-cases`: reglas del juego y casos de uso (`GameEngine`, `CombatService`).
+4. `src/infrastructure`: adaptadores externos (pendiente de implementación funcional).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Documentación relacionada:
 
-## Learn More
+1. `Architecture.md`: estructura y dependencias por capas.
+2. `MOTOR_JUEGO.md`: reglas funcionales del motor.
+3. `Agents.md`: normas obligatorias de calidad y contribución.
 
-To learn more about Next.js, take a look at the following resources:
+## Calidad mínima para merge
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. `pnpm lint` en verde.
+2. `pnpm test` en verde.
+3. `pnpm build` en verde.
+4. Tests co-localizados junto al código que validan.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Convenciones clave
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Código en inglés.
+2. Documentación, comentarios y UI en español.
+3. Sin `any`.
+4. Sin componentes/servicios GOD y límite de 150 líneas por archivo funcional.

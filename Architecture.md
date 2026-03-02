@@ -1,39 +1,82 @@
-# ARQUITECTURA DEL PROYECTO (Architecture.md)
+# Arquitectura del Proyecto (Architecture.md)
 
-Este proyecto sigue una arquitectura limpia (Clean Architecture) orientada a dominios, diseñada para desacoplar el framework (Next.js) y la base de datos (Supabase) de las reglas de negocio del juego.
+Este proyecto usa una arquitectura en capas orientada a dominio para mantener separadas la UI, la lógica del juego y las integraciones externas.
 
-## Estructura de Carpetas (`/src`)
+## Estructura real actual (`/src`)
 
 ```text
 /src
- ├── app/                  # (Capa de Presentación - Framework)
- │   ├── api/              # Endpoints de la API REST / Webhooks
- │   ├── (auth)/           # Rutas de login/registro
- │   ├── game/             # Vistas de la partida
- │   └── layout.tsx        # Layout principal de Next.js
+ ├── app/                           # Entradas Next.js App Router
+ │   ├── layout.tsx
+ │   └── page.tsx
  │
- ├── components/           # (Capa de Presentación - UI)
- │   ├── ui/               # Componentes genéricos (Botones, Modales, Inputs)
- │   └── game/             # Componentes específicos del juego (Card, Board)
+ ├── components/                    # Presentación (React)
+ │   └── game/
+ │       ├── board/
+ │       │   ├── battlefield/       # Subcomponentes del tablero 3D
+ │       │   │   ├── BattlefieldZone.tsx
+ │       │   │   ├── DigitalBeam.tsx
+ │       │   │   └── SlotGrid.tsx
+ │       │   ├── hooks/
+ │       │   │   └── useBoard.ts    # Orquestación de interacción UI
+ │       │   ├── ui/                # Widgets de HUD y control de fase
+ │       │   │   ├── OpponentHandFan.tsx
+ │       │   │   ├── PhasePanel.tsx
+ │       │   │   └── TurnTimer.tsx
+ │       │   ├── Battlefield.tsx
+ │       │   ├── Board.test.tsx
+ │       │   ├── PlayerHUD.tsx
+ │       │   ├── PlayerHand.tsx
+ │       │   ├── SidePanels.tsx
+ │       │   └── index.tsx
+ │       └── card/
+ │           ├── Card.tsx
+ │           ├── Card.test.tsx
+ │           └── CardBack.tsx
  │
- ├── core/                 # (Capa de Dominio - Lógica de Negocio Pura)
- │   ├── entities/         # Tipos e Interfaces base (ej. types para `Card`, `Player`)
- │   ├── interfaces/       # Contratos de repositorios (ej. `ICardRepository.ts`)
- │   └── use-cases/        # Lógica del juego independiente de React (ej. `AttackAction.ts`)
+ ├── core/                          # Dominio y casos de uso puros
+ │   ├── entities/
+ │   │   ├── ICard.ts
+ │   │   └── IPlayer.ts
+ │   └── use-cases/
+ │       ├── game-engine/           # Casos de uso del motor (modularizados)
+ │       │   ├── change-entity-mode.ts
+ │       │   ├── execute-attack.ts
+ │       │   ├── next-phase.ts
+ │       │   ├── play-card.ts
+ │       │   ├── player-utils.ts
+ │       │   ├── resolve-execution.ts
+ │       │   └── types.ts
+ │       ├── CombatService.ts
+ │       └── GameEngine.ts          # Fachada estable para la app
  │
- ├── infrastructure/       # (Capa de Infraestructura - Servicios Externos)
- │   ├── database/         # Implementaciones de repositorios (ej. `SupabaseCardRepository.ts`)
- │   └── ai/               # Clientes de la API de Gemini/LLMs
+ ├── infrastructure/                # Adaptadores externos (pendiente de implementación)
+ │   ├── ai/
+ │   └── database/
  │
- └── lib/                  # (Utilidades genéricas)
-     └── utils.ts          # Funciones helpers puras (formateo de fechas, cn para Tailwind)
+ └── lib/
+     └── utils.ts
 ```
 
-## Flujo de Datos (Cómo crear una nueva feature)
-    Si queremos crear la acción de "Robar Carta":
+## Reglas de dependencia
 
-    Core: Se define la interfaz en core/interfaces/ y la lógica pura en core/use-cases/.
+1. `app` y `components` pueden consumir `core`.
+2. `core` no importa desde `components`, `app` ni `infrastructure`.
+3. `infrastructure` implementa contratos del dominio cuando se incorporen repositorios.
+4. La fachada `GameEngine.ts` expone API estable y delega en módulos pequeños de `game-engine/`.
 
-    Infrastructure: Se implementa cómo se guarda esa acción en BD dentro de infrastructure/database/.
+## Criterios anti-GOD aplicados
 
-    App/Components: Se crea el botón en components/game/ que llama al caso de uso, sin saber que por debajo usa Supabase.
+1. Ningún archivo funcional supera 150 líneas.
+2. Se divide por responsabilidad: orquestación, render, reglas de combate, fases, etc.
+3. Subcarpetas por contexto (`board/battlefield`, `board/ui`, `core/use-cases/game-engine`).
+
+## Estrategia de documentación
+
+No se recomienda un `README.md` en cada componente aislado.
+
+Sí se recomienda documentar por **módulo funcional** cuando haya suficiente complejidad:
+
+1. Un `README.md` en una carpeta de contexto (por ejemplo `core/use-cases/game-engine/`) cuando explique reglas, invariantes o decisiones.
+2. Evitar README por componente visual pequeño porque genera ruido y deuda documental.
+3. Mantener documentos raíz vivos (`Architecture.md`, `MOTOR_JUEGO.md`, `README.md`) y añadir documentación local solo donde aporte contexto técnico real.

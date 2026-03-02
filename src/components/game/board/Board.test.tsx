@@ -71,9 +71,8 @@ describe('Componente UI: Board y Subcomponentes', () => {
 
     render(<Board />);
 
-    // Hacemos click en el botón (el que tiene el ícono de History)
-    // Buscamos el botón por su clase o elemento padre ya que no tiene aria-label en el código actual
-    const historyBtn = screen.getByRole('button'); 
+    // Hacemos click en el botón de historial usando su nombre accesible
+    const historyBtn = screen.getByRole('button', { name: /abrir historial de batalla/i });
     fireEvent.click(historyBtn);
 
     // Verificamos que se haya llamado a la función del hook para abrirlo

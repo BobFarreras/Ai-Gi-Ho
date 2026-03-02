@@ -75,7 +75,7 @@ export function useBoard() {
       // Jugar monstruos o Set normal
       setGameState((prev) => {
         try { return GameEngine.playCard(prev, prev.playerA.id, playingCard.id, mode); } 
-        catch (e) { return prev; }
+        catch { return prev; }
       });
       clearSelection();
     }
@@ -128,7 +128,7 @@ export function useBoard() {
         // 3. Aplicamos el daño y la enviamos al cementerio
         setGameState((prev) => {
           try { return GameEngine.executeAttack(prev, prev.playerA.id, attackerId, targetId); } 
-          catch (e) { return prev; }
+          catch { return prev; }
         });
         
         // Limpiamos los revelados tras la muerte
