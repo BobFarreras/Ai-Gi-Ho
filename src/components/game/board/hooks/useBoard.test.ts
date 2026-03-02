@@ -75,4 +75,23 @@ describe('useBoard Custom Hook', () => {
     expect(result.current.playingCard).toBeNull();
     expect(result.current.isHistoryOpen).toBe(false);
   });
+
+  it('Debe exponer un error tipado cuando se intenta una acción inválida', async () => {
+    const { result } = renderHook(() => useBoard());
+    const entityCard = result.current.gameState.playerA.hand.find((card) => card.id === 'card-p1-gemini');
+
+    expect(entityCard).toBeDefined();
+
+    act(() => {
+      result.current.toggleCardSelection(entityCard!, mockEvent);
+    });
+
+    await act(async () => {
+      await result.current.executePlayAction('ACTIVATE', mockEvent);
+    });
+
+    expect(result.current.lastError).not.toBeNull();
+    expect(result.current.lastError?.code).toBe('VALIDATION_ERROR');
+    expect(result.current.lastError?.message).toBe('Modo inválido para una entidad.');
+  });
 });

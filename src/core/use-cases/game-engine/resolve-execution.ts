@@ -1,4 +1,6 @@
 import { IPlayer } from "../../entities/IPlayer";
+import { GameRuleError } from "../../errors/GameRuleError";
+import { NotFoundError } from "../../errors/NotFoundError";
 import { assignPlayers, getPlayerPair } from "./player-utils";
 import { GameState } from "./types";
 
@@ -8,11 +10,11 @@ export function resolveExecution(state: GameState, playerId: string, executionIn
   const executionEntity = player.activeExecutions.find((entity) => entity.instanceId === executionInstanceId);
 
   if (!executionEntity) {
-    throw new Error("La ejecución no existe en el tablero.");
+    throw new NotFoundError("La ejecución no existe en el tablero.");
   }
 
   if (!executionEntity.card.effect) {
-    throw new Error("Esta carta no tiene un efecto programado.");
+    throw new GameRuleError("Esta carta no tiene un efecto programado.");
   }
 
   const effect = executionEntity.card.effect;

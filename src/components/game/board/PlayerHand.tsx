@@ -11,14 +11,20 @@ interface PlayerHandProps {
   hand: ICard[]; 
   playingCard: ICard | null; 
   hasSummoned: boolean;
+  isPlayerTurn: boolean;
   onCardClick: (card: ICard, e: React.MouseEvent) => void;
   onPlayAction: (mode: BattleMode, e: React.MouseEvent) => void;
 }
 
-export function PlayerHand({ hand, playingCard, hasSummoned, onCardClick, onPlayAction }: PlayerHandProps) {
+export function PlayerHand({ hand, playingCard, hasSummoned, isPlayerTurn, onCardClick, onPlayAction }: PlayerHandProps) {
   return (
     <div className="absolute bottom-0 left-0 w-full h-[500px] flex justify-center items-end z-40 pointer-events-none perspective-[1200px] pb-4">
-      <div className="flex justify-center -space-x-12 pointer-events-auto">
+      <div className="flex justify-center -space-x-12 pointer-events-auto relative">
+        {!isPlayerTurn && (
+          <div className="absolute -top-14 left-1/2 -translate-x-1/2 z-[120] bg-zinc-950/95 border border-amber-400/50 text-amber-200 px-4 py-2 rounded-lg text-xs uppercase tracking-widest font-black">
+            Esperando turno del rival
+          </div>
+        )}
         {hand.map((card, i) => {
           const isSelected = playingCard?.id === card.id;
           const isEntity = card.type === 'ENTITY';
@@ -38,6 +44,8 @@ export function PlayerHand({ hand, playingCard, hasSummoned, onCardClick, onPlay
                   >
                     {isBlocked ? (
                       <span className="text-red-400 font-mono text-xs px-4 py-2 uppercase tracking-widest font-bold bg-red-950/40 rounded border border-red-500/20">Límite Alcanzado</span>
+                    ) : !isPlayerTurn ? (
+                      <span className="text-amber-300 font-mono text-xs px-4 py-2 uppercase tracking-widest font-bold bg-amber-950/40 rounded border border-amber-500/20">No es tu turno</span>
                     ) : (
                       <>
                         {/* BOTONES INTELIGENTES SEGÚN EL TIPO DE CARTA */}
@@ -72,8 +80,13 @@ export function PlayerHand({ hand, playingCard, hasSummoned, onCardClick, onPlay
                   zIndex: 100 
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                onClick={(e) => onCardClick(card, e)}
-                className="cursor-pointer origin-bottom"
+                onClick={(e) => {
+                  if (!isPlayerTurn) {
+                    return;
+                  }
+                  onCardClick(card, e);
+                }}
+                className={isPlayerTurn ? "cursor-pointer origin-bottom" : "cursor-not-allowed origin-bottom opacity-75"}
                 style={{ zIndex: isSelected ? 100 : i }}
               >
                 <Card card={card} isSelected={isSelected} />

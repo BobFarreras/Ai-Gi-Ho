@@ -1,28 +1,31 @@
 import { BattleMode, IBoardEntity, IPlayer } from "../../entities/IPlayer";
+import { GameRuleError } from "../../errors/GameRuleError";
+import { NotFoundError } from "../../errors/NotFoundError";
+import { ValidationError } from "../../errors/ValidationError";
 import { GameState } from "./types";
 import { getPlayerPair } from "./player-utils";
 
 function validateEntityPlay(state: GameState, player: IPlayer, mode: BattleMode): void {
   if (state.hasNormalSummonedThisTurn) {
-    throw new Error("Ya has invocado una entidad este turno.");
+    throw new GameRuleError("Ya has invocado una entidad este turno.");
   }
 
   if (player.activeEntities.length >= 3) {
-    throw new Error("Tu zona de entidades está llena.");
+    throw new ValidationError("Tu zona de entidades está llena.");
   }
 
   if (mode !== "ATTACK" && mode !== "DEFENSE") {
-    throw new Error("Modo inválido para una entidad.");
+    throw new ValidationError("Modo inválido para una entidad.");
   }
 }
 
 function validateExecutionPlay(player: IPlayer, mode: BattleMode): void {
   if (player.activeExecutions.length >= 3) {
-    throw new Error("Tu zona de ejecuciones está llena.");
+    throw new ValidationError("Tu zona de ejecuciones está llena.");
   }
 
   if (mode !== "ACTIVATE" && mode !== "SET") {
-    throw new Error("Modo inválido para una ejecución.");
+    throw new ValidationError("Modo inválido para una ejecución.");
   }
 }
 
@@ -38,24 +41,24 @@ function createBoardEntity(card: IPlayer["hand"][number], mode: BattleMode): IBo
 
 export function playCard(state: GameState, playerId: string, cardId: string, mode: BattleMode): GameState {
   if (state.activePlayerId !== playerId) {
-    throw new Error("No es tu turno.");
+    throw new GameRuleError("No es tu turno.");
   }
 
   if (state.phase !== "MAIN_1" && state.phase !== "MAIN_2") {
-    throw new Error("Solo puedes jugar cartas en la Main Phase.");
+    throw new GameRuleError("Solo puedes jugar cartas en la Main Phase.");
   }
 
   const { player, opponent, isPlayerA } = getPlayerPair(state, playerId);
   const cardIndex = player.hand.findIndex((card) => card.id === cardId);
 
   if (cardIndex === -1) {
-    throw new Error("La carta no está en la mano.");
+    throw new NotFoundError("La carta no está en la mano.");
   }
 
   const card = player.hand[cardIndex];
 
   if (player.currentEnergy < card.cost) {
-    throw new Error("Energía insuficiente.");
+    throw new ValidationError("Energía insuficiente.");
   }
 
   if (card.type === "ENTITY") {

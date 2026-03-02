@@ -1,4 +1,5 @@
 import { IPlayer } from "../../entities/IPlayer";
+import { ValidationError } from "../../errors/ValidationError";
 import { GameState } from "./types";
 
 export interface IPlayerPair {
@@ -16,7 +17,7 @@ export function getPlayerPair(state: GameState, playerId: string): IPlayerPair {
     return { player: state.playerB, opponent: state.playerA, isPlayerA: false };
   }
 
-  throw new Error("Jugador inválido.");
+  throw new ValidationError("Jugador inválido.");
 }
 
 export function assignPlayers(state: GameState, updatedPlayer: IPlayer, updatedOpponent: IPlayer, isPlayerA: boolean): GameState {

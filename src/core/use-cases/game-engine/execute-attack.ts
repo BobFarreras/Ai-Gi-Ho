@@ -1,5 +1,7 @@
 import { CombatContext, CombatService } from "../CombatService";
 import { IBoardEntity, IPlayer } from "../../entities/IPlayer";
+import { GameRuleError } from "../../errors/GameRuleError";
+import { NotFoundError } from "../../errors/NotFoundError";
 import { assignPlayers, getPlayerPair } from "./player-utils";
 import { GameState } from "./types";
 
@@ -20,20 +22,20 @@ export function executeAttack(
   const attackerEntity = attacker.activeEntities.find((entity) => entity.instanceId === attackerInstanceId);
 
   if (!attackerEntity) {
-    throw new Error("La carta atacante no está en el campo");
+    throw new NotFoundError("La carta atacante no está en el campo");
   }
 
   if (attackerEntity.mode !== "ATTACK") {
-    throw new Error("Solo las cartas en modo ATAQUE pueden atacar");
+    throw new GameRuleError("Solo las cartas en modo ATAQUE pueden atacar");
   }
 
   if (attackerEntity.hasAttackedThisTurn) {
-    throw new Error("Esta carta ya ha atacado este turno");
+    throw new GameRuleError("Esta carta ya ha atacado este turno");
   }
 
   if (!defenderInstanceId) {
     if (defender.activeEntities.length > 0) {
-      throw new Error("No puedes atacar directamente si el oponente tiene entidades en el campo.");
+      throw new GameRuleError("No puedes atacar directamente si el oponente tiene entidades en el campo.");
     }
 
     const damage = attackerEntity.card.attack ?? 0;
@@ -52,7 +54,7 @@ export function executeAttack(
   const defenderEntity = defender.activeEntities.find((entity) => entity.instanceId === defenderInstanceId);
 
   if (!defenderEntity) {
-    throw new Error("La carta defensora no está en el campo");
+    throw new NotFoundError("La carta defensora no está en el campo");
   }
 
   const isDefenderInDefenseMode = defenderEntity.mode === "DEFENSE" || defenderEntity.mode === "SET";

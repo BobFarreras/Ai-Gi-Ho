@@ -1,5 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { IBoardEntity } from "@/core/entities/IPlayer";
 import { useBoard } from "./useBoard";
 
@@ -10,6 +10,10 @@ function createMouseEvent(): React.MouseEvent {
 describe("useBoard integración", () => {
   beforeEach(() => {
     vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("debería activar una ejecución y aplicar su efecto al rival", async () => {
@@ -72,5 +76,29 @@ describe("useBoard integración", () => {
     );
     expect(result.current.gameState.playerB.graveyard.some((card) => card.id === "op-weak")).toBe(true);
     expect(result.current.activeAttackerId).toBeNull();
+  });
+
+  it("debería bloquear acciones cuando no es el turno del jugador", async () => {
+    const { result } = renderHook(() => useBoard());
+    const card = result.current.gameState.playerA.hand.find((currentCard) => currentCard.id === "card-p1-gemini");
+
+    expect(card).toBeDefined();
+
+    act(() => {
+      result.current.advancePhase();
+      result.current.advancePhase();
+      result.current.advancePhase();
+      result.current.advancePhase();
+    });
+
+    expect(result.current.gameState.activePlayerId).toBe("p2");
+
+    act(() => {
+      result.current.toggleCardSelection(card!, createMouseEvent());
+    });
+
+    expect(result.current.playingCard).toBeNull();
+    expect(result.current.lastError?.code).toBe("GAME_RULE_ERROR");
+    expect(result.current.lastError?.message).toContain("No es tu turno");
   });
 });

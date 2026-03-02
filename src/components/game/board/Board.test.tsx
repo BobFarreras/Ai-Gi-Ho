@@ -44,12 +44,16 @@ describe('Componente UI: Board y Subcomponentes', () => {
       selectedCard: null,
       playingCard: null,
       isHistoryOpen: false,
+      activeAttackerId: null,
+      revealedEntities: [],
+      lastError: null,
       setIsHistoryOpen: vi.fn(),
       toggleCardSelection: vi.fn(),
       clearSelection: vi.fn(),
+      clearError: vi.fn(),
       executePlayAction: vi.fn(),
-      setSelectedCard: vi.fn(),
-      setPlayingCard: vi.fn(),
+      handleEntityClick: vi.fn(),
+      advancePhase: vi.fn(),
     });
   });
 
