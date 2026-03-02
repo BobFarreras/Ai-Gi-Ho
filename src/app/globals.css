@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+/* Opcional: Variables personalitzades per a la teva UI de joc */
+@theme {
+  --color-game-bg: #09090b; /* zinc-950 */
+  --font-sans: var(--font-geist-sans);
+}
+
+body {
+  background-color: var(--color-game-bg);
+  color: white;
+}
