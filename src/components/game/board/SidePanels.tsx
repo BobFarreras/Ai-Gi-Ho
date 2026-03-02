@@ -2,7 +2,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { History, X } from "lucide-react";
+import { X } from "lucide-react";
 import { ICard } from "@/core/entities/ICard";
 import { Card } from "../card/Card";
 

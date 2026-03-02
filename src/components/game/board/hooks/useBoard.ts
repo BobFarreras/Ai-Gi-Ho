@@ -1,27 +1,14 @@
-// src/components/game/board/hooks/useBoard.ts
-import { useState, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ICard } from "@/core/entities/ICard";
-import { GameState, GameEngine } from "@/core/use-cases/GameEngine";
-import { BattleMode, IBoardEntity } from "@/core/entities/IPlayer";
-
-// --- MOCKS INICIALES ---
-const mockHandA: ICard[] = [
-  { id: 'card-p1-gemini', name: 'Gemini 1.5', type: 'ENTITY', faction: 'BIG_TECH', cost: 3, attack: 2500, defense: 2000, description: 'LLM Multimodal.', bgUrl: '/assets/bgs/bg-tech.jpg', renderUrl: '/assets/renders/gemini.png' },
-  { id: 'card-spell-ddos', name: 'DDoS Attack', type: 'EXECUTION', faction: 'NO_CODE', cost: 2, description: 'Drena 1000 LP al rival.', bgUrl: '/assets/bgs/bg-tech.jpg', renderUrl: '/assets/renders/n8n.png', effect: { action: 'DAMAGE', target: 'OPPONENT', value: 1000 } },
-];
-const mockHandB: ICard[] = [{ id: 'op2', name: 'Llama 3', type: 'ENTITY', faction: 'OPEN_SOURCE', cost: 3, attack: 2200, defense: 2000, description: 'Open weights.', bgUrl: '/assets/bgs/bg-tech.jpg', renderUrl: '/assets/renders/make.png' }];
-const mockOpponentEntityStrong: IBoardEntity = { instanceId: 'inst-gpt4-boss-001', card: { id: 'op1', name: 'GPT-4', type: 'ENTITY', faction: 'BIG_TECH', cost: 4, attack: 3000, defense: 2500, description: 'Top tier LLM.', bgUrl: '/assets/bgs/bg-tech.jpg', renderUrl: '/assets/renders/chatgpt.png' }, mode: 'ATTACK', hasAttackedThisTurn: false, isNewlySummoned: false };
-const mockOpponentEntityWeak: IBoardEntity = { instanceId: 'inst-weak-bug-002', card: { id: 'op-weak', name: 'OpenClaw', type: 'ENTITY', faction: 'OPEN_SOURCE', cost: 1, attack: 1000, defense: 500, description: 'Fácil de aplastar.', bgUrl: '/assets/bgs/bg-tech.jpg', renderUrl: '/assets/renders/openclaw.png' }, mode: 'DEFENSE', hasAttackedThisTurn: false, isNewlySummoned: false };
-const generateDeck = (prefix: string) => Array.from({ length: 17 }).map((_, i) => `${prefix}-deck-${i}`);
-
-const initialGameState: GameState = {
-  playerA: { id: 'p1', name: 'Neo (Tú)', healthPoints: 8000, maxHealthPoints: 8000, currentEnergy: 10, maxEnergy: 10, deck: generateDeck('p1'), hand: mockHandA, graveyard: [], activeEntities: [], activeExecutions: [] },
-  playerB: { id: 'p2', name: 'Agente Smith', healthPoints: 8000, maxHealthPoints: 8000, currentEnergy: 10, maxEnergy: 10, deck: generateDeck('p2'), hand: mockHandB, graveyard: [], activeEntities: [mockOpponentEntityStrong, mockOpponentEntityWeak], activeExecutions: [] },
-  activePlayerId: 'p1', turn: 1, phase: 'MAIN_1', hasNormalSummonedThisTurn: false
-};
-
-// Utilidad para pausar la ejecución y dejar que Framer Motion anime
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+import { BattleMode } from "@/core/entities/IPlayer";
+import { GameEngine, GameState } from "@/core/use-cases/GameEngine";
+import { HeuristicOpponentStrategy } from "@/core/services/opponent/HeuristicOpponentStrategy";
+import { resolveDifficultyFromCampaign } from "@/core/services/opponent/difficulty/resolveDifficultyFromCampaign";
+import { ICampaignProgress } from "@/core/services/opponent/difficulty/types";
+import { initialGameState } from "./internal/boardInitialState";
+import { IBoardUiError, toBoardUiError } from "./internal/boardError";
+import { useOpponentTurn } from "./internal/useOpponentTurn";
+import { usePlayerActions } from "./internal/usePlayerActions";
 
 export function useBoard() {
   const [gameState, setGameState] = useState<GameState>(initialGameState);
@@ -29,117 +16,172 @@ export function useBoard() {
   const [playingCard, setPlayingCard] = useState<ICard | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [activeAttackerId, setActiveAttackerId] = useState<string | null>(null);
-  
-  // NUEVOS ESTADOS DE ANIMACIÓN COREOGRÁFICA
   const [isAnimating, setIsAnimating] = useState(false);
-  const [revealedEntities, setRevealedEntities] = useState<string[]>([]); // Cartas que se voltean temporalmente al ser atacadas
+  const [revealedEntities, setRevealedEntities] = useState<string[]>([]);
+  const [lastError, setLastError] = useState<IBoardUiError | null>(null);
+  const [pendingEntityReplacement, setPendingEntityReplacement] = useState<{ cardId: string; mode: BattleMode } | null>(null);
+  const [campaignProgress] = useState<ICampaignProgress>({ chapterIndex: 1, duelIndex: 1, victories: 0 });
 
-  const clearSelection = useCallback(() => { 
-    setSelectedCard(null); setPlayingCard(null); setIsHistoryOpen(false); setActiveAttackerId(null); 
+  const gameStateRef = useRef(gameState);
+  const opponentDifficulty = useMemo(() => resolveDifficultyFromCampaign(campaignProgress), [campaignProgress]);
+  const opponentStrategy = useMemo(
+    () => new HeuristicOpponentStrategy({ difficulty: opponentDifficulty }),
+    [opponentDifficulty],
+  );
+
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedCard(null);
+    setPlayingCard(null);
+    setIsHistoryOpen(false);
+    setActiveAttackerId(null);
   }, []);
-  
-  const advancePhase = useCallback(() => { 
-    if (isAnimating) return;
-    setGameState((prev) => GameEngine.nextPhase(prev)); clearSelection(); 
-  }, [clearSelection, isAnimating]);
 
-  const toggleCardSelection = (card: ICard, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    if (isAnimating) return;
-    if (playingCard?.id === card.id) clearSelection();
-    else { setSelectedCard(card); setPlayingCard(card); setActiveAttackerId(null); }
-  };
+  const clearError = useCallback(() => {
+    setLastError(null);
+  }, []);
 
-  const executePlayAction = async (mode: BattleMode, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!playingCard || isAnimating) return;
-
-    // SI JUGAMOS UNA MAGIA DIRECTAMENTE PARA ACTIVARLA
-    if (mode === 'ACTIVATE') {
-      setIsAnimating(true);
-      let execInstanceId = '';
-      setGameState((prev) => {
-        const newState = GameEngine.playCard(prev, prev.playerA.id, playingCard.id, mode);
-        execInstanceId = newState.playerA.activeExecutions[newState.playerA.activeExecutions.length - 1].instanceId;
-        return newState;
-      });
-      clearSelection();
-      
-      // Esperamos que la carta caiga y dispare el láser VFX
-      await sleep(1500); 
-      
-      // Resolvemos y la mandamos al cementerio
-      setGameState((prev) => GameEngine.resolveExecution(prev, prev.playerA.id, execInstanceId));
-      setIsAnimating(false);
-    } else {
-      // Jugar monstruos o Set normal
-      setGameState((prev) => {
-        try { return GameEngine.playCard(prev, prev.playerA.id, playingCard.id, mode); } 
-        catch (e) { return prev; }
-      });
-      clearSelection();
+  const applyTransition = useCallback((transition: (state: GameState) => GameState): GameState | null => {
+    try {
+      const nextState = transition(gameStateRef.current);
+      gameStateRef.current = nextState;
+      setGameState(nextState);
+      return nextState;
+    } catch (error: unknown) {
+      setLastError(toBoardUiError(error));
+      return null;
     }
-  };
+  }, []);
 
-  const handleEntityClick = async (entity: IBoardEntity | null, isOpponent: boolean, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isAnimating) return; // Bloquear si hay cinemática
+  const assertPlayerTurn = useCallback((): boolean => {
+    if (gameStateRef.current.activePlayerId === gameStateRef.current.playerA.id) {
+      return true;
+    }
 
-    if (!isOpponent) {
-      if (!entity) return; 
+    setLastError({ code: "GAME_RULE_ERROR", message: "No es tu turno. Espera a que el rival termine su fase." });
+    return false;
+  }, []);
 
-      // ACTIVAR UNA MAGIA QUE ESTABA BOCA ABAJO (SET)
-      if (entity.card.type === 'EXECUTION' && entity.mode === 'SET') {
-        setIsAnimating(true);
-        // 1. La volteamos a ACTIVATE
-        setGameState(prev => GameEngine.changeEntityMode(prev, prev.playerA.id, entity.instanceId, 'ACTIVATE'));
-        clearSelection();
-        // 2. Cinemática de láser
-        await sleep(1500);
-        // 3. Resolución final
-        setGameState(prev => GameEngine.resolveExecution(prev, prev.playerA.id, entity.instanceId));
-        setIsAnimating(false);
+  useEffect(() => {
+    if (!lastError) return;
+    const timeoutId = setTimeout(() => setLastError(null), 3600);
+    return () => clearTimeout(timeoutId);
+  }, [lastError]);
+
+  useOpponentTurn({
+    gameState,
+    isAnimating,
+    strategy: opponentStrategy,
+    applyTransition,
+    clearSelection,
+    clearError,
+    setIsAnimating,
+    setActiveAttackerId,
+    setRevealedEntities,
+  });
+
+  const advancePhase = useCallback(() => {
+    if (isAnimating || !assertPlayerTurn()) {
+      return;
+    }
+
+    const nextState = applyTransition((state) => GameEngine.nextPhase(state));
+    if (!nextState) {
+      return;
+    }
+
+    clearSelection();
+    clearError();
+  }, [applyTransition, assertPlayerTurn, clearError, clearSelection, isAnimating]);
+
+  const resolvePendingTurnAction = useCallback(
+    (selectedId: string) => {
+      if (isAnimating || !assertPlayerTurn()) {
         return;
       }
-      
-      if (gameState.phase !== 'BATTLE') { setSelectedCard(entity.card); return; }
-      if (entity.mode !== 'ATTACK' || entity.hasAttackedThisTurn) return;
-      
-      setActiveAttackerId(prev => prev === entity.instanceId ? null : entity.instanceId);
-      setSelectedCard(entity.card);
-      setPlayingCard(null);
 
-    } else {
-      if (activeAttackerId) {
-        setIsAnimating(true);
-        const attackerId = activeAttackerId;
-        const targetId = entity?.instanceId;
-        setActiveAttackerId(null); 
-        clearSelection();
-
-        // SI ATACAMOS A UNA CARTA BOCA ABAJO (DEFENSE / SET)
-        if (entity && (entity.mode === 'DEFENSE' || entity.mode === 'SET')) {
-            // 1. Revelamos la carta visualmente para que el jugador vea qué ha atacado
-            setRevealedEntities(prev => [...prev, targetId!]);
-            // 2. Esperamos que termine la animación de volteo
-            await sleep(800); 
-        }
-
-        // 3. Aplicamos el daño y la enviamos al cementerio
-        setGameState((prev) => {
-          try { return GameEngine.executeAttack(prev, prev.playerA.id, attackerId, targetId); } 
-          catch (e) { return prev; }
-        });
-        
-        // Limpiamos los revelados tras la muerte
-        if (targetId) setRevealedEntities(prev => prev.filter(id => id !== targetId));
-        setIsAnimating(false);
-
-      } else if (entity) {
-        setSelectedCard(entity.card); 
+      const nextState = applyTransition((state) => GameEngine.resolvePendingTurnAction(state, state.playerA.id, selectedId));
+      if (!nextState) {
+        return;
       }
-    }
-  };
 
-  return { gameState, selectedCard, playingCard, isHistoryOpen, activeAttackerId, revealedEntities, setIsHistoryOpen, toggleCardSelection, clearSelection, executePlayAction, handleEntityClick, advancePhase };
+      clearSelection();
+      clearError();
+    },
+    [applyTransition, assertPlayerTurn, clearError, clearSelection, isAnimating],
+  );
+
+  const resolvePendingHandDiscard = useCallback(
+    (cardId: string) => {
+      if (gameState.pendingTurnAction?.playerId !== gameState.playerA.id || gameState.pendingTurnAction.type !== "DISCARD_FOR_HAND_LIMIT") {
+        return;
+      }
+
+      resolvePendingTurnAction(cardId);
+    },
+    [gameState.pendingTurnAction, gameState.playerA.id, resolvePendingTurnAction],
+  );
+
+  const { toggleCardSelection, executePlayAction, handleEntityClick } = usePlayerActions({
+    gameState,
+    isAnimating,
+    playingCard,
+    activeAttackerId,
+    pendingEntityReplacement,
+    assertPlayerTurn,
+    applyTransition,
+    clearSelection,
+    clearError,
+    resolvePendingTurnAction,
+    setSelectedCard,
+    setPlayingCard,
+    setActiveAttackerId,
+    setIsAnimating,
+    setRevealedEntities,
+    setPendingEntityReplacement,
+    setLastError,
+  });
+
+  return {
+    gameState,
+    selectedCard,
+    playingCard,
+    isHistoryOpen,
+    activeAttackerId,
+    revealedEntities,
+    lastError,
+    pendingEntityReplacement,
+    pendingActionHint:
+      gameState.pendingTurnAction?.playerId === gameState.playerA.id
+        ? gameState.pendingTurnAction.type === "DISCARD_FOR_HAND_LIMIT"
+          ? "Tienes 5 cartas en mano. Elige una carta de tu mano para enviarla al cementerio."
+          : "Tu campo de entidades está lleno. Elige una entidad de tu campo para enviarla al cementerio."
+        : pendingEntityReplacement
+          ? "Tu campo está lleno. Elige una entidad del campo para reemplazarla por la nueva invocación."
+          : null,
+    pendingDiscardCardIds:
+      gameState.pendingTurnAction?.playerId === gameState.playerA.id && gameState.pendingTurnAction.type === "DISCARD_FOR_HAND_LIMIT"
+        ? gameState.playerA.hand.map((card) => card.id)
+        : [],
+    pendingEntitySelectionIds:
+      gameState.pendingTurnAction?.playerId === gameState.playerA.id && gameState.pendingTurnAction.type === "SACRIFICE_ENTITY_FOR_DRAW"
+        ? gameState.playerA.activeEntities.map((entity) => entity.instanceId)
+        : pendingEntityReplacement
+          ? gameState.playerA.activeEntities.map((entity) => entity.instanceId)
+          : [],
+    opponentDifficulty,
+    isPlayerTurn: gameState.activePlayerId === gameState.playerA.id,
+    setIsHistoryOpen,
+    toggleCardSelection,
+    clearSelection,
+    clearError,
+    executePlayAction,
+    handleEntityClick,
+    advancePhase,
+    resolvePendingTurnAction,
+    resolvePendingHandDiscard,
+  };
 }

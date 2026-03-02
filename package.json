@@ -7,9 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "quality:check": "pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm build"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -29,6 +31,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5.1.4",
+    "@vitest/coverage-v8": "^4.0.18",
     "@vitest/ui": "^4.0.18",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",

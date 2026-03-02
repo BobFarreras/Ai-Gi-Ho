@@ -1,39 +1,67 @@
-# ARQUITECTURA DEL PROYECTO (Architecture.md)
+# Arquitectura del Proyecto
 
-Este proyecto sigue una arquitectura limpia (Clean Architecture) orientada a dominios, diseñada para desacoplar el framework (Next.js) y la base de datos (Supabase) de las reglas de negocio del juego.
+Arquitectura en capas orientada a dominio con separación estricta entre UI, motor de reglas, estrategia de oponente e integraciones externas.
 
-## Estructura de Carpetas (`/src`)
+## Estructura actual (`/src`)
 
 ```text
 /src
- ├── app/                  # (Capa de Presentación - Framework)
- │   ├── api/              # Endpoints de la API REST / Webhooks
- │   ├── (auth)/           # Rutas de login/registro
- │   ├── game/             # Vistas de la partida
- │   └── layout.tsx        # Layout principal de Next.js
+ ├── app/                                  # Entradas Next.js (App Router)
+ │   ├── layout.tsx
+ │   └── page.tsx
  │
- ├── components/           # (Capa de Presentación - UI)
- │   ├── ui/               # Componentes genéricos (Botones, Modales, Inputs)
- │   └── game/             # Componentes específicos del juego (Card, Board)
+ ├── components/                           # Presentación React
+ │   └── game/
+ │       ├── board/
+ │       │   ├── battlefield/              # Render de tablero y slots
+ │       │   ├── hooks/
+ │       │   │   ├── internal/             # Estado inicial, errores UI, loop oponente
+ │       │   │   ├── useBoard.ts
+ │       │   │   ├── useBoard.test.ts
+ │       │   │   └── useBoard.integration.test.ts
+ │       │   ├── ui/                       # Paneles de fase y timer
+ │       │   ├── Board.test.tsx
+ │       │   └── index.tsx
+ │       └── card/
  │
- ├── core/                 # (Capa de Dominio - Lógica de Negocio Pura)
- │   ├── entities/         # Tipos e Interfaces base (ej. types para `Card`, `Player`)
- │   ├── interfaces/       # Contratos de repositorios (ej. `ICardRepository.ts`)
- │   └── use-cases/        # Lógica del juego independiente de React (ej. `AttackAction.ts`)
+ ├── core/
+ │   ├── entities/                         # Tipos de dominio
+ │   ├── errors/                           # AppError + códigos tipados
+ │   ├── services/
+ │   │   └── opponent/                     # IA heurística (sin LLM)
+ │   └── use-cases/
+ │       ├── game-engine/                  # Casos de uso modulares del motor
+ │       ├── CombatService.ts
+ │       └── GameEngine.ts                 # Fachada estable
  │
- ├── infrastructure/       # (Capa de Infraestructura - Servicios Externos)
- │   ├── database/         # Implementaciones de repositorios (ej. `SupabaseCardRepository.ts`)
- │   └── ai/               # Clientes de la API de Gemini/LLMs
- │
- └── lib/                  # (Utilidades genéricas)
-     └── utils.ts          # Funciones helpers puras (formateo de fechas, cn para Tailwind)
+ ├── infrastructure/                       # Integraciones externas (pendiente)
+ └── lib/
 ```
 
-## Flujo de Datos (Cómo crear una nueva feature)
-    Si queremos crear la acción de "Robar Carta":
+## Reglas de dependencia
 
-    Core: Se define la interfaz en core/interfaces/ y la lógica pura en core/use-cases/.
+1. `app` y `components` consumen `core`.
+2. `core` no depende de `components` ni de `app`.
+3. `core/services/opponent` depende de `core/use-cases` y `core/entities`.
+4. `infrastructure` implementa contratos del dominio cuando se conecten APIs/DB.
 
-    Infrastructure: Se implementa cómo se guarda esa acción en BD dentro de infrastructure/database/.
+## Flujo de turno actual
 
-    App/Components: Se crea el botón en components/game/ que llama al caso de uso, sin saber que por debajo usa Supabase.
+1. El duelo se inicializa con `createInitialGameState` (mazo de 20 y mano inicial de 3 por jugador).
+2. Se define `startingPlayerId`; el jugador inicial no puede atacar en turno `1`.
+3. El turno tiene 2 subfases: `MAIN_1` (despliegue) y `BATTLE` (combate).
+4. Al cerrar `BATTLE`, `nextPhase` pasa el turno al rival, roba 1 carta para ese rival, restaura energía y limpia flags.
+5. `useOpponentTurn` ejecuta pasos automáticos del oponente (`runOpponentStep`) con el mismo ciclo de 2 subfases.
+6. La dificultad del rival se resuelve desde progreso de campaña (`resolveDifficultyFromCampaign`) y se inyecta en la estrategia.
+
+## Diseño para evolución
+
+1. Estrategia actual: `HeuristicOpponentStrategy` (determinista con heurísticas).
+2. Extensión futura LLM: nueva implementación de `IOpponentStrategy` sin tocar UI.
+3. Multijugador futuro: sustitución del controlador rival por controlador remoto sin romper el motor.
+
+## Documentación modular
+
+1. `game-engine/README.md`: invariantes del motor y contratos.
+2. `services/opponent/README.md`: decisiones del bot y dificultad.
+3. `hooks/internal/README.md`: responsabilidades internas del tablero.

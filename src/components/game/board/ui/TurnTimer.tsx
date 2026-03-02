@@ -1,0 +1,33 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+
+interface TurnTimerProps {
+  onTimeUp: () => void;
+}
+
+export function TurnTimer({ onTimeUp }: TurnTimerProps) {
+  const [timeLeft, setTimeLeft] = useState(30);
+
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      const timeoutId = setTimeout(onTimeUp, 0);
+      return () => clearTimeout(timeoutId);
+    }
+
+    const intervalId = setInterval(() => setTimeLeft((value) => value - 1), 1000);
+    return () => clearInterval(intervalId);
+  }, [timeLeft, onTimeUp]);
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center px-3 py-1 rounded bg-black/50 border border-white/10 font-mono text-lg font-black tracking-widest transition-colors",
+        timeLeft <= 10 ? "text-red-500 animate-pulse border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.5)]" : "text-cyan-400",
+      )}
+    >
+      00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}
+    </div>
+  );
+}

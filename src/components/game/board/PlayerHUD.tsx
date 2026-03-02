@@ -10,9 +10,11 @@ import { useEffect, useRef, useState } from "react";
 interface PlayerHUDProps {
   isOpponent: boolean;
   player: IPlayer;
+  isActiveTurn: boolean;
+  badgeText?: string;
 }
 
-export function PlayerHUD({ isOpponent, player }: PlayerHUDProps) {
+export function PlayerHUD({ isOpponent, player, isActiveTurn, badgeText }: PlayerHUDProps) {
   const prevHp = useRef(player.healthPoints);
   const [damageTaken, setDamageTaken] = useState<number | null>(null);
   const [isShaking, setIsShaking] = useState(false);
@@ -50,7 +52,8 @@ export function PlayerHUD({ isOpponent, player }: PlayerHUDProps) {
       animate={{ ...shakeAnimation, opacity: 1 }}
       transition={{ duration: 0.4 }}
       className={cn(
-        "absolute z-[100] flex flex-col w-72 pointer-events-none drop-shadow-2xl",
+        "absolute z-[100] flex flex-col w-72 pointer-events-none drop-shadow-2xl transition-all duration-300",
+        isActiveTurn ? "scale-[1.02] drop-shadow-[0_0_30px_rgba(34,211,238,0.35)]" : "opacity-80",
         isOpponent ? "top-6 right-6 items-end" : "bottom-6 left-6 items-start"
       )}
     >
@@ -73,7 +76,19 @@ export function PlayerHUD({ isOpponent, player }: PlayerHUDProps) {
 
       <div className="bg-zinc-950/90 border border-zinc-700/50 backdrop-blur-xl px-4 py-1.5 mb-1 relative overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.8)]">
         <div className={cn("absolute inset-0 opacity-20", isOpponent ? "bg-red-500" : "bg-cyan-500")} />
-        <span className="font-black tracking-widest text-white uppercase text-sm drop-shadow-md">{player.name}</span>
+        <div className="flex items-center gap-2">
+          <span className="font-black tracking-widest text-white uppercase text-sm drop-shadow-md">{player.name}</span>
+          {badgeText && (
+            <span className="text-[10px] px-2 py-0.5 border border-amber-300/60 bg-amber-500/20 text-amber-200 rounded uppercase tracking-widest font-black">
+              {badgeText}
+            </span>
+          )}
+          {isActiveTurn && (
+            <span className="text-[10px] px-2 py-0.5 border border-cyan-300/60 bg-cyan-500/20 text-cyan-200 rounded uppercase tracking-widest font-black animate-pulse">
+              Turno Activo
+            </span>
+          )}
+        </div>
       </div>
 
       <div 

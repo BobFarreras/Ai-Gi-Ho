@@ -32,9 +32,11 @@ describe('Componente UI: Board y Subcomponentes', () => {
     playerA: mockPlayer,
     playerB: mockOpponent,
     activePlayerId: 'p1',
+    startingPlayerId: 'p1',
     turn: 1,
     phase: 'MAIN_1',
-    hasNormalSummonedThisTurn: false
+    hasNormalSummonedThisTurn: false,
+    pendingTurnAction: null,
   };
 
   beforeEach(() => {
@@ -44,12 +46,24 @@ describe('Componente UI: Board y Subcomponentes', () => {
       selectedCard: null,
       playingCard: null,
       isHistoryOpen: false,
+      activeAttackerId: null,
+      revealedEntities: [],
+      lastError: null,
+      pendingEntityReplacement: null,
+      pendingActionHint: null,
+      pendingDiscardCardIds: [],
+      pendingEntitySelectionIds: [],
+      opponentDifficulty: "EASY",
+      isPlayerTurn: true,
+      resolvePendingTurnAction: vi.fn(),
+      resolvePendingHandDiscard: vi.fn(),
       setIsHistoryOpen: vi.fn(),
       toggleCardSelection: vi.fn(),
       clearSelection: vi.fn(),
+      clearError: vi.fn(),
       executePlayAction: vi.fn(),
-      setSelectedCard: vi.fn(),
-      setPlayingCard: vi.fn(),
+      handleEntityClick: vi.fn(),
+      advancePhase: vi.fn(),
     });
   });
 
@@ -58,6 +72,7 @@ describe('Componente UI: Board y Subcomponentes', () => {
 
     expect(screen.getByText('Boby Master')).toBeInTheDocument();
     expect(screen.getByText('AI Overlord')).toBeInTheDocument();
+    expect(screen.getByText(/dificultad easy/i)).toBeInTheDocument();
   });
 
   it('debería abrir el historial de batalla al hacer click en el botón de historial', () => {
@@ -71,12 +86,24 @@ describe('Componente UI: Board y Subcomponentes', () => {
 
     render(<Board />);
 
-    // Hacemos click en el botón (el que tiene el ícono de History)
-    // Buscamos el botón por su clase o elemento padre ya que no tiene aria-label en el código actual
-    const historyBtn = screen.getByRole('button'); 
+    // Hacemos click en el botón de historial usando su nombre accesible
+    const historyBtn = screen.getByRole('button', { name: /abrir historial de batalla/i });
     fireEvent.click(historyBtn);
 
     // Verificamos que se haya llamado a la función del hook para abrirlo
     expect(setIsHistoryOpenMock).toHaveBeenCalledWith(true);
+  });
+
+  it('no debería mostrar acciones de fase cuando es turno del rival', () => {
+    vi.mocked(useBoardModule.useBoard).mockReturnValue({
+      ...vi.mocked(useBoardModule.useBoard)(),
+      isPlayerTurn: false,
+    });
+
+    render(<Board />);
+
+    expect(screen.queryByText(/ir a combate/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/pasar turno/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/turno rival/i)).toBeInTheDocument();
   });
 });

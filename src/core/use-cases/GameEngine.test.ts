@@ -1,7 +1,7 @@
 // src/core/use-cases/GameEngine.test.ts
 import { describe, it, expect } from 'vitest';
 import { GameEngine, GameState } from './GameEngine';
-import { IPlayer, IBoardEntity } from '../entities/IPlayer';
+import { IBoardEntity } from '../entities/IPlayer';
 import { ICard } from '../entities/ICard';
 
 const mockCardA: ICard = { id: 'c1', name: 'Gemini', type: 'ENTITY', faction: 'BIG_TECH', cost: 3, attack: 2500, defense: 2000, description: '' };
@@ -25,7 +25,8 @@ const createInitialState = (): GameState => ({
     deck: [], hand: [], graveyard: [], activeEntities: [mockBoardEntityB], activeExecutions: []
   },
   activePlayerId: 'p1',
-  turn: 1,
+  startingPlayerId: 'p2',
+  turn: 2,
   phase: 'MAIN_1',
   hasNormalSummonedThisTurn: false
 });
@@ -34,7 +35,7 @@ describe('GameEngine', () => {
   it('Debe jugar una carta de la mano al campo consumiendo energía', () => {
     const initialState = createInitialState();
     
-    const newState = GameEngine.playEntityCard(initialState, 'p1', 'c1', 'ATTACK');
+    const newState = GameEngine.playCard(initialState, 'p1', 'c1', 'ATTACK');
     
     expect(newState.playerA.currentEnergy).toBe(2); 
     expect(newState.playerA.hand.length).toBe(0);
@@ -48,7 +49,7 @@ describe('GameEngine', () => {
     let state = createInitialState();
     
     // Neo juega a Gemini
-    state = GameEngine.playEntityCard(state, 'p1', 'c1', 'ATTACK');
+    state = GameEngine.playCard(state, 'p1', 'c1', 'ATTACK');
     
     const geminiInstanceId = state.playerA.activeEntities[0].instanceId;
     
@@ -56,6 +57,7 @@ describe('GameEngine', () => {
     // Reconstruimos el estado de manera inmutable en vez de reasignarlo
     state = {
       ...state,
+      phase: 'BATTLE',
       playerA: {
         ...state.playerA,
         activeEntities: [
@@ -69,7 +71,7 @@ describe('GameEngine', () => {
     // Ollama es destruido y Neo hace 1000 de daño
     expect(state.playerB.healthPoints).toBe(7000); 
     expect(state.playerB.activeEntities.length).toBe(0);
-    expect(state.playerB.graveyard).toContain('c2');
+    expect(state.playerB.graveyard[0]?.id).toBe('c2');
     
     // Gemini sobrevive y se marca que ya atacó
     expect(state.playerA.activeEntities.length).toBe(1);
