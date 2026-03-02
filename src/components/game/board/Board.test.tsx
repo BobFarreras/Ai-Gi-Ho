@@ -1,64 +1,82 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+// src/components/game/board/Board.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Board } from './index';
+import * as useBoardModule from './hooks/useBoard';
 import { IPlayer } from '@/core/entities/IPlayer';
 import { ICard } from '@/core/entities/ICard';
+import { GameState } from '@/core/use-cases/GameEngine';
 
-// Mocks actualizados a la nueva interfaz ICard
-const mockHand: ICard[] = [
-  { id: 'c1', name: 'Firewall', description: '', type: 'ENTITY', faction: 'NEUTRAL', cost: 1, attack: 10, defense: 10 }
-];
+// Hacemos un Mock (simulación) del archivo entero del hook
+vi.mock('./hooks/useBoard', () => ({
+  useBoard: vi.fn(),
+}));
 
-// Mocks actualizados a la nueva interfaz IPlayer (incorporando deck, hand, graveyard)
-const mockPlayer: IPlayer = {
-  id: 'p1', 
-  name: 'Neo', 
-  healthPoints: 8000, 
-  maxHealthPoints: 8000,
-  currentEnergy: 5, 
-  maxEnergy: 10, 
-  deck: ['c2', 'c3'],
-  hand: mockHand,
-  graveyard: []
-};
+describe('Componente UI: Board y Subcomponentes', () => {
+  const mockEntity: ICard = {
+    id: 'c1', name: 'Hack Script', description: 'Ataca fuerte', type: 'ENTITY', faction: 'OPEN_SOURCE', cost: 2, attack: 1500, defense: 1000
+  };
 
-const mockOpponent: IPlayer = {
-  id: 'p2', 
-  name: 'Agent Smith', 
-  healthPoints: 8000, 
-  maxHealthPoints: 8000,
-  currentEnergy: 4, 
-  maxEnergy: 10, 
-  deck: ['c4', 'c5'],
-  hand: [],
-  graveyard: ['c6']
-};
+  // Mocks actualizados con todas las propiedades de IPlayer
+  const mockPlayer: IPlayer = {
+    id: 'p1', name: 'Boby Master', healthPoints: 4000, maxHealthPoints: 4000, currentEnergy: 5, maxEnergy: 10, 
+    deck: [], hand: [mockEntity], graveyard: [], activeEntities: [], activeExecutions: []
+  };
+  
+  const mockOpponent: IPlayer = {
+    id: 'p2', name: 'AI Overlord', healthPoints: 3500, maxHealthPoints: 4000, currentEnergy: 8, maxEnergy: 10, 
+    deck: [], hand: [], graveyard: [], activeEntities: [], activeExecutions: []
+  };
 
-describe('Board Component', () => {
-  it('Debe renderizar los HUDs de los jugadores correctamente', () => {
-    render(
-      <Board 
-        player={mockPlayer} 
-        opponent={mockOpponent} 
-        playerHand={mockHand} 
-        playerActiveEntities={[]} playerActiveExecutions={[]} 
-        opponentActiveEntities={[]} opponentActiveExecutions={[]} 
-      />
-    );
+  const mockGameState: GameState = {
+    playerA: mockPlayer,
+    playerB: mockOpponent,
+    activePlayerId: 'p1',
+    turn: 1,
+    phase: 'MAIN_1',
+    hasNormalSummonedThisTurn: false
+  };
 
-    expect(screen.getByText('Neo')).toBeDefined();
-    expect(screen.getByText('Agent Smith')).toBeDefined();
+  beforeEach(() => {
+    // Antes de cada test, le decimos al Hook falso qué debe devolver
+    vi.mocked(useBoardModule.useBoard).mockReturnValue({
+      gameState: mockGameState,
+      selectedCard: null,
+      playingCard: null,
+      isHistoryOpen: false,
+      setIsHistoryOpen: vi.fn(),
+      toggleCardSelection: vi.fn(),
+      clearSelection: vi.fn(),
+      executePlayAction: vi.fn(),
+      setSelectedCard: vi.fn(),
+      setPlayingCard: vi.fn(),
+    });
   });
 
-  it('Debe renderizar la carta en la mano del jugador', () => {
-    render(
-      <Board 
-        player={mockPlayer} opponent={mockOpponent} playerHand={mockHand} 
-        playerActiveEntities={[]} playerActiveExecutions={[]} 
-        opponentActiveEntities={[]} opponentActiveExecutions={[]} 
-      />
-    );
+  it('debería renderizar la información de los jugadores correctamente en el HUD', () => {
+    render(<Board />); // Ya no pasamos props, el Board usa el hook internamente
 
-    expect(screen.getByText('Firewall')).toBeDefined();
+    expect(screen.getByText('Boby Master')).toBeInTheDocument();
+    expect(screen.getByText('AI Overlord')).toBeInTheDocument();
+  });
+
+  it('debería abrir el historial de batalla al hacer click en el botón de historial', () => {
+    // Simulamos que isHistoryOpen es falso inicialmente, pero pasamos la función para abrir
+    const setIsHistoryOpenMock = vi.fn();
+    vi.mocked(useBoardModule.useBoard).mockReturnValue({
+      ...vi.mocked(useBoardModule.useBoard)(),
+      isHistoryOpen: false,
+      setIsHistoryOpen: setIsHistoryOpenMock
+    });
+
+    render(<Board />);
+
+    // Hacemos click en el botón (el que tiene el ícono de History)
+    // Buscamos el botón por su clase o elemento padre ya que no tiene aria-label en el código actual
+    const historyBtn = screen.getByRole('button'); 
+    fireEvent.click(historyBtn);
+
+    // Verificamos que se haya llamado a la función del hook para abrirlo
+    expect(setIsHistoryOpenMock).toHaveBeenCalledWith(true);
   });
 });

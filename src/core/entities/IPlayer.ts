@@ -1,4 +1,16 @@
+// src/core/entities/IPlayer.ts
 import { ICard } from './ICard';
+
+export type BattleMode = 'ATTACK' | 'DEFENSE' | 'SET';
+
+// NUEVA INTERFAZ: Representa una carta cuando ya está en el tablero
+export interface IBoardEntity {
+  readonly instanceId: string; // ID único para el tablero (por si juegas 2 cartas iguales)
+  readonly card: ICard;
+  readonly mode: BattleMode;
+  readonly hasAttackedThisTurn: boolean;
+  readonly isNewlySummoned: boolean;
+}
 
 export interface IPlayer {
   readonly id: string;
@@ -9,7 +21,11 @@ export interface IPlayer {
   readonly maxEnergy: number;
   
   // Zonas del jugador
-  readonly deck: string[];     // Array de IDs de las cartas (referencias)
-  readonly hand: ICard[];      // Cartas físicas que el jugador tiene en la mano
-  readonly graveyard: string[];// Cartas destruidas
+  readonly deck: string[];       
+  readonly hand: ICard[];        
+  readonly graveyard: string[];  
+  
+  // Zonas de Batalla Actualizadas
+  readonly activeEntities: IBoardEntity[];   // <- Ahora usan IBoardEntity
+  readonly activeExecutions: IBoardEntity[]; // <- Magias/Trampas en el campo
 }

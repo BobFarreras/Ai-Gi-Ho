@@ -1,38 +1,63 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
+
 import { ICard } from "@/core/entities/ICard";
-import { Card } from "../Card";
+import { IBoardEntity } from "@/core/entities/IPlayer";
+
+import { cn } from "@/lib/utils";
+import { CardBack } from "../card/CardBack";
+import { Card } from "../card/Card";
 
 interface BattlefieldProps {
-    playerActiveEntities: ICard[];
-    playerActiveExecutions: ICard[];
-    opponentActiveEntities: ICard[];
-    opponentActiveExecutions: ICard[];
-    onCardClick: (card: ICard) => void;
+    playerActiveEntities: IBoardEntity[];
+    playerActiveExecutions: IBoardEntity[];
+    opponentActiveEntities: IBoardEntity[];
+    opponentActiveExecutions: IBoardEntity[];
+    playerDeckCount: number;   
+    opponentDeckCount: number; 
+    activeAttackerId: string | null;
+    onEntityClick: (entity: IBoardEntity, isOpponent: boolean, e: React.MouseEvent) => void;
 }
 
 export function Battlefield({
     playerActiveEntities, playerActiveExecutions,
     opponentActiveEntities, opponentActiveExecutions,
-    onCardClick
+    playerDeckCount, opponentDeckCount,
+    activeAttackerId, onEntityClick
 }: BattlefieldProps) {
+    const [zoom, setZoom] = useState(1);
 
-    const renderSlots = (cards: ICard[], total: number) => {
+    const handleWheel = (e: React.WheelEvent) => {
+        setZoom(prev => Math.min(Math.max(prev - e.deltaY * 0.001, 0.6), 1.6));
+    };
+
+    // Añadimos isOpponentSide para saber a quién estamos clickeando
+    const renderSlots = (entities: IBoardEntity[], total: number, isOpponentSide: boolean) => {
         return Array.from({ length: total }).map((_, i) => {
-            const card = cards[i];
+            const entity = entities[i];
+            const isDefense = entity?.mode === 'DEFENSE';
+            const isSet = entity?.mode === 'SET';
+            const isAttacking = entity?.instanceId === activeAttackerId;
+
             return (
-                // El Slot: Tamaño exacto para el tablero
-                <div key={i} className="relative w-24 h-36 border-2 border-cyan-500/20 rounded-md bg-black/40 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.1)_inset] overflow-hidden group">
-                    {card ? (
-                        <div
-                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[0.35] w-64 h-80 origin-center cursor-pointer transition-transform duration-300 group-hover:scale-[0.40] z-10"
-                            onClick={() => onCardClick(card)}
+                <div key={i} className="relative w-24 h-36 border-2 border-cyan-500/30 rounded-lg bg-cyan-950/40 flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.15)_inset] overflow-hidden group hover:border-cyan-300 hover:bg-cyan-900/40 transition-all duration-300">
+                    {entity ? (
+                        <motion.div
+                            layoutId={`card-animation-${entity.card.id}`}
+                            className={cn(
+                                "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[0.35] origin-center cursor-pointer transition-all duration-300 z-10",
+                                (isDefense || isSet) ? "-rotate-90" : "",
+                                // Si es el atacante, brilla en ROJO con un pulso
+                                isAttacking ? "scale-[0.38] ring-8 ring-red-500 shadow-[0_0_40px_rgba(239,68,68,1)] animate-pulse" : "group-hover:scale-[0.40]"
+                            )}
+                            onClick={(e) => onEntityClick(entity, isOpponentSide, e)}
                         >
-                            <Card card={card} />
-                        </div>
+                            {isSet ? <CardBack isHorizontal={true} /> : <Card card={entity.card} />}
+                        </motion.div>
                     ) : (
-                        <span className="text-cyan-500/20 text-xs font-bold font-mono">SLOT {i + 1}</span>
+                        <span className="text-cyan-500/30 text-[10px] font-black font-mono tracking-widest opacity-50 group-hover:opacity-100">SLOT_{i + 1}</span>
                     )}
                 </div>
             );
@@ -40,47 +65,56 @@ export function Battlefield({
     };
 
     return (
-        <motion.div
-            drag dragConstraints={{ left: -100, right: 100, top: -50, bottom: 50 }} dragElastic={0.1}
-            // SOLUCIÓN AL SOLAPAMIENTO: pb-24 y -translate-y-12 suben el tablero para dejar espacio a la mano
-            className="absolute inset-0 flex items-center justify-center cursor-grab active:cursor-grabbing perspective-[1200px] pb-24 -translate-y-12"
-        >
-            {/* ILUMINADO Y MÁS VISIBLE: bg-zinc-800/80 en vez de bg-zinc-950/80 */}
-            <div className="w-[900px] h-[700px] transform rotate-x-[50deg] scale-110 relative flex flex-col justify-center items-center gap-4 rounded-[3rem] border border-cyan-400/40 bg-zinc-800/80 p-8 shadow-[0_0_80px_rgba(6,182,212,0.25)] overflow-hidden backdrop-blur-sm">
+        <div className="absolute inset-0 overflow-hidden pointer-events-auto" onWheel={handleWheel}>
+            <motion.div
+                drag dragConstraints={{ left: -300, right: 300, top: -200, bottom: 200 }} dragElastic={0.05}
+                animate={{ scale: zoom }} transition={{ type: "spring", stiffness: 400, damping: 40 }}
+                className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing perspective-[1200px]"
+            >
+                {/* Si estamos apuntando, el tablero entero se tiñe sutilmente de rojo */}
+                <div className={cn(
+                    "w-[1050px] h-[800px] transform rotate-x-[55deg] relative flex flex-col justify-center items-center gap-6 rounded-[3rem] border-[4px] border-cyan-900/80 bg-zinc-950/90 shadow-[0_0_100px_rgba(6,182,212,0.2)_inset,0_50px_100px_rgba(0,0,0,0.9)] backdrop-blur-xl overflow-hidden transition-colors duration-500",
+                    activeAttackerId ? "border-red-900/80 shadow-[0_0_100px_rgba(239,68,68,0.2)_inset,0_50px_100px_rgba(0,0,0,0.9)]" : ""
+                )}>
+                    
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(6,182,212,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(6,182,212,0.1)_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
 
-                {/* REJILLA MÁS BRILLANTE: opacity-30 */}
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#06b6d4_1px,transparent_1px),linear-gradient(to_bottom,#06b6d4_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_20%,transparent_100%)] opacity-30 animate-[pulse_4s_ease-in-out_infinite]" />
+                    {/* --- ZONA DEL OPONENTE --- */}
+                    <div className={cn(
+                        "flex w-full justify-center items-center gap-8 mb-4 z-10 p-4 rounded-2xl transition-colors duration-300",
+                        activeAttackerId ? "bg-red-950/30 cursor-crosshair" : "" // Cursor de mira si apuntamos
+                    )}>
+                        <div className="w-24 h-36 border-2 border-dashed border-red-500/40 bg-red-950/20 rounded-lg flex flex-col items-center justify-center text-red-500/60 shadow-[inset_0_0_20px_rgba(239,68,68,0.2)]">
+                            <span className="font-black text-xs uppercase tracking-widest">Grave</span><span className="text-xs mt-1 opacity-50 font-mono">0</span>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <div className="flex gap-3 opacity-60">{renderSlots(opponentActiveExecutions, 3, true)}</div>
+                            <div className="flex gap-3">{renderSlots(opponentActiveEntities, 3, true)}</div>
+                        </div>
+                        <div className="relative w-24 h-36 border-2 border-zinc-700/80 rounded-lg shadow-[0_0_30px_rgba(0,0,0,0.8)] flex flex-col items-center justify-center overflow-hidden bg-black/50">
+                            <div className="absolute inset-0 scale-[0.35] origin-center opacity-80"><CardBack /></div>
+                            <span className="relative z-10 bg-black/90 px-3 py-1 rounded-md text-cyan-400 font-mono text-sm border border-cyan-900/80 shadow-[0_0_10px_rgba(6,182,212,0.5)]">{opponentDeckCount}</span>
+                        </div>
+                    </div>
 
-                {/* --- LADO DEL OPONENTE --- */}
-                <div className="flex w-full justify-between items-center mb-2 z-10">
-                    <div className="w-24 h-36 border-2 border-dashed border-red-500/30 bg-red-950/20 flex flex-col items-center justify-center text-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.1)_inset]">
-                        <span className="font-bold text-xs uppercase tracking-widest">Grave</span>
-                        <span className="text-[10px] mt-1 opacity-50">0</span>
+                    <div className="w-[85%] h-1.5 bg-gradient-to-r from-transparent via-cyan-500 to-transparent shadow-[0_0_20px_rgba(6,182,212,1)] opacity-70 z-10 rounded-full" />
+
+                    {/* --- ZONA DEL JUGADOR --- */}
+                    <div className="flex w-full justify-center items-center gap-8 mt-4 z-10 p-4">
+                        <div className="w-24 h-36 border-2 border-dashed border-cyan-500/40 bg-cyan-950/20 rounded-lg flex flex-col items-center justify-center text-cyan-500/60 shadow-[inset_0_0_20px_rgba(6,182,212,0.2)]">
+                            <span className="font-black text-xs uppercase tracking-widest">Grave</span><span className="text-xs mt-1 opacity-50 font-mono">0</span>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <div className="flex gap-3">{renderSlots(playerActiveEntities, 3, false)}</div>
+                            <div className="flex gap-3 opacity-60">{renderSlots(playerActiveExecutions, 3, false)}</div>
+                        </div>
+                        <div className="relative w-24 h-36 border-2 border-zinc-700/80 rounded-lg shadow-[0_0_30px_rgba(0,0,0,0.8)] flex flex-col items-center justify-center overflow-hidden bg-black/50">
+                            <div className="absolute inset-0 scale-[0.35] origin-center opacity-80"><CardBack /></div>
+                            <span className="relative z-10 bg-black/90 px-3 py-1 rounded-md text-cyan-400 font-mono text-sm border border-cyan-900/80 shadow-[0_0_10px_rgba(6,182,212,0.5)]">{playerDeckCount}</span>
+                        </div>
                     </div>
-                    <div className="flex flex-col gap-2">
-                        <div className="flex gap-4 opacity-70">{renderSlots(opponentActiveExecutions, 3)}</div>
-                        <div className="flex gap-4">{renderSlots(opponentActiveEntities, 3)}</div>
-                    </div>
-                    <div className="w-24 h-36 bg-zinc-900 border-2 border-zinc-700 shadow-[5px_5px_0_rgba(0,0,0,0.8)] flex items-center justify-center text-zinc-600 font-bold tracking-widest">DECK</div>
                 </div>
-
-                {/* LÍNEA DIVISORIA DE ENERGÍA */}
-                <div className="w-full h-1.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_20px_rgba(34,211,238,1)] my-4 z-10" />
-
-                {/* --- LADO DEL JUGADOR --- */}
-                <div className="flex w-full justify-between items-center mt-2 z-10">
-                    <div className="w-24 h-36 border-2 border-dashed border-cyan-500/30 bg-cyan-950/20 flex flex-col items-center justify-center text-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.1)_inset]">
-                        <span className="font-bold text-xs uppercase tracking-widest">Grave</span>
-                        <span className="text-[10px] mt-1 opacity-50">0</span>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <div className="flex gap-4">{renderSlots(playerActiveEntities, 3)}</div>
-                        <div className="flex gap-4 opacity-70">{renderSlots(playerActiveExecutions, 3)}</div>
-                    </div>
-                    <div className="w-24 h-36 bg-zinc-900 border-2 border-zinc-700 shadow-[5px_5px_0_rgba(0,0,0,0.8)] flex items-center justify-center text-zinc-600 font-bold tracking-widest">DECK</div>
-                </div>
-
-            </div>
-        </motion.div>
+            </motion.div>
+        </div>
     );
 }
