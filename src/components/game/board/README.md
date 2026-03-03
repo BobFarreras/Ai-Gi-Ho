@@ -4,10 +4,20 @@ Guía rápida para entender la lógica de tablero y batalla.
 
 ## Flujo de alto nivel
 
-1. `Board` compone HUD, mano, tablero y panel de fase.
+1. `Board` actúa como composición ligera (shell) y delega en subcapas UI:
+   - `ui/overlays/BoardStatusOverlays`
+   - `ui/layout/BoardTopBar`
+   - `ui/layers/BoardPlayersLayer`
+   - `ui/layers/BoardInteractiveLayer`
+   - `ui/layout/BoardActionButtons`
 2. `useBoard` centraliza estado UI + puente con motor (`GameEngine`).
 3. `usePlayerActions` procesa acciones humanas (invocar, activar, atacar).
 4. `useOpponentTurn` ejecuta pasos del rival con ritmo visual (delays + animación).
+5. `hooks/internal` se organiza por subcarpetas:
+   - `board-state/` (estado y proyecciones de UI),
+   - `player-actions/` (acciones del jugador),
+   - `opponent-turn/` (pasos del rival),
+   - `audio/` (runtime de sonido).
 
 ## Subfases y responsabilidades
 
@@ -50,6 +60,10 @@ Guía rápida para entender la lógica de tablero y batalla.
 2. Debes elegir 2 entidades de tu campo.
 3. El motor valida receta/energía y ejecuta `GameEngine.fuseCards`.
 4. Los materiales van al cementerio y la carta fusionada entra al campo.
+5. Las entidades ya elegidas como material quedan marcadas visualmente con estado dedicado (`MATERIAL` + ring cian).
+6. Al confirmarse la fusión, la cinemática sigue flujo en 2 etapas:
+   - vídeo de fusión,
+   - transición de carta invocada desde centro a slot final.
 
 ## Estado UI importante
 
@@ -91,6 +105,7 @@ Guía rápida para entender la lógica de tablero y batalla.
 8. `BattleBannerCenter` muestra solo turno y subturno (fase), con transición de entrada/salida.
 9. `GraveyardTransitionLayer` anima cualquier evento `CARD_TO_GRAVEYARD` (descarte, sacrificio, destrucción, fusión).
 10. `GraveyardBrowser` permite abrir el cementerio desde el tablero y previsualizar cualquier carta en el panel lateral.
+11. Para QA de fusión, `initialDeckFactory` usa mazos mock con más consistencia de materiales + cartas mágicas de fusión para ambos lados.
 
 ## Sonido y resultado
 
@@ -130,3 +145,5 @@ Guía rápida para entender la lógica de tablero y batalla.
 2. Decisiones del rival: `src/core/services/opponent/*`.
 3. Ritmo visual de acciones rival: `src/components/game/board/hooks/internal/useOpponentTurn.ts`.
 4. Render y animación de campo: `src/components/game/board/battlefield/*`.
+5. Subcomponentes internos de UI del historial: `src/components/game/board/ui/internal/combat-log-row/*`.
+6. Subcomponentes internos de zona de batalla: `src/components/game/board/battlefield/internal/*`.

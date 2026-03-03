@@ -5,6 +5,7 @@ import { playCardWithEntityReplacement } from "./game-engine/actions/play-card-w
 import { resolveExecution } from "./game-engine/actions/resolve-execution";
 import { executeAttack } from "./game-engine/combat/execute-attack";
 import { fuseCards } from "./game-engine/fusion/fuse-cards";
+import { startFusionSummon } from "./game-engine/fusion/start-fusion-summon";
 import { nextPhase } from "./game-engine/phases/next-phase";
 import { resolvePendingTurnAction } from "./game-engine/phases/resolve-pending-turn-action";
 import { createInitialGameState } from "./game-engine/state/create-initial-game-state";
@@ -46,6 +47,15 @@ export class GameEngine {
     mode: "ATTACK" | "DEFENSE",
   ): GameState {
     return fuseCards(state, playerId, fusionCardId, materialInstanceIds, mode);
+  }
+
+  public static startFusionSummon(
+    state: GameState,
+    playerId: string,
+    fusionCardId: string,
+    mode: "ATTACK" | "DEFENSE",
+  ): GameState {
+    return startFusionSummon(state, playerId, fusionCardId, mode);
   }
 
   public static nextPhase(state: GameState): GameState {

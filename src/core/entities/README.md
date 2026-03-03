@@ -14,6 +14,8 @@ Tipos de dominio puros del juego, sin dependencias de UI.
      - `fusionMaterials`
      - `fusionEnergyRequirement`
      - `archetype`
+   - Efecto de fusión preparado para magia:
+     - `FUSION_SUMMON` (`recipeId`, `materialsRequired`)
 
 2. `IPlayer` / `IBoardEntity`
    - Estado de jugador, mano, mazo, cementerio y slots en campo.

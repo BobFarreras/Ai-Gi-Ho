@@ -33,10 +33,13 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
  │       ├── game-engine/                  # Casos de uso modulares por dominio
  │       │   ├── state/
  │       │   ├── actions/
+ │       │   │   └── internal/             # Resolución de efectos de ejecución + logs
  │       │   ├── phases/
  │       │   ├── combat/
+ │       │   │   └── internal/             # Validación, resolución y logging de combate
  │       │   ├── fusion/
  │       │   ├── effects/
+ │       │   │   └── internal/             # Selección, resolución y logging de trampas
  │       │   └── logging/
  │       ├── CombatService.ts
  │       └── GameEngine.ts                 # Fachada estable
@@ -54,7 +57,7 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
 
 ## Flujo de turno actual
 
-1. El duelo se inicializa con `createInitialGameState` (mazo de 20 y mano inicial de 3 por jugador).
+1. El duelo se inicializa con `createInitialGameState` (mazo de 20 y mano inicial configurable; en tablero actual se usa 4 por jugador).
 2. Se define `startingPlayerId`; el jugador inicial no puede atacar en turno `1`.
 3. El turno tiene 2 subfases: `MAIN_1` (despliegue) y `BATTLE` (combate).
 4. Al cerrar `BATTLE`, `nextPhase` pasa el turno al rival, roba 1 carta para ese rival, suma energía `+2` (con tope) y limpia flags.
@@ -63,6 +66,8 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
 7. `GameState` mantiene `combatLog` en memoria y la UI consume ese stream para historial y carteleras.
 8. `Board` consume también `combatLog` para animaciones desacopladas (ej. transición al cementerio).
 9. Las trampas (`TRAP`) viven en la misma zona de `activeExecutions` y se disparan por eventos del motor (no desde UI).
+10. La fusión soporta flujo pendiente en motor: `startFusionSummon` crea `pendingTurnAction` y `resolvePendingTurnAction` completa selección de 2 materiales antes de invocar.
+11. La UI marca materiales seleccionados de fusión (`pendingFusionSelectedEntityIds`) para mantener trazabilidad visual durante la selección.
 
 ## Diseño para evolución
 
@@ -78,6 +83,8 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
 4. `GraveyardTransitionLayer` reutiliza eventos `CARD_TO_GRAVEYARD` para animación genérica de descarte/destrucción/sacrificio.
 5. `useGameAudio` consume `combatLog` para efectos de sonido por eventos y fin de duelo.
 6. `audio-catalog.ts` define rutas/volúmenes por evento y canales (`music`/`sfx`).
+7. `FusionCinematicLayer` consume `FUSION_SUMMONED` para reproducir vídeo por carta de fusión y bloquear interacción temporal.
+8. Tras el vídeo, `FusionCinematicLayer` ejecuta una segunda animación de invocación: carta desde centro hasta el slot final en tablero.
 
 ## Fin de partida
 
@@ -90,3 +97,12 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
 1. `game-engine/README.md`: invariantes del motor y contratos.
 2. `services/opponent/README.md`: decisiones del bot y dificultad.
 3. `hooks/internal/README.md`: responsabilidades internas del tablero.
+4. `board/README.md`: mapa de interacción del tablero y UX.
+5. `board/hooks/README.md`: fachada de hooks públicos del tablero.
+6. `board/ui/README.md`: componentes visuales y capas de layout.
+7. `board/battlefield/README.md`: zonas de campo, slots y VFX.
+8. `core/use-cases/README.md`: capa de aplicación y fachada `GameEngine`.
+9. `core/entities/README.md`: tipos de dominio (`ICard`, `IPlayer`, `ICombatLog`).
+10. `core/errors/README.md`: catálogo de errores tipados.
+11. `core/data/mock-cards/README.md`: dataset de cartas mock para pruebas.
+12. `core/config/README.md`: configuración central (audio y futuros catálogos).

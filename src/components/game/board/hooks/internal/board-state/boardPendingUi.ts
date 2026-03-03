@@ -1,0 +1,62 @@
+import { BattleMode } from "@/core/entities/IPlayer";
+import { GameState } from "@/core/use-cases/GameEngine";
+
+interface IPendingEntityReplacement {
+  cardId: string;
+  mode: BattleMode;
+}
+
+export interface IBoardPendingUi {
+  pendingActionHint: string | null;
+  pendingDiscardCardIds: string[];
+  pendingEntitySelectionIds: string[];
+  pendingFusionSelectedEntityIds: string[];
+}
+
+export function buildBoardPendingUi(
+  gameState: GameState,
+  pendingEntityReplacement: IPendingEntityReplacement | null,
+): IBoardPendingUi {
+  const pendingFusionMaterialsCount =
+    gameState.pendingTurnAction?.playerId === gameState.playerA.id && gameState.pendingTurnAction.type === "SELECT_FUSION_MATERIALS"
+      ? gameState.pendingTurnAction.selectedMaterialInstanceIds.length
+      : null;
+  const pendingActionHint =
+    gameState.pendingTurnAction?.playerId === gameState.playerA.id
+      ? gameState.pendingTurnAction.type === "DISCARD_FOR_HAND_LIMIT"
+        ? "Tienes 5 cartas en mano. Elige una carta de tu mano para enviarla al cementerio."
+        : gameState.pendingTurnAction.type === "SACRIFICE_ENTITY_FOR_DRAW"
+          ? "Tu campo de entidades está lleno. Elige una entidad de tu campo para enviarla al cementerio."
+          : `Selecciona 2 materiales para fusionar (${pendingFusionMaterialsCount ?? 0}/2).`
+      : pendingFusionMaterialsCount !== null
+        ? `Selecciona 2 materiales para fusionar (${pendingFusionMaterialsCount}/2).`
+        : pendingEntityReplacement
+          ? "Tu campo está lleno. Elige una entidad del campo para reemplazarla por la nueva invocación."
+          : null;
+
+  const pendingDiscardCardIds =
+    gameState.pendingTurnAction?.playerId === gameState.playerA.id && gameState.pendingTurnAction.type === "DISCARD_FOR_HAND_LIMIT"
+      ? gameState.playerA.hand.map((card) => card.id)
+      : [];
+
+  const pendingEntitySelectionIds =
+    gameState.pendingTurnAction?.playerId === gameState.playerA.id && gameState.pendingTurnAction.type === "SACRIFICE_ENTITY_FOR_DRAW"
+      ? gameState.playerA.activeEntities.map((entity) => entity.instanceId)
+      : gameState.pendingTurnAction?.playerId === gameState.playerA.id && gameState.pendingTurnAction.type === "SELECT_FUSION_MATERIALS"
+        ? gameState.playerA.activeEntities.map((entity) => entity.instanceId)
+        : pendingEntityReplacement
+        ? gameState.playerA.activeEntities.map((entity) => entity.instanceId)
+        : [];
+
+  const pendingFusionSelectedEntityIds =
+    gameState.pendingTurnAction?.playerId === gameState.playerA.id && gameState.pendingTurnAction.type === "SELECT_FUSION_MATERIALS"
+      ? gameState.pendingTurnAction.selectedMaterialInstanceIds
+      : [];
+
+  return {
+    pendingActionHint,
+    pendingDiscardCardIds,
+    pendingEntitySelectionIds,
+    pendingFusionSelectedEntityIds,
+  };
+}

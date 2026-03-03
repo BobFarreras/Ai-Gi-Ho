@@ -1,46 +1,44 @@
 # Board Hooks Internal
 
-Submódulos internos para reducir complejidad de `useBoard`.
+Submódulos internos para reducir complejidad de `useBoard` y mantener SRP.
 
-## Principio
+## Estructura
 
-`useBoard.ts` orquesta; los detalles se extraen a helpers/hooks internos cohesionados.
+1. Base
+   - `boardInitialState.ts`: estado inicial local.
+   - `initialDeckFactory.ts`: mazos base.
+   - `boardError.ts`: mapping de error de dominio a UI.
+   - `sleep.ts`: delays de animación.
+   - `trapPreview.ts`: utilidades de reveal/hide de trampas reactivas.
 
-## Archivos
+2. `board-state/`
+   - `useBoardUiState.ts`: estado UI local + acciones base.
+   - `useBoardTurnControls.ts`: avance de fase y acciones obligatorias.
+   - `boardPendingUi.ts`: hints/ids de acciones pendientes.
+   - `boardCombatFeedback.ts`: deltas de daño/curación/buffs.
+   - `buildUseBoardResult.ts`: construcción del contrato público de `useBoard`.
 
-1. `boardInitialState.ts`
-   - Orquesta el estado inicial de partida local.
+3. `player-actions/`
+   - `useToggleCardSelection.ts`
+   - `useExecutePlayAction.ts`
+   - `useHandleEntityClick.ts`
+   - `handleOwnEntityClick.ts`
+   - `handleOpponentEntityClick.ts`
+   - `constants.ts` y `types.ts`
 
-2. `initialDeckFactory.ts`
-   - Construye mazos base de 20 cartas y los baraja al crear la partida.
+4. `opponent-turn/`
+   - `runMainPhaseStep.ts`
+   - `runBattlePhaseStep.ts`
+   - `autoPick.ts`
+   - `types.ts`
 
-3. `boardError.ts`
-   - Mapeo de errores de dominio a errores de UI (`IBoardUiError`).
+5. Hooks fachada
+   - `usePlayerActions.ts`: compone subhooks de `player-actions/`.
+   - `useOpponentTurn.ts`: orquesta paso del rival con `opponent-turn/`.
+   - `useGameAudio.ts`: SFX + soundtrack.
 
-4. `sleep.ts`
-   - Delay controlado para sincronizar animación y lógica.
+## Reglas
 
-5. `useOpponentTurn.ts`
-   - Loop automático del turno del rival.
-   - Orquesta visualmente cada acción (despliegue, activación, ataque) con delays controlados.
-   - Incluye `windup` de ataque y `cooldown` post-resolución para evitar solape entre daño, efectos y siguiente acción.
-   - Mantiene `activeAttackerId` y `isAnimating` para feedback en tiempo real.
-
-6. `usePlayerActions.ts`
-   - Acciones del jugador (play card, entity click, selección).
-   - Validaciones de turno y animación.
-   - Si hay trampa reactiva del rival, previsualiza flip de trampa antes de resolver ataque/ejecución.
-
-7. `useGameAudio.ts`
-   - Gestiona SFX y soundtrack principal.
-   - Al finalizar duelo, detiene y reinicia el soundtrack base antes de reproducir resultado.
-
-8. `trapPreview.ts`
-   - Detecta trampas `SET` reactivas por trigger.
-   - Utilidades para revelar/ocultar temporalmente la trampa durante la cadena visual.
-
-## Reglas de mantenimiento
-
-1. No meter reglas de dominio aquí; esas van a `core/use-cases`.
-2. Cada archivo interno debe tener una responsabilidad concreta.
-3. Si un hook interno supera 150 líneas, dividirlo nuevamente.
+1. No meter reglas de dominio aquí; van en `core/use-cases`.
+2. Mantener tests co-localizados al módulo que validan.
+3. Si un archivo supera 150 líneas, extraer submódulos en la misma carpeta funcional.
