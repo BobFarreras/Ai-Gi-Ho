@@ -27,7 +27,7 @@ const PLAYER_A_DECK_IDS = [
   "exec-boost-atk-400",
   "exec-framework-atk-300",
   "exec-llm-def-300",
-  "exec-db-def-300",
+  "exec-fusion-gemgpt",
   "exec-direct-damage-600",
   "exec-heal-700",
   "entity-openclaw",

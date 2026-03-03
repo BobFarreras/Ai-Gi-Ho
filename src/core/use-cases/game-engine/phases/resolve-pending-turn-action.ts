@@ -2,6 +2,7 @@ import { IPlayer } from "@/core/entities/IPlayer";
 import { GameRuleError } from "@/core/errors/GameRuleError";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import { fuseCards } from "@/core/use-cases/game-engine/fusion/fuse-cards";
+import { fuseCardsFromExecution } from "@/core/use-cases/game-engine/fusion/fuse-cards-from-execution";
 import { appendCombatLogEvent } from "@/core/use-cases/game-engine/logging/combat-log";
 import { assignPlayers, getPlayerPair } from "@/core/use-cases/game-engine/state/player-utils";
 import { GameState } from "@/core/use-cases/game-engine/state/types";
@@ -136,6 +137,18 @@ export function resolvePendingTurnAction(state: GameState, playerId: string, sel
       ...state,
       pendingTurnAction: null,
     };
+    if (fusionPending.fusionFromExecutionInstanceId && fusionPending.fusionFromExecutionRecipeId) {
+      return fuseCardsFromExecution(
+        withoutPending,
+        playerId,
+        fusionPending.fusionFromExecutionInstanceId,
+        fusionPending.fusionFromExecutionRecipeId,
+        [selectedMaterialInstanceIds[0], selectedMaterialInstanceIds[1]],
+      );
+    }
+    if (!fusionPending.fusionCardId) {
+      throw new GameRuleError("No se encontró carta de fusión asociada a la acción pendiente.");
+    }
     return fuseCards(
       withoutPending,
       playerId,

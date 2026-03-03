@@ -5,6 +5,7 @@ import { ValidationError } from "@/core/errors/ValidationError";
 import { applyExecutionEffect } from "@/core/use-cases/game-engine/actions/internal/execution-effects";
 import { appendExecutionResolutionLogs } from "@/core/use-cases/game-engine/actions/internal/execution-logging";
 import { resolveTrapTrigger } from "@/core/use-cases/game-engine/effects/resolve-trap-trigger";
+import { startFusionSummonFromExecution } from "@/core/use-cases/game-engine/fusion/start-fusion-summon-from-execution";
 import { assignPlayers, getPlayerPair } from "@/core/use-cases/game-engine/state/player-utils";
 import { GameState } from "@/core/use-cases/game-engine/state/types";
 
@@ -28,6 +29,9 @@ export function resolveExecution(state: GameState, playerId: string, executionIn
   }
 
   const effect = executionEntity.card.effect;
+  if (effect.action === "FUSION_SUMMON") {
+    return startFusionSummonFromExecution(withTrapResolution, playerId, executionInstanceId, effect.recipeId);
+  }
   const effectResult = applyExecutionEffect(player, opponent, effect);
   let updatedPlayer: IPlayer = effectResult.player;
 

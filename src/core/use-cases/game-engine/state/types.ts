@@ -19,7 +19,9 @@ export interface IDiscardForHandLimitPendingTurnAction extends IBasePendingTurnA
 
 export interface ISelectFusionMaterialsPendingTurnAction extends IBasePendingTurnAction {
   type: "SELECT_FUSION_MATERIALS";
-  fusionCardId: string;
+  fusionCardId?: string;
+  fusionFromExecutionInstanceId?: string;
+  fusionFromExecutionRecipeId?: string;
   mode: "ATTACK" | "DEFENSE";
   selectedMaterialInstanceIds: string[];
 }

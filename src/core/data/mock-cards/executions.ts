@@ -81,4 +81,13 @@ export const EXECUTION_CARDS: ICard[] = [
     cost: 2,
     effect: { action: "BOOST_DEFENSE_BY_ARCHETYPE", archetype: "DB", value: 300 },
   }),
+  createExecution({
+    id: "exec-fusion-gemgpt",
+    name: "Fusion Compiler",
+    description: "Inicia fusión GemGPT: selecciona 2 materiales válidos en tu campo.",
+    renderFile: "gemgpt",
+    faction: "BIG_TECH",
+    cost: 4,
+    effect: { action: "FUSION_SUMMON", recipeId: "fusion-gemgpt", materialsRequired: 2 },
+  }),
 ];
