@@ -5,11 +5,11 @@ import { resolveDifficultyFromCampaign } from "@/core/services/opponent/difficul
 import { ICampaignProgress } from "@/core/services/opponent/difficulty/types";
 import { createInitialBoardState } from "./internal/boardInitialState";
 import { toBoardUiError } from "./internal/boardError";
-import { buildBoardCombatFeedback } from "./internal/boardCombatFeedback";
-import { buildBoardPendingUi } from "./internal/boardPendingUi";
-import { buildUseBoardResult } from "./internal/buildUseBoardResult";
-import { useBoardTurnControls } from "./internal/useBoardTurnControls";
-import { useBoardUiState } from "./internal/useBoardUiState";
+import { buildBoardCombatFeedback } from "./internal/board-state/boardCombatFeedback";
+import { buildBoardPendingUi } from "./internal/board-state/boardPendingUi";
+import { buildUseBoardResult } from "./internal/board-state/buildUseBoardResult";
+import { useBoardTurnControls } from "./internal/board-state/useBoardTurnControls";
+import { useBoardUiState } from "./internal/board-state/useBoardUiState";
 import { useOpponentTurn } from "./internal/useOpponentTurn";
 import { usePlayerActions } from "./internal/usePlayerActions";
 

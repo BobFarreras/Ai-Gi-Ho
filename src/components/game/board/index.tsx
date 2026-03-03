@@ -3,11 +3,11 @@ import { useMemo, useState } from "react";
 import { useBoard } from "./hooks/useBoard";
 import { DuelResultOverlay } from "./ui/DuelResultOverlay";
 import { useGameAudio } from "./hooks/internal/useGameAudio";
-import { BoardStatusOverlays } from "./ui/BoardStatusOverlays";
-import { BoardTopBar } from "./ui/BoardTopBar";
-import { BoardActionButtons } from "./ui/BoardActionButtons";
-import { BoardPlayersLayer } from "./ui/BoardPlayersLayer";
-import { BoardInteractiveLayer } from "./ui/BoardInteractiveLayer";
+import { BoardStatusOverlays } from "./ui/overlays/BoardStatusOverlays";
+import { BoardTopBar } from "./ui/layout/BoardTopBar";
+import { BoardActionButtons } from "./ui/layout/BoardActionButtons";
+import { BoardPlayersLayer } from "./ui/layers/BoardPlayersLayer";
+import { BoardInteractiveLayer } from "./ui/layers/BoardInteractiveLayer";
 
 export function Board() {
   const {
