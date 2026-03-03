@@ -38,13 +38,30 @@ export interface IBoostAttackByArchetypeEffect {
   value: number;
 }
 
+export interface IReduceOpponentAttackEffect {
+  action: "REDUCE_OPPONENT_ATTACK";
+  value: number;
+}
+
+export interface IReduceOpponentDefenseEffect {
+  action: "REDUCE_OPPONENT_DEFENSE";
+  value: number;
+}
+
+export interface INegateAttackAndDestroyAttackerEffect {
+  action: "NEGATE_ATTACK_AND_DESTROY_ATTACKER";
+}
+
 export type ICardEffect =
   | IDamageEffect
   | IHealEffect
   | IDrawCardEffect
   | IBoostAttackAlliedEffect
   | IBoostDefenseByArchetypeEffect
-  | IBoostAttackByArchetypeEffect;
+  | IBoostAttackByArchetypeEffect
+  | IReduceOpponentAttackEffect
+  | IReduceOpponentDefenseEffect
+  | INegateAttackAndDestroyAttackerEffect;
 
 export interface ICard {
   readonly id: string;

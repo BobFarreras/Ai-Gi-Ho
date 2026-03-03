@@ -37,7 +37,7 @@ describe("useBoard integración", () => {
 
   it("debería bloquear ataque directo del jugador inicial durante el primer turno", async () => {
     const { result } = renderHook(() => useBoard());
-    const entityCard = result.current.gameState.playerA.hand.find((card) => card.id === "entity-ollama");
+    const entityCard = result.current.gameState.playerA.hand.find((card) => card.type === "ENTITY");
 
     expect(entityCard).toBeDefined();
 
@@ -73,7 +73,7 @@ describe("useBoard integración", () => {
 
   it("debería bloquear acciones cuando no es el turno del jugador", async () => {
     const { result } = renderHook(() => useBoard());
-    const card = result.current.gameState.playerA.hand.find((currentCard) => currentCard.id === "entity-ollama");
+    const card = result.current.gameState.playerA.hand[0];
 
     expect(card).toBeDefined();
 

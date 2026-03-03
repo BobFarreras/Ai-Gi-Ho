@@ -14,6 +14,7 @@ function createInitialBoardState(): GameState {
       deck: createPlayerDeckB(),
     },
     starterPlayerId: "p1",
+    openingHandSize: 4,
   });
 
   return baseState;
