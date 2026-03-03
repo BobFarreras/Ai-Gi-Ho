@@ -90,4 +90,22 @@ export const EXECUTION_CARDS: ICard[] = [
     cost: 4,
     effect: { action: "FUSION_SUMMON", recipeId: "fusion-gemgpt", materialsRequired: 2 },
   }),
+  createExecution({
+    id: "exec-fusion-kaclauli",
+    name: "Fusion Compiler: KaClauli",
+    description: "Inicia fusión KaClauli: selecciona 2 materiales válidos en tu campo.",
+    renderFile: "kaclauli",
+    faction: "OPEN_SOURCE",
+    cost: 4,
+    effect: { action: "FUSION_SUMMON", recipeId: "fusion-kaclauli", materialsRequired: 2 },
+  }),
+  createExecution({
+    id: "exec-fusion-pytgress",
+    name: "Fusion Compiler: Pytgress",
+    description: "Inicia fusión Pytgress: selecciona 2 materiales válidos en tu campo.",
+    renderFile: "pytgress",
+    faction: "OPEN_SOURCE",
+    cost: 4,
+    effect: { action: "FUSION_SUMMON", recipeId: "fusion-pytgress", materialsRequired: 2 },
+  }),
 ];

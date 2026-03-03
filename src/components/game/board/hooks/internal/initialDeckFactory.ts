@@ -28,8 +28,8 @@ const PLAYER_A_DECK_IDS = [
   "exec-framework-atk-300",
   "exec-llm-def-300",
   "exec-fusion-gemgpt",
-  "exec-direct-damage-600",
-  "exec-heal-700",
+  "exec-fusion-kaclauli",
+  "exec-fusion-pytgress",
   "entity-openclaw",
   "entity-kali-linux",
 ] as const;

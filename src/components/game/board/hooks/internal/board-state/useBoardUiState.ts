@@ -25,6 +25,8 @@ interface IUseBoardUiStateResult {
   setPendingEntityReplacement: (value: { cardId: string; mode: BattleMode } | null) => void;
   pendingFusionSummon: { cardId: string; mode: "ATTACK" | "DEFENSE"; materials: string[] } | null;
   setPendingFusionSummon: (value: { cardId: string; mode: "ATTACK" | "DEFENSE"; materials: string[] } | null) => void;
+  isFusionCinematicActive: boolean;
+  setIsFusionCinematicActive: (value: boolean) => void;
   isMuted: boolean;
   setIsMuted: (value: boolean | ((previous: boolean) => boolean)) => void;
   clearSelection: () => void;
@@ -48,6 +50,7 @@ export function useBoardUiState(
   const [lastError, setLastError] = useState<IBoardUiError | null>(null);
   const [pendingEntityReplacement, setPendingEntityReplacement] = useState<{ cardId: string; mode: BattleMode } | null>(null);
   const [pendingFusionSummon, setPendingFusionSummon] = useState<{ cardId: string; mode: "ATTACK" | "DEFENSE"; materials: string[] } | null>(null);
+  const [isFusionCinematicActive, setIsFusionCinematicActive] = useState(false);
   const [isMuted, setIsMuted] = useState<boolean>(() => (typeof window !== "undefined" ? window.localStorage.getItem("board-muted") === "1" : false));
 
   const clearSelection = useCallback(() => {
@@ -102,6 +105,8 @@ export function useBoardUiState(
     setPendingEntityReplacement,
     pendingFusionSummon,
     setPendingFusionSummon,
+    isFusionCinematicActive,
+    setIsFusionCinematicActive,
     isMuted,
     setIsMuted,
     clearSelection,

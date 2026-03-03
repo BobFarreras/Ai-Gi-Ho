@@ -27,6 +27,18 @@ const FUSION_RECIPES: IFusionRecipe[] = [
     requiredEnergyPerMaterial: 5,
     requiredTotalEnergy: 10,
   },
+  {
+    resultCardId: "fusion-kaclauli",
+    requiredMaterialIds: ["entity-claude", "entity-kali-linux"],
+    requiredEnergyPerMaterial: 4,
+    requiredTotalEnergy: 9,
+  },
+  {
+    resultCardId: "fusion-pytgress",
+    requiredMaterialIds: ["entity-python", "entity-postgress"],
+    requiredEnergyPerMaterial: 4,
+    requiredTotalEnergy: 8,
+  },
 ];
 
 export function getFusionRecipeByResultId(resultCardId: string): IFusionRecipe | null {

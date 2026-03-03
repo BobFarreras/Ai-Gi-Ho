@@ -17,6 +17,8 @@ interface IBuildUseBoardResultParams {
   opponentDifficulty: string;
   isPlayerTurn: boolean;
   isMuted: boolean;
+  isFusionCinematicActive: boolean;
+  setIsFusionCinematicActive: (value: boolean) => void;
   winnerPlayerId: string | "DRAW" | null;
   restartMatch: () => void;
   toggleMute: () => void;
@@ -48,6 +50,8 @@ export function buildUseBoardResult(params: IBuildUseBoardResultParams) {
     opponentDifficulty: params.opponentDifficulty,
     isPlayerTurn: params.isPlayerTurn,
     isMuted: params.isMuted,
+    isFusionCinematicActive: params.isFusionCinematicActive,
+    setIsFusionCinematicActive: params.setIsFusionCinematicActive,
     winnerPlayerId: params.winnerPlayerId,
     restartMatch: params.restartMatch,
     toggleMute: params.toggleMute,

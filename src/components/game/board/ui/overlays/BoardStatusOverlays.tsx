@@ -4,6 +4,7 @@ import { ICard } from "@/core/entities/ICard";
 import { ICombatLogEvent } from "@/core/entities/ICombatLog";
 import { IBoardUiError } from "../../hooks/internal/boardError";
 import { BattleBannerCenter } from "../BattleBannerCenter";
+import { FusionCinematicLayer } from "../FusionCinematicLayer";
 import { GraveyardBrowser } from "../GraveyardBrowser";
 import { GraveyardTransitionLayer } from "../GraveyardTransitionLayer";
 
@@ -15,6 +16,8 @@ interface BoardStatusOverlaysProps {
   playerAName: string;
   playerBId: string;
   playerBName: string;
+  isFusionCinematicActive?: boolean;
+  setIsFusionCinematicActive?: (value: boolean) => void;
   graveyardView: "player" | "opponent" | null;
   graveyardOwnerName: string;
   graveyardCards: ICard[];
@@ -31,6 +34,8 @@ export function BoardStatusOverlays({
   playerAName,
   playerBId,
   playerBName,
+  isFusionCinematicActive = false,
+  setIsFusionCinematicActive = () => undefined,
   graveyardView,
   graveyardOwnerName,
   graveyardCards,
@@ -69,6 +74,14 @@ export function BoardStatusOverlays({
       )}
 
       <BattleBannerCenter events={combatLog} playerAId={playerAId} playerAName={playerAName} playerBId={playerBId} playerBName={playerBName} />
+      <FusionCinematicLayer
+        events={combatLog}
+        onActiveChange={(active) => {
+          if (active !== isFusionCinematicActive) {
+            setIsFusionCinematicActive(active);
+          }
+        }}
+      />
       <GraveyardTransitionLayer events={combatLog} playerAId={playerAId} playerBId={playerBId} />
       <GraveyardBrowser
         isOpen={graveyardView !== null}

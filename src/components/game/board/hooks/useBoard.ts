@@ -28,6 +28,7 @@ export function useBoard() {
   const opponentDifficulty = useMemo(() => resolveDifficultyFromCampaign(campaignProgress), [campaignProgress]);
   const opponentStrategy = useMemo(() => new HeuristicOpponentStrategy({ difficulty: opponentDifficulty }), [opponentDifficulty]);
   const isPlayerTurn = gameState.activePlayerId === gameState.playerA.id;
+  const isActionLocked = uiState.isAnimating || uiState.isFusionCinematicActive;
   const winnerPlayerId = useMemo(() => resolveWinnerPlayerId(gameState), [gameState]);
   const combatFeedback = useMemo(() => buildBoardCombatFeedback(gameState.combatLog), [gameState.combatLog]);
   const pendingUi = useMemo(
@@ -68,7 +69,7 @@ export function useBoard() {
 
   useOpponentTurn({
     gameState,
-    isAnimating: uiState.isAnimating,
+    isAnimating: isActionLocked,
     strategy: opponentStrategy,
     duelWinnerId: winnerPlayerId,
     applyTransition,
@@ -83,7 +84,7 @@ export function useBoard() {
     gameState,
     gameStateRef,
     winnerPlayerId,
-    isAnimating: uiState.isAnimating,
+    isAnimating: isActionLocked,
     isPlayerTurn,
     assertPlayerTurn,
     applyTransition,
@@ -93,7 +94,7 @@ export function useBoard() {
 
   const { toggleCardSelection, executePlayAction, handleEntityClick } = usePlayerActions({
     gameState,
-    isAnimating: uiState.isAnimating,
+    isAnimating: isActionLocked,
     playingCard: uiState.playingCard,
     activeAttackerId: uiState.activeAttackerId,
     pendingEntityReplacement: uiState.pendingEntityReplacement,
@@ -125,6 +126,8 @@ export function useBoard() {
     opponentDifficulty,
     isPlayerTurn,
     isMuted: uiState.isMuted,
+    isFusionCinematicActive: uiState.isFusionCinematicActive,
+    setIsFusionCinematicActive: uiState.setIsFusionCinematicActive,
     winnerPlayerId,
     restartMatch: uiState.restartMatch,
     toggleMute: uiState.toggleMute,

@@ -46,6 +46,8 @@ export function Board() {
     winnerPlayerId,
     restartMatch,
     isMuted,
+    isFusionCinematicActive,
+    setIsFusionCinematicActive,
     toggleMute,
   } = useBoard();
 
@@ -79,6 +81,8 @@ export function Board() {
         playerAName={gameState.playerA.name}
         playerBId={gameState.playerB.id}
         playerBName={gameState.playerB.name}
+        isFusionCinematicActive={isFusionCinematicActive}
+        setIsFusionCinematicActive={setIsFusionCinematicActive}
         graveyardView={graveyardView}
         graveyardOwnerName={visibleGraveyardOwner}
         graveyardCards={visibleGraveyardCards}
