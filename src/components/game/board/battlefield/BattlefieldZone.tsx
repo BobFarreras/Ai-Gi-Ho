@@ -17,6 +17,7 @@ interface BattlefieldZoneProps {
   selectedCard: ICard | null;
   revealedEntities: string[];
   highlightedEntityIds: string[];
+  selectedEntityIds: string[];
   shouldDamageFlash: boolean;
   damageEventId: string | null;
   buffedEntityIds: string[];
@@ -38,6 +39,7 @@ export function BattlefieldZone({
   selectedCard,
   revealedEntities,
   highlightedEntityIds,
+  selectedEntityIds,
   shouldDamageFlash,
   damageEventId,
   buffedEntityIds,
@@ -74,6 +76,7 @@ export function BattlefieldZone({
         selectedCard={selectedCard}
         revealedEntities={revealedEntities}
         highlightedEntityIds={highlightedEntityIds}
+        selectedEntityIds={selectedEntityIds}
         buffedEntityIds={buffedEntityIds}
         buffStat={buffStat}
         buffAmount={buffAmount}

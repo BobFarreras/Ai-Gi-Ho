@@ -15,6 +15,7 @@ interface SlotGridProps {
   selectedCard: ICard | null;
   revealedEntities: string[];
   highlightedEntityIds: string[];
+  selectedEntityIds: string[];
   buffedEntityIds: string[];
   buffStat: "ATTACK" | "DEFENSE" | null;
   buffAmount: number | null;
@@ -30,6 +31,7 @@ export function SlotGrid({
   selectedCard,
   revealedEntities,
   highlightedEntityIds,
+  selectedEntityIds,
   buffedEntityIds,
   buffStat,
   buffAmount,
@@ -44,6 +46,7 @@ export function SlotGrid({
         const isRevealed = entity ? revealedEntities.includes(entity.instanceId) : false;
         const isActivating = entity?.mode === "ACTIVATE";
         const isHighlighted = entity ? highlightedEntityIds.includes(entity.instanceId) : false;
+        const isSelected = entity ? selectedEntityIds.includes(entity.instanceId) : false;
         const isBuffed = entity ? Boolean(buffEventId) && buffedEntityIds.includes(entity.instanceId) : false;
         const isFaceDown = (entity?.mode === "DEFENSE" || entity?.mode === "SET") && !isRevealed;
         const isHorizontal = entity?.mode === "DEFENSE" || (entity?.mode === "SET" && entity.card.type === "ENTITY");
@@ -77,7 +80,10 @@ export function SlotGrid({
                     "w-[260px] h-[340px] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 origin-center cursor-pointer",
                     isAttacking ? "ring-4 ring-red-500 shadow-[0_0_30px_rgba(239,68,68,1)] animate-pulse rounded-xl" : "",
                     isHighlighted ? "ring-4 ring-amber-400 shadow-[0_0_35px_rgba(251,191,36,0.8)] animate-pulse rounded-xl" : "",
+                    isSelected ? "ring-4 ring-cyan-300 shadow-[0_0_35px_rgba(34,211,238,0.9)] rounded-xl" : "",
                   )}
+                  data-board-card-id={entity.card.id}
+                  data-board-entity-instance-id={entity.instanceId}
                   onClick={(event) => onEntityClick(entity, isOpponentSide, event)}
                 >
                   {isBuffed && buffStat && buffEventId && (buffAmount ?? 0) > 0 && (
@@ -92,6 +98,11 @@ export function SlotGrid({
                         transition={{ duration: 0.5 }}
                         className="absolute inset-0 bg-white rounded-xl mix-blend-overlay z-50"
                       />
+                    )}
+                    {isSelected && (
+                      <span className="absolute top-2 left-2 px-2 py-0.5 text-[10px] font-black rounded-md bg-cyan-300 text-cyan-950 shadow-[0_0_14px_rgba(34,211,238,0.9)]">
+                        MATERIAL
+                      </span>
                     )}
                   </div>
                   <div

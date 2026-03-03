@@ -4,7 +4,7 @@ export const FUSION_CARDS: ICard[] = [
   {
     id: "fusion-gemgpt",
     name: "GemGPT",
-    description: "Fusión de ChatGPT y Gemini con salida de alto impacto.",
+    description: "Requiere ChatGPT + Gemini. Fusión LLM de alto impacto para cierre de partida.",
     type: "FUSION",
     faction: "BIG_TECH",
     cost: 7,
@@ -20,7 +20,7 @@ export const FUSION_CARDS: ICard[] = [
   {
     id: "fusion-kaclauli",
     name: "KaClauli",
-    description: "Fusión de Claude y Kali Linux con dominio ofensivo y táctico.",
+    description: "Requiere Claude + Kali Linux. Fusión de presión ofensiva y control táctico.",
     type: "FUSION",
     faction: "OPEN_SOURCE",
     cost: 7,
@@ -36,7 +36,7 @@ export const FUSION_CARDS: ICard[] = [
   {
     id: "fusion-pytgress",
     name: "Pytgress",
-    description: "Fusión de Python y Postgress para control y escalado de recursos.",
+    description: "Requiere Python + Postgress. Fusión técnica para control de recursos y mesa.",
     type: "FUSION",
     faction: "OPEN_SOURCE",
     cost: 6,

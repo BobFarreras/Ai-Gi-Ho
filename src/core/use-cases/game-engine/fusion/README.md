@@ -39,6 +39,11 @@ Reglas de invocación por fusión del motor.
 6. El flujo oficial puede ser:
    - `startFusionSummon` -> selección de materiales vía `resolvePendingTurnAction` -> `fuseCards`.
    - `resolveExecution(FUSION_SUMMON)` -> `startFusionSummonFromExecution` -> `resolvePendingTurnAction` -> `fuseCardsFromExecution`.
+7. Las recetas activas del proyecto:
+   - `chatgpt + gemini -> gemgpt`
+   - `claude + kali-linux -> kaclauli`
+   - `python + postgress -> pytgress`
+8. Las cartas de resultado (`FUSION`) documentan explícitamente sus materiales requeridos en `core/data/mock-cards/fusions.ts`.
 
 ## Tests
 

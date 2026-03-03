@@ -67,6 +67,7 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
 8. `Board` consume también `combatLog` para animaciones desacopladas (ej. transición al cementerio).
 9. Las trampas (`TRAP`) viven en la misma zona de `activeExecutions` y se disparan por eventos del motor (no desde UI).
 10. La fusión soporta flujo pendiente en motor: `startFusionSummon` crea `pendingTurnAction` y `resolvePendingTurnAction` completa selección de 2 materiales antes de invocar.
+11. La UI marca materiales seleccionados de fusión (`pendingFusionSelectedEntityIds`) para mantener trazabilidad visual durante la selección.
 
 ## Diseño para evolución
 
@@ -83,6 +84,7 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
 5. `useGameAudio` consume `combatLog` para efectos de sonido por eventos y fin de duelo.
 6. `audio-catalog.ts` define rutas/volúmenes por evento y canales (`music`/`sfx`).
 7. `FusionCinematicLayer` consume `FUSION_SUMMONED` para reproducir vídeo por carta de fusión y bloquear interacción temporal.
+8. Tras el vídeo, `FusionCinematicLayer` ejecuta una segunda animación de invocación: carta desde centro hasta el slot final en tablero.
 
 ## Fin de partida
 

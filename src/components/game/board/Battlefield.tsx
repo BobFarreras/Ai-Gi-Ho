@@ -22,6 +22,7 @@ interface BattlefieldProps {
   selectedCard: ICard | null;
   revealedEntities?: string[];
   highlightedPlayerEntityIds?: string[];
+  selectedFusionMaterialIds?: string[];
   damagedPlayerId?: string | null;
   damageEventId?: string | null;
   buffedEntityIds?: string[];
@@ -49,6 +50,7 @@ export function Battlefield({
   selectedCard,
   revealedEntities = [],
   highlightedPlayerEntityIds = [],
+  selectedFusionMaterialIds = [],
   damagedPlayerId = null,
   damageEventId = null,
   buffedEntityIds = [],
@@ -95,6 +97,7 @@ export function Battlefield({
             selectedCard={selectedCard}
             revealedEntities={revealedEntities}
             highlightedEntityIds={[]}
+            selectedEntityIds={[]}
             shouldDamageFlash={damagedPlayerId === opponentId}
             damageEventId={damageEventId}
             buffedEntityIds={buffedEntityIds}
@@ -118,6 +121,7 @@ export function Battlefield({
             selectedCard={selectedCard}
             revealedEntities={revealedEntities}
             highlightedEntityIds={highlightedPlayerEntityIds}
+            selectedEntityIds={selectedFusionMaterialIds}
             shouldDamageFlash={damagedPlayerId === playerId}
             damageEventId={damageEventId}
             buffedEntityIds={buffedEntityIds}

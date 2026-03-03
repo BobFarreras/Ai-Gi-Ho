@@ -21,6 +21,7 @@ export function Board() {
     pendingActionHint,
     pendingDiscardCardIds,
     pendingEntitySelectionIds,
+    pendingFusionSelectedEntityIds,
     opponentDifficulty,
     setIsHistoryOpen,
     toggleCardSelection,
@@ -109,6 +110,7 @@ export function Board() {
       <BoardInteractiveLayer
         gameState={gameState} selectedCard={selectedCard} playingCard={playingCard} activeAttackerId={activeAttackerId}
         revealedEntities={revealedEntities} pendingEntitySelectionIds={pendingEntitySelectionIds} pendingDiscardCardIds={pendingDiscardCardIds}
+        pendingFusionSelectedEntityIds={pendingFusionSelectedEntityIds}
         isHistoryOpen={isHistoryOpen} isPlayerTurn={isPlayerTurn} lastDamageTargetPlayerId={lastDamageTargetPlayerId} lastDamageEventId={lastDamageEventId}
         lastBuffTargetEntityIds={lastBuffTargetEntityIds} lastBuffStat={lastBuffStat} lastBuffAmount={lastBuffAmount} lastBuffEventId={lastBuffEventId}
         onGraveyardClick={setGraveyardView} onEntityClick={handleEntityClick} onMandatoryCardSelect={resolvePendingHandDiscard}

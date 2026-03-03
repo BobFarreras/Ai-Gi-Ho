@@ -14,6 +14,7 @@ interface BoardInteractiveLayerProps {
   activeAttackerId: string | null;
   revealedEntities: string[];
   pendingEntitySelectionIds: string[];
+  pendingFusionSelectedEntityIds: string[];
   pendingDiscardCardIds: string[];
   isHistoryOpen: boolean;
   isPlayerTurn: boolean;
@@ -40,6 +41,7 @@ export function BoardInteractiveLayer({
   activeAttackerId,
   revealedEntities,
   pendingEntitySelectionIds,
+  pendingFusionSelectedEntityIds,
   pendingDiscardCardIds,
   isHistoryOpen,
   isPlayerTurn,
@@ -79,6 +81,7 @@ export function BoardInteractiveLayer({
           selectedCard={selectedCard}
           revealedEntities={revealedEntities}
           highlightedPlayerEntityIds={pendingEntitySelectionIds}
+          selectedFusionMaterialIds={pendingFusionSelectedEntityIds}
           damagedPlayerId={lastDamageTargetPlayerId}
           damageEventId={lastDamageEventId}
           buffedEntityIds={lastBuffTargetEntityIds}

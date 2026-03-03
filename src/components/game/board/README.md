@@ -60,6 +60,10 @@ Guía rápida para entender la lógica de tablero y batalla.
 2. Debes elegir 2 entidades de tu campo.
 3. El motor valida receta/energía y ejecuta `GameEngine.fuseCards`.
 4. Los materiales van al cementerio y la carta fusionada entra al campo.
+5. Las entidades ya elegidas como material quedan marcadas visualmente con estado dedicado (`MATERIAL` + ring cian).
+6. Al confirmarse la fusión, la cinemática sigue flujo en 2 etapas:
+   - vídeo de fusión,
+   - transición de carta invocada desde centro a slot final.
 
 ## Estado UI importante
 
@@ -101,6 +105,7 @@ Guía rápida para entender la lógica de tablero y batalla.
 8. `BattleBannerCenter` muestra solo turno y subturno (fase), con transición de entrada/salida.
 9. `GraveyardTransitionLayer` anima cualquier evento `CARD_TO_GRAVEYARD` (descarte, sacrificio, destrucción, fusión).
 10. `GraveyardBrowser` permite abrir el cementerio desde el tablero y previsualizar cualquier carta en el panel lateral.
+11. Para QA de fusión, `initialDeckFactory` usa mazos mock con más consistencia de materiales + cartas mágicas de fusión para ambos lados.
 
 ## Sonido y resultado
 

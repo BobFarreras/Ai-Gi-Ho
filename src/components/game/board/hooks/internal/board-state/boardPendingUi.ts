@@ -10,6 +10,7 @@ export interface IBoardPendingUi {
   pendingActionHint: string | null;
   pendingDiscardCardIds: string[];
   pendingEntitySelectionIds: string[];
+  pendingFusionSelectedEntityIds: string[];
 }
 
 export function buildBoardPendingUi(
@@ -47,9 +48,15 @@ export function buildBoardPendingUi(
         ? gameState.playerA.activeEntities.map((entity) => entity.instanceId)
         : [];
 
+  const pendingFusionSelectedEntityIds =
+    gameState.pendingTurnAction?.playerId === gameState.playerA.id && gameState.pendingTurnAction.type === "SELECT_FUSION_MATERIALS"
+      ? gameState.pendingTurnAction.selectedMaterialInstanceIds
+      : [];
+
   return {
     pendingActionHint,
     pendingDiscardCardIds,
     pendingEntitySelectionIds,
+    pendingFusionSelectedEntityIds,
   };
 }

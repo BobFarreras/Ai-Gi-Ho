@@ -12,6 +12,7 @@ interface BattlefieldLanesProps {
   selectedCard: ICard | null;
   revealedEntities: string[];
   highlightedEntityIds: string[];
+  selectedEntityIds: string[];
   buffedEntityIds: string[];
   buffStat: "ATTACK" | "DEFENSE" | null;
   buffAmount: number | null;
@@ -27,6 +28,7 @@ export function BattlefieldLanes({
   selectedCard,
   revealedEntities,
   highlightedEntityIds,
+  selectedEntityIds,
   buffedEntityIds,
   buffStat,
   buffAmount,
@@ -46,6 +48,7 @@ export function BattlefieldLanes({
           selectedCard={selectedCard}
           revealedEntities={revealedEntities}
           highlightedEntityIds={highlightedEntityIds}
+          selectedEntityIds={selectedEntityIds}
           buffedEntityIds={buffedEntityIds}
           buffStat={buffStat}
           buffAmount={buffAmount}
@@ -62,6 +65,7 @@ export function BattlefieldLanes({
           selectedCard={selectedCard}
           revealedEntities={revealedEntities}
           highlightedEntityIds={highlightedEntityIds}
+          selectedEntityIds={selectedEntityIds}
           buffedEntityIds={buffedEntityIds}
           buffStat={buffStat}
           buffAmount={buffAmount}

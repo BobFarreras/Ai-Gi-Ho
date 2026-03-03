@@ -168,3 +168,7 @@ El motor registra eventos técnicos para trazabilidad y UI:
    - `/assets/videos/gemgpt.mp4`
    - `/assets/videos/kaclouli.mp4`
    - `/assets/videos/pytgress.mp4`
+4. La cinemática tiene dos etapas:
+   - reproducción de vídeo completo (con fallback máximo de seguridad),
+   - aparición de la carta fusionada desde el centro hacia su slot final del tablero.
+5. Al terminar la segunda etapa se libera el lock de interacción.
