@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { ICard } from "../../entities/ICard";
-import { IBoardEntity } from "../../entities/IPlayer";
-import { GameEngine, GameState } from "../GameEngine";
+import { ICard } from "@/core/entities/ICard";
+import { IBoardEntity } from "@/core/entities/IPlayer";
+import { GameEngine, GameState } from "@/core/use-cases/GameEngine";
 
 const entityCard: ICard = {
   id: "entity-1",

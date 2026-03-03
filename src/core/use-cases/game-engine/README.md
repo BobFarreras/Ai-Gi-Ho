@@ -33,6 +33,15 @@ Casos de uso puros del motor, organizados por responsabilidad.
 7. `logging/`
    - `combat-log.ts`
 
+8. Tests co-localizados por subdominio
+   - `actions/*.test.ts`
+   - `combat/*.test.ts`
+   - `effects/*.test.ts`
+   - `phases/*.test.ts`
+   - `fusion/*.test.ts`
+   - `state/*.test.ts`
+   - `logging/*.test.ts`
+
 ## Invariantes
 
 1. `GameState` es inmutable.

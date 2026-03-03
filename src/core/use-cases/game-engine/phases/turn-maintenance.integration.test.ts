@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ICard } from "@/core/entities/ICard";
 import { IBoardEntity } from "@/core/entities/IPlayer";
-import { GameEngine, GameState } from "../GameEngine";
+import { GameEngine, GameState } from "@/core/use-cases/GameEngine";
 
 function createCard(id: string, type: "ENTITY" | "EXECUTION" = "ENTITY"): ICard {
   return {
