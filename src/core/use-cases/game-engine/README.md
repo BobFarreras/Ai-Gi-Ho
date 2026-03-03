@@ -51,7 +51,8 @@ Casos de uso puros del motor, organizados por responsabilidad.
 1. `GameState` es inmutable.
 2. Solo jugador activo puede actuar.
 3. Con `pendingTurnAction` no se puede avanzar turno ni jugar/atacar.
-4. Errores de dominio tipados (`ValidationError`, `GameRuleError`, `NotFoundError`).
+4. Excepción controlada: `SELECT_FUSION_MATERIALS` se resuelve con `resolvePendingTurnAction` hasta completar 2 materiales.
+5. Errores de dominio tipados (`ValidationError`, `GameRuleError`, `NotFoundError`).
 
 ## Guía de extensión
 

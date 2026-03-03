@@ -84,6 +84,11 @@ export async function handleOwnEntityClick({
     return "handled";
   }
 
+  if (gameState.pendingTurnAction?.playerId === gameState.playerA.id && gameState.pendingTurnAction.type === "SELECT_FUSION_MATERIALS") {
+    applyTransition((state) => GameEngine.resolvePendingTurnAction(state, state.playerA.id, entity.instanceId));
+    return "handled";
+  }
+
   if (entity.card.type === "EXECUTION" && entity.mode === "SET") {
     setIsAnimating(true);
     const activated = applyTransition((state) => GameEngine.changeEntityMode(state, state.playerA.id, entity.instanceId, "ACTIVATE"));

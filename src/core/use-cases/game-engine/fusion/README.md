@@ -6,17 +6,21 @@ Reglas de invocación por fusión del motor.
 
 1. `fuse-cards.ts`
    - Fachada del caso de uso de fusión.
+   - Ejecuta la resolución final cuando ya hay 2 materiales elegidos.
 
-2. `fusion-recipes.ts`
+2. `start-fusion-summon.ts`
+   - Inicia flujo con `pendingTurnAction` tipo `SELECT_FUSION_MATERIALS`.
+
+3. `fusion-recipes.ts`
    - Recetas estáticas (`requiredMaterialIds`, `requiredArchetypes`, energía mínima).
 
-3. `internal/validate-fusion-context.ts`
+4. `internal/validate-fusion-context.ts`
    - Valida turno/fase, carta de fusión, materiales, receta y energía.
 
-4. `internal/apply-fusion-result.ts`
+5. `internal/apply-fusion-result.ts`
    - Aplica consumo de energía, mueve materiales al cementerio e invoca entidad fusionada.
 
-5. `internal/append-fusion-logs.ts`
+6. `internal/append-fusion-logs.ts`
    - Registra eventos `CARD_TO_GRAVEYARD` y `FUSION_SUMMONED`.
 
 ## Reglas actuales
@@ -26,9 +30,10 @@ Reglas de invocación por fusión del motor.
 3. Debe existir receta válida para la carta de fusión.
 4. Se valida energía por material, total de receta y energía disponible del jugador.
 5. La fusión consume energía del jugador.
+6. El flujo oficial puede ser:
+   - `startFusionSummon` -> selección de materiales vía `resolvePendingTurnAction` -> `fuseCards`.
 
 ## Tests
 
 1. `fuse-cards.integration.test.ts`: flujo base de éxito/fracaso por receta.
 2. `fuse-cards.rules.integration.test.ts`: energía, materiales duplicados, materiales inexistentes y protección de slots.
-

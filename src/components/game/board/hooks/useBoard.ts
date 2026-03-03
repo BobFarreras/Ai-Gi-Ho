@@ -31,8 +31,8 @@ export function useBoard() {
   const winnerPlayerId = useMemo(() => resolveWinnerPlayerId(gameState), [gameState]);
   const combatFeedback = useMemo(() => buildBoardCombatFeedback(gameState.combatLog), [gameState.combatLog]);
   const pendingUi = useMemo(
-    () => buildBoardPendingUi(gameState, uiState.pendingFusionSummon, uiState.pendingEntityReplacement),
-    [gameState, uiState.pendingEntityReplacement, uiState.pendingFusionSummon],
+    () => buildBoardPendingUi(gameState, uiState.pendingEntityReplacement),
+    [gameState, uiState.pendingEntityReplacement],
   );
 
   useEffect(() => {

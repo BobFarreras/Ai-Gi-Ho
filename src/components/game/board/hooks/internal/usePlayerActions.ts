@@ -27,7 +27,6 @@ export function usePlayerActions(params: IUsePlayerActionsParams): IPlayerAction
     playingCard: params.playingCard,
     setActiveAttackerId: params.setActiveAttackerId,
     setPendingEntityReplacement: params.setPendingEntityReplacement,
-    setPendingFusionSummon: params.setPendingFusionSummon,
     setIsAnimating: params.setIsAnimating,
     setLastError: params.setLastError,
     setRevealedEntities: params.setRevealedEntities,

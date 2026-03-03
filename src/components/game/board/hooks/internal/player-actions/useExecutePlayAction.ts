@@ -17,7 +17,6 @@ type IExecutePlayActionParams = Pick<
   | "playingCard"
   | "setActiveAttackerId"
   | "setPendingEntityReplacement"
-  | "setPendingFusionSummon"
   | "setIsAnimating"
   | "setLastError"
   | "setRevealedEntities"
@@ -33,7 +32,6 @@ export function useExecutePlayAction({
   playingCard,
   setActiveAttackerId,
   setPendingEntityReplacement,
-  setPendingFusionSummon,
   setIsAnimating,
   setLastError,
   setRevealedEntities,
@@ -56,11 +54,7 @@ export function useExecutePlayAction({
       }
 
       if (playingCard.type === "FUSION" && (mode === "ATTACK" || mode === "DEFENSE")) {
-        if (gameState.playerA.activeEntities.length < 2) {
-          setLastError({ code: "GAME_RULE_ERROR", message: "Necesitas 2 entidades en campo para fusionar." });
-          return;
-        }
-        setPendingFusionSummon({ cardId: playingCard.id, mode, materials: [] });
+        applyTransition((state) => GameEngine.startFusionSummon(state, state.playerA.id, playingCard.id, mode));
         return;
       }
 
@@ -110,7 +104,6 @@ export function useExecutePlayAction({
       playingCard,
       setActiveAttackerId,
       setPendingEntityReplacement,
-      setPendingFusionSummon,
       setIsAnimating,
       setLastError,
       setRevealedEntities,

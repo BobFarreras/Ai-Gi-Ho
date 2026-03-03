@@ -59,6 +59,14 @@ export function useBoardTurnControls({
         if (leftmostCard) resolvePendingTurnAction(leftmostCard.id);
         return;
       }
+      if (pendingAction.type === "SELECT_FUSION_MATERIALS") {
+        const available = gameStateRef.current.playerA.activeEntities
+          .map((entity) => entity.instanceId)
+          .filter((instanceId) => !pendingAction.selectedMaterialInstanceIds.includes(instanceId));
+        const autoPick = available.slice(0, 2 - pendingAction.selectedMaterialInstanceIds.length);
+        autoPick.forEach((instanceId) => resolvePendingTurnAction(instanceId));
+        return;
+      }
       const oldestEntity = gameStateRef.current.playerA.activeEntities[0];
       if (oldestEntity) resolvePendingTurnAction(oldestEntity.instanceId);
       return;
