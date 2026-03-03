@@ -6,6 +6,12 @@ interface IAttackOption {
   attacker: IBoardEntity;
   defender?: IBoardEntity;
   score: number;
+  isLethal: boolean;
+  isHighValueClear: boolean;
+  isLosingTrade: boolean;
+  defenderDestroyed: boolean;
+  attackerDestroyed: boolean;
+  damageToAttackerPlayer: number;
 }
 
 function getEntityBattleStat(entity: IBoardEntity): number {
@@ -17,24 +23,51 @@ function getEntityBattleStat(entity: IBoardEntity): number {
 }
 
 function scoreDirectAttack(attackerAtk: number, targetPlayer: IPlayer, profile: IOpponentDifficultyProfile): number {
-  const wouldBeLethal = attackerAtk >= targetPlayer.healthPoints;
-  const pressureBonus = Math.floor(attackerAtk * 0.12);
-
-  return attackerAtk + pressureBonus + profile.directAttackBias + (wouldBeLethal ? profile.lethalBias : 0);
+  const lethalChance = attackerAtk >= targetPlayer.healthPoints ? profile.lethalBias : 0;
+  const expectedDamage = attackerAtk + profile.directAttackBias;
+  const boardAdvantage = Math.floor(attackerAtk * 0.12);
+  return expectedDamage + boardAdvantage + lethalChance;
 }
 
-function scoreBattle(attacker: IBoardEntity, defender: IBoardEntity, profile: IOpponentDifficultyProfile): number {
+function entityValue(entity: IBoardEntity): number {
+  return (entity.card.attack ?? 0) * 1.2 + (entity.card.defense ?? 0);
+}
+
+function scoreBattle(
+  attacker: IBoardEntity,
+  defender: IBoardEntity,
+  targetPlayer: IPlayer,
+  profile: IOpponentDifficultyProfile,
+): IAttackOption {
   const attackerAtk = attacker.card.attack ?? 0;
   const defenderStat = getEntityBattleStat(defender);
   const isDefenderInDefenseMode = defender.mode === "DEFENSE" || defender.mode === "SET";
   const result = CombatService.calculateBattle({ attackerAtk, defenderStat, isDefenderInDefenseMode });
+  const expectedDamage = result.damageToDefenderPlayer;
+  const boardAdvantage =
+    (result.defenderDestroyed ? profile.destroyReward : 0) +
+    (result.defenderDestroyed ? Math.floor(entityValue(defender) * 0.2) : 0);
+  const lethalChance = expectedDamage >= targetPlayer.healthPoints ? profile.lethalBias : 0;
+  const selfDamageRisk = result.damageToAttackerPlayer * profile.selfDamagePenaltyMultiplier;
+  const attackerValueLoss = result.attackerDestroyed ? profile.attackerLossPenalty + Math.floor(entityValue(attacker) * 0.2) : 0;
+  const score = expectedDamage + boardAdvantage + lethalChance - selfDamageRisk - attackerValueLoss;
+  const isHighValueClear =
+    result.defenderDestroyed &&
+    entityValue(defender) >= entityValue(attacker) * 1.5 &&
+    (defender.card.attack ?? 0) >= 2200;
+  const isLosingTrade = result.attackerDestroyed && !result.defenderDestroyed;
 
-  const destroyScore =
-    (result.defenderDestroyed ? profile.destroyReward : 0) - (result.attackerDestroyed ? profile.attackerLossPenalty : 0);
-  const damageScore = result.damageToDefenderPlayer * 1.1 - result.damageToAttackerPlayer * profile.selfDamagePenaltyMultiplier;
-  const statBias = (attacker.card.attack ?? 0) * 0.06 - defenderStat * 0.03;
-
-  return destroyScore + damageScore + statBias;
+  return {
+    attacker,
+    defender,
+    score,
+    isLethal: lethalChance > 0,
+    isHighValueClear,
+    isLosingTrade,
+    defenderDestroyed: result.defenderDestroyed,
+    attackerDestroyed: result.attackerDestroyed,
+    damageToAttackerPlayer: result.damageToAttackerPlayer,
+  };
 }
 
 function buildAttackOptions(opponent: IPlayer, target: IPlayer, profile: IOpponentDifficultyProfile): IAttackOption[] {
@@ -50,16 +83,47 @@ function buildAttackOptions(opponent: IPlayer, target: IPlayer, profile: IOppone
     return attackers.map((attacker) => ({
       attacker,
       score: scoreDirectAttack(attacker.card.attack ?? 0, target, profile),
+      isLethal: (attacker.card.attack ?? 0) >= target.healthPoints,
+      isHighValueClear: false,
+      isLosingTrade: false,
+      defenderDestroyed: false,
+      attackerDestroyed: false,
+      damageToAttackerPlayer: 0,
     }));
   }
 
   return attackers.flatMap((attacker) =>
-    target.activeEntities.map((defender) => ({
-      attacker,
-      defender,
-      score: scoreBattle(attacker, defender, profile),
-    })),
+    target.activeEntities.map((defender) => scoreBattle(attacker, defender, target, profile)),
   );
+}
+
+function isSuicidalAttack(option: IAttackOption): boolean {
+  return option.attackerDestroyed && !option.defenderDestroyed && option.damageToAttackerPlayer > 0;
+}
+
+function filterOptionsByRisk(
+  options: IAttackOption[],
+  profile: IOpponentDifficultyProfile,
+): IAttackOption[] {
+  if (profile.key === "EASY") {
+    return options;
+  }
+
+  return options.filter((option) => {
+    if (option.isLethal || option.isHighValueClear) {
+      return true;
+    }
+
+    if (isSuicidalAttack(option)) {
+      return false;
+    }
+
+    if (profile.key === "NORMAL") {
+      return option.damageToAttackerPlayer <= 900;
+    }
+
+    return option.damageToAttackerPlayer <= 250 && !option.isLosingTrade;
+  });
 }
 
 export function chooseBestAttack(
@@ -73,8 +137,17 @@ export function chooseBestAttack(
     return null;
   }
 
-  const bestOption = options.reduce((best, current) => (current.score > best.score ? current : best));
-  if (bestOption.score < profile.minAttackScore) {
+  const filteredOptions = filterOptionsByRisk(options, profile);
+  if (filteredOptions.length === 0) {
+    return null;
+  }
+
+  const bestOption = filteredOptions.reduce((best, current) => (current.score > best.score ? current : best));
+  if (bestOption.isLosingTrade && !bestOption.isLethal) {
+    return null;
+  }
+
+  if (bestOption.score < profile.minAttackScore && !bestOption.isLethal && !bestOption.isHighValueClear) {
     return null;
   }
 

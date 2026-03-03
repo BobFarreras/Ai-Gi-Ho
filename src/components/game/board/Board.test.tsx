@@ -37,6 +37,7 @@ describe('Componente UI: Board y Subcomponentes', () => {
     phase: 'MAIN_1',
     hasNormalSummonedThisTurn: false,
     pendingTurnAction: null,
+    combatLog: [],
   };
 
   beforeEach(() => {
@@ -55,15 +56,31 @@ describe('Componente UI: Board y Subcomponentes', () => {
       pendingEntitySelectionIds: [],
       opponentDifficulty: "EASY",
       isPlayerTurn: true,
+      isMuted: false,
+      lastDamageTargetPlayerId: null,
+      lastDamageAmount: null,
+      lastDamageEventId: null,
+      lastHealTargetPlayerId: null,
+      lastHealAmount: null,
+      lastHealEventId: null,
+      lastBuffTargetEntityIds: [],
+      lastBuffStat: null,
+      lastBuffAmount: null,
+      lastBuffEventId: null,
+      winnerPlayerId: null,
       resolvePendingTurnAction: vi.fn(),
       resolvePendingHandDiscard: vi.fn(),
       setIsHistoryOpen: vi.fn(),
       toggleCardSelection: vi.fn(),
+      previewCard: vi.fn(),
       clearSelection: vi.fn(),
       clearError: vi.fn(),
       executePlayAction: vi.fn(),
       handleEntityClick: vi.fn(),
       advancePhase: vi.fn(),
+      handleTimerExpired: vi.fn(),
+      restartMatch: vi.fn(),
+      toggleMute: vi.fn(),
     });
   });
 
@@ -90,8 +107,11 @@ describe('Componente UI: Board y Subcomponentes', () => {
     const historyBtn = screen.getByRole('button', { name: /abrir historial de batalla/i });
     fireEvent.click(historyBtn);
 
-    // Verificamos que se haya llamado a la función del hook para abrirlo
-    expect(setIsHistoryOpenMock).toHaveBeenCalledWith(true);
+    // Verificamos que se haya llamado en modo toggle
+    expect(setIsHistoryOpenMock).toHaveBeenCalledTimes(1);
+    const updater = setIsHistoryOpenMock.mock.calls[0][0];
+    expect(typeof updater).toBe("function");
+    expect(updater(false)).toBe(true);
   });
 
   it('no debería mostrar acciones de fase cuando es turno del rival', () => {

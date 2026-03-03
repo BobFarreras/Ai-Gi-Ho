@@ -1,101 +1,85 @@
 import { ICard } from "@/core/entities/ICard";
+import { ENTITY_CARDS } from "@/core/data/mock-cards/entities";
+import { EXECUTION_CARDS } from "@/core/data/mock-cards/executions";
+import { TRAP_CARDS } from "@/core/data/mock-cards/traps";
+import { FUSION_CARDS } from "@/core/data/mock-cards/fusions";
 
-const cardP1Gemini: ICard = {
-  id: "card-p1-gemini",
-  name: "Gemini 1.5",
-  type: "ENTITY",
-  faction: "BIG_TECH",
-  cost: 3,
-  attack: 2500,
-  defense: 2000,
-  description: "LLM Multimodal.",
-  bgUrl: "/assets/bgs/bg-tech.jpg",
-  renderUrl: "/assets/renders/gemini.png",
-};
+type CardMap = Record<string, ICard>;
 
-const cardSpellDdos: ICard = {
-  id: "card-spell-ddos",
-  name: "DDoS Attack",
-  type: "EXECUTION",
-  faction: "NO_CODE",
-  cost: 2,
-  description: "Drena 1000 LP al rival.",
-  bgUrl: "/assets/bgs/bg-tech.jpg",
-  renderUrl: "/assets/renders/n8n.png",
-  effect: { action: "DAMAGE", target: "OPPONENT", value: 1000 },
-};
+const cardCatalog: CardMap = [...ENTITY_CARDS, ...EXECUTION_CARDS, ...TRAP_CARDS, ...FUSION_CARDS].reduce<CardMap>((acc, card) => {
+  acc[card.id] = card;
+  return acc;
+}, {});
 
-const cardP1Lite: ICard = {
-  id: "card-p1-lite",
-  name: "Mini Agent",
-  type: "ENTITY",
-  faction: "OPEN_SOURCE",
-  cost: 1,
-  attack: 1200,
-  defense: 900,
-  description: "Entidad ágil de apertura.",
-  bgUrl: "/assets/bgs/bg-tech.jpg",
-  renderUrl: "/assets/renders/openclaw.png",
-};
+const PLAYER_A_DECK_IDS = [
+  "entity-chatgpt",
+  "exec-direct-damage-900",
+  "exec-draw-1",
+  "trap-kernel-panic",
+  "trap-runtime-punish",
+  "trap-atk-drain",
+  "trap-def-fragment",
+  "entity-gemini",
+  "entity-deepseek",
+  "entity-claude",
+  "entity-react",
+  "entity-supabase",
+  "exec-boost-atk-400",
+  "exec-framework-atk-300",
+  "exec-llm-def-300",
+  "exec-db-def-300",
+  "exec-direct-damage-600",
+  "exec-heal-700",
+  "entity-openclaw",
+  "entity-kali-linux",
+] as const;
 
-const cardP2Llama: ICard = {
-  id: "op2",
-  name: "Llama 3",
-  type: "ENTITY",
-  faction: "OPEN_SOURCE",
-  cost: 3,
-  attack: 2200,
-  defense: 2000,
-  description: "Open weights.",
-  bgUrl: "/assets/bgs/bg-tech.jpg",
-  renderUrl: "/assets/renders/make.png",
-};
+const PLAYER_B_DECK_IDS = [
+  "entity-vscode",
+  "entity-cursor",
+  "entity-git",
+  "entity-perplexity",
+  "entity-python",
+  "entity-astro",
+  "entity-github",
+  "entity-n8n",
+  "entity-make",
+  "exec-heal-700",
+  "exec-draw-1",
+  "exec-db-def-300",
+  "trap-counter-intrusion",
+  "entity-ollama",
+  "entity-supabase",
+  "entity-huggenface",
+  "entity-postgress",
+  "entity-openclaw",
+  "entity-kali-linux",
+  "exec-direct-damage-600",
+] as const;
 
-const cardP2Shield: ICard = {
-  id: "op-shield",
-  name: "Firewall Mesh",
-  type: "ENTITY",
-  faction: "BIG_TECH",
-  cost: 2,
-  attack: 1400,
-  defense: 1800,
-  description: "Malla defensiva adaptable.",
-  bgUrl: "/assets/bgs/bg-tech.jpg",
-  renderUrl: "/assets/renders/chatgpt.png",
-};
+function toDeck(deckIds: readonly string[]): ICard[] {
+  return deckIds.map((id) => {
+    const card = cardCatalog[id];
+    if (!card) {
+      throw new Error(`Carta no encontrada en catálogo: ${id}`);
+    }
+    return { ...card };
+  });
+}
 
-const cardP2Pulse: ICard = {
-  id: "op-pulse",
-  name: "Pulse Script",
-  type: "EXECUTION",
-  faction: "NO_CODE",
-  cost: 2,
-  description: "Descarga directa de red.",
-  bgUrl: "/assets/bgs/bg-tech.jpg",
-  renderUrl: "/assets/renders/n8n.png",
-  effect: { action: "DAMAGE", target: "OPPONENT", value: 500 },
-};
-
-function createFillerDeck(prefix: string, count: number): ICard[] {
-  return Array.from({ length: count }).map((_, index) => ({
-    id: `${prefix}-deck-${index}`,
-    name: `Bot ${prefix.toUpperCase()} ${index + 1}`,
-    type: index % 4 === 0 ? "EXECUTION" : "ENTITY",
-    faction: index % 2 === 0 ? "BIG_TECH" : "OPEN_SOURCE",
-    cost: 1 + (index % 4),
-    attack: 1100 + index * 30,
-    defense: 900 + index * 25,
-    description: "Carta de mazo base temporal.",
-    effect: index % 4 === 0 ? { action: "DAMAGE", target: "OPPONENT", value: 300 } : undefined,
-    bgUrl: "/assets/bgs/bg-tech.jpg",
-    renderUrl: "/assets/renders/openclaw.png",
-  }));
+export function shuffleDeck(deck: ICard[], randomFn: () => number = Math.random): ICard[] {
+  const shuffled = [...deck];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(randomFn() * (index + 1));
+    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+  }
+  return shuffled;
 }
 
 export function createPlayerDeckA(): ICard[] {
-  return [cardP1Gemini, cardSpellDdos, cardP1Lite, ...createFillerDeck("p1", 17)];
+  return shuffleDeck(toDeck(PLAYER_A_DECK_IDS));
 }
 
 export function createPlayerDeckB(): ICard[] {
-  return [cardP2Llama, cardP2Shield, cardP2Pulse, ...createFillerDeck("p2", 17)];
+  return shuffleDeck(toDeck(PLAYER_B_DECK_IDS));
 }

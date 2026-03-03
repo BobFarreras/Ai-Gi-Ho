@@ -25,7 +25,17 @@ Estrategias de toma de decisiones para el rival.
 3. `HeuristicOpponentStrategy.ts`
    - Implementación actual sin IA generativa.
    - Selecciona jugadas con heurísticas de valor/coste.
-   - Evalúa ataques por resultado esperado (intercambio de mesa + daño) en lugar de elegir el primer objetivo.
+   - Evalúa ataques por utilidad táctica:
+     - daño esperado,
+     - ventaja de mesa,
+     - oportunidad de lethal,
+     - riesgo de autodaño,
+     - pérdida de valor del atacante.
+   - Filtra ataques suicidas por dificultad:
+     - `EASY`: comete más errores (menos filtros).
+     - `NORMAL`: evita autodaño alto.
+     - `HARD/BOSS`: evita trades perdedores y autodaño salvo `lethal` o limpieza de amenaza crítica.
+   - Soporta fusión mínima: si hay carta `FUSION` + materiales válidos, puede invocar por fusión.
 
 4. `difficulty/*`
    - `types.ts`: contratos de dificultad y progreso de campaña.

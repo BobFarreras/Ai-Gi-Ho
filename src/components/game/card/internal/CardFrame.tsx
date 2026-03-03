@@ -12,6 +12,14 @@ interface CardFrameProps {
   onClick?: (card: ICard) => void;
 }
 
+function resolveTypeBadge(card: ICard): string {
+  if (card.type !== "ENTITY") {
+    return card.type;
+  }
+
+  return card.archetype ? `${card.type} · ${card.archetype}` : card.type;
+}
+
 export function CardFrame({ card, factionStyles, isSelected, isOnBoard, onClick }: CardFrameProps) {
   const isExecution = card.type === "EXECUTION";
 
@@ -40,8 +48,11 @@ export function CardFrame({ card, factionStyles, isSelected, isOnBoard, onClick 
             <Zap className="absolute opacity-20 w-8 h-8" />
             <span className="relative z-10 text-xl">{card.cost}</span>
           </div>
-          <div className="bg-black/90 px-3 py-1.5 text-[10px] font-black tracking-widest text-white/70 uppercase border border-white/10 rounded-sm">
-            {card.type}
+          <div
+            aria-label="Tipo de carta"
+            className="bg-black/90 px-3 py-1.5 text-[10px] font-black tracking-widest text-white/70 uppercase border border-white/10 rounded-sm"
+          >
+            {resolveTypeBadge(card)}
           </div>
         </div>
 
@@ -80,9 +91,15 @@ export function CardFrame({ card, factionStyles, isSelected, isOnBoard, onClick 
                 </div>
               </>
             ) : (
-              <div className="flex items-center w-full justify-center space-x-2 text-purple-400 font-black text-lg tracking-widest">
-                <Cpu className="w-5 h-5" />
-                <span>SCRIPT_EXEC</span>
+              <div className="flex w-full items-center justify-between text-purple-300 font-black tracking-widest text-sm">
+                <div className="flex items-center space-x-1">
+                  <Cpu className="w-4 h-4" />
+                  <span>MAGIA</span>
+                </div>
+                <div className="flex items-center space-x-1 text-emerald-300">
+                  <Zap className="w-4 h-4" />
+                  <span>{card.effect?.action === "DAMAGE" ? card.effect.value : 0}</span>
+                </div>
               </div>
             )}
           </div>

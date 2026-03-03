@@ -1,14 +1,20 @@
 "use client";
 
-import { Clock, History } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Clock, History, Volume2, VolumeX } from "lucide-react";
 import { Battlefield } from "./Battlefield";
 import { PlayerHUD } from "./PlayerHUD";
 import { PlayerHand } from "./PlayerHand";
 import { SidePanels } from "./SidePanels";
 import { useBoard } from "./hooks/useBoard";
 import { OpponentHandFan } from "./ui/OpponentHandFan";
+import { BattleBannerCenter } from "./ui/BattleBannerCenter";
+import { GraveyardTransitionLayer } from "./ui/GraveyardTransitionLayer";
+import { DuelResultOverlay } from "./ui/DuelResultOverlay";
 import { PhasePanel } from "./ui/PhasePanel";
 import { TurnTimer } from "./ui/TurnTimer";
+import { useGameAudio } from "./hooks/internal/useGameAudio";
+import { GraveyardBrowser } from "./ui/GraveyardBrowser";
 
 export function Board() {
   const {
@@ -26,16 +32,47 @@ export function Board() {
     setIsHistoryOpen,
     toggleCardSelection,
     clearSelection,
+    previewCard,
     clearError,
     executePlayAction,
     handleEntityClick,
     advancePhase,
     resolvePendingHandDiscard,
     isPlayerTurn,
+    handleTimerExpired,
+    lastDamageTargetPlayerId,
+    lastDamageAmount,
+    lastDamageEventId,
+    lastHealTargetPlayerId,
+    lastHealAmount,
+    lastHealEventId,
+    lastBuffTargetEntityIds,
+    lastBuffStat,
+    lastBuffAmount,
+    lastBuffEventId,
+    winnerPlayerId,
+    restartMatch,
+    isMuted,
+    toggleMute,
   } = useBoard();
 
   const player = gameState.playerA;
   const opponent = gameState.playerB;
+  const [graveyardView, setGraveyardView] = useState<"player" | "opponent" | null>(null);
+  const visibleGraveyardCards = useMemo(
+    () => (graveyardView === "player" ? player.graveyard : graveyardView === "opponent" ? opponent.graveyard : []),
+    [graveyardView, opponent.graveyard, player.graveyard],
+  );
+  const visibleGraveyardOwner = graveyardView === "player" ? player.name : opponent.name;
+  const { playTimerExpired, playTimerWarning, playButtonClick } = useGameAudio({
+    combatLog: gameState.combatLog,
+    winnerPlayerId,
+    playerId: player.id,
+    isHistoryOpen,
+    hasSelectedCard: Boolean(selectedCard),
+    lastErrorCode: lastError?.code ?? null,
+    isMuted,
+  });
 
   return (
     <div className="relative w-full h-screen bg-[#020305] overflow-hidden font-sans cursor-crosshair" onClick={clearSelection}>
@@ -53,6 +90,7 @@ export function Board() {
               aria-label="Cerrar mensaje de error"
               onClick={(event) => {
                 event.stopPropagation();
+                playButtonClick();
                 clearError();
               }}
               className="text-red-200 hover:text-white font-black"
@@ -70,6 +108,24 @@ export function Board() {
         </div>
       )}
 
+      <BattleBannerCenter
+        events={gameState.combatLog}
+        playerAId={gameState.playerA.id}
+        playerAName={gameState.playerA.name}
+        playerBId={gameState.playerB.id}
+        playerBName={gameState.playerB.name}
+      />
+      <GraveyardTransitionLayer events={gameState.combatLog} playerAId={gameState.playerA.id} playerBId={gameState.playerB.id} />
+      <GraveyardBrowser
+        isOpen={graveyardView !== null}
+        ownerName={visibleGraveyardOwner}
+        cards={visibleGraveyardCards}
+        onClose={() => setGraveyardView(null)}
+        onSelectCard={(card) => {
+          previewCard(card);
+        }}
+      />
+
       <div className="absolute top-6 left-6 z-50 flex flex-col items-start pointer-events-auto w-80">
         <div className="w-full bg-zinc-950/90 border-2 border-cyan-500/50 backdrop-blur-xl px-6 py-3 rounded-t-2xl flex items-center justify-between shadow-[0_10px_40px_rgba(6,182,212,0.5)]">
           <div className="flex items-center gap-3">
@@ -78,7 +134,15 @@ export function Board() {
               Turno {gameState.turn}
             </span>
           </div>
-          <TurnTimer key={`${gameState.turn}-${gameState.phase}`} onTimeUp={advancePhase} />
+          <TurnTimer
+            key={`${gameState.turn}-${gameState.phase}-${gameState.pendingTurnAction?.type ?? "NONE"}-${gameState.pendingTurnAction?.playerId ?? "NONE"}`}
+            onTimeUp={() => {
+              playTimerExpired();
+              handleTimerExpired();
+            }}
+            onWarning={playTimerWarning}
+            isActive={isPlayerTurn}
+          />
         </div>
         <PhasePanel
           phase={gameState.phase}
@@ -95,8 +159,24 @@ export function Board() {
         player={opponent}
         isActiveTurn={gameState.activePlayerId === opponent.id}
         badgeText={`Dificultad ${opponentDifficulty}`}
+        wasDamagedThisAction={lastDamageTargetPlayerId === opponent.id}
+        damageAmount={lastDamageAmount}
+        damagePulseKey={lastDamageEventId}
+        wasHealedThisAction={lastHealTargetPlayerId === opponent.id}
+        healAmount={lastHealAmount}
+        healPulseKey={lastHealEventId}
       />
-      <PlayerHUD isOpponent={false} player={player} isActiveTurn={isPlayerTurn} />
+      <PlayerHUD
+        isOpponent={false}
+        player={player}
+        isActiveTurn={isPlayerTurn}
+        wasDamagedThisAction={lastDamageTargetPlayerId === player.id}
+        damageAmount={lastDamageAmount}
+        damagePulseKey={lastDamageEventId}
+        wasHealedThisAction={lastHealTargetPlayerId === player.id}
+        healAmount={lastHealAmount}
+        healPulseKey={lastHealEventId}
+      />
 
       <div onClick={(event) => event.stopPropagation()}>
         <Battlefield
@@ -114,6 +194,15 @@ export function Board() {
           selectedCard={selectedCard}
           revealedEntities={revealedEntities}
           highlightedPlayerEntityIds={pendingEntitySelectionIds}
+          damagedPlayerId={lastDamageTargetPlayerId}
+          damageEventId={lastDamageEventId}
+          buffedEntityIds={lastBuffTargetEntityIds}
+          buffStat={lastBuffStat === "ATTACK" || lastBuffStat === "DEFENSE" ? lastBuffStat : null}
+          buffAmount={lastBuffAmount}
+          buffEventId={lastBuffEventId}
+          playerId={player.id}
+          opponentId={opponent.id}
+          onGraveyardClick={setGraveyardView}
           onEntityClick={handleEntityClick}
         />
       </div>
@@ -132,24 +221,45 @@ export function Board() {
       <div onClick={(event) => event.stopPropagation()}>
         <SidePanels
           selectedCard={selectedCard}
+          gameState={gameState}
           isHistoryOpen={isHistoryOpen}
+          onSelectCard={previewCard}
           onCloseCard={clearSelection}
           onCloseHistory={() => setIsHistoryOpen(false)}
         />
       </div>
 
-      {!isHistoryOpen && (
+      <div className="absolute bottom-6 right-6 z-50 flex items-center gap-3">
         <button
-          aria-label="Abrir historial de batalla"
+          aria-label={isMuted ? "Activar sonido" : "Silenciar sonido"}
           onClick={(event) => {
             event.stopPropagation();
-            setIsHistoryOpen(true);
+            playButtonClick();
+            toggleMute();
           }}
-          className="absolute bottom-6 right-6 z-50 bg-zinc-950/90 border-2 border-red-500/50 text-red-500 p-4 rounded-full hover:bg-red-950 hover:shadow-[0_0_20px_rgba(239,68,68,0.6)] transition-all"
+          className="bg-zinc-950/90 border-2 border-cyan-500/50 text-cyan-300 p-4 rounded-full hover:bg-cyan-950 hover:shadow-[0_0_20px_rgba(34,211,238,0.6)] transition-all"
+        >
+          {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+        </button>
+        <button
+          aria-label={isHistoryOpen ? "Cerrar historial de batalla" : "Abrir historial de batalla"}
+          onClick={(event) => {
+            event.stopPropagation();
+            playButtonClick();
+            setIsHistoryOpen((previous) => !previous);
+          }}
+          className="bg-zinc-950/90 border-2 border-red-500/50 text-red-500 p-4 rounded-full hover:bg-red-950 hover:shadow-[0_0_20px_rgba(239,68,68,0.6)] transition-all"
         >
           <History size={24} />
         </button>
-      )}
+      </div>
+
+      <DuelResultOverlay
+        winnerPlayerId={winnerPlayerId}
+        playerA={player}
+        playerB={opponent}
+        onRestart={restartMatch}
+      />
     </div>
   );
 }

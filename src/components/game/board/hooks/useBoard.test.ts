@@ -57,7 +57,7 @@ describe('useBoard Custom Hook', () => {
     expect(result.current.playingCard).toBeNull();
   });
 
-  it('La función clearSelection debe purgar todos los estados activos', () => {
+  it('La función clearSelection debe purgar selección sin cerrar historial', () => {
     const { result } = renderHook(() => useBoard());
     
     // Ensuciamos el estado
@@ -73,25 +73,29 @@ describe('useBoard Custom Hook', () => {
 
     expect(result.current.selectedCard).toBeNull();
     expect(result.current.playingCard).toBeNull();
-    expect(result.current.isHistoryOpen).toBe(false);
+    expect(result.current.isHistoryOpen).toBe(true);
   });
 
   it('Debe exponer un error tipado cuando se intenta una acción inválida', async () => {
     const { result } = renderHook(() => useBoard());
-    const entityCard = result.current.gameState.playerA.hand.find((card) => card.id === 'card-p1-gemini');
+    const handCard = result.current.gameState.playerA.hand[0];
 
-    expect(entityCard).toBeDefined();
+    expect(handCard).toBeDefined();
+    if (!handCard) {
+      throw new Error('La mano inicial no puede estar vacía en este escenario.');
+    }
+    const invalidMode = handCard.type === 'ENTITY' ? 'ACTIVATE' : 'ATTACK';
 
     act(() => {
-      result.current.toggleCardSelection(entityCard!, mockEvent);
+      result.current.toggleCardSelection(handCard, mockEvent);
     });
 
     await act(async () => {
-      await result.current.executePlayAction('ACTIVATE', mockEvent);
+      await result.current.executePlayAction(invalidMode, mockEvent);
     });
 
     expect(result.current.lastError).not.toBeNull();
     expect(result.current.lastError?.code).toBe('VALIDATION_ERROR');
-    expect(result.current.lastError?.message).toBe('Modo inválido para una entidad.');
+    expect(typeof result.current.lastError?.message).toBe('string');
   });
 });
