@@ -82,6 +82,7 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
 4. `GraveyardTransitionLayer` reutiliza eventos `CARD_TO_GRAVEYARD` para animación genérica de descarte/destrucción/sacrificio.
 5. `useGameAudio` consume `combatLog` para efectos de sonido por eventos y fin de duelo.
 6. `audio-catalog.ts` define rutas/volúmenes por evento y canales (`music`/`sfx`).
+7. `FusionCinematicLayer` consume `FUSION_SUMMONED` para reproducir vídeo por carta de fusión y bloquear interacción temporal.
 
 ## Fin de partida
 

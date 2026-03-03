@@ -15,9 +15,9 @@ interface IFusionPlaybackItem {
 }
 
 const FUSION_VIDEO_BY_CARD_ID: Record<string, string> = {
-  "fusion-gemgpt": "/assets/videos/fusions/gemgpt.mp4",
-  "fusion-kaclauli": "/assets/videos/fusions/kaclauli.mp4",
-  "fusion-pytgress": "/assets/videos/fusions/pytgress.mp4",
+  "fusion-gemgpt": "/assets/videos/gemgpt.mp4",
+  "fusion-kaclauli": "/assets/videos/kaclouli.mp4",
+  "fusion-pytgress": "/assets/videos/pytgress.mp4",
 };
 
 const DEFAULT_DURATION_MS = 3200;

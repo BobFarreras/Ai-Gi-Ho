@@ -118,16 +118,28 @@ El motor registra eventos técnicos para trazabilidad y UI:
 
 ## 10. Fusión (implementada)
 
-1. Las cartas `FUSION` no se juegan con `playCard`.
-2. Se invocan con `GameEngine.fuseCards(...)`.
-3. Requiere:
-   - estar en `MAIN_1`,
-   - turno propio,
-   - seleccionar 2 materiales del campo propio,
-   - cumplir receta estática (`fusion-recipes.ts`).
-4. Los materiales van al cementerio y se registra:
-   - `CARD_TO_GRAVEYARD` por cada material,
-   - `FUSION_SUMMONED` para la invocación.
+1. Flujo principal actual: fusión desde carta mágica (`EXECUTION` con efecto `FUSION_SUMMON`).
+2. Secuencia:
+   - activar ejecución de fusión (`ACTIVATE`),
+   - `resolveExecution` inicia acción pendiente `SELECT_FUSION_MATERIALS`,
+   - seleccionar 2 materiales en el campo propio,
+   - resolver fusión y generar entidad fusionada.
+3. Reglas:
+   - solo en `MAIN_1` y turno propio,
+   - materiales distintos,
+   - receta válida en `fusion-recipes.ts`,
+   - energía validada por receta/carta.
+4. Resolución al completar:
+   - materiales al cementerio,
+   - carta mágica de fusión al cementerio,
+   - carta fusionada entra al campo.
+5. Fusiones disponibles:
+   - `chatgpt + gemini -> gemgpt`,
+   - `claude + kali-linux -> kaclauli`,
+   - `python + postgress -> pytgress`.
+6. Eventos de log:
+   - `CARD_TO_GRAVEYARD` (materiales y ejecución),
+   - `FUSION_SUMMONED`.
 
 ## 11. Fin de partida
 
@@ -147,3 +159,12 @@ El motor registra eventos técnicos para trazabilidad y UI:
    - fin de partida.
 3. El catálogo de pistas/volumen por evento está en `src/core/config/audio-catalog.ts`.
 4. El jugador dispone de `mute` global persistente (localStorage).
+
+## 13. Cinemática de fusión
+
+1. Al recibir `FUSION_SUMMONED`, la UI muestra cinemática central (`FusionCinematicLayer`).
+2. Durante la cinemática se bloquean inputs del jugador para evitar acciones desincronizadas.
+3. Rutas actuales de vídeo:
+   - `/assets/videos/gemgpt.mp4`
+   - `/assets/videos/kaclouli.mp4`
+   - `/assets/videos/pytgress.mp4`
