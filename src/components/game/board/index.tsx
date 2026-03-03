@@ -1,20 +1,13 @@
 "use client";
-
 import { useMemo, useState } from "react";
-import { Clock, History, Volume2, VolumeX } from "lucide-react";
-import { Battlefield } from "./Battlefield";
-import { PlayerHUD } from "./PlayerHUD";
-import { PlayerHand } from "./PlayerHand";
-import { SidePanels } from "./SidePanels";
 import { useBoard } from "./hooks/useBoard";
-import { OpponentHandFan } from "./ui/OpponentHandFan";
-import { BattleBannerCenter } from "./ui/BattleBannerCenter";
-import { GraveyardTransitionLayer } from "./ui/GraveyardTransitionLayer";
 import { DuelResultOverlay } from "./ui/DuelResultOverlay";
-import { PhasePanel } from "./ui/PhasePanel";
-import { TurnTimer } from "./ui/TurnTimer";
 import { useGameAudio } from "./hooks/internal/useGameAudio";
-import { GraveyardBrowser } from "./ui/GraveyardBrowser";
+import { BoardStatusOverlays } from "./ui/BoardStatusOverlays";
+import { BoardTopBar } from "./ui/BoardTopBar";
+import { BoardActionButtons } from "./ui/BoardActionButtons";
+import { BoardPlayersLayer } from "./ui/BoardPlayersLayer";
+import { BoardInteractiveLayer } from "./ui/BoardInteractiveLayer";
 
 export function Board() {
   const {
@@ -78,188 +71,53 @@ export function Board() {
     <div className="relative w-full h-screen bg-[#020305] overflow-hidden font-sans cursor-crosshair" onClick={clearSelection}>
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:100px_100px] pointer-events-none" />
       <div className="absolute inset-0 shadow-[inset_0_0_300px_rgba(0,0,0,1)] pointer-events-none" />
-
-      {lastError && (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[140] w-[92%] max-w-xl bg-red-950/90 border border-red-500/60 text-red-100 px-5 py-4 rounded-xl shadow-[0_0_35px_rgba(239,68,68,0.4)]">
-          <div className="flex items-start gap-3">
-            <div className="flex-1">
-              <p className="text-xs font-black tracking-wider uppercase text-red-300">{lastError.code}</p>
-              <p className="text-sm font-semibold">{lastError.message}</p>
-            </div>
-            <button
-              aria-label="Cerrar mensaje de error"
-              onClick={(event) => {
-                event.stopPropagation();
-                playButtonClick();
-                clearError();
-              }}
-              className="text-red-200 hover:text-white font-black"
-            >
-              X
-            </button>
-          </div>
-        </div>
-      )}
-
-      {pendingActionHint && (
-        <div className="absolute top-28 left-1/2 -translate-x-1/2 z-[130] w-[92%] max-w-3xl bg-amber-950/85 border border-amber-400/50 text-amber-100 px-5 py-3 rounded-xl shadow-[0_0_35px_rgba(251,191,36,0.25)]">
-          <p className="text-xs font-black tracking-wider uppercase text-amber-300">Acción obligatoria</p>
-          <p className="text-sm font-semibold">{pendingActionHint}</p>
-        </div>
-      )}
-
-      <BattleBannerCenter
-        events={gameState.combatLog}
+      <BoardStatusOverlays
+        lastError={lastError}
+        pendingActionHint={pendingActionHint}
+        combatLog={gameState.combatLog}
         playerAId={gameState.playerA.id}
         playerAName={gameState.playerA.name}
         playerBId={gameState.playerB.id}
         playerBName={gameState.playerB.name}
+        graveyardView={graveyardView}
+        graveyardOwnerName={visibleGraveyardOwner}
+        graveyardCards={visibleGraveyardCards}
+        onCloseError={() => { playButtonClick(); clearError(); }}
+        onCloseGraveyard={() => setGraveyardView(null)}
+        onPreviewCard={previewCard}
       />
-      <GraveyardTransitionLayer events={gameState.combatLog} playerAId={gameState.playerA.id} playerBId={gameState.playerB.id} />
-      <GraveyardBrowser
-        isOpen={graveyardView !== null}
-        ownerName={visibleGraveyardOwner}
-        cards={visibleGraveyardCards}
-        onClose={() => setGraveyardView(null)}
-        onSelectCard={(card) => {
-          previewCard(card);
-        }}
-      />
-
-      <div className="absolute top-6 left-6 z-50 flex flex-col items-start pointer-events-auto w-80">
-        <div className="w-full bg-zinc-950/90 border-2 border-cyan-500/50 backdrop-blur-xl px-6 py-3 rounded-t-2xl flex items-center justify-between shadow-[0_10px_40px_rgba(6,182,212,0.5)]">
-          <div className="flex items-center gap-3">
-            <Clock className="text-cyan-400 w-6 h-6 animate-pulse" />
-            <span className="font-black text-white tracking-widest text-xl uppercase drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]">
-              Turno {gameState.turn}
-            </span>
-          </div>
-          <TurnTimer
-            key={`${gameState.turn}-${gameState.phase}-${gameState.pendingTurnAction?.type ?? "NONE"}-${gameState.pendingTurnAction?.playerId ?? "NONE"}`}
-            onTimeUp={() => {
-              playTimerExpired();
-              handleTimerExpired();
-            }}
-            onWarning={playTimerWarning}
-            isActive={isPlayerTurn}
-          />
-        </div>
-        <PhasePanel
-          phase={gameState.phase}
-          hasNormalSummonedThisTurn={gameState.hasNormalSummonedThisTurn}
-          isPlayerTurn={isPlayerTurn}
-          onAdvancePhase={advancePhase}
-        />
-      </div>
-
-      <OpponentHandFan hand={opponent.hand} />
-
-      <PlayerHUD
-        isOpponent={true}
-        player={opponent}
-        isActiveTurn={gameState.activePlayerId === opponent.id}
-        badgeText={`Dificultad ${opponentDifficulty}`}
-        wasDamagedThisAction={lastDamageTargetPlayerId === opponent.id}
-        damageAmount={lastDamageAmount}
-        damagePulseKey={lastDamageEventId}
-        wasHealedThisAction={lastHealTargetPlayerId === opponent.id}
-        healAmount={lastHealAmount}
-        healPulseKey={lastHealEventId}
-      />
-      <PlayerHUD
-        isOpponent={false}
-        player={player}
-        isActiveTurn={isPlayerTurn}
-        wasDamagedThisAction={lastDamageTargetPlayerId === player.id}
-        damageAmount={lastDamageAmount}
-        damagePulseKey={lastDamageEventId}
-        wasHealedThisAction={lastHealTargetPlayerId === player.id}
-        healAmount={lastHealAmount}
-        healPulseKey={lastHealEventId}
-      />
-
-      <div onClick={(event) => event.stopPropagation()}>
-        <Battlefield
-          playerActiveEntities={player.activeEntities}
-          playerActiveExecutions={player.activeExecutions}
-          opponentActiveEntities={opponent.activeEntities}
-          opponentActiveExecutions={opponent.activeExecutions}
-          playerDeckCount={player.deck.length}
-          opponentDeckCount={opponent.deck.length}
-          playerTopGraveCard={player.graveyard[player.graveyard.length - 1] || null}
-          opponentTopGraveCard={opponent.graveyard[opponent.graveyard.length - 1] || null}
-          playerGraveyardCount={player.graveyard.length}
-          opponentGraveyardCount={opponent.graveyard.length}
-          activeAttackerId={activeAttackerId}
-          selectedCard={selectedCard}
-          revealedEntities={revealedEntities}
-          highlightedPlayerEntityIds={pendingEntitySelectionIds}
-          damagedPlayerId={lastDamageTargetPlayerId}
-          damageEventId={lastDamageEventId}
-          buffedEntityIds={lastBuffTargetEntityIds}
-          buffStat={lastBuffStat === "ATTACK" || lastBuffStat === "DEFENSE" ? lastBuffStat : null}
-          buffAmount={lastBuffAmount}
-          buffEventId={lastBuffEventId}
-          playerId={player.id}
-          opponentId={opponent.id}
-          onGraveyardClick={setGraveyardView}
-          onEntityClick={handleEntityClick}
-        />
-      </div>
-
-      <PlayerHand
-        hand={player.hand}
-        playingCard={playingCard}
-        hasSummoned={gameState.hasNormalSummonedThisTurn}
+      <BoardTopBar
+        turn={gameState.turn}
+        phase={gameState.phase}
+        hasNormalSummonedThisTurn={gameState.hasNormalSummonedThisTurn}
+        pendingActionType={gameState.pendingTurnAction?.type ?? null}
+        pendingActionPlayerId={gameState.pendingTurnAction?.playerId ?? null}
         isPlayerTurn={isPlayerTurn}
-        highlightedCardIds={pendingDiscardCardIds}
-        onMandatoryCardSelect={resolvePendingHandDiscard}
-        onCardClick={toggleCardSelection}
-        onPlayAction={executePlayAction}
+        onAdvancePhase={advancePhase}
+        onTimeUp={() => { playTimerExpired(); handleTimerExpired(); }}
+        onWarning={playTimerWarning}
       />
-
-      <div onClick={(event) => event.stopPropagation()}>
-        <SidePanels
-          selectedCard={selectedCard}
-          gameState={gameState}
-          isHistoryOpen={isHistoryOpen}
-          onSelectCard={previewCard}
-          onCloseCard={clearSelection}
-          onCloseHistory={() => setIsHistoryOpen(false)}
-        />
-      </div>
-
-      <div className="absolute bottom-6 right-6 z-50 flex items-center gap-3">
-        <button
-          aria-label={isMuted ? "Activar sonido" : "Silenciar sonido"}
-          onClick={(event) => {
-            event.stopPropagation();
-            playButtonClick();
-            toggleMute();
-          }}
-          className="bg-zinc-950/90 border-2 border-cyan-500/50 text-cyan-300 p-4 rounded-full hover:bg-cyan-950 hover:shadow-[0_0_20px_rgba(34,211,238,0.6)] transition-all"
-        >
-          {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
-        </button>
-        <button
-          aria-label={isHistoryOpen ? "Cerrar historial de batalla" : "Abrir historial de batalla"}
-          onClick={(event) => {
-            event.stopPropagation();
-            playButtonClick();
-            setIsHistoryOpen((previous) => !previous);
-          }}
-          className="bg-zinc-950/90 border-2 border-red-500/50 text-red-500 p-4 rounded-full hover:bg-red-950 hover:shadow-[0_0_20px_rgba(239,68,68,0.6)] transition-all"
-        >
-          <History size={24} />
-        </button>
-      </div>
-
-      <DuelResultOverlay
-        winnerPlayerId={winnerPlayerId}
-        playerA={player}
-        playerB={opponent}
-        onRestart={restartMatch}
+      <BoardPlayersLayer
+        player={player} opponent={opponent} isPlayerTurn={isPlayerTurn} opponentDifficulty={opponentDifficulty}
+        lastDamageTargetPlayerId={lastDamageTargetPlayerId} lastDamageAmount={lastDamageAmount} lastDamageEventId={lastDamageEventId}
+        lastHealTargetPlayerId={lastHealTargetPlayerId} lastHealAmount={lastHealAmount} lastHealEventId={lastHealEventId}
       />
+      <BoardInteractiveLayer
+        gameState={gameState} selectedCard={selectedCard} playingCard={playingCard} activeAttackerId={activeAttackerId}
+        revealedEntities={revealedEntities} pendingEntitySelectionIds={pendingEntitySelectionIds} pendingDiscardCardIds={pendingDiscardCardIds}
+        isHistoryOpen={isHistoryOpen} isPlayerTurn={isPlayerTurn} lastDamageTargetPlayerId={lastDamageTargetPlayerId} lastDamageEventId={lastDamageEventId}
+        lastBuffTargetEntityIds={lastBuffTargetEntityIds} lastBuffStat={lastBuffStat} lastBuffAmount={lastBuffAmount} lastBuffEventId={lastBuffEventId}
+        onGraveyardClick={setGraveyardView} onEntityClick={handleEntityClick} onMandatoryCardSelect={resolvePendingHandDiscard}
+        onCardClick={toggleCardSelection} onPlayAction={executePlayAction} onSelectCard={previewCard} onCloseCard={clearSelection}
+        onCloseHistory={() => setIsHistoryOpen(false)}
+      />
+      <BoardActionButtons
+        isMuted={isMuted}
+        isHistoryOpen={isHistoryOpen}
+        onToggleMute={() => { playButtonClick(); toggleMute(); }}
+        onToggleHistory={() => { playButtonClick(); setIsHistoryOpen((previous) => !previous); }}
+      />
+      <DuelResultOverlay winnerPlayerId={winnerPlayerId} playerA={player} playerB={opponent} onRestart={restartMatch} />
     </div>
   );
 }

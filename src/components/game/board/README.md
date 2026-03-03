@@ -4,7 +4,12 @@ Guía rápida para entender la lógica de tablero y batalla.
 
 ## Flujo de alto nivel
 
-1. `Board` compone HUD, mano, tablero y panel de fase.
+1. `Board` actúa como composición ligera (shell) y delega en subcapas UI:
+   - `BoardStatusOverlays`
+   - `BoardTopBar`
+   - `BoardPlayersLayer`
+   - `BoardInteractiveLayer`
+   - `BoardActionButtons`
 2. `useBoard` centraliza estado UI + puente con motor (`GameEngine`).
 3. `usePlayerActions` procesa acciones humanas (invocar, activar, atacar).
 4. `useOpponentTurn` ejecuta pasos del rival con ritmo visual (delays + animación).
