@@ -33,10 +33,13 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
  │       ├── game-engine/                  # Casos de uso modulares por dominio
  │       │   ├── state/
  │       │   ├── actions/
+ │       │   │   └── internal/             # Resolución de efectos de ejecución + logs
  │       │   ├── phases/
  │       │   ├── combat/
+ │       │   │   └── internal/             # Validación, resolución y logging de combate
  │       │   ├── fusion/
  │       │   ├── effects/
+ │       │   │   └── internal/             # Selección, resolución y logging de trampas
  │       │   └── logging/
  │       ├── CombatService.ts
  │       └── GameEngine.ts                 # Fachada estable
@@ -54,7 +57,7 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
 
 ## Flujo de turno actual
 
-1. El duelo se inicializa con `createInitialGameState` (mazo de 20 y mano inicial de 3 por jugador).
+1. El duelo se inicializa con `createInitialGameState` (mazo de 20 y mano inicial configurable; en tablero actual se usa 4 por jugador).
 2. Se define `startingPlayerId`; el jugador inicial no puede atacar en turno `1`.
 3. El turno tiene 2 subfases: `MAIN_1` (despliegue) y `BATTLE` (combate).
 4. Al cerrar `BATTLE`, `nextPhase` pasa el turno al rival, roba 1 carta para ese rival, suma energía `+2` (con tope) y limpia flags.

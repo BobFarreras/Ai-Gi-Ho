@@ -14,6 +14,7 @@ Casos de uso puros del motor, organizados por responsabilidad.
    - `play-card-with-entity-replacement.ts`
    - `change-entity-mode.ts`
    - `resolve-execution.ts`
+   - `internal/`: resolución de efectos de ejecución y construcción de logs.
 
 3. `phases/`
    - `next-phase.ts`
@@ -21,9 +22,11 @@ Casos de uso puros del motor, organizados por responsabilidad.
 
 4. `combat/`
    - `execute-attack.ts`
+   - `internal/`: validaciones, resolución de combate/directo y logging.
 
 5. `effects/`
    - `resolve-trap-trigger.ts`
+   - `internal/`: selección de trampa, resolución de efecto y logging.
    - Soporta trampas de daño, negación de ataque con destrucción de atacante y reducción de stats rival.
 
 6. `fusion/`
