@@ -93,3 +93,12 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
 1. `game-engine/README.md`: invariantes del motor y contratos.
 2. `services/opponent/README.md`: decisiones del bot y dificultad.
 3. `hooks/internal/README.md`: responsabilidades internas del tablero.
+4. `board/README.md`: mapa de interacción del tablero y UX.
+5. `board/hooks/README.md`: fachada de hooks públicos del tablero.
+6. `board/ui/README.md`: componentes visuales y capas de layout.
+7. `board/battlefield/README.md`: zonas de campo, slots y VFX.
+8. `core/use-cases/README.md`: capa de aplicación y fachada `GameEngine`.
+9. `core/entities/README.md`: tipos de dominio (`ICard`, `IPlayer`, `ICombatLog`).
+10. `core/errors/README.md`: catálogo de errores tipados.
+11. `core/data/mock-cards/README.md`: dataset de cartas mock para pruebas.
+12. `core/config/README.md`: configuración central (audio y futuros catálogos).
