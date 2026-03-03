@@ -67,10 +67,19 @@ function toDeck(deckIds: readonly string[]): ICard[] {
   });
 }
 
+export function shuffleDeck(deck: ICard[], randomFn: () => number = Math.random): ICard[] {
+  const shuffled = [...deck];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(randomFn() * (index + 1));
+    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
 export function createPlayerDeckA(): ICard[] {
-  return toDeck(PLAYER_A_DECK_IDS);
+  return shuffleDeck(toDeck(PLAYER_A_DECK_IDS));
 }
 
 export function createPlayerDeckB(): ICard[] {
-  return toDeck(PLAYER_B_DECK_IDS);
+  return shuffleDeck(toDeck(PLAYER_B_DECK_IDS));
 }

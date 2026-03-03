@@ -63,20 +63,27 @@ export function useGameAudio({
   useEffect(() => {
     if (soundtrackRef.current) return;
     soundtrackRef.current = createAudio("SOUNDTRACK", true);
+    return () => {
+      soundtrackRef.current?.pause();
+      soundtrackRef.current = null;
+    };
   }, []);
 
   useEffect(() => {
     const soundtrack = soundtrackRef.current;
     if (!soundtrack) return;
-    if (isMuted) {
+    if (isMuted || winnerPlayerId) {
       soundtrack.pause();
+      if (winnerPlayerId) {
+        soundtrack.currentTime = 0;
+      }
       return;
     }
     const playPromise = soundtrack.play();
     if (playPromise && typeof playPromise.catch === "function") {
       playPromise.catch(() => undefined);
     }
-  }, [isMuted]);
+  }, [isMuted, winnerPlayerId]);
 
   useEffect(() => {
     if (isMuted) {

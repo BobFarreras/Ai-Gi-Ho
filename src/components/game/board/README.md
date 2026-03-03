@@ -84,9 +84,11 @@ Guía rápida para entender la lógica de tablero y batalla.
 
 1. `useGameAudio` reproduce efectos según `combatLog`.
 2. El fin de partida muestra `DuelResultOverlay` central y bloquea acciones.
-3. El jugador puede activar/desactivar audio global con botón `mute` junto al historial.
-4. El catálogo de audio y volúmenes está centralizado en `src/core/config/audio-catalog.ts`.
-5. Eventos con sonido específico:
+3. Al finalizar duelo se detiene y reinicia el soundtrack base antes de reproducir resultado.
+4. Cada nueva partida/reinicio crea mazos barajados para ambos jugadores.
+5. El jugador puede activar/desactivar audio global con botón `mute` junto al historial.
+6. El catálogo de audio y volúmenes está centralizado en `src/core/config/audio-catalog.ts`.
+7. Eventos con sonido específico:
    - turno/subturno (banner),
    - ataque/magia/fusión,
    - daño y pérdida de LP,

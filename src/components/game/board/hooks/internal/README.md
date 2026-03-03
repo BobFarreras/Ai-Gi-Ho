@@ -12,7 +12,7 @@ Submódulos internos para reducir complejidad de `useBoard`.
    - Orquesta el estado inicial de partida local.
 
 2. `initialDeckFactory.ts`
-   - Construye mazos base de 20 cartas y entidades iniciales del rival.
+   - Construye mazos base de 20 cartas y los baraja al crear la partida.
 
 3. `boardError.ts`
    - Mapeo de errores de dominio a errores de UI (`IBoardUiError`).
@@ -28,6 +28,10 @@ Submódulos internos para reducir complejidad de `useBoard`.
 6. `usePlayerActions.ts`
    - Acciones del jugador (play card, entity click, selección).
    - Validaciones de turno y animación.
+
+7. `useGameAudio.ts`
+   - Gestiona SFX y soundtrack principal.
+   - Al finalizar duelo, detiene y reinicia el soundtrack base antes de reproducir resultado.
 
 ## Reglas de mantenimiento
 

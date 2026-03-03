@@ -1,7 +1,7 @@
 import { GameEngine, GameState } from "@/core/use-cases/GameEngine";
 import { createPlayerDeckA, createPlayerDeckB } from "./initialDeckFactory";
 
-function createInitialBoardState(): GameState {
+export function createInitialBoardState(): GameState {
   const baseState = GameEngine.createInitialGameState({
     playerA: {
       id: "p1",
@@ -19,5 +19,3 @@ function createInitialBoardState(): GameState {
 
   return baseState;
 }
-
-export const initialGameState: GameState = createInitialBoardState();

@@ -5,13 +5,13 @@ import { GameEngine, GameState } from "@/core/use-cases/GameEngine";
 import { HeuristicOpponentStrategy } from "@/core/services/opponent/HeuristicOpponentStrategy";
 import { resolveDifficultyFromCampaign } from "@/core/services/opponent/difficulty/resolveDifficultyFromCampaign";
 import { ICampaignProgress } from "@/core/services/opponent/difficulty/types";
-import { initialGameState } from "./internal/boardInitialState";
+import { createInitialBoardState } from "./internal/boardInitialState";
 import { IBoardUiError, toBoardUiError } from "./internal/boardError";
 import { useOpponentTurn } from "./internal/useOpponentTurn";
 import { usePlayerActions } from "./internal/usePlayerActions";
 
 export function useBoard() {
-  const [gameState, setGameState] = useState<GameState>(initialGameState);
+  const [gameState, setGameState] = useState<GameState>(() => createInitialBoardState());
   const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
   const [playingCard, setPlayingCard] = useState<ICard | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -83,8 +83,9 @@ export function useBoard() {
   }, []);
 
   const restartMatch = useCallback(() => {
-    setGameState(initialGameState);
-    gameStateRef.current = initialGameState;
+    const freshState = createInitialBoardState();
+    setGameState(freshState);
+    gameStateRef.current = freshState;
     clearSelection();
     clearError();
   }, [clearError, clearSelection]);

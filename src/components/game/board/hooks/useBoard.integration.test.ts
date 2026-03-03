@@ -15,34 +15,50 @@ describe("useBoard integración", () => {
     vi.useRealTimers();
   });
 
-  it("debería activar una ejecución y aplicar su efecto al rival", async () => {
+  it("debería jugar una carta válida desde la mano del jugador", async () => {
     const { result } = renderHook(() => useBoard());
-    const spellCard = result.current.gameState.playerA.hand.find((card) => card.id === "exec-direct-damage-900");
+    const playableCard = result.current.gameState.playerA.hand.find((card) => card.type === "ENTITY" || card.type === "EXECUTION");
 
-    expect(spellCard).toBeDefined();
+    expect(playableCard).toBeDefined();
+    if (!playableCard) {
+      throw new Error("La mano inicial debe incluir al menos una carta ENTITY o EXECUTION.");
+    }
     act(() => {
-      result.current.toggleCardSelection(spellCard!, createMouseEvent());
+      result.current.toggleCardSelection(playableCard, createMouseEvent());
     });
 
     await act(async () => {
-      const pendingAction = result.current.executePlayAction("ACTIVATE", createMouseEvent());
+      const mode = playableCard.type === "ENTITY" ? "ATTACK" : "ACTIVATE";
+      const pendingAction = result.current.executePlayAction(mode, createMouseEvent());
       await vi.advanceTimersByTimeAsync(1500);
       await pendingAction;
     });
 
-    expect(result.current.gameState.playerB.healthPoints).toBe(7100);
-    expect(result.current.gameState.playerA.activeExecutions).toHaveLength(0);
-    expect(result.current.gameState.playerA.graveyard.some((card) => card.id === "exec-direct-damage-900")).toBe(true);
+    expect(result.current.gameState.playerA.hand.some((card) => card.id === playableCard.id)).toBe(false);
+    if (playableCard.type === "ENTITY") {
+      expect(result.current.gameState.playerA.activeEntities.some((entity) => entity.card.id === playableCard.id)).toBe(true);
+    } else {
+      expect(result.current.gameState.playerA.graveyard.some((card) => card.id === playableCard.id)).toBe(true);
+    }
   });
 
   it("debería bloquear ataque directo del jugador inicial durante el primer turno", async () => {
     const { result } = renderHook(() => useBoard());
-    const entityCard = result.current.gameState.playerA.hand.find((card) => card.type === "ENTITY");
+    let entityCard = result.current.gameState.playerA.hand.find((card) => card.type === "ENTITY");
+    for (let attempt = 0; attempt < 8 && !entityCard; attempt += 1) {
+      act(() => {
+        result.current.restartMatch();
+      });
+      entityCard = result.current.gameState.playerA.hand.find((card) => card.type === "ENTITY");
+    }
 
     expect(entityCard).toBeDefined();
+    if (!entityCard) {
+      throw new Error("No se encontró entidad en mano tras varios reinicios de prueba.");
+    }
 
     act(() => {
-      result.current.toggleCardSelection(entityCard!, createMouseEvent());
+      result.current.toggleCardSelection(entityCard, createMouseEvent());
     });
 
     await act(async () => {
