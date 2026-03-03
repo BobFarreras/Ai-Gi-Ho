@@ -32,6 +32,7 @@ Casos de uso puros del motor, organizados por responsabilidad.
 6. `fusion/`
    - `fusion-recipes.ts`
    - `fuse-cards.ts`
+   - `internal/`: validación de contexto, aplicación de resultado y logging.
 
 7. `logging/`
    - `combat-log.ts`

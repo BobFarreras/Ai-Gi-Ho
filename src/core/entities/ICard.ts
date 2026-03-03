@@ -52,6 +52,12 @@ export interface INegateAttackAndDestroyAttackerEffect {
   action: "NEGATE_ATTACK_AND_DESTROY_ATTACKER";
 }
 
+export interface IFusionSummonEffect {
+  action: "FUSION_SUMMON";
+  recipeId: string;
+  materialsRequired: number;
+}
+
 export type ICardEffect =
   | IDamageEffect
   | IHealEffect
@@ -61,7 +67,8 @@ export type ICardEffect =
   | IBoostAttackByArchetypeEffect
   | IReduceOpponentAttackEffect
   | IReduceOpponentDefenseEffect
-  | INegateAttackAndDestroyAttackerEffect;
+  | INegateAttackAndDestroyAttackerEffect
+  | IFusionSummonEffect;
 
 export interface ICard {
   readonly id: string;
