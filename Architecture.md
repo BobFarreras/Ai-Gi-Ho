@@ -24,13 +24,18 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
  │       │   ├── Board.test.tsx
  │       │   └── index.tsx
  │       └── card/
+ │   └── hub/                              # Dashboard central (ciudad) y accesos a módulos
  │
  ├── core/
  │   ├── entities/                         # Tipos de dominio
+ │   │   └── hub/                          # Entidades del mundo central
  │   ├── errors/                           # AppError + códigos tipados
+ │   ├── repositories/                     # Contratos de acceso a datos de dominio
  │   ├── services/
  │   │   └── opponent/                     # IA heurística (sin LLM)
+ │   │   └── hub/                          # Orquestación de progreso y desbloqueos del dashboard
  │   └── use-cases/
+ │       └── hub/                          # Casos de uso del dashboard central
  │       ├── game-engine/                  # Casos de uso modulares por dominio
  │       │   ├── state/
  │       │   ├── actions/
@@ -45,7 +50,8 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
  │       ├── CombatService.ts
  │       └── GameEngine.ts                 # Fachada estable
  │
- ├── infrastructure/                       # Integraciones externas (pendiente)
+ ├── infrastructure/                       # Integraciones externas (DB/API/adaptadores)
+ │   └── repositories/                     # Implementaciones de contratos (mock/in-memory/real)
  └── lib/
 ```
 
