@@ -1,9 +1,11 @@
+// src/components/game/board/battlefield/SlotGrid.tsx - Renderiza slots de tablero y aplica animaciones según modo y estado visual de entidad.
 import { AnimatePresence, motion } from "framer-motion";
 import { ICard } from "@/core/entities/ICard";
 import { IBoardEntity } from "@/core/entities/IPlayer";
 import { cn } from "@/lib/utils";
 import { Card } from "../../card/Card";
 import { CardBack } from "../../card/CardBack";
+import { resolveEntityVisibility } from "./internal/entity-visibility";
 import { BuffImpactVfx } from "./BuffImpactVfx";
 import { ExecutionActivationVfx } from "./ExecutionActivationVfx";
 
@@ -48,8 +50,7 @@ export function SlotGrid({
         const isHighlighted = entity ? highlightedEntityIds.includes(entity.instanceId) : false;
         const isSelected = entity ? selectedEntityIds.includes(entity.instanceId) : false;
         const isBuffed = entity ? Boolean(buffEventId) && buffedEntityIds.includes(entity.instanceId) : false;
-        const isFaceDown = (entity?.mode === "DEFENSE" || entity?.mode === "SET") && !isRevealed;
-        const isHorizontal = entity?.mode === "DEFENSE" || (entity?.mode === "SET" && entity.card.type === "ENTITY");
+        const visibility = resolveEntityVisibility(entity, isRevealed);
         const targetX = -120 - index * 105;
 
         return (
@@ -71,8 +72,8 @@ export function SlotGrid({
                     scale: isAttacking ? 0.38 : isActivating ? 0.35 : 0.28,
                     y: isAttacking ? (isOpponentSide ? 30 : -30) : isActivating ? -20 : 0,
                     zIndex: isAttacking || isActivating ? 50 : 10,
-                    rotateY: isFaceDown ? 180 : 0,
-                    rotateZ: isHorizontal ? -90 : 0,
+                    rotateY: visibility.isFaceDown ? 180 : 0,
+                    rotateZ: visibility.isHorizontal ? -90 : 0,
                   }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   exit={{ opacity: [1, 0], scale: [0.28, 0.1], x: targetX, y: 0, transition: { duration: 0.4 } }}

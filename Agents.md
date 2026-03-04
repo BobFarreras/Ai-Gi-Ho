@@ -1,3 +1,4 @@
+<!-- Agents.md - Reglas obligatorias de ingeniería, arquitectura y calidad del proyecto. -->
 # SYSTEM RULES & GUIDELINES (Agents.md)
 
 ## 1. Language Policy (The "English-Code, Spanish-Docs" Rule)
@@ -74,3 +75,12 @@
   * historial visual,
   * carteleras de estado,
   * efectos de sonido/feedback.
+
+## 14. Cabecera obligatoria por archivo (Ruta + Descripción)
+* **Primera línea obligatoria:** Todo archivo nuevo o modificado debe incluir en su primera línea un comentario con la ruta del archivo y una descripción breve de su responsabilidad.
+* **Formato por tipo de archivo:**
+  * `ts`, `tsx`, `js`, `jsx`: `// src/ruta/archivo.ext - Descripción breve.`
+  * `md`: `<!-- ruta/archivo.md - Descripción breve. -->`
+  * `css`: `/* src/ruta/archivo.css - Descripción breve. */`
+* **Objetivo:** Mejorar trazabilidad, lectura rápida en PR y contexto inmediato al abrir archivos.
+* **Gate de calidad:** Un archivo sin cabecera de ruta y descripción se considera incumplimiento de documentación y no debe mergearse.

@@ -1,3 +1,4 @@
+<!-- MOTOR_JUEGO.md - Reglas funcionales implementadas del motor de juego y flujo de combate/fusión. -->
 # AI-GI-OH! - Motor de Juego
 
 Reglas implementadas en `GameEngine`, `CombatService` y estrategia de turno del oponente (`core/services/opponent`).
@@ -172,3 +173,8 @@ El motor registra eventos técnicos para trazabilidad y UI:
    - reproducción de vídeo completo (con fallback máximo de seguridad),
    - aparición de la carta fusionada desde el centro hacia su slot final del tablero.
 5. Al terminar la segunda etapa se libera el lock de interacción.
+
+## 14. Convención documental de cabecera
+
+1. Primera línea obligatoria por archivo: comentario con ruta + descripción corta.
+2. La convención busca reducir ambigüedad durante refactors del motor y acelerar code review.

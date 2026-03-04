@@ -1,3 +1,4 @@
+// src/core/use-cases/game-engine/actions/resolve-execution.ts - Resuelve ejecuciones activas, incluyendo trampas reactivas y flujo de fusión.
 import { IPlayer } from "@/core/entities/IPlayer";
 import { GameRuleError } from "@/core/errors/GameRuleError";
 import { NotFoundError } from "@/core/errors/NotFoundError";
@@ -9,6 +10,16 @@ import { startFusionSummonFromExecution } from "@/core/use-cases/game-engine/fus
 import { assignPlayers, getPlayerPair } from "@/core/use-cases/game-engine/state/player-utils";
 import { GameState } from "@/core/use-cases/game-engine/state/types";
 
+/**
+ * Resuelve una carta de ejecución en estado ACTIVATE para el jugador indicado.
+ * @param state Estado actual del duelo.
+ * @param playerId Jugador activo que intenta resolver la ejecución.
+ * @param executionInstanceId Instancia concreta en la zona de ejecuciones.
+ * @returns Nuevo estado tras aplicar trampas, efecto y logs.
+ * @throws NotFoundError Si la ejecución no existe en tablero.
+ * @throws GameRuleError Si la carta no tiene efecto definido.
+ * @throws ValidationError Si la instancia no corresponde a una ejecución válida.
+ */
 export function resolveExecution(state: GameState, playerId: string, executionInstanceId: string): GameState {
   let withTrapResolution = state;
   const initialPair = getPlayerPair(state, playerId);

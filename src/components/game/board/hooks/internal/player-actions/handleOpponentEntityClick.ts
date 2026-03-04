@@ -1,3 +1,4 @@
+// src/components/game/board/hooks/internal/player-actions/handleOpponentEntityClick.ts - Gestiona clics sobre entidades rivales cuando existe un atacante seleccionado.
 import { IBoardEntity } from "@/core/entities/IPlayer";
 import { GameEngine } from "@/core/use-cases/GameEngine";
 import { sleep } from "../sleep";
@@ -15,9 +16,15 @@ interface IHandleOpponentEntityClickParams extends Pick<
   | "setIsAnimating"
   | "setRevealedEntities"
 > {
+  /** Entidad objetivo del rival; `null` representa intento de ataque directo. */
   entity: IBoardEntity | null;
 }
 
+/**
+ * Resuelve la secuencia de ataque contra objetivo rival o ataque directo.
+ * @param params Dependencias de estado, transición y entidad objetivo.
+ * @returns `handled` cuando consume el clic; `pass` cuando no hay atacante activo.
+ */
 export async function handleOpponentEntityClick({
   entity,
   activeAttackerId,
