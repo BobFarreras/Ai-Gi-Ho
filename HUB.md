@@ -31,6 +31,19 @@ El hub es la puerta de entrada a los modos principales del juego fuera del duelo
 4. `/hub/story`
 5. `/hub/multiplayer`
 
+## Mi Home (Deck Builder)
+
+1. El deck del jugador usa `20` slots fijos.
+2. No se permiten más de `3` copias de una misma carta (`card.id`).
+3. El guardado del deck falla si existe cualquier slot vacío.
+4. `Mi Home` trabaja con dos fuentes:
+   - Deck actual del jugador.
+   - Almacén/Colección de cartas disponibles.
+5. La UI se divide en:
+   - Panel `Deck` (20 slots interactivos y reordenables),
+   - Panel `Almacén` (cartas disponibles para añadir).
+6. Las acciones de UI se orquestan vía `deck-builder-actions.ts` reutilizando casos de uso de dominio.
+
 ## Assets HUD esperados
 
 Ruta: `public/assets/hud/`

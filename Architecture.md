@@ -102,6 +102,21 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
 4. `getHubSectionViewModel` resuelve en servidor el estado de cada sección antes de renderizar su pantalla.
 5. `HubSectionScreen` unifica la presentación base de módulos para evitar duplicación de layout.
 
+## Subdominio Mi Home (Deck Builder)
+
+1. Entidades: `IDeck`, `IDeckCardSlot`, `ICollectionCard`.
+2. Contrato de datos: `IDeckRepository` (deck + colección).
+3. Reglas puras en `deck-rules.ts`:
+   - deck de `20` cartas,
+   - máximo `3` copias por `card.id`.
+4. Casos de uso base:
+   - `GetHomeDeckBuilderDataUseCase`,
+   - `AddCardToDeckUseCase`,
+   - `RemoveCardFromDeckUseCase`,
+   - `MoveDeckCardUseCase`,
+   - `SaveDeckUseCase`.
+5. Capa `services/home/deck-builder` adapta la interacción de UI reutilizando los casos de uso sin mover lógica al componente React.
+
 ## Eventos y observabilidad
 
 1. El motor añade eventos en `combatLog` desde los casos de uso (`playCard`, `executeAttack`, `nextPhase`, etc.).
