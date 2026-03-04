@@ -6,7 +6,6 @@ import { IBoardUiError } from "../../hooks/internal/boardError";
 import { BattleBannerCenter } from "../BattleBannerCenter";
 import { FusionCinematicLayer } from "../FusionCinematicLayer";
 import { GraveyardBrowser } from "../GraveyardBrowser";
-import { GraveyardTransitionLayer } from "../GraveyardTransitionLayer";
 
 interface BoardStatusOverlaysProps {
   lastError: IBoardUiError | null;
@@ -24,6 +23,7 @@ interface BoardStatusOverlaysProps {
   onCloseError: () => void;
   onCloseGraveyard: () => void;
   onPreviewCard: (card: ICard) => void;
+ 
 }
 
 export function BoardStatusOverlays({
@@ -42,11 +42,12 @@ export function BoardStatusOverlays({
   onCloseError,
   onCloseGraveyard,
   onPreviewCard,
+  
 }: BoardStatusOverlaysProps) {
   return (
     <>
       {lastError && (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[140] w-[92%] max-w-xl bg-red-950/90 border border-red-500/60 text-red-100 px-5 py-4 rounded-xl shadow-[0_0_35px_rgba(239,68,68,0.4)]">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-140 w-[92%] max-w-xl bg-red-950/90 border border-red-500/60 text-red-100 px-5 py-4 rounded-xl shadow-[0_0_35px_rgba(239,68,68,0.4)]">
           <div className="flex items-start gap-3">
             <div className="flex-1">
               <p className="text-xs font-black tracking-wider uppercase text-red-300">{lastError.code}</p>
@@ -67,7 +68,7 @@ export function BoardStatusOverlays({
       )}
 
       {pendingActionHint && (
-        <div className="absolute top-28 left-1/2 -translate-x-1/2 z-[130] w-[92%] max-w-3xl bg-amber-950/85 border border-amber-400/50 text-amber-100 px-5 py-3 rounded-xl shadow-[0_0_35px_rgba(251,191,36,0.25)]">
+        <div className="absolute top-28 left-1/2 -translate-x-1/2 z-130 w-[92%] max-w-3xl bg-amber-950/85 border border-amber-400/50 text-amber-100 px-5 py-3 rounded-xl shadow-[0_0_35px_rgba(251,191,36,0.25)]">
           <p className="text-xs font-black tracking-wider uppercase text-amber-300">Acción obligatoria</p>
           <p className="text-sm font-semibold">{pendingActionHint}</p>
         </div>
@@ -82,7 +83,7 @@ export function BoardStatusOverlays({
           }
         }}
       />
-      <GraveyardTransitionLayer events={combatLog} playerAId={playerAId} playerBId={playerBId} />
+   
       <GraveyardBrowser
         isOpen={graveyardView !== null}
         ownerName={graveyardOwnerName}
