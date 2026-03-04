@@ -1,9 +1,17 @@
+// src/core/use-cases/game-engine/fusion/start-fusion-summon-from-execution.ts - Inicia la selección de materiales para una fusión activada desde ejecución.
 import { GameRuleError } from "@/core/errors/GameRuleError";
 import { NotFoundError } from "@/core/errors/NotFoundError";
 import { ValidationError } from "@/core/errors/ValidationError";
 import { getPlayerPair } from "@/core/use-cases/game-engine/state/player-utils";
 import { GameState } from "@/core/use-cases/game-engine/state/types";
 
+/**
+ * Crea una acción pendiente de selección de materiales cuando una ejecución de fusión es válida.
+ * @param state Estado global de la partida.
+ * @param playerId Jugador que activa la ejecución de fusión.
+ * @param executionInstanceId Instancia de ejecución activa que contiene el efecto de fusión.
+ * @param recipeId Identificador de receta de fusión esperado por la ejecución.
+ */
 export function startFusionSummonFromExecution(
   state: GameState,
   playerId: string,

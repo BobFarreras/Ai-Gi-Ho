@@ -1,22 +1,52 @@
 "use client";
 
-import { History, Volume2, VolumeX } from "lucide-react";
+import { History, Pause, Play, Swords, Volume2, VolumeX } from "lucide-react";
 
 interface BoardActionButtonsProps {
   isMuted: boolean;
+  isPaused: boolean;
   isHistoryOpen: boolean;
+  canSetSelectedEntityToAttack: boolean;
   onToggleMute: () => void;
+  onTogglePause: () => void;
   onToggleHistory: () => void;
+  onSetSelectedEntityToAttack: () => void;
 }
 
 export function BoardActionButtons({
   isMuted,
+  isPaused,
   isHistoryOpen,
+  canSetSelectedEntityToAttack,
   onToggleMute,
+  onTogglePause,
   onToggleHistory,
+  onSetSelectedEntityToAttack,
 }: BoardActionButtonsProps) {
   return (
     <div className="absolute bottom-6 right-6 z-50 flex items-center gap-3">
+      {canSetSelectedEntityToAttack && (
+        <button
+          aria-label="Cambiar entidad seleccionada a ataque"
+          onClick={(event) => {
+            event.stopPropagation();
+            onSetSelectedEntityToAttack();
+          }}
+          className="bg-zinc-950/90 border-2 border-amber-500/60 text-amber-300 p-4 rounded-full hover:bg-amber-950 hover:shadow-[0_0_20px_rgba(251,191,36,0.6)] transition-all"
+        >
+          <Swords size={24} />
+        </button>
+      )}
+      <button
+        aria-label={isPaused ? "Reanudar partida" : "Pausar partida"}
+        onClick={(event) => {
+          event.stopPropagation();
+          onTogglePause();
+        }}
+        className="bg-zinc-950/90 border-2 border-emerald-500/60 text-emerald-300 p-4 rounded-full hover:bg-emerald-950 hover:shadow-[0_0_20px_rgba(16,185,129,0.6)] transition-all"
+      >
+        {isPaused ? <Play size={24} /> : <Pause size={24} />}
+      </button>
       <button
         aria-label={isMuted ? "Activar sonido" : "Silenciar sonido"}
         onClick={(event) => {

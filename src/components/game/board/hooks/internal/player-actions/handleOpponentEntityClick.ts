@@ -1,3 +1,4 @@
+// src/components/game/board/hooks/internal/player-actions/handleOpponentEntityClick.ts - Gestiona clics sobre entidades rivales cuando existe un atacante seleccionado.
 import { IBoardEntity } from "@/core/entities/IPlayer";
 import { GameEngine } from "@/core/use-cases/GameEngine";
 import { sleep } from "../sleep";
@@ -15,9 +16,15 @@ interface IHandleOpponentEntityClickParams extends Pick<
   | "setIsAnimating"
   | "setRevealedEntities"
 > {
+  /** Entidad objetivo del rival; `null` representa intento de ataque directo. */
   entity: IBoardEntity | null;
 }
 
+/**
+ * Resuelve la secuencia de ataque contra objetivo rival o ataque directo.
+ * @param params Dependencias de estado, transición y entidad objetivo.
+ * @returns `handled` cuando consume el clic; `pass` cuando no hay atacante activo.
+ */
 export async function handleOpponentEntityClick({
   entity,
   activeAttackerId,
@@ -37,10 +44,10 @@ export async function handleOpponentEntityClick({
   const attackerId = activeAttackerId;
   const targetId = entity?.instanceId;
   clearSelection();
-
-  if (entity && (entity.mode === "DEFENSE" || entity.mode === "SET") && targetId) {
+  const shouldRevealTargetBeforeBattle = Boolean(entity && entity.mode === "SET" && targetId);
+  if (shouldRevealTargetBeforeBattle && targetId) {
     setRevealedEntities((previous) => addRevealedId(previous, targetId));
-    await sleep(800);
+    await sleep(320);
   }
 
   const reactiveTrap = findReactiveTrap(gameState, gameState.playerB.id, "ON_OPPONENT_ATTACK_DECLARED");
@@ -52,7 +59,8 @@ export async function handleOpponentEntityClick({
   }
 
   applyTransition((state) => GameEngine.executeAttack(state, state.playerA.id, attackerId, targetId));
-  if (targetId) {
+  if (shouldRevealTargetBeforeBattle && targetId) {
+    await sleep(PLAYER_POST_RESOLUTION_MS);
     setRevealedEntities((previous) => removeRevealedId(previous, targetId));
   }
   if (reactiveTrap) {

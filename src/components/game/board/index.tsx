@@ -32,6 +32,8 @@ export function Board() {
     handleEntityClick,
     advancePhase,
     resolvePendingHandDiscard,
+    setSelectedEntityToAttack,
+    canSetSelectedEntityToAttack,
     isPlayerTurn,
     handleTimerExpired,
     lastDamageTargetPlayerId,
@@ -47,9 +49,11 @@ export function Board() {
     winnerPlayerId,
     restartMatch,
     isMuted,
+    isPaused,
     isFusionCinematicActive,
     setIsFusionCinematicActive,
     toggleMute,
+    togglePause,
   } = useBoard();
 
   const player = gameState.playerA;
@@ -68,11 +72,13 @@ export function Board() {
     hasSelectedCard: Boolean(selectedCard),
     lastErrorCode: lastError?.code ?? null,
     isMuted,
+    isPaused,
   });
+
 
   return (
     <div className="relative w-full h-screen bg-[#020305] overflow-hidden font-sans cursor-crosshair" onClick={clearSelection}>
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:100px_100px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-size-[100px_100px] pointer-events-none" />
       <div className="absolute inset-0 shadow-[inset_0_0_300px_rgba(0,0,0,1)] pointer-events-none" />
       <BoardStatusOverlays
         lastError={lastError}
@@ -82,6 +88,8 @@ export function Board() {
         playerAName={gameState.playerA.name}
         playerBId={gameState.playerB.id}
         playerBName={gameState.playerB.name}
+        isPaused={isPaused}
+        onResumePause={() => { playButtonClick(); togglePause(); }}
         isFusionCinematicActive={isFusionCinematicActive}
         setIsFusionCinematicActive={setIsFusionCinematicActive}
         graveyardView={graveyardView}
@@ -90,6 +98,7 @@ export function Board() {
         onCloseError={() => { playButtonClick(); clearError(); }}
         onCloseGraveyard={() => setGraveyardView(null)}
         onPreviewCard={previewCard}
+
       />
       <BoardTopBar
         turn={gameState.turn}
@@ -98,6 +107,7 @@ export function Board() {
         pendingActionType={gameState.pendingTurnAction?.type ?? null}
         pendingActionPlayerId={gameState.pendingTurnAction?.playerId ?? null}
         isPlayerTurn={isPlayerTurn}
+        isPaused={isPaused}
         onAdvancePhase={advancePhase}
         onTimeUp={() => { playTimerExpired(); handleTimerExpired(); }}
         onWarning={playTimerWarning}
@@ -119,9 +129,13 @@ export function Board() {
       />
       <BoardActionButtons
         isMuted={isMuted}
+        isPaused={isPaused}
         isHistoryOpen={isHistoryOpen}
+        canSetSelectedEntityToAttack={canSetSelectedEntityToAttack}
         onToggleMute={() => { playButtonClick(); toggleMute(); }}
+        onTogglePause={() => { playButtonClick(); togglePause(); }}
         onToggleHistory={() => { playButtonClick(); setIsHistoryOpen((previous) => !previous); }}
+        onSetSelectedEntityToAttack={() => { playButtonClick(); setSelectedEntityToAttack(); }}
       />
       <DuelResultOverlay winnerPlayerId={winnerPlayerId} playerA={player} playerB={opponent} onRestart={restartMatch} />
     </div>

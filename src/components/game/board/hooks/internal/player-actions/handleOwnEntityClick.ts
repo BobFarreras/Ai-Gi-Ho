@@ -1,3 +1,4 @@
+// src/components/game/board/hooks/internal/player-actions/handleOwnEntityClick.ts - Gestiona clics sobre entidades propias según fase, acciones pendientes y animaciones.
 import { IBoardEntity } from "@/core/entities/IPlayer";
 import { GameEngine } from "@/core/use-cases/GameEngine";
 import { sleep } from "../sleep";
@@ -119,7 +120,14 @@ export async function handleOwnEntityClick({
     return "handled";
   }
 
-  if (entity.mode !== "ATTACK" || entity.hasAttackedThisTurn) return "handled";
+  if (entity.hasAttackedThisTurn) return "handled";
+  if (entity.mode === "DEFENSE" || entity.mode === "SET") {
+    setSelectedCard(entity.card);
+    setPlayingCard(null);
+    setLastError(null);
+    return "handled";
+  }
+  if (entity.mode !== "ATTACK") return "handled";
   if (activeAttackerId === entity.instanceId) {
     const changedState = applyTransition((state) => GameEngine.changeEntityMode(state, state.playerA.id, entity.instanceId, "DEFENSE"));
     if (changedState) {

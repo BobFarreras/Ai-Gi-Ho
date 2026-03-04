@@ -1,3 +1,4 @@
+<!-- Architecture.md - Descripción de la arquitectura por capas, reglas de dependencia y flujo del juego. -->
 # Arquitectura del Proyecto
 
 Arquitectura en capas orientada a dominio con separación estricta entre UI, motor de reglas, estrategia de oponente e integraciones externas.
@@ -106,3 +107,10 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
 10. `core/errors/README.md`: catálogo de errores tipados.
 11. `core/data/mock-cards/README.md`: dataset de cartas mock para pruebas.
 12. `core/config/README.md`: configuración central (audio y futuros catálogos).
+
+## Convención documental obligatoria
+
+1. Todo archivo del proyecto debe empezar con una primera línea comentada que incluya:
+   - ruta del archivo,
+   - descripción breve de su responsabilidad.
+2. Esta convención aplica tanto a código como a documentación para mantener trazabilidad homogénea en PR y revisiones técnicas.
