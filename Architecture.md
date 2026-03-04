@@ -82,6 +82,13 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
 2. Extensión futura LLM: nueva implementación de `IOpponentStrategy` sin tocar UI.
 3. Multijugador futuro: sustitución del controlador rival por controlador remoto sin romper el motor.
 
+## Subdominio Hub (fase inicial)
+
+1. `HubService` centraliza reglas de bloqueo/desbloqueo del dashboard.
+2. `HubAccessPolicy` define condiciones de acceso por progreso (tutorial/medallas).
+3. `GetHubDashboardUseCase`, `GetHubMapUseCase` y `GetAvailableSectionsUseCase` exponen lecturas específicas sin lógica en UI.
+4. `IHubRepository` abstrae acceso a progreso, secciones y nodos del mapa; `InMemoryHubRepository` es el adaptador temporal.
+
 ## Eventos y observabilidad
 
 1. El motor añade eventos en `combatLog` desde los casos de uso (`playCard`, `executeAttack`, `nextPhase`, etc.).

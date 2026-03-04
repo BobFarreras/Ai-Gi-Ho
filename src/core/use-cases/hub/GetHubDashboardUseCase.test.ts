@@ -5,10 +5,10 @@ import { InMemoryHubRepository } from "@/infrastructure/repositories/InMemoryHub
 import { GetHubDashboardUseCase } from "./GetHubDashboardUseCase";
 
 describe("GetHubDashboardUseCase", () => {
-  it("bloquea multijugador si el tutorial no está completado", async () => {
+  it("bloquea multijugador si el jugador no tiene medallas", async () => {
     const repository = new InMemoryHubRepository({
       playerId: "player-a",
-      medals: 1,
+      medals: 0,
       storyChapter: 1,
       hasCompletedTutorial: false,
     });

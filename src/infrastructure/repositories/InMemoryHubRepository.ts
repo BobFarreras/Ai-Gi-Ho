@@ -1,4 +1,5 @@
 // src/infrastructure/repositories/InMemoryHubRepository.ts - Repositorio temporal en memoria para poblar el dashboard central.
+import { IHubMapNode } from "@/core/entities/hub/IHubMapNode";
 import { IHubSection } from "@/core/entities/hub/IHubSection";
 import { IPlayerHubProgress } from "@/core/entities/hub/IPlayerHubProgress";
 import { IHubRepository } from "@/core/repositories/IHubRepository";
@@ -30,6 +31,14 @@ const DEFAULT_PROGRESS: IPlayerHubProgress = {
   hasCompletedTutorial: false,
 };
 
+const HUB_MAP_NODES: ReadonlyArray<IHubMapNode> = [
+  { id: "node-home", sectionType: "HOME", positionX: 50, positionY: 78, districtLabel: "Distrito Base" },
+  { id: "node-market", sectionType: "MARKET", positionX: 24, positionY: 58, districtLabel: "Distrito Comercial" },
+  { id: "node-training", sectionType: "TRAINING", positionX: 74, positionY: 56, districtLabel: "Dojo Táctico" },
+  { id: "node-story", sectionType: "STORY", positionX: 36, positionY: 30, districtLabel: "Archivo de Historia" },
+  { id: "node-multiplayer", sectionType: "MULTIPLAYER", positionX: 66, positionY: 26, districtLabel: "Portal Arena" },
+];
+
 export class InMemoryHubRepository implements IHubRepository {
   constructor(private readonly progress: IPlayerHubProgress = DEFAULT_PROGRESS) {}
 
@@ -40,11 +49,17 @@ export class InMemoryHubRepository implements IHubRepository {
     };
   }
 
-  async getSections(): Promise<IHubSection[]> {
+  async getSections(playerId: string): Promise<IHubSection[]> {
+    void playerId;
     return HUB_SECTIONS.map((section) => ({
       ...section,
       isLocked: false,
       lockReason: null,
     }));
+  }
+
+  async getMapNodes(playerId: string): Promise<IHubMapNode[]> {
+    void playerId;
+    return HUB_MAP_NODES.map((node) => ({ ...node }));
   }
 }
