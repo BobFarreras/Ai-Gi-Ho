@@ -1,16 +1,19 @@
+// src/components/game/board/ui/DuelResultOverlay.tsx - Overlay final de duelo con resultado y resumen de experiencia de cartas.
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { IPlayer } from "@/core/entities/IPlayer";
+import type { IAppliedCardExperienceResult } from "@/core/use-cases/progression/ApplyBattleCardExperienceUseCase";
 
 interface DuelResultOverlayProps {
-  winnerPlayerId: string | null;
+  winnerPlayerId: string | "DRAW" | null;
   playerA: IPlayer;
   playerB: IPlayer;
+  battleExperienceSummary: IAppliedCardExperienceResult[];
   onRestart: () => void;
 }
 
-function resolveResultText(winnerPlayerId: string | null, playerA: IPlayer, playerB: IPlayer): string {
+function resolveResultText(winnerPlayerId: string | "DRAW" | null, playerA: IPlayer, playerB: IPlayer): string {
   if (!winnerPlayerId) return "";
   if (winnerPlayerId === "DRAW") return "EMPATE";
   if (winnerPlayerId === playerA.id) return `VICTORIA DE ${playerA.name}`;
@@ -18,7 +21,7 @@ function resolveResultText(winnerPlayerId: string | null, playerA: IPlayer, play
   return "FIN DEL DUELO";
 }
 
-export function DuelResultOverlay({ winnerPlayerId, playerA, playerB, onRestart }: DuelResultOverlayProps) {
+export function DuelResultOverlay({ winnerPlayerId, playerA, playerB, battleExperienceSummary, onRestart }: DuelResultOverlayProps) {
   const text = resolveResultText(winnerPlayerId, playerA, playerB);
   const isVisible = Boolean(winnerPlayerId);
 
@@ -42,6 +45,18 @@ export function DuelResultOverlay({ winnerPlayerId, playerA, playerB, onRestart 
               {text}
             </h2>
             <p className="text-zinc-300 text-sm mb-8">Pulsa para reiniciar el duelo.</p>
+            {battleExperienceSummary.length > 0 && (
+              <div className="mb-6 rounded-xl border border-cyan-300/30 bg-cyan-950/30 p-3 text-left">
+                <p className="mb-2 text-xs font-black uppercase tracking-[0.2em] text-cyan-200">Experiencia de cartas</p>
+                <div className="max-h-36 overflow-y-auto pr-1">
+                  {battleExperienceSummary.map((entry) => (
+                    <p key={entry.cardId} className="text-xs text-cyan-50/90">
+                      {entry.cardId}: +{entry.gainedXp} EXP · Lv {entry.oldLevel} → {entry.newLevel}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            )}
             <button
               aria-label="Reiniciar duelo"
               onClick={onRestart}

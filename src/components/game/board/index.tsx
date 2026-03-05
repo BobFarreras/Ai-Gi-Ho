@@ -40,6 +40,7 @@ export function Board({ initialPlayerDeck }: IBoardProps) {
     resolvePendingHandDiscard,
     setSelectedEntityToAttack,
     canSetSelectedEntityToAttack,
+    battleExperienceSummary,
     isPlayerTurn,
     handleTimerExpired,
     lastDamageTargetPlayerId,
@@ -143,7 +144,13 @@ export function Board({ initialPlayerDeck }: IBoardProps) {
         onToggleHistory={() => { playButtonClick(); setIsHistoryOpen((previous) => !previous); }}
         onSetSelectedEntityToAttack={() => { playButtonClick(); setSelectedEntityToAttack(); }}
       />
-      <DuelResultOverlay winnerPlayerId={winnerPlayerId} playerA={player} playerB={opponent} onRestart={restartMatch} />
+      <DuelResultOverlay
+        winnerPlayerId={winnerPlayerId}
+        playerA={player}
+        playerB={opponent}
+        battleExperienceSummary={battleExperienceSummary}
+        onRestart={restartMatch}
+      />
     </div>
   );
 }

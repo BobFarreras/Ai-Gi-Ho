@@ -30,6 +30,24 @@ export function getTotalXpRequiredToReachLevel(level: number): number {
   return total;
 }
 
+export function getMaxTotalXpForCardLeveling(): number {
+  return getTotalXpRequiredToReachLevel(MAX_CARD_LEVEL);
+}
+
+export function clampCardTotalXp(totalXp: number): number {
+  const safeXp = Number.isFinite(totalXp) ? Math.max(0, Math.floor(totalXp)) : 0;
+  return Math.min(safeXp, getMaxTotalXpForCardLeveling());
+}
+
+export function resolveCardLevelFromTotalXp(totalXp: number): number {
+  const clampedXp = clampCardTotalXp(totalXp);
+  let level = 0;
+  while (level < MAX_CARD_LEVEL && getTotalXpRequiredToReachLevel(level + 1) <= clampedXp) {
+    level += 1;
+  }
+  return level;
+}
+
 export function getCardLevelProgressMetrics(level: number, xp: number): ICardLevelProgressMetrics {
   const clampedLevel = Math.min(Math.max(0, Math.floor(level)), MAX_CARD_LEVEL);
   if (clampedLevel >= MAX_CARD_LEVEL) {
