@@ -43,6 +43,7 @@ export function HomeCollectionPanel({
           
           {collection.map((entry) => {
             const usedCopies = usedByCardId.get(entry.card.id) ?? 0;
+            const availableStorageCopies = Math.max(0, entry.ownedCopies - usedCopies);
             const canAdd = usedCopies < Math.min(3, entry.ownedCopies);
             const isSelected = selectedCardId === entry.card.id;
             const canEvolve = evolvableCardIds.has(entry.card.id);
@@ -81,7 +82,7 @@ export function HomeCollectionPanel({
                     ? "text-red-400 border-red-900/50 shadow-[0_0_10px_rgba(239,68,68,0.3)]"
                     : "text-cyan-300 border-cyan-900/50"
                 }`}>
-                  D {usedCopies}/{Math.min(3, entry.ownedCopies)} U {entry.ownedCopies}
+                  D {usedCopies}/{Math.min(3, entry.ownedCopies)} U {availableStorageCopies}
                 </span>
               </motion.button>
             );
