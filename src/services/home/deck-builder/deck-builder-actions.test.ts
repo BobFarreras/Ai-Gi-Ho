@@ -4,7 +4,7 @@ import { ENTITY_CARDS } from "@/core/data/mock-cards/entities";
 import { ICollectionCard } from "@/core/entities/home/ICollectionCard";
 import { IDeck } from "@/core/entities/home/IDeck";
 import { HOME_DECK_SIZE } from "@/core/services/home/deck-rules";
-import { addCardToDeckAction, saveDeckAction } from "./deck-builder-actions";
+import { addCardToDeckAction, evolveCardVersionAction, saveDeckAction } from "./deck-builder-actions";
 
 function createEmptyDeck(playerId: string): IDeck {
   return {
@@ -44,5 +44,27 @@ describe("deck-builder-actions", () => {
       json: async () => ({ message: "El deck debe tener 20 cartas para guardarse." }),
     } as Response);
     await expect(saveDeckAction({ playerId: "player-a", deck, collection })).rejects.toThrow("El deck debe tener 20 cartas");
+  });
+
+  it("evoluciona carta y devuelve progreso actualizado", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        progress: {
+          playerId: "player-a",
+          cardId: "entity-python",
+          versionTier: 1,
+          level: 0,
+          xp: 0,
+          masteryPassiveSkillId: null,
+          updatedAtIso: new Date().toISOString(),
+        },
+        collection: [],
+        consumedCopies: 4,
+      }),
+    } as Response);
+    const response = await evolveCardVersionAction("player-a", "entity-python");
+    expect(response.progress.versionTier).toBe(1);
+    expect(response.consumedCopies).toBe(4);
   });
 });

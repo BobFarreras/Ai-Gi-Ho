@@ -270,6 +270,18 @@ UI (app/components) -> UseCases/Services -> Repositories (interfaces core)
    - `card_mastery_passive_map` (asignación por carta).
 4. La lógica de evolución se basa en copias del almacén (`player_collection_cards`), sin contar slots de deck.
 
+## Subdominio Progresión (fase 6.2 evolución de versión)
+
+1. Caso de uso `EvolveCardVersionUseCase` orquesta:
+   - validación de copias requeridas por tier,
+   - consumo de copias del almacén,
+   - actualización de `player_card_progress`.
+2. Endpoint `POST /api/home/collection/evolve` expone la operación y devuelve snapshot (`progress`, `collection`, `consumedCopies`).
+3. Se mantiene separación de responsabilidades:
+   - reglas puras en `core/services/progression`,
+   - orquestación en `core/use-cases/home`,
+   - persistencia en repositorios (`ICardCollectionRepository`, `IPlayerCardProgressRepository`).
+
 ## Eventos y observabilidad
 
 1. El motor añade eventos en `combatLog` desde los casos de uso (`playCard`, `executeAttack`, `nextPhase`, etc.).

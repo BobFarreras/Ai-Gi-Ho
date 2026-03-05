@@ -1,6 +1,7 @@
 // src/services/home/deck-builder/deck-builder-actions.ts - Orquesta acciones de Mi Home reutilizando casos de uso del dominio.
 import { ICollectionCard } from "@/core/entities/home/ICollectionCard";
 import { IDeck } from "@/core/entities/home/IDeck";
+import { IPlayerCardProgress } from "@/core/entities/progression/IPlayerCardProgress";
 
 interface IDeckActionContext {
   playerId: string;
@@ -50,4 +51,26 @@ export async function saveDeckAction(context: IDeckActionContext): Promise<IDeck
   void context;
   const response = await fetch("/api/home/deck/save", { method: "POST", cache: "no-store" });
   return parseDeckResponse(response);
+}
+
+export interface IEvolveCardVersionResponse {
+  progress: IPlayerCardProgress;
+  collection: ICollectionCard[];
+  consumedCopies: number;
+}
+
+export async function evolveCardVersionAction(playerId: string, cardId: string): Promise<IEvolveCardVersionResponse> {
+  void playerId;
+  const response = await fetch("/api/home/collection/evolve", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ cardId }),
+    cache: "no-store",
+  });
+  const data = (await response.json()) as IEvolveCardVersionResponse | { message?: string };
+  if (!response.ok) {
+    const message = typeof data === "object" && data && "message" in data ? data.message : undefined;
+    throw new Error(message ?? "No se pudo evolucionar la carta.");
+  }
+  return data as IEvolveCardVersionResponse;
 }

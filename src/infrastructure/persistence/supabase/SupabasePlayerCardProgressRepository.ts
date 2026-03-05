@@ -53,13 +53,14 @@ export class SupabasePlayerCardProgressRepository implements IPlayerCardProgress
   }
 
   async upsert(input: IUpsertPlayerCardProgressInput): Promise<IPlayerCardProgress> {
+    const existing = await this.getByPlayerAndCard(input.playerId, input.cardId);
     const payload = {
       player_id: input.playerId,
       card_id: input.cardId,
-      version_tier: input.versionTier ?? 0,
-      level: input.level ?? 0,
-      xp: input.xp ?? 0,
-      mastery_passive_skill_id: input.masteryPassiveSkillId ?? null,
+      version_tier: input.versionTier ?? existing?.versionTier ?? 0,
+      level: input.level ?? existing?.level ?? 0,
+      xp: input.xp ?? existing?.xp ?? 0,
+      mastery_passive_skill_id: input.masteryPassiveSkillId ?? existing?.masteryPassiveSkillId ?? null,
     };
     const { data, error } = await this.client
       .from("player_card_progress")

@@ -67,4 +67,34 @@ export class SupabaseCardCollectionRepository implements ICardCollectionReposito
       if (updateError) throw new ValidationError("No se pudo actualizar copias de carta en el almacén.");
     }
   }
+
+  async consumeCards(playerId: string, cardId: string, copies: number): Promise<void> {
+    if (!Number.isInteger(copies) || copies <= 0) throw new ValidationError("La cantidad a consumir debe ser positiva.");
+    const { data, error } = await this.client
+      .from("player_collection_cards")
+      .select("player_id,card_id,owned_copies")
+      .eq("player_id", playerId)
+      .eq("card_id", cardId)
+      .maybeSingle<ICollectionRow>();
+    if (error) throw new ValidationError("No se pudo leer el almacén para consumir copias.");
+    if (!data || data.owned_copies < copies) {
+      throw new ValidationError("No hay suficientes copias en el almacén para evolucionar.");
+    }
+    const nextCopies = data.owned_copies - copies;
+    if (nextCopies === 0) {
+      const { error: deleteError } = await this.client
+        .from("player_collection_cards")
+        .delete()
+        .eq("player_id", playerId)
+        .eq("card_id", cardId);
+      if (deleteError) throw new ValidationError("No se pudo consumir copias del almacén.");
+      return;
+    }
+    const { error: updateError } = await this.client
+      .from("player_collection_cards")
+      .update({ owned_copies: nextCopies })
+      .eq("player_id", playerId)
+      .eq("card_id", cardId);
+    if (updateError) throw new ValidationError("No se pudo consumir copias del almacén.");
+  }
 }
