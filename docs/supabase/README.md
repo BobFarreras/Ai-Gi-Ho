@@ -21,6 +21,15 @@
 6. `public.market_transactions`:
    - historial de compras de mercado (`BUY_CARD`, `BUY_PACK`).
    - guarda coste, item comprado y cartas obtenidas.
+7. `public.cards_catalog`:
+   - catálogo maestro de cartas del juego (datos de dominio + metadatos render/effect).
+   - fuente canónica para garantizar integridad referencial entre market/home y cartas.
+8. `public.market_card_listings`:
+   - listado de cartas vendibles en mercado (precio Nexus, stock, disponibilidad, rareza comercial).
+9. `public.market_pack_definitions`:
+   - definición de sobres (precio, tamaño de pack, pool objetivo, cartas preview).
+10. `public.market_pack_pool_entries`:
+   - entradas del pool de cada sobre con peso de aparición por carta.
 
 ## Fase 2 (Perfil y Progreso)
 
@@ -46,7 +55,43 @@
    - `player_wallets` con `nexus = 1000`,
    - 20 filas en `player_deck_slots` (índices 0..19).
 
+## Fase 4 (Catálogo de Mercado)
+
+1. Ejecuta `docs/supabase/sql/003_phase_4_market_catalog.sql`.
+2. Verifica tablas:
+   - `public.market_card_listings`
+   - `public.market_pack_definitions`
+   - `public.market_pack_pool_entries`
+3. Comprueba que puedes leer catálogo desde `/api/market/catalog` autenticado.
+
+## Fase 4.1 (Integridad de Catálogo Maestro)
+
+1. Ejecuta `docs/supabase/sql/004_phase_4_cards_catalog_integrity.sql`.
+2. Verifica tabla:
+   - `public.cards_catalog`
+3. Comprueba que existen FKs activas hacia `cards_catalog` desde:
+   - `market_card_listings.card_id`
+   - `market_pack_pool_entries.card_id`
+   - `player_collection_cards.card_id`
+   - `player_deck_slots.card_id`
+4. Después del script, usa plantillas atómicas para nuevas altas:
+   - `docs/supabase/sql/templates/001_market_card_bundle_template.sql` (carta + listing).
+   - `docs/supabase/sql/templates/002_market_pack_template.sql` (pack + pool).
+
+## Seed opcional (Lote extra de cartas)
+
+1. Ejecuta `docs/supabase/sql/005_seed_extra_cards_and_market.sql`.
+2. Este script inserta:
+   - nuevas `ENTITY`,
+   - varias `EXECUTION` (mágicas),
+   - varias `TRAP`,
+   - y sus listados en `market_card_listings`.
+
 ## Notas
 
 1. El trigger `on_auth_user_created` solo debe existir una vez.
 2. Si ya tienes datos, el script es idempotente para políticas/trigger principales.
+3. Para alta de cartas nuevas, evita inserts manuales sueltos: usa siempre plantillas transaccionales de `templates/`.
+4. Orden recomendado:
+   - primero `001_market_card_bundle_template.sql` (dar de alta cartas),
+   - después `002_market_pack_template.sql` (usar esos `card_id` en sobres).
