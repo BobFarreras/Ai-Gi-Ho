@@ -24,13 +24,18 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
  │       │   ├── Board.test.tsx
  │       │   └── index.tsx
  │       └── card/
+ │   └── hub/                              # Dashboard central (ciudad) y accesos a módulos
  │
  ├── core/
  │   ├── entities/                         # Tipos de dominio
+ │   │   └── hub/                          # Entidades del mundo central
  │   ├── errors/                           # AppError + códigos tipados
+ │   ├── repositories/                     # Contratos de acceso a datos de dominio
  │   ├── services/
  │   │   └── opponent/                     # IA heurística (sin LLM)
+ │   │   └── hub/                          # Orquestación de progreso y desbloqueos del dashboard
  │   └── use-cases/
+ │       └── hub/                          # Casos de uso del dashboard central
  │       ├── game-engine/                  # Casos de uso modulares por dominio
  │       │   ├── state/
  │       │   ├── actions/
@@ -45,7 +50,8 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
  │       ├── CombatService.ts
  │       └── GameEngine.ts                 # Fachada estable
  │
- ├── infrastructure/                       # Integraciones externas (pendiente)
+ ├── infrastructure/                       # Integraciones externas (DB/API/adaptadores)
+ │   └── repositories/                     # Implementaciones de contratos (mock/in-memory/real)
  └── lib/
 ```
 
@@ -75,6 +81,41 @@ Arquitectura en capas orientada a dominio con separación estricta entre UI, mot
 1. Estrategia actual: `HeuristicOpponentStrategy` (determinista con heurísticas).
 2. Extensión futura LLM: nueva implementación de `IOpponentStrategy` sin tocar UI.
 3. Multijugador futuro: sustitución del controlador rival por controlador remoto sin romper el motor.
+
+## Subdominio Hub (fase inicial)
+
+1. `HubService` centraliza reglas de bloqueo/desbloqueo del dashboard.
+2. `HubAccessPolicy` define condiciones de acceso por progreso (tutorial/medallas).
+3. `GetHubDashboardUseCase`, `GetHubMapUseCase` y `GetAvailableSectionsUseCase` exponen lecturas específicas sin lógica en UI.
+4. `IHubRepository` abstrae acceso a progreso, secciones y nodos del mapa; `InMemoryHubRepository` es el adaptador temporal.
+
+## Hub UI y navegación (fase 3 y 4)
+
+1. `src/app/hub/page.tsx` renderiza la sala de control (HUD) como punto de entrada visual.
+2. `HubScene` y `HubSceneNode` gestionan layout de paneles, navegación por click y feedback de secciones bloqueadas.
+3. Rutas activas del hub:
+   - `/hub/market`
+   - `/hub/home`
+   - `/hub/training`
+   - `/hub/story`
+   - `/hub/multiplayer`
+4. `getHubSectionViewModel` resuelve en servidor el estado de cada sección antes de renderizar su pantalla.
+5. `HubSectionScreen` unifica la presentación base de módulos para evitar duplicación de layout.
+
+## Subdominio Mi Home (Deck Builder)
+
+1. Entidades: `IDeck`, `IDeckCardSlot`, `ICollectionCard`.
+2. Contrato de datos: `IDeckRepository` (deck + colección).
+3. Reglas puras en `deck-rules.ts`:
+   - deck de `20` cartas,
+   - máximo `3` copias por `card.id`.
+4. Casos de uso base:
+   - `GetHomeDeckBuilderDataUseCase`,
+   - `AddCardToDeckUseCase`,
+   - `RemoveCardFromDeckUseCase`,
+   - `MoveDeckCardUseCase`,
+   - `SaveDeckUseCase`.
+5. Capa `services/home/deck-builder` adapta la interacción de UI reutilizando los casos de uso sin mover lógica al componente React.
 
 ## Eventos y observabilidad
 
