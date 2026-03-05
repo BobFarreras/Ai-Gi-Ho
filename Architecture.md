@@ -252,6 +252,12 @@ UI (app/components) -> UseCases/Services -> Repositories (interfaces core)
 3. `HomeDeckBuilderScene` aplica inserción/retirada optimista de slots para respuesta visual inmediata.
 4. Se cachea la validación de disponibilidad de catálogo Supabase con TTL corto para reducir round-trips repetidos de bootstrap.
 
+## Subdominio Game (fase 5.2 deck persistido)
+
+1. `Board` acepta `initialPlayerDeck` opcional para evitar dependencia rígida de mazos mock.
+2. `getPlayerBoardDeck` resuelve en servidor el mazo guardado del jugador autenticado (`deck slots + colección`).
+3. `/hub/training` inicializa el combate con mazo persistido cuando está completo; si no, usa fallback mock del motor.
+
 ## Eventos y observabilidad
 
 1. El motor añade eventos en `combatLog` desde los casos de uso (`playCard`, `executeAttack`, `nextPhase`, etc.).

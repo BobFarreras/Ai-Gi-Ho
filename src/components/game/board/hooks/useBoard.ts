@@ -1,5 +1,7 @@
+// src/components/game/board/hooks/useBoard.ts - Hook principal del tablero con soporte de mazo inicial persistido del jugador.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GameState } from "@/core/use-cases/GameEngine";
+import { ICard } from "@/core/entities/ICard";
 import { HeuristicOpponentStrategy } from "@/core/services/opponent/HeuristicOpponentStrategy";
 import { resolveDifficultyFromCampaign } from "@/core/services/opponent/difficulty/resolveDifficultyFromCampaign";
 import { ICampaignProgress } from "@/core/services/opponent/difficulty/types";
@@ -19,10 +21,14 @@ function resolveWinnerPlayerId(gameState: GameState): string | "DRAW" | null {
   return null;
 }
 
-export function useBoard() {
+export function useBoard(initialPlayerDeck?: ICard[]) {
   const [campaignProgress] = useState<ICampaignProgress>({ chapterIndex: 1, duelIndex: 1, victories: 0 });
-  const gameStateRef = useRef<GameState>(createInitialBoardState());
-  const uiState = useBoardUiState(gameStateRef, createInitialBoardState);
+  const createInitialState = useCallback(
+    () => createInitialBoardState({ playerDeck: initialPlayerDeck }),
+    [initialPlayerDeck],
+  );
+  const gameStateRef = useRef<GameState>(createInitialState());
+  const uiState = useBoardUiState(gameStateRef, createInitialState);
   const gameState = uiState.gameState;
   const opponentDifficulty = useMemo(() => resolveDifficultyFromCampaign(campaignProgress), [campaignProgress]);
   const opponentStrategy = useMemo(() => new HeuristicOpponentStrategy({ difficulty: opponentDifficulty }), [opponentDifficulty]);

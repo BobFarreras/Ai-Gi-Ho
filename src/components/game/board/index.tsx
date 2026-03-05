@@ -9,8 +9,13 @@ import { BoardTopBar } from "./ui/layout/BoardTopBar";
 import { BoardActionButtons } from "./ui/layout/BoardActionButtons";
 import { BoardPlayersLayer } from "./ui/layers/BoardPlayersLayer";
 import { BoardInteractiveLayer } from "./ui/layers/BoardInteractiveLayer";
+import { ICard } from "@/core/entities/ICard";
 
-export function Board() {
+interface IBoardProps {
+  initialPlayerDeck?: ICard[] | null;
+}
+
+export function Board({ initialPlayerDeck }: IBoardProps) {
   const {
     gameState,
     selectedCard,
@@ -55,7 +60,7 @@ export function Board() {
     setIsFusionCinematicActive,
     toggleMute,
     togglePause,
-  } = useBoard();
+  } = useBoard(initialPlayerDeck ?? undefined);
 
   const player = gameState.playerA;
   const opponent = gameState.playerB;
