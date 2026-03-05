@@ -10,6 +10,7 @@ import { HomeCardInspector } from "@/components/hub/home/HomeCardInspector";
 import { HomeCollectionPanel } from "@/components/hub/home/HomeCollectionPanel";
 import { HomeDeckPanel } from "@/components/hub/home/HomeDeckPanel";
 import { HomeErrorBanner } from "@/components/hub/home/HomeErrorBanner";
+import { HomeEvolutionOverlay } from "@/components/hub/home/HomeEvolutionOverlay";
 import {
   HomeCollectionOrderDirection,
   HomeCollectionOrderField,
@@ -31,6 +32,14 @@ interface HomeDeckBuilderSceneProps {
   initialCardProgress: IPlayerCardProgress[];
 }
 
+interface IEvolutionOverlayState {
+  cardId: string;
+  fromVersionTier: number;
+  toVersionTier: number;
+  level: number;
+  consumedCopies: number;
+}
+
 export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initialCardProgress }: HomeDeckBuilderSceneProps) {
   const [deck, setDeck] = useState<IDeck>(initialDeck);
   const [collectionState, setCollectionState] = useState<ICollectionCard[]>(collection);
@@ -43,6 +52,7 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
   const [typeFilter, setTypeFilter] = useState<HomeCollectionTypeFilter>("ALL");
   const [orderField, setOrderField] = useState<HomeCollectionOrderField>("NAME");
   const [orderDirection, setOrderDirection] = useState<HomeCollectionOrderDirection>("ASC");
+  const [evolutionOverlay, setEvolutionOverlay] = useState<IEvolutionOverlayState | null>(null);
   
   const cardById = useMemo(() => new Map(collectionState.map((entry) => [entry.card.id, entry.card])), [collectionState]);
   const selectedCardId = useMemo(() => {
@@ -65,6 +75,7 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
     () => buildHomeCollectionView({ collection: collectionState, typeFilter, orderField, orderDirection }),
     [collectionState, orderDirection, orderField, typeFilter],
   );
+  const evolutionCard = evolutionOverlay ? cardById.get(evolutionOverlay.cardId) ?? selectedCard : null;
 
   return (
     <main className="hub-control-room-bg relative box-border w-full h-[100dvh] overflow-hidden px-3 py-3 text-slate-100 sm:px-5 flex flex-col justify-center items-center">
@@ -114,6 +125,7 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
             evolveCost={copiesRequiredToEvolve}
             onEvolve={async () => {
               if (!selectedCardId || !canEvolveSelectedCard) return;
+              const previousVersionTier = selectedCardVersionTier;
               try {
                 const result = await evolveCardVersionAction(playerId, selectedCardId);
                 setCollectionState(result.collection);
@@ -122,6 +134,14 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
                   next.set(result.progress.cardId, result.progress);
                   return next;
                 });
+                setEvolutionOverlay({
+                  cardId: selectedCardId,
+                  fromVersionTier: previousVersionTier,
+                  toVersionTier: result.progress.versionTier,
+                  level: result.progress.level,
+                  consumedCopies: result.consumedCopies,
+                });
+                setTimeout(() => setEvolutionOverlay(null), 2200);
                 setErrorMessage(null);
               } catch (error) {
                 setErrorBanner(error);
@@ -175,6 +195,15 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
           </div>
         </div>
       </section>
+      {evolutionOverlay && (
+        <HomeEvolutionOverlay
+          card={evolutionCard}
+          fromVersionTier={evolutionOverlay.fromVersionTier}
+          toVersionTier={evolutionOverlay.toVersionTier}
+          level={evolutionOverlay.level}
+          consumedCopies={evolutionOverlay.consumedCopies}
+        />
+      )}
     </main>
   );
 }

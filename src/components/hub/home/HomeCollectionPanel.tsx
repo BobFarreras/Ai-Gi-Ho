@@ -1,4 +1,4 @@
-// src/components/hub/home/HomeCollectionPanel.tsx
+// src/components/hub/home/HomeCollectionPanel.tsx - Panel de almacén con selección de cartas y contador de copias (deck/almacén).
 import { motion } from "framer-motion";
 import { ICollectionCard } from "@/core/entities/home/ICollectionCard";
 import { IDeck } from "@/core/entities/home/IDeck";
@@ -56,13 +56,18 @@ export function HomeCollectionPanel({ deck, collection, selectedCardId, onSelect
                 />
                 
                 {/* Indicador de copias con estilo neón si está al máximo */}
-                <span className={`mt-2 rounded bg-black/80 px-2 py-0.5 text-[10px] font-mono font-bold tracking-widest border ${
-                  usedCopies >= Math.min(3, entry.ownedCopies) 
-                    ? "text-red-400 border-red-900/50 shadow-[0_0_10px_rgba(239,68,68,0.3)]" 
-                    : "text-cyan-300 border-cyan-900/50"
-                }`}>
-                  {usedCopies}/{Math.min(3, entry.ownedCopies)}
-                </span>
+                <div className="mt-2 flex flex-col items-center gap-1">
+                  <span className={`rounded bg-black/80 px-2 py-0.5 text-[10px] font-mono font-bold tracking-widest border ${
+                    usedCopies >= Math.min(3, entry.ownedCopies)
+                      ? "text-red-400 border-red-900/50 shadow-[0_0_10px_rgba(239,68,68,0.3)]"
+                      : "text-cyan-300 border-cyan-900/50"
+                  }`}>
+                    Deck {usedCopies}/{Math.min(3, entry.ownedCopies)}
+                  </span>
+                  <span className="rounded border border-amber-500/35 bg-amber-950/35 px-2 py-0.5 text-[10px] font-mono font-bold tracking-widest text-amber-200">
+                    Alm {entry.ownedCopies}u
+                  </span>
+                </div>
               </motion.button>
             );
           })}

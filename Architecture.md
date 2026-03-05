@@ -287,6 +287,8 @@ UI (app/components) -> UseCases/Services -> Repositories (interfaces core)
 1. `HomeDeckActionBar` reemplaza el botón de compilar por `Evolucionar` cuando la carta seleccionada cumple copias requeridas.
 2. `HomeDeckBuilderScene` mantiene estado de colección/progreso para reflejar consumo de copias tras evolución sin recargar pantalla.
 3. `Card` y `CardFrame` aceptan metadatos de progreso (`versionTier`, `level`) y los renderizan junto al bloque de energía.
+4. `HomeCollectionPanel` muestra simultáneamente copias usadas en deck y unidades disponibles en almacén para guiar evolución.
+5. `HomeEvolutionOverlay` visualiza la fusión de copias y subida de versión en capa central con feedback cinemático.
 
 ## Eventos y observabilidad
 
