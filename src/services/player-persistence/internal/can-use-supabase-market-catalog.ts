@@ -1,7 +1,17 @@
 // src/services/player-persistence/internal/can-use-supabase-market-catalog.ts - Verifica disponibilidad del esquema de catálogo de mercado en Supabase.
 import { SupabaseClient } from "@supabase/supabase-js";
 
+interface IMarketCatalogAvailabilityCache {
+  value: boolean;
+  expiresAt: number;
+}
+
+const CATALOG_CHECK_TTL_MS = 60_000;
+let cachedAvailability: IMarketCatalogAvailabilityCache | null = null;
+
 export async function canUseSupabaseMarketCatalog(client: SupabaseClient): Promise<boolean> {
+  const now = Date.now();
+  if (cachedAvailability && cachedAvailability.expiresAt > now) return cachedAvailability.value;
   const [listingCheck, packCheck, poolCheck, cardCatalogCheck] = await Promise.all([
     client.from("market_card_listings").select("id").limit(1),
     client.from("market_pack_definitions").select("id").limit(1),
@@ -13,5 +23,7 @@ export async function canUseSupabaseMarketCatalog(client: SupabaseClient): Promi
     (packCheck.data?.length ?? 0) > 0 &&
     (poolCheck.data?.length ?? 0) > 0 &&
     (cardCatalogCheck.data?.length ?? 0) > 0;
-  return !listingCheck.error && !packCheck.error && !poolCheck.error && !cardCatalogCheck.error && hasRows;
+  const canUse = !listingCheck.error && !packCheck.error && !poolCheck.error && !cardCatalogCheck.error && hasRows;
+  cachedAvailability = { value: canUse, expiresAt: now + CATALOG_CHECK_TTL_MS };
+  return canUse;
 }

@@ -2,6 +2,7 @@
 import { ICollectionCard } from "@/core/entities/home/ICollectionCard";
 import { IMarketTransaction } from "@/core/entities/market/IMarketTransaction";
 import { IMarketCatalog } from "@/core/use-cases/market/GetMarketCatalogUseCase";
+import { IMarketRuntimeSnapshot } from "@/services/market/market-runtime-snapshot";
 
 async function parseJsonResponse<T>(response: Response): Promise<T> {
   const data = (await response.json()) as T | { message?: string };
@@ -30,7 +31,7 @@ export async function getPlayerCollectionAction(playerId: string): Promise<IColl
   return parseJsonResponse<ICollectionCard[]>(response);
 }
 
-export async function buyMarketCardAction(playerId: string, listingId: string): Promise<IMarketCatalog> {
+export async function buyMarketCardAction(playerId: string, listingId: string): Promise<IMarketRuntimeSnapshot> {
   void playerId;
   const response = await fetch("/api/market/buy-card", {
     method: "POST",
@@ -38,10 +39,13 @@ export async function buyMarketCardAction(playerId: string, listingId: string): 
     body: JSON.stringify({ listingId }),
     cache: "no-store",
   });
-  return parseJsonResponse<IMarketCatalog>(response);
+  return parseJsonResponse<IMarketRuntimeSnapshot>(response);
 }
 
-export async function buyPackAction(playerId: string, packId: string): Promise<{ catalog: IMarketCatalog; openedCardIds: string[] }> {
+export async function buyPackAction(
+  playerId: string,
+  packId: string,
+): Promise<IMarketRuntimeSnapshot & { openedCardIds: string[] }> {
   void playerId;
   const response = await fetch("/api/market/buy-pack", {
     method: "POST",
@@ -49,5 +53,5 @@ export async function buyPackAction(playerId: string, packId: string): Promise<{
     body: JSON.stringify({ packId }),
     cache: "no-store",
   });
-  return parseJsonResponse<{ catalog: IMarketCatalog; openedCardIds: string[] }>(response);
+  return parseJsonResponse<IMarketRuntimeSnapshot & { openedCardIds: string[] }>(response);
 }

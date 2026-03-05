@@ -245,6 +245,13 @@ UI (app/components) -> UseCases/Services -> Repositories (interfaces core)
 3. Se mantiene fallback a in-memory solo si no está disponible el esquema completo (`market_*` + `cards_catalog`).
 4. `004_phase_4_cards_catalog_integrity.sql` garantiza FKs entre market/home y catálogo maestro.
 
+## Subdominio Market/Home (fase 5.1 rendimiento UX)
+
+1. Endpoints de compra del market (`buy-card`, `buy-pack`) devuelven snapshot unificado (`catalog`, `transactions`, `collection`) para evitar refetch múltiple en cliente.
+2. `useMarketSceneState` aplica actualización optimista al comprar carta y reconcilia con snapshot de servidor.
+3. `HomeDeckBuilderScene` aplica inserción/retirada optimista de slots para respuesta visual inmediata.
+4. Se cachea la validación de disponibilidad de catálogo Supabase con TTL corto para reducir round-trips repetidos de bootstrap.
+
 ## Eventos y observabilidad
 
 1. El motor añade eventos en `combatLog` desde los casos de uso (`playCard`, `executeAttack`, `nextPhase`, etc.).

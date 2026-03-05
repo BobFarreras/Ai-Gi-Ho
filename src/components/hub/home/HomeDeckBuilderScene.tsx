@@ -1,4 +1,4 @@
-// src/components/hub/home/HomeDeckBuilderScene.tsx
+// src/components/hub/home/HomeDeckBuilderScene.tsx - Escena principal de Mi Home con interacción de deck y colección.
 "use client";
 
 import { useMemo, useState } from "react";
@@ -15,6 +15,7 @@ import {
   HomeCollectionTypeFilter,
 } from "@/components/hub/home/home-filters";
 import { buildHomeCollectionView } from "@/components/hub/home/home-collection-view";
+import { applyOptimisticAddToDeck, applyOptimisticRemoveFromDeck } from "@/components/hub/home/internal/optimistic-deck-updates";
 import {
   addCardToDeckAction,
   removeCardFromDeckAction,
@@ -72,21 +73,27 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection }: Home
             }
             onInsert={async () => {
               if (!selectedCollectionCardId) return;
+              const previousDeck = deck;
+              setDeck((currentDeck) => applyOptimisticAddToDeck(currentDeck, selectedCollectionCardId));
               try {
                 const updatedDeck = await addCardToDeckAction(context, selectedCollectionCardId);
                 setDeck(updatedDeck);
                 setErrorMessage(null);
               } catch (error) {
+                setDeck(previousDeck);
                 setErrorBanner(error);
               }
             }}
             onRemove={async () => {
               if (selectedSlotIndex === null) return;
+              const previousDeck = deck;
+              setDeck((currentDeck) => applyOptimisticRemoveFromDeck(currentDeck, selectedSlotIndex));
               try {
                 const updatedDeck = await removeCardFromDeckAction(context, selectedSlotIndex);
                 setDeck(updatedDeck);
                 setErrorMessage(null);
               } catch (error) {
+                setDeck(previousDeck);
                 setErrorBanner(error);
               }
             }}

@@ -37,11 +37,11 @@ export default async function MarketPage() {
   }
   const getMarketCatalogUseCase = new GetMarketCatalogUseCase(repositories.marketRepository, repositories.walletRepository);
   const getMarketTransactionsUseCase = new GetMarketTransactionsUseCase(repositories.transactionRepository);
-  const [catalog, transactions] = await Promise.all([
+  const [catalog, transactions, collection] = await Promise.all([
     getMarketCatalogUseCase.execute(playerId),
     getMarketTransactionsUseCase.execute(playerId),
+    repositories.collectionRepository.getCollection(playerId),
   ]);
-  const collection = await repositories.collectionRepository.getCollection(playerId);
 
   return (
     <MarketScene
