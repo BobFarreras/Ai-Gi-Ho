@@ -9,7 +9,7 @@ import { createPlayerRouteRepositories } from "@/services/player-persistence/cre
 
 export async function createMarketRouteContext(request: NextRequest) {
   const response = NextResponse.json({ ok: true }, { status: 200 });
-  const repositories = createPlayerRouteRepositories(request, response);
+  const repositories = await createPlayerRouteRepositories(request, response);
   const playerId = await getAuthenticatedUserId(repositories.client);
   return {
     response,
