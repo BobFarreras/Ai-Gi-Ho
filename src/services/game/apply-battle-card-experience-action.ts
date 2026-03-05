@@ -3,12 +3,16 @@ import { ICardExperienceEvent } from "@/core/services/progression/card-experienc
 import type { IAppliedCardExperienceResult } from "@/core/use-cases/progression/ApplyBattleCardExperienceUseCase";
 
 interface IApplyBattleCardExperiencePayload {
+  battleId: string;
   events: ICardExperienceEvent[];
 }
 
-export async function applyBattleCardExperienceAction(events: ICardExperienceEvent[]): Promise<IAppliedCardExperienceResult[]> {
+export async function applyBattleCardExperienceAction(
+  battleId: string,
+  events: ICardExperienceEvent[],
+): Promise<IAppliedCardExperienceResult[]> {
   if (events.length === 0) return [];
-  const payload: IApplyBattleCardExperiencePayload = { events };
+  const payload: IApplyBattleCardExperiencePayload = { battleId, events };
   const response = await fetch("/api/game/progression/apply-battle-exp", {
     method: "POST",
     headers: { "content-type": "application/json" },

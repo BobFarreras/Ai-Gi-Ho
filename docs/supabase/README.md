@@ -36,6 +36,8 @@
    - mapea qué pasivas puede desbloquear cada carta al llegar a mastery.
 13. `public.player_card_progress`:
    - progreso por carta y jugador (`version_tier`, `level`, `xp`, pasiva de mastery).
+14. `public.player_card_xp_batches`:
+   - registro idempotente por batalla para evitar aplicar la EXP del mismo duelo más de una vez.
 
 ## Fase 2 (Perfil y Progreso)
 
@@ -120,6 +122,17 @@
 6. Persistencia de experiencia de cartas:
    - la EXP de combate se agrega en memoria durante el duelo y se persiste en batch al finalizar, evitando escrituras por evento.
    - endpoint: `POST /api/game/progression/apply-battle-exp`.
+
+## Fase 7.5.1 (Idempotencia de EXP por batalla)
+
+1. Ejecuta `docs/supabase/sql/007_phase_7_5_1_battle_exp_idempotency.sql`.
+2. Verifica tabla:
+   - `public.player_card_xp_batches`
+3. Verifica RLS:
+   - lectura e inserción solo para `auth.uid() = player_id`.
+4. Flujo esperado:
+   - el endpoint `POST /api/game/progression/apply-battle-exp` requiere `battleId`.
+   - si se repite el mismo `battleId`, la respuesta es vacía y no duplica EXP.
 
 ## Notas
 

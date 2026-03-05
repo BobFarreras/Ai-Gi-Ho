@@ -79,7 +79,8 @@ export function useBoard(initialPlayerDeck?: ICard[]) {
     hasAppliedBattleExperienceRef.current = true;
     const experienceEvents = buildCardExperienceEvents(gameState.combatLog, gameState.playerA.id);
     if (experienceEvents.length === 0) return;
-    applyBattleCardExperienceAction(experienceEvents)
+    const battleId = `duel-${gameState.playerA.id}-${gameState.playerB.id}-${gameState.combatLog.length}-${gameState.combatLog[0]?.id ?? "start"}-${gameState.combatLog[gameState.combatLog.length - 1]?.id ?? "end"}`;
+    applyBattleCardExperienceAction(battleId, experienceEvents)
       .then((summary) => {
         setBattleExperienceSummary(summary);
         if (summary.length === 0) return;
@@ -88,7 +89,7 @@ export function useBoard(initialPlayerDeck?: ICard[]) {
       .catch(() => {
         uiState.setLastError({ code: "VALIDATION_ERROR", message: "No se pudo guardar la experiencia de cartas del duelo." });
       });
-  }, [applyTransition, gameState.combatLog, gameState.playerA.id, uiState, winnerPlayerId]);
+  }, [applyTransition, gameState.combatLog, gameState.playerA.id, gameState.playerB.id, uiState, winnerPlayerId]);
   const assertPlayerTurn = useCallback((): boolean => {
     if (winnerPlayerId) {
       uiState.setLastError({ code: "GAME_RULE_ERROR", message: "La partida ya terminó." });

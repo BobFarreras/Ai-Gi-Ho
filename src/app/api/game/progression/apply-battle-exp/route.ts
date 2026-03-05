@@ -7,6 +7,7 @@ import { getAuthenticatedUserId } from "@/services/auth/api/internal/get-authent
 import { createPlayerRouteRepositories } from "@/services/player-persistence/create-player-route-repositories";
 
 interface IApplyBattleCardExperiencePayload {
+  battleId: string;
   events: ICardExperienceEvent[];
 }
 
@@ -16,7 +17,14 @@ export async function POST(request: NextRequest) {
     const repositories = await createPlayerRouteRepositories(request, response);
     const playerId = await getAuthenticatedUserId(repositories.client);
     const payload = (await request.json()) as IApplyBattleCardExperiencePayload;
+    if (!payload.battleId?.trim()) throw new ValidationError("El battleId es obligatorio para idempotencia de experiencia.");
     if (!Array.isArray(payload.events)) throw new ValidationError("El listado de eventos de experiencia es obligatorio.");
+    const reservedBatch = await repositories.playerBattleExperienceBatchRepository.tryReserveBatch(
+      playerId,
+      payload.battleId,
+      payload.events.length,
+    );
+    if (!reservedBatch) return NextResponse.json([], { status: 200, headers: response.headers });
     const useCase = new ApplyBattleCardExperienceUseCase(repositories.playerCardProgressRepository);
     const result = await useCase.execute({ playerId, events: payload.events });
     return NextResponse.json(result, { status: 200, headers: response.headers });
@@ -27,4 +35,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "No se pudo guardar la experiencia de cartas del duelo." }, { status: 400 });
   }
 }
-
