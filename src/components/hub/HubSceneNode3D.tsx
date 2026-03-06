@@ -25,9 +25,17 @@ interface HubSceneNode3DProps {
   node: IHubMapNode;
   section: IHubSection;
   nodeEntryDelay?: number;
+  onNodeHoverSound?: () => void;
+  showActionPanel?: boolean;
 }
 
-export function HubSceneNode3D({ node, section, nodeEntryDelay = 0 }: HubSceneNode3DProps) {
+export function HubSceneNode3D({
+  node,
+  section,
+  nodeEntryDelay = 0,
+  onNodeHoverSound,
+  showActionPanel = true,
+}: HubSceneNode3DProps) {
   const router = useRouter();
   const nodeRef = useRef<THREE.Group>(null);
   const baseRef = useRef<THREE.Group>(null);
@@ -87,6 +95,7 @@ export function HubSceneNode3D({ node, section, nodeEntryDelay = 0 }: HubSceneNo
         onPointerDown={(event) => event.stopPropagation()}
         onPointerOver={(event) => {
           event.stopPropagation();
+          if (!isHovered) onNodeHoverSound?.();
           setIsHovered(true);
         }}
         onPointerOut={(event) => {
@@ -114,21 +123,25 @@ export function HubSceneNode3D({ node, section, nodeEntryDelay = 0 }: HubSceneNo
       </group>
 
       {/* 3. LA UI DOM CON HTML DE DREI */}
-      <Html 
-        center 
-        position={[0, HUB_NODE_PANEL_Y_OFFSET, 0]} 
-        transform={false} 
-        zIndexRange={[100, 0]} 
+      {showActionPanel ? (
+        <Html
+          center
+        position={[0, HUB_NODE_PANEL_Y_OFFSET, 0]}
+        transform
+        sprite
+        distanceFactor={12}
+        zIndexRange={[0, 0]}
         className="pointer-events-auto"
-      >
-        <HubNodeActionPanel
-          section={section}
-          baseColor={baseColor}
-          isHovered={isHovered}
-          isLockReasonVisible={isLockReasonVisible}
-          onAction={handleNodeAction}
-        />
-      </Html>
+        >
+          <HubNodeActionPanel
+            section={section}
+            baseColor={baseColor}
+            isHovered={isHovered}
+            isLockReasonVisible={isLockReasonVisible}
+            onAction={handleNodeAction}
+          />
+        </Html>
+      ) : null}
     </group>
   );
 }

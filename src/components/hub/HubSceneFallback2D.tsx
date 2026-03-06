@@ -12,9 +12,17 @@ interface HubSceneFallback2DProps {
   sections: IHubSection[];
   nodes: IHubMapNode[];
   onNavigate: (href: string) => void;
+  onNodeHoverSound?: () => void;
+  areNodeLabelsVisible?: boolean;
 }
 
-export function HubSceneFallback2D({ sections, nodes, onNavigate }: HubSceneFallback2DProps) {
+export function HubSceneFallback2D({
+  sections,
+  nodes,
+  onNavigate,
+  onNodeHoverSound,
+  areNodeLabelsVisible = true,
+}: HubSceneFallback2DProps) {
   const [lockVisibleBySection, setLockVisibleBySection] = useState<Record<string, boolean>>({});
   const sectionsByType = new Map<HubSectionType, IHubSection>(sections.map((section) => [section.type, section]));
 
@@ -30,20 +38,23 @@ export function HubSceneFallback2D({ sections, nodes, onNavigate }: HubSceneFall
             className="absolute z-30 -translate-x-1/2 -translate-y-1/2"
             style={{ left: `${node.positionX}%`, top: `${node.positionY}%` }}
           >
-            <HubNodeActionPanel
-              section={section}
-              baseColor={resolveHubNodeBaseColor(section.type)}
-              isHovered={false}
-              isLockReasonVisible={Boolean(lockVisibleBySection[section.id])}
-              onAction={() => {
-                const result = resolveHubNodeInteraction(section);
-                if (result.kind === "locked") {
-                  setLockVisibleBySection((previous) => ({ ...previous, [section.id]: !previous[section.id] }));
-                  return;
-                }
-                onNavigate(result.href);
-              }}
-            />
+            {areNodeLabelsVisible ? (
+              <HubNodeActionPanel
+                section={section}
+                baseColor={resolveHubNodeBaseColor(section.type)}
+                isHovered={false}
+                isLockReasonVisible={Boolean(lockVisibleBySection[section.id])}
+                onHoverStart={onNodeHoverSound}
+                onAction={() => {
+                  const result = resolveHubNodeInteraction(section);
+                  if (result.kind === "locked") {
+                    setLockVisibleBySection((previous) => ({ ...previous, [section.id]: !previous[section.id] }));
+                    return;
+                  }
+                  onNavigate(result.href);
+                }}
+              />
+            ) : null}
           </article>
         );
       })}

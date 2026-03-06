@@ -1,6 +1,14 @@
 // src/components/hub/internal/hub-node-responsive-layout.ts - Reescala posiciones de nodos según ancho de viewport para evitar solapes.
 import { IHubMapNode } from "@/core/entities/hub/IHubMapNode";
 
+const MOBILE_NODE_LAYOUT_BY_TYPE: Partial<Record<IHubMapNode["sectionType"], { x: number; y: number }>> = {
+  STORY: { x: 34, y: 18 },
+  MARKET: { x: 64, y: 28 },
+  HOME: { x: 50, y: 48 },
+  MULTIPLAYER: { x: 40, y: 68 },
+  TRAINING: { x: 60, y: 72 },
+};
+
 function clampNodeAxis(value: number): number {
   return Math.max(12, Math.min(88, value));
 }
@@ -13,6 +21,13 @@ function resolveSpreadFactor(viewportWidth: number): number {
 }
 
 export function applyResponsiveNodeLayout(nodes: readonly IHubMapNode[], viewportWidth: number): IHubMapNode[] {
+  if (viewportWidth < 640) {
+    return nodes.map((node) => {
+      const mobilePreset = MOBILE_NODE_LAYOUT_BY_TYPE[node.sectionType];
+      if (!mobilePreset) return { ...node };
+      return { ...node, positionX: mobilePreset.x, positionY: mobilePreset.y };
+    });
+  }
   const spreadFactor = resolveSpreadFactor(viewportWidth);
   return nodes.map((node) => {
     const nextX = clampNodeAxis(50 + (node.positionX - 50) * spreadFactor);
