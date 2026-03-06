@@ -9,7 +9,6 @@ import { createInitialBoardState } from "./internal/boardInitialState";
 import { toBoardUiError } from "./internal/boardError";
 import { buildBoardCombatFeedback } from "./internal/board-state/boardCombatFeedback";
 import { buildBoardPendingUi } from "./internal/board-state/boardPendingUi";
-import { buildUseBoardResult } from "./internal/board-state/buildUseBoardResult";
 import { useBoardTurnControls } from "./internal/board-state/useBoardTurnControls";
 import { useBoardUiState } from "./internal/board-state/useBoardUiState";
 import { useOpponentTurn } from "./internal/useOpponentTurn";
@@ -192,7 +191,7 @@ export function useBoard(initialPlayerDeck?: ICard[]) {
     setLastError: uiState.setLastError,
   });
 
-  return buildUseBoardResult({
+  return {
     gameState,
     selectedCard: uiState.selectedCard,
     playingCard: uiState.playingCard,
@@ -230,7 +229,7 @@ export function useBoard(initialPlayerDeck?: ICard[]) {
     battleExperienceSummary,
     battleExperienceCardLookup,
     isBattleExperiencePending,
-    pendingUi,
-    combatFeedback,
-  });
+    ...pendingUi,
+    ...combatFeedback,
+  };
 }

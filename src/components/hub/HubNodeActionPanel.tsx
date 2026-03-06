@@ -1,36 +1,37 @@
 // src/components/hub/HubNodeActionPanel.tsx - Panel HTML accesible para nodos 3D con navegación o estado bloqueado.
 "use client";
 
-import { useState } from "react";
 import { IHubSection } from "@/core/entities/hub/IHubSection";
 
 interface HubNodeActionPanelProps {
   section: IHubSection;
   baseColor: string;
-  onNavigate: (href: string) => void;
+  isHovered?: boolean;
+  isLockReasonVisible: boolean;
+  onAction: () => void;
 }
 
-export function HubNodeActionPanel({ section, baseColor, onNavigate }: HubNodeActionPanelProps) {
-  const [isLockReasonVisible, setIsLockReasonVisible] = useState(false);
-  const isLocked = section.isLocked;
+function withHexAlpha(color: string, alphaHex: string): string {
+  if (!color.startsWith("#") || color.length !== 7) return color;
+  return `${color}${alphaHex}`;
+}
 
-  const handleAction = () => {
-    if (isLocked) {
-      setIsLockReasonVisible((previous) => !previous);
-      return;
-    }
-    onNavigate(section.href);
-  };
+export function HubNodeActionPanel({ section, baseColor, isHovered = false, isLockReasonVisible, onAction }: HubNodeActionPanelProps) {
+  const isLocked = section.isLocked;
 
   return (
     <button
       type="button"
       aria-label={isLocked ? `Mostrar bloqueo de ${section.title}` : `Abrir ${section.title}`}
-      onClick={handleAction}
+      onClick={onAction}
       className={`flex w-[220px] cursor-pointer flex-col items-center justify-center border bg-[#030914]/80 py-3 shadow-lg backdrop-blur-md transition-all hover:scale-105 hover:bg-[#051124]/90
-        ${isLocked ? "border-red-500/30 hover:border-red-400/80" : "border-slate-600/30 hover:border-white/50"}
+        hover:brightness-110
       `}
-      style={{ clipPath: "polygon(0 0, 85% 0, 100% 15px, 100% 100%, 15% 100%, 0 calc(100% - 15px))" }}
+      style={{
+        borderColor: withHexAlpha(baseColor, "80"),
+        boxShadow: `0 0 ${isHovered ? "24px" : "14px"} ${withHexAlpha(baseColor, isHovered ? "55" : "33")}`,
+        clipPath: "polygon(0 0, 85% 0, 100% 15px, 100% 100%, 15% 100%, 0 calc(100% - 15px))",
+      }}
     >
       <div className="flex items-center gap-3">
         {isLocked ? <div className="h-2 w-2 animate-pulse rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,1)]" /> : null}

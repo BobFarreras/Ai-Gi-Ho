@@ -2,6 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { IPlayerCardProgress } from "@/core/entities/progression/IPlayerCardProgress";
 import { IPlayerCardProgressRepository } from "@/core/repositories/IPlayerCardProgressRepository";
+import { resolveCardLevelFromTotalXp } from "@/core/services/progression/card-level-rules";
 import { ApplyBattleCardExperienceUseCase } from "./ApplyBattleCardExperienceUseCase";
 
 class InMemoryPlayerCardProgressRepository implements IPlayerCardProgressRepository {
@@ -65,8 +66,9 @@ describe("ApplyBattleCardExperienceUseCase", () => {
       playerId: "player-b",
       events: [{ cardId: "entity-python", eventType: "SUMMON_SUCCESS" }],
     });
+    const expectedLevel = resolveCardLevelFromTotalXp(1000);
     expect(result[0].oldLevel).toBe(0);
-    expect(result[0].newLevel).toBe(1);
+    expect(result[0].newLevel).toBe(expectedLevel);
     expect(result[0].progress.xp).toBe(1000);
   });
 });

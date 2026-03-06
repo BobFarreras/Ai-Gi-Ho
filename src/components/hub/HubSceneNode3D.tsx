@@ -1,7 +1,7 @@
 // src/components/hub/HubSceneNode3D.tsx - Nodo tridimensional del hub con núcleo 3D, color por sección y panel accesible.
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
@@ -9,7 +9,10 @@ import * as THREE from "three";
 import { IHubMapNode } from "@/core/entities/hub/IHubMapNode";
 import { IHubSection } from "@/core/entities/hub/IHubSection";
 import { HubNodeActionPanel } from "@/components/hub/HubNodeActionPanel";
+import { resolveHubNodeInteraction } from "@/components/hub/internal/hub-node-interaction";
+import { resolveHubNodeEntryScale } from "@/components/hub/internal/hub-node-entry-animation";
 import { resolveHubNodeBaseColor, resolveHubNodeWorldPosition } from "@/components/hub/internal/hub-3d-node-math";
+import { HUB_NODE_PANEL_Y_OFFSET } from "@/components/hub/internal/hub-node-panel-layout";
 
 // Importamos los núcleos
 import { MarketCore3D } from "./nodes/market/MarketCore3D";
@@ -21,22 +24,51 @@ import { TrainingCore3D } from "./nodes/HubNodeDecorTraining";
 interface HubSceneNode3DProps {
   node: IHubMapNode;
   section: IHubSection;
+  nodeEntryDelay?: number;
 }
 
-export function HubSceneNode3D({ node, section }: HubSceneNode3DProps) {
+export function HubSceneNode3D({ node, section, nodeEntryDelay = 0 }: HubSceneNode3DProps) {
   const router = useRouter();
+  const nodeRef = useRef<THREE.Group>(null);
   const baseRef = useRef<THREE.Group>(null);
+  const [isLockReasonVisible, setIsLockReasonVisible] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const { x: posX, z: posZ } = resolveHubNodeWorldPosition(node.positionX, node.positionY);
   const baseColor = resolveHubNodeBaseColor(section.type);
 
+  const handleNodeAction = () => {
+    const result = resolveHubNodeInteraction(section);
+    if (result.kind === "locked") {
+      setIsLockReasonVisible((previous) => !previous);
+      return;
+    }
+    router.push(result.href);
+  };
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.style.cursor = isHovered ? "pointer" : "";
+    return () => {
+      document.body.style.cursor = "";
+    };
+  }, [isHovered]);
+
   useFrame((_, delta) => {
+    if (nodeRef.current) {
+      const entryScale = resolveHubNodeEntryScale(_.clock.elapsedTime, nodeEntryDelay);
+      const hoverScale = isHovered ? 1.08 : 1;
+      const targetScale = entryScale * hoverScale;
+      const currentScale = nodeRef.current.scale.x;
+      const nextScale = THREE.MathUtils.lerp(currentScale, targetScale, 0.14);
+      nodeRef.current.scale.set(nextScale, nextScale, nextScale);
+    }
     if (baseRef.current) {
       baseRef.current.rotation.z -= delta * 0.1; 
     }
   });
 
   return (
-    <group position={[posX, 0, posZ]}>
+    <group ref={nodeRef} position={[posX, 0, posZ]} scale={[0, 0, 0]}>
       
       {/* 💡 FIX DE ILUMINACIÓN: Luz puntual propia para cada nodo.
           Esto hace que el material PBR (meshStandardMaterial) brille perfectamente
@@ -49,7 +81,19 @@ export function HubSceneNode3D({ node, section }: HubSceneNode3DProps) {
       />
 
       {/* 1. EL NÚCLEO HOLOGRÁFICO 3D */}
-      <group position={[0, 1.5, 0]}>
+      <group
+        position={[0, 1.5, 0]}
+        onClick={handleNodeAction}
+        onPointerDown={(event) => event.stopPropagation()}
+        onPointerOver={(event) => {
+          event.stopPropagation();
+          setIsHovered(true);
+        }}
+        onPointerOut={(event) => {
+          event.stopPropagation();
+          setIsHovered(false);
+        }}
+      >
          {section.type === "MARKET" && <MarketCore3D />}
          {section.type === "HOME" && <HomeCore3D />}
          {section.type === "MULTIPLAYER" && <MultiplayerCore3D />}
@@ -72,12 +116,18 @@ export function HubSceneNode3D({ node, section }: HubSceneNode3DProps) {
       {/* 3. LA UI DOM CON HTML DE DREI */}
       <Html 
         center 
-        position={[0, -1.5, 0]} 
+        position={[0, HUB_NODE_PANEL_Y_OFFSET, 0]} 
         transform={false} 
         zIndexRange={[100, 0]} 
         className="pointer-events-auto"
       >
-        <HubNodeActionPanel section={section} baseColor={baseColor} onNavigate={(href) => router.push(href)} />
+        <HubNodeActionPanel
+          section={section}
+          baseColor={baseColor}
+          isHovered={isHovered}
+          isLockReasonVisible={isLockReasonVisible}
+          onAction={handleNodeAction}
+        />
       </Html>
     </group>
   );

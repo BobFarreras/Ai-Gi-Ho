@@ -1,7 +1,7 @@
 // src/components/hub/HubScene.tsx - Escena principal del hub con HUD 2D superpuesto y mapa 3D interactivo.
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, MeshReflectorMaterial } from "@react-three/drei";
@@ -11,6 +11,8 @@ import { IPlayerHubProgress } from "@/core/entities/hub/IPlayerHubProgress";
 import { HubSceneNode3D } from "@/components/hub/HubSceneNode3D";
 import { HubSceneHudOverlay } from "@/components/hub/HubSceneHudOverlay";
 import { HubSceneFallback2D } from "@/components/hub/HubSceneFallback2D";
+import { HUB_NODE_STAGGER_DELAY } from "@/components/hub/internal/hub-entry-timings";
+import { HUB_SCENE_FLOOR_CONFIG } from "@/components/hub/internal/hub-scene-floor-config";
 import { supportsWebGL } from "@/components/hub/internal/hub-webgl-support";
 import { useDocumentVisibility } from "@/components/hub/internal/use-document-visibility";
 
@@ -33,15 +35,10 @@ export function HubScene({
 }: HubSceneProps) {
   const router = useRouter();
   const isDocumentVisible = useDocumentVisibility();
-  const [canRender3D, setCanRender3D] = useState<boolean>(forceFallbackForTests ? false : true);
-
-  useEffect(() => {
-    if (forceFallbackForTests) {
-      setCanRender3D(false);
-      return;
-    }
-    setCanRender3D(supportsWebGL());
-  }, [forceFallbackForTests]);
+  const canRender3D = useMemo(
+    () => (forceFallbackForTests ? false : supportsWebGL()),
+    [forceFallbackForTests],
+  );
 
   const sectionsByType = useMemo(() => {
     return new Map<HubSectionType, IHubSection>(sections.map((section) => [section.type, section]));
@@ -85,25 +82,30 @@ export function HubScene({
           {/* 🚀 EL SUELO (Cristal de Obsidiana Pulido) */}
           <group position={[0, -0.05, 0]}>
             <mesh rotation={[-Math.PI / 2, 0, 0]}>
-              <planeGeometry args={[150, 150]} />
+              <planeGeometry args={[HUB_SCENE_FLOOR_CONFIG.planeSize, HUB_SCENE_FLOOR_CONFIG.planeSize]} />
               <MeshReflectorMaterial
-                blur={[400, 100]}      // Difuminado direccional elegante
-                resolution={1024}      // Alta resolución para los hologramas
+                blur={HUB_SCENE_FLOOR_CONFIG.blur}
+                resolution={HUB_SCENE_FLOOR_CONFIG.reflectionResolution}
                 mixBlur={1}
-                mixStrength={40}       // 🚀 MUY FUERTE: Para que los colores de los neones se reflejen brutalmente
-                roughness={0.15}       // Muy liso (casi cristal)
+                mixStrength={HUB_SCENE_FLOOR_CONFIG.reflectionStrength}
+                roughness={HUB_SCENE_FLOOR_CONFIG.roughness}
                 depthScale={1.2}
                 minDepthThreshold={0.4}
                 maxDepthThreshold={1.4}
-                color="#020813"        // Color casi negro, azul abisal
-                metalness={0.8}        // Muy metálico para potenciar el reflejo
+                color={HUB_SCENE_FLOOR_CONFIG.planeColor}
+                metalness={HUB_SCENE_FLOOR_CONFIG.metalness}
                 mirror={0}
               />
             </mesh>
 
             {/* Retícula Táctica (Grid Tron) */}
             <gridHelper
-              args={[150, 150, '#0284c7', '#082f49']}
+              args={[
+                HUB_SCENE_FLOOR_CONFIG.gridSize,
+                HUB_SCENE_FLOOR_CONFIG.gridDivisions,
+                HUB_SCENE_FLOOR_CONFIG.gridPrimaryColor,
+                HUB_SCENE_FLOOR_CONFIG.gridSecondaryColor,
+              ]}
               position={[0, 0.01, 0]}
             />
           </group>
@@ -122,13 +124,14 @@ export function HubScene({
           />
 
           {/* Nodos 3D */}
-          {nodes.map((node) => {
+          {nodes.map((node, index) => {
             const section = sectionsByType.get(node.sectionType);
             if (!section) return null;
-            return <HubSceneNode3D key={node.id} node={node} section={section} />;
+            const nodeDelay = index * HUB_NODE_STAGGER_DELAY;
+            return <HubSceneNode3D key={node.id} node={node} section={section} nodeEntryDelay={nodeDelay} />;
           })}
-          </Canvas>
-        ) : null}
+        </Canvas>
+      ) : null}
       </div>
     </section>
   );

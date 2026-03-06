@@ -58,14 +58,18 @@ interface HeroCardsProps {
   onCardReveal?: (delayMs?: number) => void;
 }
 
+function resolveViewportMode(): "mobile" | "tablet" | "desktop" {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return "desktop";
+  if (window.matchMedia("(max-width: 639px)").matches) return "mobile";
+  if (window.matchMedia("(min-width: 640px) and (max-width: 1023px)").matches) return "tablet";
+  return "desktop";
+}
+
 export function HeroCards({ onCardReveal }: HeroCardsProps) {
-  const [viewportMode, setViewportMode] = useState<"mobile" | "tablet" | "desktop">("desktop");
+  const [viewportMode, setViewportMode] = useState<"mobile" | "tablet" | "desktop">(resolveViewportMode);
 
   useEffect(() => {
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
-      setViewportMode("desktop");
-      return;
-    }
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
     const mobileQuery = window.matchMedia("(max-width: 639px)");
     const tabletQuery = window.matchMedia("(min-width: 640px) and (max-width: 1023px)");
     const syncViewport = () => {

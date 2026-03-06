@@ -1,7 +1,6 @@
 // src/components/hub/HubUserSection.tsx - Widget HUD que muestra identidad activa del jugador en el hub.
 "use client";
 
-import { motion } from "framer-motion";
 import { Fingerprint } from "lucide-react";
 
 interface HubUserSectionProps {
@@ -10,11 +9,7 @@ interface HubUserSectionProps {
 
 export function HubUserSection({ playerLabel }: HubUserSectionProps) {
   return (
-    // Animamos la entrada del panel como si el casco del HUD se estuviera encendiendo
-    <motion.section 
-      initial={{ opacity: 0, x: -30, filter: "blur(10px)" }}
-      animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-      transition={{ duration: 0.7, ease: "easeOut" }}
+    <section
       className="group relative flex w-[280px] items-center gap-4 border border-cyan-500/40 bg-[#010a14]/90 p-3 shadow-[0_0_30px_rgba(6,182,212,0.15)] backdrop-blur-md transition-all hover:border-cyan-400/80 hover:bg-[#021224]/95"
       style={{ clipPath: "polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px)" }}
     >
@@ -28,12 +23,7 @@ export function HubUserSection({ playerLabel }: HubUserSectionProps) {
       >
         <Fingerprint className="h-7 w-7 text-cyan-400 opacity-80" />
         
-        {/* Haz de luz escaneando la huella */}
-        <motion.div 
-          animate={{ top: ["-10%", "110%", "-10%"] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-          className="absolute left-0 right-0 h-[2px] bg-cyan-300/90 shadow-[0_0_8px_rgba(6,182,212,1)]"
-        />
+    
       </div>
 
       {/* 2. DATOS DEL USUARIO (Derecha) */}
@@ -62,6 +52,6 @@ export function HubUserSection({ playerLabel }: HubUserSectionProps) {
         <div className="h-1 w-1 bg-cyan-500/50" />
         <div className="h-1 w-3 bg-cyan-500/80" />
       </div>
-    </motion.section>
+    </section>
   );
 }

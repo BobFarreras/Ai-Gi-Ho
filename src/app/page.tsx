@@ -21,9 +21,12 @@ export default function HomePage() {
   const { playButtonClick, playTerminalBoot, playHeroCardDeploy, stopNarrationTrack } = useLandingAudio({ isNarrativeActive: phase === "NARRATIVE" });
 
   useEffect(() => {
-    const introSeen = window.localStorage.getItem(LANDING_INTRO_SEEN_KEY) === "1";
-    if (introSeen) setPhase("SHOWCASE");
-    setIsReady(true);
+    const timeoutId = window.setTimeout(() => {
+      const introSeen = window.localStorage.getItem(LANDING_INTRO_SEEN_KEY) === "1";
+      if (introSeen) setPhase("SHOWCASE");
+      setIsReady(true);
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
   }, []);
 
   const toNarrative = (code: string) => {

@@ -64,10 +64,10 @@ export function createInitialGameState(config: ICreateInitialGameStateConfig): G
   const openingHandSize = config.openingHandSize ?? 3;
   const maxHealthPoints = config.maxHealthPoints ?? 8000;
   const maxEnergy = config.maxEnergy ?? 10;
+  const startingPlayerId = resolveStartingPlayerId(config);
 
   const playerA = drawOpeningHand(createPlayer(config.playerA, maxHealthPoints, maxEnergy), openingHandSize);
   const playerB = drawOpeningHand(createPlayer(config.playerB, maxHealthPoints, maxEnergy), openingHandSize);
-  const startingPlayerId = resolveStartingPlayerId(config);
 
   return {
     playerA,

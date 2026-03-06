@@ -1,21 +1,20 @@
 // src/components/hub/nodes/market/MarketRadarSweep.tsx - Haz giratorio principal del radar de mercado.
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { MARKET_SWEEP_DURATION } from "./market-radar-types";
 
 export function MarketRadarSweep() {
   const sweepRef = useRef<THREE.Mesh>(null);
-  const [texture, setTexture] = useState<THREE.CanvasTexture | null>(null);
-
-  useEffect(() => {
+  const texture = useMemo(() => {
+    if (typeof document === "undefined") return null;
     const canvas = document.createElement("canvas");
     canvas.width = 512;
     canvas.height = 512;
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (!ctx) return null;
     const gradient = ctx.createConicGradient(Math.PI / 2, 256, 256);
     gradient.addColorStop(0, "rgba(245, 158, 11, 0)");
     gradient.addColorStop(0.8, "rgba(245, 158, 11, 0.05)");
@@ -23,7 +22,7 @@ export function MarketRadarSweep() {
     gradient.addColorStop(1, "rgba(245, 158, 11, 0)");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 512, 512);
-    setTexture(new THREE.CanvasTexture(canvas));
+    return new THREE.CanvasTexture(canvas);
   }, []);
 
   useFrame((state) => {

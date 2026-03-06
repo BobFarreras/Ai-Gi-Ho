@@ -1,10 +1,12 @@
 // src/components/hub/HubSceneFallback2D.tsx - Fallback 2D del hub para entornos sin WebGL manteniendo navegación por nodos.
 "use client";
 
+import { useState } from "react";
 import { IHubMapNode } from "@/core/entities/hub/IHubMapNode";
 import { HubSectionType, IHubSection } from "@/core/entities/hub/IHubSection";
 import { getControlPanelPosition } from "@/components/hub/control-room-layout";
 import { HubNodeActionPanel } from "@/components/hub/HubNodeActionPanel";
+import { resolveHubNodeInteraction } from "@/components/hub/internal/hub-node-interaction";
 import { resolveHubNodeBaseColor } from "@/components/hub/internal/hub-3d-node-math";
 
 interface HubSceneFallback2DProps {
@@ -14,6 +16,7 @@ interface HubSceneFallback2DProps {
 }
 
 export function HubSceneFallback2D({ sections, nodes, onNavigate }: HubSceneFallback2DProps) {
+  const [lockVisibleBySection, setLockVisibleBySection] = useState<Record<string, boolean>>({});
   const sectionsByType = new Map<HubSectionType, IHubSection>(sections.map((section) => [section.type, section]));
 
   return (
@@ -25,7 +28,20 @@ export function HubSceneFallback2D({ sections, nodes, onNavigate }: HubSceneFall
         const position = getControlPanelPosition(section.type);
         return (
           <article key={node.id} className="absolute z-30 -translate-x-1/2 -translate-y-1/2" style={{ left: position.left, top: position.top }}>
-            <HubNodeActionPanel section={section} baseColor={resolveHubNodeBaseColor(section.type)} onNavigate={onNavigate} />
+            <HubNodeActionPanel
+              section={section}
+              baseColor={resolveHubNodeBaseColor(section.type)}
+              isHovered={false}
+              isLockReasonVisible={Boolean(lockVisibleBySection[section.id])}
+              onAction={() => {
+                const result = resolveHubNodeInteraction(section);
+                if (result.kind === "locked") {
+                  setLockVisibleBySection((previous) => ({ ...previous, [section.id]: !previous[section.id] }));
+                  return;
+                }
+                onNavigate(result.href);
+              }}
+            />
           </article>
         );
       })}
