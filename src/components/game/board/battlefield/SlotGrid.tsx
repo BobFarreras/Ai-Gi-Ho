@@ -9,6 +9,7 @@ import { resolveEntityMotionState } from "./internal/entity-motion";
 import { resolveEntityVisibility } from "./internal/entity-visibility";
 import { SummonHologramVfx } from "./internal/SummonHologramVfx";
 import { BuffImpactVfx } from "./BuffImpactVfx";
+import { CardXpGainVfx } from "./CardXpGainVfx";
 import { ExecutionActivationVfx } from "./ExecutionActivationVfx";
 
 interface SlotGridProps {
@@ -24,6 +25,9 @@ interface SlotGridProps {
   buffStat: "ATTACK" | "DEFENSE" | null;
   buffAmount: number | null;
   buffEventId: string | null;
+  cardXpCardId: string | null;
+  cardXpAmount: number | null;
+  cardXpEventId: string | null;
   onEntityClick: (entity: IBoardEntity | null, isOpponentSide: boolean, event: React.MouseEvent) => void;
 }
 
@@ -40,6 +44,9 @@ export function SlotGrid({
   buffStat,
   buffAmount,
   buffEventId,
+  cardXpCardId,
+  cardXpAmount,
+  cardXpEventId,
   onEntityClick,
 }: SlotGridProps) {
   return (
@@ -52,6 +59,7 @@ export function SlotGrid({
         const isHighlighted = entity ? highlightedEntityIds.includes(entity.instanceId) : false;
         const isSelected = entity ? selectedEntityIds.includes(entity.instanceId) : false;
         const isBuffed = entity ? Boolean(buffEventId) && buffedEntityIds.includes(entity.instanceId) : false;
+        const isCardXpGain = entity ? Boolean(cardXpEventId) && cardXpCardId === entity.card.id : false;
         const visibility = resolveEntityVisibility(entity, isRevealed);
         const motionState = resolveEntityMotionState({
           isAttacking,
@@ -91,8 +99,11 @@ export function SlotGrid({
                   data-board-entity-instance-id={entity.instanceId}
                   onClick={(event) => onEntityClick(entity, isOpponentSide, event)}
                 >
-                  {isBuffed && buffStat && buffEventId && (buffAmount ?? 0) > 0 && (
+                  {isBuffed && buffStat && buffEventId && (buffAmount ?? 0) !== 0 && (
                     <BuffImpactVfx eventId={buffEventId} entityId={entity.instanceId} stat={buffStat} amount={buffAmount ?? 0} />
+                  )}
+                  {isCardXpGain && cardXpEventId && (cardXpAmount ?? 0) > 0 && (
+                    <CardXpGainVfx eventId={cardXpEventId} entityId={entity.instanceId} amount={cardXpAmount ?? 0} />
                   )}
                   {visibility.isFaceDown ? (
                     <div className="absolute w-full h-full flex items-center justify-center">

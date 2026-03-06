@@ -1,3 +1,4 @@
+// src/components/game/board/hooks/internal/board-state/boardPendingUi.ts - Deriva pistas y selecciones pendientes de UI desde el estado y acciones obligatorias.
 import { BattleMode } from "@/core/entities/IPlayer";
 import { GameState } from "@/core/use-cases/GameEngine";
 import { resolveSelectableFusionMaterialIds } from "./fusion-material-selection";
@@ -37,7 +38,7 @@ export function buildBoardPendingUi(
 
   const pendingDiscardCardIds =
     gameState.pendingTurnAction?.playerId === gameState.playerA.id && gameState.pendingTurnAction.type === "DISCARD_FOR_HAND_LIMIT"
-      ? gameState.playerA.hand.map((card) => card.id)
+      ? gameState.playerA.hand.map((card) => card.runtimeId ?? card.id)
       : [];
 
   const pendingFusionSelectableIds = resolveSelectableFusionMaterialIds(gameState);

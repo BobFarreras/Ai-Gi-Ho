@@ -1,3 +1,4 @@
+// src/core/use-cases/game-engine/phases/resolve-pending-turn-action.ts - Resuelve acciones obligatorias de turno (descartar, sacrificar o seleccionar materiales).
 import { IPlayer } from "@/core/entities/IPlayer";
 import { GameRuleError } from "@/core/errors/GameRuleError";
 import { NotFoundError } from "@/core/errors/NotFoundError";
@@ -80,7 +81,7 @@ export function resolvePendingTurnAction(state: GameState, playerId: string, sel
   }
 
   if (state.pendingTurnAction.type === "DISCARD_FOR_HAND_LIMIT") {
-    const cardIndex = player.hand.findIndex((card) => card.id === selectedId);
+    const cardIndex = player.hand.findIndex((card) => card.runtimeId === selectedId || card.id === selectedId);
     if (cardIndex === -1) {
       throw new NotFoundError("La carta seleccionada no está en tu mano.");
     }

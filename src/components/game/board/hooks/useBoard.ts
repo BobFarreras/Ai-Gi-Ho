@@ -16,6 +16,7 @@ import { useOpponentTurn } from "./internal/useOpponentTurn";
 import { usePlayerActions } from "./internal/usePlayerActions";
 import { buildCardExperienceEvents } from "./internal/progression/build-card-experience-events";
 import { buildPlayerCardLookup } from "./internal/progression/build-player-card-lookup";
+import { buildProjectedExperienceSummary } from "./internal/progression/build-projected-experience-summary";
 import { applyBattleCardExperienceAction } from "@/services/game/apply-battle-card-experience-action";
 import type { IAppliedCardExperienceResult } from "@/core/use-cases/progression/ApplyBattleCardExperienceUseCase";
 import { appendExperienceSummaryToCombatLog } from "./internal/progression/append-experience-combat-log";
@@ -33,6 +34,7 @@ function resolveWinnerPlayerId(gameState: GameState): string | "DRAW" | null {
 export function useBoard(initialPlayerDeck?: ICard[]) {
   const [campaignProgress] = useState<ICampaignProgress>({ chapterIndex: 1, duelIndex: 1, victories: 0 });
   const [battleExperienceSummary, setBattleExperienceSummary] = useState<IAppliedCardExperienceResult[]>([]);
+  const [isBattleExperiencePending, setIsBattleExperiencePending] = useState(false);
   const [battleId, setBattleId] = useState<string>(() => createBattleExperienceBatchId());
   const createInitialState = useCallback(
     () => createInitialBoardState({ playerDeck: initialPlayerDeck }),
@@ -58,6 +60,7 @@ export function useBoard(initialPlayerDeck?: ICard[]) {
   }, [gameState]);
   const restartMatch = useCallback(() => {
     setBattleExperienceSummary([]);
+    setIsBattleExperiencePending(false);
     setBattleId(createBattleExperienceBatchId());
     uiState.restartMatch();
   }, [uiState]);
@@ -85,18 +88,28 @@ export function useBoard(initialPlayerDeck?: ICard[]) {
     }
     if (hasAppliedBattleExperienceRef.current) return;
     hasAppliedBattleExperienceRef.current = true;
+    Promise.resolve().then(() => setIsBattleExperiencePending(true));
     const experienceEvents = buildCardExperienceEvents(gameState.combatLog, gameState.playerA.id);
+    const projectedSummary = buildProjectedExperienceSummary(gameState.playerA.id, battleExperienceCardLookup, experienceEvents);
     applyBattleCardExperienceAction(battleId, experienceEvents)
       .then((summary) => {
-        setBattleExperienceSummary(summary);
-        if (summary.length === 0) return;
-        applyTransition((currentState) => appendExperienceSummaryToCombatLog(currentState, currentState.playerA.id, summary));
+        const resolvedSummary = summary.length > 0 ? summary : projectedSummary;
+        setBattleExperienceSummary(resolvedSummary);
+        if (resolvedSummary.length === 0) return;
+        applyTransition((currentState) => appendExperienceSummaryToCombatLog(currentState, currentState.playerA.id, resolvedSummary));
       })
       .catch((error: unknown) => {
         const message = error instanceof Error ? error.message : "No se pudo guardar la experiencia de cartas del duelo.";
         uiState.setLastError({ code: "VALIDATION_ERROR", message });
+        setBattleExperienceSummary(projectedSummary);
+        if (projectedSummary.length > 0) {
+          applyTransition((currentState) => appendExperienceSummaryToCombatLog(currentState, currentState.playerA.id, projectedSummary));
+        }
+      })
+      .finally(() => {
+        setIsBattleExperiencePending(false);
       });
-  }, [applyTransition, battleId, gameState.combatLog, gameState.playerA, uiState, winnerPlayerId]);
+  }, [applyTransition, battleExperienceCardLookup, battleId, gameState.combatLog, gameState.playerA, uiState, winnerPlayerId]);
   const assertPlayerTurn = useCallback((): boolean => {
     if (winnerPlayerId) {
       uiState.setLastError({ code: "GAME_RULE_ERROR", message: "La partida ya terminó." });
@@ -188,6 +201,7 @@ export function useBoard(initialPlayerDeck?: ICard[]) {
     canSetSelectedEntityToAttack: turnControls.canSetSelectedEntityToAttack,
     battleExperienceSummary,
     battleExperienceCardLookup,
+    isBattleExperiencePending,
     pendingUi,
     combatFeedback,
   });

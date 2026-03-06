@@ -1,3 +1,4 @@
+// src/core/use-cases/game-engine/phases/next-phase.ts - Gestiona transición de fases y arranque de turno con recuperación de energía y pasivas mastery.
 import { IBoardEntity, IPlayer } from "@/core/entities/IPlayer";
 import { GameRuleError } from "@/core/errors/GameRuleError";
 import { appendCombatLogEvent } from "@/core/use-cases/game-engine/logging/combat-log";
@@ -46,6 +47,13 @@ function resolveTurnStartForPlayer(player: IPlayer, playerId: string): { player:
   };
 }
 
+function resolveMasteryDefenseEnergyBonus(player: IPlayer): number {
+  const hasDefensiveMasteryEntity = player.activeEntities.some(
+    (entity) => entity.mode === "DEFENSE" && entity.card.masteryPassiveSkillId === "passive-defense-energy-plus-1",
+  );
+  return hasDefensiveMasteryEntity ? 1 : 0;
+}
+
 export function nextPhase(state: GameState): GameState {
   if (state.pendingTurnAction) {
     throw new GameRuleError("Debes resolver la acción obligatoria de inicio de turno antes de avanzar.");
@@ -66,15 +74,18 @@ export function nextPhase(state: GameState): GameState {
   if (state.phase === "BATTLE") {
     const nextActivePlayerId = state.activePlayerId === state.playerA.id ? state.playerB.id : state.playerA.id;
     const isNextPlayerA = nextActivePlayerId === state.playerA.id;
+    const nextActivePlayerBeforeGain = isNextPlayerA ? state.playerA : state.playerB;
+    const masteryEnergyBonus = resolveMasteryDefenseEnergyBonus(nextActivePlayerBeforeGain);
+    const turnEnergyGain = 2 + masteryEnergyBonus;
     const previousEnergy = isNextPlayerA ? state.playerA.currentEnergy : state.playerB.currentEnergy;
     const nextPlayerA = {
       ...state.playerA,
-      currentEnergy: isNextPlayerA ? Math.min(state.playerA.maxEnergy, state.playerA.currentEnergy + 2) : state.playerA.currentEnergy,
+      currentEnergy: isNextPlayerA ? Math.min(state.playerA.maxEnergy, state.playerA.currentEnergy + turnEnergyGain) : state.playerA.currentEnergy,
       activeEntities: resetEntitiesForNewTurn(state.playerA.activeEntities),
     };
     const nextPlayerB = {
       ...state.playerB,
-      currentEnergy: isNextPlayerA ? state.playerB.currentEnergy : Math.min(state.playerB.maxEnergy, state.playerB.currentEnergy + 2),
+      currentEnergy: isNextPlayerA ? state.playerB.currentEnergy : Math.min(state.playerB.maxEnergy, state.playerB.currentEnergy + turnEnergyGain),
       activeEntities: resetEntitiesForNewTurn(state.playerB.activeEntities),
     };
     const turnStartResolution = isNextPlayerA
@@ -101,6 +112,7 @@ export function nextPhase(state: GameState): GameState {
       before: previousEnergy,
       gained: Math.max(0, energyAfterGain - previousEnergy),
       after: energyAfterGain,
+      masteryDefenseBonus: masteryEnergyBonus,
     });
   }
 

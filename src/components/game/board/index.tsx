@@ -42,6 +42,7 @@ export function Board({ initialPlayerDeck }: IBoardProps) {
     canSetSelectedEntityToAttack,
     battleExperienceSummary,
     battleExperienceCardLookup,
+    isBattleExperiencePending,
     isPlayerTurn,
     handleTimerExpired,
     lastDamageTargetPlayerId,
@@ -54,6 +55,10 @@ export function Board({ initialPlayerDeck }: IBoardProps) {
     lastBuffStat,
     lastBuffAmount,
     lastBuffEventId,
+    lastCardXpCardId,
+    lastCardXpAmount,
+    lastCardXpEventId,
+    lastCardXpActorPlayerId,
     winnerPlayerId,
     restartMatch,
     isMuted,
@@ -116,6 +121,7 @@ export function Board({ initialPlayerDeck }: IBoardProps) {
         pendingActionPlayerId={gameState.pendingTurnAction?.playerId ?? null}
         isPlayerTurn={isPlayerTurn}
         isPaused={isPaused}
+        hasWinner={Boolean(winnerPlayerId)}
         onAdvancePhase={advancePhase}
         onTimeUp={() => { playTimerExpired(); handleTimerExpired(); }}
         onWarning={playTimerWarning}
@@ -131,6 +137,7 @@ export function Board({ initialPlayerDeck }: IBoardProps) {
         pendingFusionSelectedEntityIds={pendingFusionSelectedEntityIds}
         isHistoryOpen={isHistoryOpen} isPlayerTurn={isPlayerTurn} lastDamageTargetPlayerId={lastDamageTargetPlayerId} lastDamageEventId={lastDamageEventId}
         lastBuffTargetEntityIds={lastBuffTargetEntityIds} lastBuffStat={lastBuffStat} lastBuffAmount={lastBuffAmount} lastBuffEventId={lastBuffEventId}
+        lastCardXpCardId={lastCardXpCardId} lastCardXpAmount={lastCardXpAmount} lastCardXpEventId={lastCardXpEventId} lastCardXpActorPlayerId={lastCardXpActorPlayerId}
         onGraveyardClick={setGraveyardView} onEntityClick={handleEntityClick} onMandatoryCardSelect={resolvePendingHandDiscard}
         onCardClick={toggleCardSelection} onPlayAction={executePlayAction} onSelectCard={previewCard} onCloseCard={clearSelection}
         onCloseHistory={() => setIsHistoryOpen(false)}
@@ -151,6 +158,7 @@ export function Board({ initialPlayerDeck }: IBoardProps) {
         playerB={opponent}
         battleExperienceSummary={battleExperienceSummary}
         battleExperienceCardLookup={battleExperienceCardLookup}
+        isBattleExperiencePending={isBattleExperiencePending}
         onRestart={restartMatch}
       />
     </div>

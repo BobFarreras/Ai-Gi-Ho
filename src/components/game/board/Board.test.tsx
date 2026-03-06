@@ -74,6 +74,10 @@ describe('Componente UI: Board y Subcomponentes', () => {
       lastBuffStat: null,
       lastBuffAmount: null,
       lastBuffEventId: null,
+      lastCardXpCardId: null,
+      lastCardXpAmount: null,
+      lastCardXpEventId: null,
+      lastCardXpActorPlayerId: null,
       winnerPlayerId: null,
       resolvePendingTurnAction: vi.fn(),
       resolvePendingHandDiscard: vi.fn(),
@@ -94,6 +98,7 @@ describe('Componente UI: Board y Subcomponentes', () => {
       canSetSelectedEntityToAttack: false,
       battleExperienceSummary: [],
       battleExperienceCardLookup: {},
+      isBattleExperiencePending: false,
     });
   });
 
