@@ -2,11 +2,11 @@
 import { IHubMapNode } from "@/core/entities/hub/IHubMapNode";
 
 const MOBILE_NODE_LAYOUT_BY_TYPE: Partial<Record<IHubMapNode["sectionType"], { x: number; y: number }>> = {
-  STORY: { x: 34, y: 18 },
+  STORY: { x: 36, y: 14 },
   MARKET: { x: 64, y: 28 },
   HOME: { x: 50, y: 48 },
-  MULTIPLAYER: { x: 40, y: 68 },
-  TRAINING: { x: 60, y: 72 },
+  MULTIPLAYER: { x: 42, y: 66 },
+  TRAINING: { x: 58, y: 78 },
 };
 
 function clampNodeAxis(value: number): number {

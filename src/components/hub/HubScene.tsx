@@ -3,20 +3,15 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Canvas } from "@react-three/fiber";
-import { MeshReflectorMaterial } from "@react-three/drei";
 import { IHubMapNode } from "@/core/entities/hub/IHubMapNode";
-import { HubSectionType, IHubSection } from "@/core/entities/hub/IHubSection";
+import { IHubSection } from "@/core/entities/hub/IHubSection";
 import { IPlayerHubProgress } from "@/core/entities/hub/IPlayerHubProgress";
-import { HubSceneCameraControls } from "@/components/hub/HubSceneCameraControls";
 import { HubSceneFloatingActions } from "@/components/hub/HubSceneFloatingActions";
-import { HubSceneNode3D } from "@/components/hub/HubSceneNode3D";
 import { HubSceneHudOverlay } from "@/components/hub/HubSceneHudOverlay";
 import { HubSceneFallback2D } from "@/components/hub/HubSceneFallback2D";
+import { HubSceneWorld3D } from "@/components/hub/HubSceneWorld3D";
 import { resolveHubCameraPose } from "@/components/hub/internal/hub-camera-fit";
-import { HUB_NODE_STAGGER_DELAY } from "@/components/hub/internal/hub-entry-timings";
 import { applyResponsiveNodeLayout } from "@/components/hub/internal/hub-node-responsive-layout";
-import { HUB_SCENE_FLOOR_CONFIG } from "@/components/hub/internal/hub-scene-floor-config";
 import { supportsWebGL } from "@/components/hub/internal/hub-webgl-support";
 import { useDocumentVisibility } from "@/components/hub/internal/use-document-visibility";
 import { useHubSfx } from "@/components/hub/internal/use-hub-sfx";
@@ -52,10 +47,6 @@ export function HubScene({
   const responsiveNodes = useMemo(() => applyResponsiveNodeLayout(nodes, viewportWidth), [nodes, viewportWidth]);
   const cameraPose = useMemo(() => resolveHubCameraPose(responsiveNodes, viewportWidth), [responsiveNodes, viewportWidth]);
 
-  const sectionsByType = useMemo(() => {
-    return new Map<HubSectionType, IHubSection>(sections.map((section) => [section.type, section]));
-  }, [sections]);
-
   return (
     <section className="relative h-screen w-full overflow-hidden">
       <HubSceneHudOverlay
@@ -81,73 +72,18 @@ export function HubScene({
           />
         ) : null}
         {canRender3D ? (
-          <Canvas
-          camera={{ position: cameraPose.position, fov: 45 }}
-          dpr={[1, 1.5]}
-          gl={{ antialias: false, powerPreference: "high-performance" }}
-          frameloop={isDocumentVisible ? "always" : "never"}
-          className="cursor-grab active:cursor-grabbing"
-        >
-          <ambientLight intensity={0.3} />
-          <directionalLight
-            position={[10, 20, 10]}
-            intensity={1.2}
-            color="#0ea5e9"
+          <HubSceneWorld3D
+            sections={sections}
+            nodes={responsiveNodes}
+            viewportWidth={viewportWidth}
+            isDocumentVisible={isDocumentVisible}
+            cameraResetSignal={cameraResetSignal}
+            cameraPosition={cameraPose.position}
+            cameraTarget={cameraPose.target}
+            areNodeLabelsVisible={areNodeLabelsVisible}
+            onNodeHoverSound={playNodeHover}
           />
-          <directionalLight
-            position={[-15, 10, -15]}
-            intensity={0.5}
-            color="#38bdf8"
-          />
-          <group position={[0, -0.05, 0]}>
-            <mesh rotation={[-Math.PI / 2, 0, 0]}>
-              <planeGeometry args={[HUB_SCENE_FLOOR_CONFIG.planeSize, HUB_SCENE_FLOOR_CONFIG.planeSize]} />
-              <MeshReflectorMaterial
-                blur={HUB_SCENE_FLOOR_CONFIG.blur}
-                resolution={HUB_SCENE_FLOOR_CONFIG.reflectionResolution}
-                mixBlur={1}
-                mixStrength={HUB_SCENE_FLOOR_CONFIG.reflectionStrength}
-                roughness={HUB_SCENE_FLOOR_CONFIG.roughness}
-                depthScale={1.2}
-                minDepthThreshold={0.4}
-                maxDepthThreshold={1.4}
-                color={HUB_SCENE_FLOOR_CONFIG.planeColor}
-                metalness={HUB_SCENE_FLOOR_CONFIG.metalness}
-                mirror={0}
-              />
-            </mesh>
-            <gridHelper
-              args={[
-                HUB_SCENE_FLOOR_CONFIG.gridSize,
-                HUB_SCENE_FLOOR_CONFIG.gridDivisions,
-                HUB_SCENE_FLOOR_CONFIG.gridPrimaryColor,
-                HUB_SCENE_FLOOR_CONFIG.gridSecondaryColor,
-              ]}
-              position={[0, 0.01, 0]}
-            />
-          </group>
-          <HubSceneCameraControls
-            resetSignal={cameraResetSignal}
-            desiredPosition={cameraPose.position}
-            desiredTarget={cameraPose.target}
-          />
-          {responsiveNodes.map((node, index) => {
-            const section = sectionsByType.get(node.sectionType);
-            if (!section) return null;
-            const nodeDelay = index * HUB_NODE_STAGGER_DELAY;
-            return (
-              <HubSceneNode3D
-                key={node.id}
-                node={node}
-                section={section}
-                nodeEntryDelay={nodeDelay}
-                onNodeHoverSound={playNodeHover}
-                showActionPanel={areNodeLabelsVisible}
-              />
-            );
-          })}
-        </Canvas>
-      ) : null}
+        ) : null}
       </div>
     </section>
   );

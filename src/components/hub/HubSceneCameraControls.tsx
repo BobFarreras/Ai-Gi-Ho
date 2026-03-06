@@ -1,11 +1,10 @@
 // src/components/hub/HubSceneCameraControls.tsx - Encapsula OrbitControls y permite recolar cámara con una señal externa.
 "use client";
 
-import { useEffect, useRef } from "react";
+import { type ElementRef, useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { OrbitControls } from "@react-three/drei";
-import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { HUB_CAMERA_DEFAULT_POSITION, HUB_CAMERA_DEFAULT_TARGET } from "@/components/hub/internal/hub-camera-config";
 
 interface HubSceneCameraControlsProps {
@@ -15,6 +14,7 @@ interface HubSceneCameraControlsProps {
 }
 
 const CAMERA_RESET_DURATION_SECONDS = 0.45;
+type OrbitControlsRef = ElementRef<typeof OrbitControls>;
 
 interface ICameraResetAnimationState {
   active: boolean;
@@ -35,7 +35,7 @@ export function HubSceneCameraControls({
   desiredPosition = HUB_CAMERA_DEFAULT_POSITION,
   desiredTarget = HUB_CAMERA_DEFAULT_TARGET,
 }: HubSceneCameraControlsProps) {
-  const controlsRef = useRef<OrbitControlsImpl | null>(null);
+  const controlsRef = useRef<OrbitControlsRef | null>(null);
   const animationStateRef = useRef<ICameraResetAnimationState>({
     active: false,
     elapsed: 0,
