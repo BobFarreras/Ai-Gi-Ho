@@ -1,4 +1,4 @@
-// src/components/game/board/Board.test.tsx
+// src/components/game/board/Board.test.tsx - Verifica el comportamiento UI del tablero mediante mock del hook principal.
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Board } from './index';
@@ -10,6 +10,10 @@ import { GameState } from '@/core/use-cases/GameEngine';
 // Hacemos un Mock (simulación) del archivo entero del hook
 vi.mock('./hooks/useBoard', () => ({
   useBoard: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
 }));
 
 describe('Componente UI: Board y Subcomponentes', () => {
@@ -51,12 +55,16 @@ describe('Componente UI: Board y Subcomponentes', () => {
       revealedEntities: [],
       lastError: null,
       pendingEntityReplacement: null,
+      pendingEntityReplacementTargetId: null,
       pendingActionHint: null,
       pendingDiscardCardIds: [],
       pendingEntitySelectionIds: [],
+      pendingFusionSelectedEntityIds: [],
       opponentDifficulty: "EASY",
       isPlayerTurn: true,
       isMuted: false,
+      isPaused: false,
+      isFusionCinematicActive: false,
       lastDamageTargetPlayerId: null,
       lastDamageAmount: null,
       lastDamageEventId: null,
@@ -67,6 +75,10 @@ describe('Componente UI: Board y Subcomponentes', () => {
       lastBuffStat: null,
       lastBuffAmount: null,
       lastBuffEventId: null,
+      lastCardXpCardId: null,
+      lastCardXpAmount: null,
+      lastCardXpEventId: null,
+      lastCardXpActorPlayerId: null,
       winnerPlayerId: null,
       resolvePendingTurnAction: vi.fn(),
       resolvePendingHandDiscard: vi.fn(),
@@ -79,8 +91,17 @@ describe('Componente UI: Board y Subcomponentes', () => {
       handleEntityClick: vi.fn(),
       advancePhase: vi.fn(),
       handleTimerExpired: vi.fn(),
+      confirmEntityReplacement: vi.fn(),
+      cancelEntityReplacement: vi.fn(),
       restartMatch: vi.fn(),
       toggleMute: vi.fn(),
+      togglePause: vi.fn(),
+      setIsFusionCinematicActive: vi.fn(),
+      setSelectedEntityToAttack: vi.fn(),
+      canSetSelectedEntityToAttack: false,
+      battleExperienceSummary: [],
+      battleExperienceCardLookup: {},
+      isBattleExperiencePending: false,
     });
   });
 

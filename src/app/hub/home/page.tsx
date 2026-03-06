@@ -1,16 +1,27 @@
-// src/app/hub/home/page.tsx - Renderiza la pantalla base de Mi Home dentro del hub.
-import { HubSectionScreen } from "@/components/hub/sections/HubSectionScreen";
-import { getHubSectionViewModel } from "@/app/hub/internal/getHubSectionViewModel";
+// src/app/hub/home/page.tsx - Renderiza Mi Home con constructor de deck y fallback bloqueado según progreso.
+import { HomeDeckBuilderScene } from "@/components/hub/home/HomeDeckBuilderScene";
+import { GetHomeDeckBuilderDataUseCase } from "@/core/use-cases/home/GetHomeDeckBuilderDataUseCase";
+import { getCurrentUserSession } from "@/services/auth/get-current-user-session";
+import { createPlayerRuntimeRepositories } from "@/services/player-persistence/create-player-runtime-repositories";
+import { sharedDeckRepository } from "@/infrastructure/repositories/singletons";
 
 export default async function HomeModulePage() {
-  const viewModel = await getHubSectionViewModel("HOME");
+  const session = await getCurrentUserSession();
+  const playerId = session?.user.id ?? "local-player";
+  const runtimeRepositories = session ? await createPlayerRuntimeRepositories() : null;
+  const deckRepository = runtimeRepositories?.deckRepository ?? sharedDeckRepository;
+  const getHomeDeckBuilderDataUseCase = new GetHomeDeckBuilderDataUseCase(deckRepository);
+  const [data, cardProgress] = await Promise.all([
+    getHomeDeckBuilderDataUseCase.execute(playerId),
+    runtimeRepositories?.playerCardProgressRepository.listByPlayer(playerId) ?? Promise.resolve([]),
+  ]);
 
   return (
-    <HubSectionScreen
-      title={viewModel.section.title}
-      description="Gestiona mazos, preferencias de cuenta y datos personales del duelista."
-      isLocked={viewModel.section.isLocked}
-      lockReason={viewModel.section.lockReason}
+    <HomeDeckBuilderScene
+      playerId={playerId}
+      initialDeck={data.deck}
+      collection={data.collection}
+      initialCardProgress={cardProgress}
     />
   );
 }

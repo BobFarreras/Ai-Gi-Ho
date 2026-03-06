@@ -26,10 +26,7 @@ function resolveEntityDeployMode(mode: BattleMode): Extract<BattleMode, "ATTACK"
     return "SET";
   }
 
-  if (mode !== "ATTACK" && mode !== "DEFENSE") {
-    throw new ValidationError("Modo inválido para una entidad.");
-  }
-  return "SET";
+  throw new ValidationError("Modo inválido para una entidad.");
 }
 
 function validateExecutionPlay(player: IPlayer, mode: BattleMode): void {
@@ -62,6 +59,10 @@ function createBoardEntity(card: IPlayer["hand"][number], mode: BattleMode): IBo
   };
 }
 
+function matchesHandCardReference(card: IPlayer["hand"][number], reference: string): boolean {
+  return card.runtimeId === reference || card.id === reference;
+}
+
 export function playCard(state: GameState, playerId: string, cardId: string, mode: BattleMode): GameState {
   if (state.pendingTurnAction) {
     throw new GameRuleError("Debes resolver la acción obligatoria de inicio de turno antes de jugar cartas.");
@@ -76,7 +77,7 @@ export function playCard(state: GameState, playerId: string, cardId: string, mod
   }
 
   const { player, opponent, isPlayerA } = getPlayerPair(state, playerId);
-  const cardIndex = player.hand.findIndex((card) => card.id === cardId);
+  const cardIndex = player.hand.findIndex((card) => matchesHandCardReference(card, cardId));
 
   if (cardIndex === -1) {
     throw new NotFoundError("La carta no está en la mano.");
