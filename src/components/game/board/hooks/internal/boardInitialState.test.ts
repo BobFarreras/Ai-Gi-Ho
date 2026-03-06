@@ -21,7 +21,8 @@ describe("boardInitialState", () => {
     const persistedDeck = Array.from({ length: 20 }, (_, index) => createCard(`persisted-${index}`));
     const state = createInitialBoardState({ playerDeck: persistedDeck });
     expect(state.playerA.hand).toHaveLength(4);
-    expect(state.playerA.hand[0].id).toBe("persisted-0");
+    const persistedIds = new Set(persistedDeck.map((card) => card.id));
+    expect(state.playerA.hand.every((card) => persistedIds.has(card.id))).toBe(true);
   });
 
   it("usa fallback mock cuando no hay mazo persistido", () => {

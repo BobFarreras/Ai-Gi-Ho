@@ -39,9 +39,11 @@ export function useToggleCardSelection({
         return;
       }
 
-      if (playingCard?.runtimeId === card.runtimeId && playingCard.runtimeId) {
+      const selectedRuntimeId = playingCard?.runtimeId ?? null;
+      const selectedCardId = playingCard?.id ?? null;
+      if (selectedRuntimeId && selectedRuntimeId === card.runtimeId) {
         clearSelection();
-      } else if (!playingCard?.runtimeId && !card.runtimeId && playingCard?.id === card.id) {
+      } else if (!selectedRuntimeId && !card.runtimeId && selectedCardId === card.id) {
         clearSelection();
       } else {
         setSelectedCard(card);
@@ -57,8 +59,7 @@ export function useToggleCardSelection({
       gameState.pendingTurnAction,
       gameState.playerA.id,
       isAnimating,
-      playingCard?.id,
-      playingCard?.runtimeId,
+      playingCard,
       setActiveAttackerId,
       setLastError,
       setPlayingCard,

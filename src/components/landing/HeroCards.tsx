@@ -17,6 +17,7 @@ const LORE_CARDS: ICard[] = [
     cost: 8,
     attack: 3000,
     defense: 2500,
+    bgUrl: "/assets/bgs/bg-tech.jpg",
     renderUrl: "/assets/renders/gemini.png",
     versionTier: 1,
     level: 5,
@@ -31,6 +32,7 @@ const LORE_CARDS: ICard[] = [
     cost: 4,
     attack: 1500,
     defense: 2800,
+    bgUrl: "/assets/bgs/bg-tech.jpg",
     renderUrl: "/assets/renders/ollama.png",
     versionTier: 1,
     level: 4,
@@ -45,6 +47,7 @@ const LORE_CARDS: ICard[] = [
     archetype: "TOOL",
     trigger: "ON_OPPONENT_ATTACK_DECLARED",
     cost: 2,
+    bgUrl: "/assets/bgs/bg-tech.jpg",
     renderUrl: "/assets/renders/n8n.png",
     versionTier: 1,
     level: 1,
@@ -55,14 +58,18 @@ interface HeroCardsProps {
   onCardReveal?: (delayMs?: number) => void;
 }
 
+function resolveViewportMode(): "mobile" | "tablet" | "desktop" {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return "desktop";
+  if (window.matchMedia("(max-width: 639px)").matches) return "mobile";
+  if (window.matchMedia("(min-width: 640px) and (max-width: 1023px)").matches) return "tablet";
+  return "desktop";
+}
+
 export function HeroCards({ onCardReveal }: HeroCardsProps) {
-  const [viewportMode, setViewportMode] = useState<"mobile" | "tablet" | "desktop">("desktop");
+  const [viewportMode, setViewportMode] = useState<"mobile" | "tablet" | "desktop">(resolveViewportMode);
 
   useEffect(() => {
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
-      setViewportMode("desktop");
-      return;
-    }
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
     const mobileQuery = window.matchMedia("(max-width: 639px)");
     const tabletQuery = window.matchMedia("(min-width: 640px) and (max-width: 1023px)");
     const syncViewport = () => {
@@ -106,7 +113,7 @@ export function HeroCards({ onCardReveal }: HeroCardsProps) {
         transition={{ type: "spring", stiffness: 80, damping: 15, delay: 0.2 }}
         className="absolute z-10"
       >
-        <Card card={LORE_CARDS[1]} />
+        <Card card={LORE_CARDS[1]} disableHoverEffects disableDefaultShadow />
       </motion.div>
 
       {/* Carta Centro */}
@@ -114,9 +121,9 @@ export function HeroCards({ onCardReveal }: HeroCardsProps) {
         initial={{ opacity: 0, y: 100, scale: 0.8 }}
         animate={{ opacity: 1, y: centerYOffset, scale: centerScale }}
         transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.5 }}
-        className="absolute z-30 shadow-[0_0_60px_rgba(59,130,246,0.3)]"
+        className="absolute z-30"
       >
-        <Card card={LORE_CARDS[0]} />
+        <Card card={LORE_CARDS[0]} disableHoverEffects clipToFrameShape disableDefaultShadow />
       </motion.div>
 
       {/* Carta Derecha (Más separada y girada) */}
@@ -126,7 +133,7 @@ export function HeroCards({ onCardReveal }: HeroCardsProps) {
         transition={{ type: "spring", stiffness: 80, damping: 15, delay: 0.8 }}
         className="absolute z-20"
       >
-        <Card card={LORE_CARDS[2]} />
+        <Card card={LORE_CARDS[2]} disableHoverEffects disableDefaultShadow />
       </motion.div>
     </div>
   );
