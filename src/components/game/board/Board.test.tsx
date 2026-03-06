@@ -1,4 +1,4 @@
-// src/components/game/board/Board.test.tsx
+// src/components/game/board/Board.test.tsx - Verifica el comportamiento UI del tablero mediante mock del hook principal.
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Board } from './index';
@@ -92,6 +92,8 @@ describe('Componente UI: Board y Subcomponentes', () => {
       setIsFusionCinematicActive: vi.fn(),
       setSelectedEntityToAttack: vi.fn(),
       canSetSelectedEntityToAttack: false,
+      battleExperienceSummary: [],
+      battleExperienceCardLookup: {},
     });
   });
 
