@@ -185,6 +185,16 @@ UI (app/components) -> UseCases/Services -> Repositories (interfaces core)
 3. `MarketCore3D` se divide en submódulos (`nodes/market/*`) para reducir tamaño por archivo y aislar responsabilidades.
 4. Se eliminan wrappers legacy no referenciados para evitar deuda técnica.
 
+## Hub UI (fase 5 y 6 - fallback y resiliencia runtime)
+
+1. Detección de capacidades gráficas en `internal/hub-webgl-support.ts`.
+2. Fallback 2D (`HubSceneFallback2D`) activo cuando WebGL no está disponible.
+3. `HubScene` pausa render 3D cuando la pestaña no está visible para proteger FPS/consumo.
+4. Cobertura de pruebas añadida para:
+   - detector WebGL,
+   - fallback 2D,
+   - integración de `HubScene` en modo fallback.
+
 ## Hub UI (Refactor Fase 0 - Preparación)
 
 1. Se define nueva arquitectura visual por capas:

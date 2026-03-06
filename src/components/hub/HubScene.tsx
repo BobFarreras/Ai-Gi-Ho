@@ -1,67 +1,68 @@
 // src/components/hub/HubScene.tsx - Escena principal del hub con HUD 2D superpuesto y mapa 3D interactivo.
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, MeshReflectorMaterial } from "@react-three/drei";
 import { IHubMapNode } from "@/core/entities/hub/IHubMapNode";
 import { HubSectionType, IHubSection } from "@/core/entities/hub/IHubSection";
 import { IPlayerHubProgress } from "@/core/entities/hub/IPlayerHubProgress";
-
-// HUD UI Components
-import { HubProgressSection } from "@/components/hub/HubProgressSection";
-import { HubSessionSection } from "@/components/hub/HubSessionSection";
-import { HubUserSection } from "@/components/hub/HubUserSection";
-
-// Nodos 3D
 import { HubSceneNode3D } from "@/components/hub/HubSceneNode3D";
+import { HubSceneHudOverlay } from "@/components/hub/HubSceneHudOverlay";
+import { HubSceneFallback2D } from "@/components/hub/HubSceneFallback2D";
+import { supportsWebGL } from "@/components/hub/internal/hub-webgl-support";
+import { useDocumentVisibility } from "@/components/hub/internal/use-document-visibility";
 
 interface HubSceneProps {
   playerLabel?: string;
   progress?: IPlayerHubProgress;
   showMetaNodes?: boolean;
+  forceFallbackForTests?: boolean;
   sections: IHubSection[];
   nodes: IHubMapNode[];
 }
 
-export function HubScene({ playerLabel, progress, showMetaNodes = false, sections, nodes }: HubSceneProps) {
+export function HubScene({
+  playerLabel,
+  progress,
+  showMetaNodes = false,
+  forceFallbackForTests = false,
+  sections,
+  nodes,
+}: HubSceneProps) {
+  const router = useRouter();
+  const isDocumentVisible = useDocumentVisibility();
+  const [canRender3D, setCanRender3D] = useState<boolean>(forceFallbackForTests ? false : true);
+
+  useEffect(() => {
+    if (forceFallbackForTests) {
+      setCanRender3D(false);
+      return;
+    }
+    setCanRender3D(supportsWebGL());
+  }, [forceFallbackForTests]);
+
   const sectionsByType = useMemo(() => {
     return new Map<HubSectionType, IHubSection>(sections.map((section) => [section.type, section]));
   }, [sections]);
 
   return (
     <section className="relative h-screen w-full overflow-hidden">
-
-      {/* =========================================
-          1. CAPA DEL HUD (Interfaces 2D)
-          ========================================= */}
-      <div className="pointer-events-none absolute inset-0 z-40">
-        {showMetaNodes && playerLabel && (
-          <div className="pointer-events-auto absolute left-4 top-4 sm:left-[6%] sm:top-[6%]">
-            <HubUserSection playerLabel={playerLabel} />
-          </div>
-        )}
-        {showMetaNodes && progress && (
-          <div className="pointer-events-auto absolute left-1/2 top-5 sm:top-3 -translate-x-1/2">
-            <HubProgressSection progress={progress} />
-          </div>
-        )}
-        {showMetaNodes && (
-          <div className="pointer-events-auto absolute right-4 top-4 sm:right-[6%] sm:top-[6%]">
-            <HubSessionSection />
-          </div>
-        )}
-      </div>
+      <HubSceneHudOverlay playerLabel={playerLabel} progress={progress} showMetaNodes={showMetaNodes} />
 
       {/* =========================================
           2. CAPA DEL MUNDO 3D (Tactical Dark Room)
           ========================================= */}
       <div className="absolute inset-0 z-10 bg-[#010610]">
+        {!canRender3D ? <HubSceneFallback2D sections={sections} nodes={nodes} onNavigate={(href) => router.push(href)} /> : null}
         {/* Fondo base ultra oscuro para que no haya fugas de luz clara */}
-        <Canvas
+        {canRender3D ? (
+          <Canvas
           camera={{ position: [0, 15, 22], fov: 45 }}
           dpr={[1, 1.5]}
           gl={{ antialias: false, powerPreference: "high-performance" }}
+          frameloop={isDocumentVisible ? "always" : "never"}
           className="cursor-grab active:cursor-grabbing"
         >
           {/* 💡 ILUMINACIÓN CIBERPUNK (Dramática pero visible) */}
@@ -126,7 +127,8 @@ export function HubScene({ playerLabel, progress, showMetaNodes = false, section
             if (!section) return null;
             return <HubSceneNode3D key={node.id} node={node} section={section} />;
           })}
-        </Canvas>
+          </Canvas>
+        ) : null}
       </div>
     </section>
   );

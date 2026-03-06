@@ -107,6 +107,7 @@ Estado: aprobado para implementación por fases.
 3. `HubUserSection`, `HubSessionSection` y `HubProgressSection` se renderizan como nodos flotantes integrados en la escena.
 4. Cada sección principal tiene decoración propia desacoplada en `src/components/hub/nodes/*`.
 5. El layout de nodos es asimétrico y evita solapes entre secciones interactivas.
+6. Si no hay soporte WebGL, el hub cae automáticamente a `HubSceneFallback2D`.
 
 ### Fase 2: Escena 3D mínima
 

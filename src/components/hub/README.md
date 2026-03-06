@@ -33,6 +33,16 @@ La UI del Hub representa un centro de control interactivo en 3D, manteniendo:
    - `antialias: false`
    - `powerPreference: "high-performance"`
 3. El nodo `MARKET` está dividido en submódulos (`grid`, `sweep`, `blips`) para limitar complejidad y facilitar tuning.
+4. El render 3D se pausa automáticamente cuando la pestaña no está visible (`frameloop: never`).
+
+## Fallback WebGL
+
+1. Si el entorno no soporta WebGL, el hub utiliza `HubSceneFallback2D`.
+2. El fallback mantiene:
+   - nodos clicables,
+   - navegación por `href`,
+   - visualización de `lockReason` en secciones bloqueadas.
+3. Detección centralizada en `internal/hub-webgl-support.ts`.
 
 ## Accesibilidad
 
@@ -47,6 +57,9 @@ La UI del Hub representa un centro de control interactivo en 3D, manteniendo:
 2. `src/components/hub/internal/hub-3d-node-math.test.ts`
 3. `src/components/hub/nodes/market/market-radar-utils.test.ts`
 4. `src/components/hub/sections/HubSectionScreen.test.tsx`
+5. `src/components/hub/HubSceneFallback2D.test.tsx`
+6. `src/components/hub/HubScene.fallback.test.tsx`
+7. `src/components/hub/internal/hub-webgl-support.test.ts`
 
 Comando:
 
