@@ -8,8 +8,7 @@ import { CardBack } from "../../card/CardBack";
 import { resolveEntityMotionState } from "./internal/entity-motion";
 import { resolveEntityVisibility } from "./internal/entity-visibility";
 import { SummonHologramVfx } from "./internal/SummonHologramVfx";
-import { BuffImpactVfx } from "./BuffImpactVfx";
-import { CardXpGainVfx } from "./CardXpGainVfx";
+import { CardFloatingQueueVfx } from "./CardFloatingQueueVfx";
 import { ExecutionActivationVfx } from "./ExecutionActivationVfx";
 
 interface SlotGridProps {
@@ -58,8 +57,17 @@ export function SlotGrid({
         const isActivating = entity?.mode === "ACTIVATE";
         const isHighlighted = entity ? highlightedEntityIds.includes(entity.instanceId) : false;
         const isSelected = entity ? selectedEntityIds.includes(entity.instanceId) : false;
-        const isBuffed = entity ? Boolean(buffEventId) && buffedEntityIds.includes(entity.instanceId) : false;
-        const isCardXpGain = entity ? Boolean(cardXpEventId) && cardXpCardId === entity.card.id : false;
+        const floatingEvents =
+          entity && ((buffEventId && buffStat && (buffAmount ?? 0) !== 0 && buffedEntityIds.includes(entity.instanceId)) || (cardXpEventId && (cardXpAmount ?? 0) > 0 && cardXpCardId === entity.card.id))
+            ? [
+                ...(buffEventId && buffStat && (buffAmount ?? 0) !== 0 && buffedEntityIds.includes(entity.instanceId)
+                  ? [{ id: `${buffEventId}-${entity.instanceId}`, type: "STAT" as const, amount: buffAmount ?? 0, stat: buffStat }]
+                  : []),
+                ...(cardXpEventId && (cardXpAmount ?? 0) > 0 && cardXpCardId === entity.card.id
+                  ? [{ id: `${cardXpEventId}-${entity.instanceId}`, type: "XP" as const, amount: cardXpAmount ?? 0 }]
+                  : []),
+              ]
+            : [];
         const visibility = resolveEntityVisibility(entity, isRevealed);
         const motionState = resolveEntityMotionState({
           isAttacking,
@@ -76,6 +84,9 @@ export function SlotGrid({
             className="relative w-24 h-36 border-2 border-cyan-500/30 rounded-lg bg-cyan-950/40 flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.15)_inset] group hover:border-cyan-300 transition-colors duration-300"
           >
             {entity && <ExecutionActivationVfx entity={entity} isOpponentSide={isOpponentSide} />}
+            {entity && floatingEvents.length > 0 && (
+              <CardFloatingQueueVfx entityId={entity.instanceId} events={floatingEvents} />
+            )}
 
             <AnimatePresence>
               {entity ? (
@@ -99,12 +110,6 @@ export function SlotGrid({
                   data-board-entity-instance-id={entity.instanceId}
                   onClick={(event) => onEntityClick(entity, isOpponentSide, event)}
                 >
-                  {isBuffed && buffStat && buffEventId && (buffAmount ?? 0) !== 0 && (
-                    <BuffImpactVfx eventId={buffEventId} entityId={entity.instanceId} stat={buffStat} amount={buffAmount ?? 0} />
-                  )}
-                  {isCardXpGain && cardXpEventId && (cardXpAmount ?? 0) > 0 && (
-                    <CardXpGainVfx eventId={cardXpEventId} entityId={entity.instanceId} amount={cardXpAmount ?? 0} />
-                  )}
                   {visibility.isFaceDown ? (
                     <div className="absolute w-full h-full flex items-center justify-center">
                       <CardBack isHorizontal={visibility.isHorizontal} />
