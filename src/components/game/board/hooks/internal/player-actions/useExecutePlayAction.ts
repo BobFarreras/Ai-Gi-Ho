@@ -18,6 +18,7 @@ type IExecutePlayActionParams = Pick<
   | "playingCard"
   | "setActiveAttackerId"
   | "setPendingEntityReplacement"
+  | "setPendingEntityReplacementTargetId"
   | "setIsAnimating"
   | "setLastError"
   | "setRevealedEntities"
@@ -33,6 +34,7 @@ export function useExecutePlayAction({
   playingCard,
   setActiveAttackerId,
   setPendingEntityReplacement,
+  setPendingEntityReplacementTargetId,
   setIsAnimating,
   setLastError,
   setRevealedEntities,
@@ -51,6 +53,7 @@ export function useExecutePlayAction({
       const selectedCardReference = playingCard.runtimeId ?? playingCard.id;
       if (playingCard.type === "ENTITY" && (mode === "ATTACK" || mode === "DEFENSE") && gameState.playerA.activeEntities.length >= 3) {
         setPendingEntityReplacement({ cardId: selectedCardReference, mode });
+        setPendingEntityReplacementTargetId(null);
         setLastError(null);
         return;
       }
@@ -106,6 +109,7 @@ export function useExecutePlayAction({
       playingCard,
       setActiveAttackerId,
       setPendingEntityReplacement,
+      setPendingEntityReplacementTargetId,
       setIsAnimating,
       setLastError,
       setRevealedEntities,

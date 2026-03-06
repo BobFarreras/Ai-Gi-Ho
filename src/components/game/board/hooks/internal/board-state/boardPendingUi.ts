@@ -27,9 +27,7 @@ export function buildBoardPendingUi(
     gameState.pendingTurnAction?.playerId === gameState.playerA.id
       ? gameState.pendingTurnAction.type === "DISCARD_FOR_HAND_LIMIT"
         ? "Tienes 5 cartas en mano. Elige una carta de tu mano para enviarla al cementerio."
-        : gameState.pendingTurnAction.type === "SACRIFICE_ENTITY_FOR_DRAW"
-          ? "Tu campo de entidades está lleno. Elige una entidad de tu campo para enviarla al cementerio."
-          : `Selecciona 2 materiales para fusionar (${pendingFusionMaterialsCount ?? 0}/2).`
+        : `Selecciona 2 materiales para fusionar (${pendingFusionMaterialsCount ?? 0}/2).`
       : pendingFusionMaterialsCount !== null
         ? `Selecciona 2 materiales para fusionar (${pendingFusionMaterialsCount}/2).`
         : pendingEntityReplacement
@@ -43,9 +41,7 @@ export function buildBoardPendingUi(
 
   const pendingFusionSelectableIds = resolveSelectableFusionMaterialIds(gameState);
   const pendingEntitySelectionIds =
-    gameState.pendingTurnAction?.playerId === gameState.playerA.id && gameState.pendingTurnAction.type === "SACRIFICE_ENTITY_FOR_DRAW"
-      ? gameState.playerA.activeEntities.map((entity) => entity.instanceId)
-      : gameState.pendingTurnAction?.playerId === gameState.playerA.id && gameState.pendingTurnAction.type === "SELECT_FUSION_MATERIALS"
+    gameState.pendingTurnAction?.playerId === gameState.playerA.id && gameState.pendingTurnAction.type === "SELECT_FUSION_MATERIALS"
         ? pendingFusionSelectableIds
         : pendingEntityReplacement
         ? gameState.playerA.activeEntities.map((entity) => entity.instanceId)

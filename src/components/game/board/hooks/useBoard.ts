@@ -1,6 +1,6 @@
 // src/components/game/board/hooks/useBoard.ts - Hook principal del tablero con soporte de mazo inicial persistido del jugador.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { GameState } from "@/core/use-cases/GameEngine";
+import { GameEngine, GameState } from "@/core/use-cases/GameEngine";
 import { ICard } from "@/core/entities/ICard";
 import { HeuristicOpponentStrategy } from "@/core/services/opponent/HeuristicOpponentStrategy";
 import { resolveDifficultyFromCampaign } from "@/core/services/opponent/difficulty/resolveDifficultyFromCampaign";
@@ -81,6 +81,29 @@ export function useBoard(initialPlayerDeck?: ICard[]) {
       return null;
     }
   }, [uiState]);
+  const confirmEntityReplacement = useCallback(() => {
+    if (!uiState.pendingEntityReplacement || !uiState.pendingEntityReplacementTargetId) return;
+    const pendingReplacement = uiState.pendingEntityReplacement;
+    const targetEntityId = uiState.pendingEntityReplacementTargetId;
+    const replacedState = applyTransition((state) =>
+      GameEngine.playCardWithEntityReplacement(
+        state,
+        state.playerA.id,
+        pendingReplacement.cardId,
+        pendingReplacement.mode,
+        targetEntityId,
+      ),
+    );
+    if (!replacedState) return;
+    uiState.setPendingEntityReplacement(null);
+    uiState.setPendingEntityReplacementTargetId(null);
+    uiState.clearSelection();
+  }, [applyTransition, uiState]);
+  const cancelEntityReplacement = useCallback(() => {
+    uiState.setPendingEntityReplacement(null);
+    uiState.setPendingEntityReplacementTargetId(null);
+    uiState.clearSelection();
+  }, [uiState]);
   useEffect(() => {
     if (!winnerPlayerId) {
       hasAppliedBattleExperienceRef.current = false;
@@ -151,6 +174,7 @@ export function useBoard(initialPlayerDeck?: ICard[]) {
     playingCard: uiState.playingCard,
     activeAttackerId: uiState.activeAttackerId,
     pendingEntityReplacement: uiState.pendingEntityReplacement,
+    pendingEntityReplacementTargetId: uiState.pendingEntityReplacementTargetId,
     pendingFusionSummon: uiState.pendingFusionSummon,
     assertPlayerTurn,
     applyTransition,
@@ -163,6 +187,7 @@ export function useBoard(initialPlayerDeck?: ICard[]) {
     setIsAnimating: uiState.setIsAnimating,
     setRevealedEntities: uiState.setRevealedEntities,
     setPendingEntityReplacement: uiState.setPendingEntityReplacement,
+    setPendingEntityReplacementTargetId: uiState.setPendingEntityReplacementTargetId,
     setPendingFusionSummon: uiState.setPendingFusionSummon,
     setLastError: uiState.setLastError,
   });
@@ -176,6 +201,7 @@ export function useBoard(initialPlayerDeck?: ICard[]) {
     revealedEntities: uiState.revealedEntities,
     lastError: uiState.lastError,
     pendingEntityReplacement: uiState.pendingEntityReplacement,
+    pendingEntityReplacementTargetId: uiState.pendingEntityReplacementTargetId,
     opponentDifficulty,
     isPlayerTurn,
     isMuted: uiState.isMuted,
@@ -195,6 +221,8 @@ export function useBoard(initialPlayerDeck?: ICard[]) {
     handleEntityClick,
     advancePhase: turnControls.advancePhase,
     handleTimerExpired: turnControls.handleTimerExpired,
+    confirmEntityReplacement,
+    cancelEntityReplacement,
     resolvePendingTurnAction: turnControls.resolvePendingTurnAction,
     resolvePendingHandDiscard: turnControls.resolvePendingHandDiscard,
     setSelectedEntityToAttack: turnControls.setSelectedEntityToAttack,

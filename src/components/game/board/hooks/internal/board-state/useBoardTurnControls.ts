@@ -1,3 +1,4 @@
+// src/components/game/board/hooks/internal/board-state/useBoardTurnControls.ts - Centraliza controles de fase, timer y resolución de acciones pendientes del jugador.
 import { MutableRefObject, useCallback } from "react";
 import { ICard } from "@/core/entities/ICard";
 import { GameEngine, GameState } from "@/core/use-cases/GameEngine";
@@ -93,8 +94,6 @@ export function useBoardTurnControls({
         autoPick.forEach((instanceId) => resolvePendingTurnAction(instanceId));
         return;
       }
-      const oldestEntity = currentState.playerA.activeEntities[0];
-      if (oldestEntity) resolvePendingTurnAction(oldestEntity.instanceId);
       return;
     }
     advancePhase();

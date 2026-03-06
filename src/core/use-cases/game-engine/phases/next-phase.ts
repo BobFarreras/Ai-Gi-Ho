@@ -27,13 +27,6 @@ function drawCard(player: IPlayer): IPlayer {
 }
 
 function resolveTurnStartForPlayer(player: IPlayer, playerId: string): { player: IPlayer; pendingTurnAction: GameState["pendingTurnAction"] } {
-  if (player.activeEntities.length >= 3) {
-    return {
-      player,
-      pendingTurnAction: { type: "SACRIFICE_ENTITY_FOR_DRAW", playerId },
-    };
-  }
-
   if (player.hand.length >= 5) {
     return {
       player,
