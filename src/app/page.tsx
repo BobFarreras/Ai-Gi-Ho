@@ -1,53 +1,120 @@
-// src/app/page.tsx - Landing pública principal con acceso a login/registro y redirección al hub si hay sesión.
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getCurrentUserSession } from "@/services/auth/get-current-user-session";
+// src/app/page.tsx - Landing principal del juego con flujo por fases (terminal, narrativa y showcase de acceso).
+"use client";
 
-export default async function HomePage() {
-  const session = await getCurrentUserSession();
-  if (session) {
-    redirect("/hub");
-  }
+import { useState } from "react";
+import Link from "next/link";
+import { CyberBackground } from "@/components/landing/CyberBackground";
+import { TerminalPrompt } from "@/components/landing/TerminalPrompt";
+import { CrawlText } from "@/components/landing/CrawlText";
+import { HeroCards } from "@/components/landing/HeroCards";
+import { motion, AnimatePresence, Variants } from "framer-motion";
+
+type LandingPhase = "TERMINAL" | "NARRATIVE" | "SHOWCASE";
+
+export default function HomePage() {
+  const [phase, setPhase] = useState<LandingPhase>("TERMINAL");
+  const [userCode, setUserCode] = useState("");
+
+  const handleTerminalComplete = (code: string) => {
+    setUserCode(code);
+    setPhase("NARRATIVE");
+  };
+
+  const handleSkipNarrative = () => {
+    setPhase("SHOWCASE");
+  };
+
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { staggerChildren: 0.3, delayChildren: 0.2 } 
+    }
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 30, scale: 0.9 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1, 
+      transition: { type: "spring", stiffness: 100, damping: 15 } 
+    }
+  };
 
   return (
-    <main className="hub-control-room-bg relative flex min-h-dvh items-center justify-center overflow-hidden px-6 py-12">
-      <section className="relative z-10 w-full max-w-5xl rounded-3xl border border-cyan-500/30 bg-[#030a16]/82 p-8 shadow-[0_26px_66px_rgba(0,0,0,0.55)] backdrop-blur-xl md:p-12">
-        <div className="grid gap-10 md:grid-cols-[1.2fr_0.8fr] md:items-center">
-          <article>
-            <p className="inline-flex items-center border border-cyan-400/35 bg-cyan-500/10 px-3 py-1 text-xs font-black uppercase tracking-[0.22em] text-cyan-100">
-              Nexus Protocol
-            </p>
-            <h1 className="mt-5 text-4xl font-black uppercase tracking-[0.05em] text-cyan-50 md:text-6xl">AI-GI-OH</h1>
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-cyan-100/82 md:text-lg">
-              Construye tu deck, domina el tablero y desbloquea nuevas rutas tácticas en el hub cibernético.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+    <main className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-[#010308] selection:bg-cyan-500/30">
+      
+      <CyberBackground />
+
+      <AnimatePresence mode="wait">
+        {phase === "TERMINAL" && (
+          <TerminalPrompt key="terminal" onComplete={handleTerminalComplete} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {phase === "NARRATIVE" && (
+          <motion.div 
+            key="narrative" 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0, transition: { duration: 0.5 } }}
+            className="absolute inset-0 z-40"
+          >
+            <CrawlText accessCode={userCode} onSkip={handleSkipNarrative} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {phase === "SHOWCASE" && (
+          <motion.div 
+            key="showcase"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            // ARQUITECTURA RESPONSIVA: Altura total asegurada, overflow-y-auto por si la pantalla es enana
+            className="absolute inset-0 z-30 flex h-dvh flex-col items-center justify-between overflow-x-hidden overflow-y-auto py-8 px-4 sm:px-6 pointer-events-auto"
+          >
+            {/* HEADER - flex-shrink-0 garantiza que no se aplaste */}
+            <motion.header variants={itemVariants} className="flex-shrink-0 mt-2 text-center pointer-events-none">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-cyan-100 to-cyan-600 drop-shadow-[0_0_15px_rgba(6,182,212,0.6)]">
+                AI-GI-OH
+              </h1>
+              <span className="text-lg md:text-xl lg:text-2xl text-cyan-500 font-mono tracking-[0.3em] mt-2 block">
+                THE AGI WARS
+              </span>
+            </motion.header>
+
+            {/* CARTAS - flex-1 hace que ocupen EXACTAMENTE el espacio sobrante sin solapar */}
+            <motion.div variants={itemVariants} className="flex-1 w-full max-w-5xl flex items-center justify-center min-h-[300px]">
+              <HeroCards />
+            </motion.div>
+
+            {/* BOTONES - flex-shrink-0 garantiza que siempre estén visibles abajo */}
+            <motion.footer variants={itemVariants} className="flex-shrink-0 w-full max-w-3xl flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/register"
-                className="border border-cyan-300/60 bg-cyan-500/20 px-6 py-3 text-xs font-black uppercase tracking-[0.18em] text-cyan-50 transition hover:bg-cyan-400/30"
+                className="group relative flex h-14 sm:h-16 w-full sm:w-1/2 items-center justify-center bg-cyan-500 px-4 sm:px-8 font-mono text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-black transition-all hover:bg-cyan-400 hover:shadow-[0_0_30px_rgba(6,182,212,0.8)]"
+                style={{ clipPath: "polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px)" }}
               >
-                Crear cuenta
+                <div className="absolute inset-0 -translate-x-full bg-white/40 skew-x-12 transition-transform duration-500 ease-out group-hover:translate-x-full" />
+                <span>Compilar ID</span>
               </Link>
+              
               <Link
                 href="/login"
-                className="border border-cyan-700/70 bg-[#030f1f] px-6 py-3 text-xs font-black uppercase tracking-[0.18em] text-cyan-200 transition hover:border-cyan-400/70 hover:text-cyan-100"
+                className="relative flex h-14 sm:h-16 w-full sm:w-1/2 items-center justify-center border border-cyan-500/50 bg-black/60 px-4 sm:px-8 font-mono text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-cyan-400 backdrop-blur-md transition-all hover:border-cyan-300 hover:bg-cyan-900/40 hover:text-cyan-200"
+                style={{ clipPath: "polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px))" }}
               >
-                Iniciar sesión
+                Conexión Red
               </Link>
-            </div>
-          </article>
+            </motion.footer>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-          <aside className="hub-control-panel-frame relative overflow-hidden rounded-2xl bg-[#020d1a]/70 p-6">
-            <div className="hub-control-panel-glow pointer-events-none absolute inset-0" />
-            <h2 className="relative z-10 text-lg font-black uppercase tracking-[0.14em] text-cyan-100">Estado del sistema</h2>
-            <ul className="relative z-10 mt-5 space-y-3 text-sm text-cyan-100/85">
-              <li className="border border-cyan-900/55 bg-[#031527]/70 px-3 py-2">Mercado Nexus: Activo</li>
-              <li className="border border-cyan-900/55 bg-[#031527]/70 px-3 py-2">Simulador de Combate: Activo</li>
-              <li className="border border-cyan-900/55 bg-[#031527]/70 px-3 py-2">Seguridad de Cuenta: Habilitada</li>
-            </ul>
-          </aside>
-        </div>
-      </section>
     </main>
   );
 }
