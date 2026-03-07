@@ -14,10 +14,11 @@
 ## Plan de mitigación
 
 1. **Fase 0 (completada)**: contratos de match desacoplado + fábrica inicial.
-2. **Fase 1**: extraer runtime de `useBoard` a `useMatchRuntime` + `useMatchUiState`.
-3. **Fase 2**: controllers por modo (`Training`, `Story`, `Tutorial`, `Multiplayer`) con misma interfaz.
-4. **Fase 3**: mover persistencia post-duelo a servicio de aplicación por modo.
-5. **Fase 4**: retirar hardcodes de jugadores/decks del board y resolver todo por configuración de match.
+2. **Fase 1 (parcial completada)**: política de recompensas por modo desacoplada en `core/services/match/rewards`.
+3. **Fase 1 (pendiente)**: extraer runtime de `useBoard` a `useMatchRuntime` + `useMatchUiState`.
+4. **Fase 2**: controllers por modo (`Training`, `Story`, `Tutorial`, `Multiplayer`) con misma interfaz.
+5. **Fase 3**: mover persistencia post-duelo a servicio de aplicación por modo.
+6. **Fase 4**: retirar hardcodes de jugadores/decks del board y resolver todo por configuración de match.
 
 ## Criterios de salida de deuda (combate)
 

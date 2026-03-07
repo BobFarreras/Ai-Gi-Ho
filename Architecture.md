@@ -314,6 +314,17 @@ UI (app/components) -> UseCases/Services -> Repositories (interfaces core)
    - fijar frontera de orquestación de partida antes de extraer lógica de `useBoard`.
 5. Esta fase no cambia reglas del motor (`GameEngine`), solo prepara desacoplamiento de runtime.
 
+## Subdominio Game (fase 1 recompensas desacopladas por modo)
+
+1. Se introduce política pura de recompensas en `core/services/match/rewards`.
+2. Cálculo por modo:
+   - `TUTORIAL`: sin recompensa,
+   - `TRAINING`: curva base reducida,
+   - `STORY`: escala por `storyOpponentTier`,
+   - `MULTIPLAYER`: curva competitiva separada.
+3. Esta política es agnóstica de BD y UI; solo devuelve valores dominio (`nexus`, `playerExperience`).
+4. Persistencia de recompensa quedará en capa de aplicación (fase posterior), no en el motor.
+
 ## Subdominio Progresión (fase 6.1)
 
 1. Se incorpora `player_card_progress` como estado canónico de progresión por carta (`version_tier`, `level`, `xp`).

@@ -194,3 +194,15 @@ El motor registra eventos técnicos para trazabilidad y UI:
    - `services/game/match/LocalMatchController`,
    - fábrica `createMatchController`.
 4. Esta fase no modifica reglas del `GameEngine`; prepara desacoplamiento para fases siguientes.
+
+## 17. Recompensas por modo desacopladas (Fase 1)
+
+1. Se añade política pura de recompensas de duelo en `core/services/match/rewards/match-reward-policy.ts`.
+2. La política calcula:
+   - `nexus`,
+   - `playerExperience`.
+3. Reglas iniciales:
+   - `TUTORIAL`: siempre `0`.
+   - `STORY`: recompensa escalada por tier del oponente.
+   - `TRAINING` y `MULTIPLAYER`: curvas separadas.
+4. El motor de juego sigue sin llamadas a BD; la persistencia de recompensas se aplicará fuera del motor.
