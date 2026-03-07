@@ -38,6 +38,13 @@ Se separa el render por breakpoint sin alterar reglas del dominio:
 6. En mobile, las acciones `Añadir/Remover/Evolucionar` se ejecutan desde el inspector según el origen de selección.
 7. La cabecera del módulo se renombra visualmente a `Arsenal`.
 
+## Fase 4 - Evolución responsive en mobile
+
+1. `HomeEvolutionOverlay` adapta escala, luces y partículas para pantallas pequeñas.
+2. El overlay evita recortes en móvil con paddings y tamaños fluidos.
+3. Se añade feedback de copias fusionadas dentro del overlay.
+4. Se incorpora test de render base en `HomeEvolutionOverlay.test.tsx`.
+
 ## Testing de fase 0/1/3
 
 1. `layout/HomeResponsiveWorkspace.test.tsx` valida que se montan ambos layouts.
