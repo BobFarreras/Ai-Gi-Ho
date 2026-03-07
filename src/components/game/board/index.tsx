@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { useBoard } from "./hooks/useBoard";
 import { DuelResultOverlay } from "./ui/DuelResultOverlay";
-import { useGameAudio } from "./hooks/internal/useGameAudio";
 import { BoardStatusOverlays } from "./ui/overlays/BoardStatusOverlays";
 import { BoardTopBar } from "./ui/layout/BoardTopBar";
 import { BoardActionButtons } from "./ui/layout/BoardActionButtons";
@@ -71,6 +70,9 @@ export function Board({ initialPlayerDeck }: IBoardProps) {
     setIsFusionCinematicActive,
     toggleMute,
     togglePause,
+    playTimerExpired,
+    playTimerWarning,
+    playButtonClick,
   } = useBoard(initialPlayerDeck ?? undefined);
 
   const player = gameState.playerA;
@@ -85,18 +87,6 @@ export function Board({ initialPlayerDeck }: IBoardProps) {
     return player.activeEntities.find((entity) => entity.instanceId === pendingEntityReplacementTargetId)?.card ?? null;
   }, [pendingEntityReplacementTargetId, player.activeEntities]);
   const visibleGraveyardOwner = graveyardView === "player" ? player.name : opponent.name;
-  const { playTimerExpired, playTimerWarning, playButtonClick } = useGameAudio({
-    combatLog: gameState.combatLog,
-    winnerPlayerId,
-    playerId: player.id,
-    isHistoryOpen,
-    hasSelectedCard: Boolean(selectedCard),
-    lastErrorCode: lastError?.code ?? null,
-    isMuted,
-    isPaused,
-  });
-
-
   return (
     <div className="board-space-bg relative w-full h-screen overflow-hidden font-sans cursor-crosshair" onClick={clearSelection}>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(34,211,238,0.12),transparent_52%)] pointer-events-none" />
