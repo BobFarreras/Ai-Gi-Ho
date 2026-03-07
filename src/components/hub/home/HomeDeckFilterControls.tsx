@@ -17,6 +17,7 @@ interface HomeDeckFilterControlsProps {
   typeFilter: HomeCollectionTypeFilter;
   orderField: HomeCollectionOrderField;
   orderDirection: HomeCollectionOrderDirection;
+  showDesktopSearch?: boolean;
   onNameQueryChange: (value: string) => void;
   onChangeTypeFilter: (value: HomeCollectionTypeFilter) => void;
   onChangeOrderField: (value: HomeCollectionOrderField) => void;
@@ -25,10 +26,11 @@ interface HomeDeckFilterControlsProps {
 
 export function HomeDeckFilterControls(props: HomeDeckFilterControlsProps) {
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const showDesktopSearch = props.showDesktopSearch ?? true;
 
   return (
-    <div className="flex w-full flex-col gap-2 lg:w-auto">
-      <div className="flex items-center gap-2">
+    <div className="relative z-30 flex w-full flex-col gap-2">
+      <div className="flex items-center gap-2 lg:hidden">
         <label className="flex h-[38px] w-full items-center gap-2 rounded-lg border border-cyan-500/30 bg-[#020a14]/80 px-3">
           <Search size={14} className="shrink-0 text-cyan-400" />
           <input
@@ -48,7 +50,19 @@ export function HomeDeckFilterControls(props: HomeDeckFilterControlsProps) {
           Filtros
         </button>
       </div>
-      <div className="hidden items-center gap-2 lg:flex">
+      <div className="hidden w-full items-end gap-2 lg:flex">
+        {showDesktopSearch ? (
+          <label className="flex h-[42px] min-w-0 flex-1 items-center gap-2 rounded-lg border border-cyan-500/30 bg-[#020a14]/80 px-3">
+            <Search size={14} className="shrink-0 text-cyan-400" />
+            <input
+              aria-label="Buscar carta en almacén"
+              value={props.nameQuery}
+              onChange={(event) => props.onNameQueryChange(event.target.value)}
+              className="w-full truncate bg-transparent text-xs font-medium tracking-wider text-cyan-50 outline-none placeholder:text-cyan-100/40"
+              placeholder="BUSCAR CARTA..."
+            />
+          </label>
+        ) : null}
         <GameSelect
           label="TIPO"
           value={props.typeFilter}

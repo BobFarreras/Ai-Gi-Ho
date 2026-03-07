@@ -100,6 +100,91 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
     return ids;
   }, [cardProgressById, collectionState, deckCopiesByCardId]);
   const evolutionCard = evolutionOverlay ? cardById.get(evolutionOverlay.cardId) ?? selectedCard : null;
+  const handleInsertSelectedCard = async () => {
+    if (!selectedCollectionCardId) return;
+    const previousDeck = deck;
+    setDeck((currentDeck) => applyOptimisticAddToDeck(currentDeck, selectedCollectionCardId));
+    try {
+      const updatedDeck = await addCardToDeckAction(context, selectedCollectionCardId);
+      setDeck(updatedDeck);
+      setErrorMessage(null);
+    } catch (error) {
+      setDeck(previousDeck);
+      setErrorBanner(error);
+    }
+  };
+  const handleRemoveSelectedCard = async () => {
+    if (selectedSlotIndex === null) return;
+    const previousDeck = deck;
+    setDeck((currentDeck) => applyOptimisticRemoveFromDeck(currentDeck, selectedSlotIndex));
+    try {
+      const updatedDeck = await removeCardFromDeckAction(context, selectedSlotIndex);
+      setDeck(updatedDeck);
+      setErrorMessage(null);
+    } catch (error) {
+      setDeck(previousDeck);
+      setErrorBanner(error);
+    }
+  };
+  const handleEvolveSelectedCard = async () => {
+    if (!selectedCardId || !canEvolveSelectedCard || copiesRequiredToEvolve === null) return;
+    const previousVersionTier = selectedCardVersionTier;
+    const previousCollection = collectionState;
+    const previousProgressById = new Map(cardProgressById);
+    const optimisticProgress: IPlayerCardProgress = {
+      playerId,
+      cardId: selectedCardId,
+      versionTier: previousVersionTier + 1,
+      level: selectedCardLevel,
+      xp: selectedCardProgress?.xp ?? 0,
+      masteryPassiveSkillId: selectedCardProgress?.masteryPassiveSkillId ?? null,
+      updatedAtIso: new Date().toISOString(),
+    };
+    setEvolutionOverlay({
+      cardId: selectedCardId,
+      fromVersionTier: previousVersionTier,
+      toVersionTier: optimisticProgress.versionTier,
+      level: optimisticProgress.level,
+      consumedCopies: copiesRequiredToEvolve,
+    });
+    setCollectionState((currentCollection) =>
+      currentCollection
+        .map((entry) =>
+          entry.card.id === selectedCardId
+            ? { ...entry, ownedCopies: Math.max(0, entry.ownedCopies - copiesRequiredToEvolve) }
+            : entry,
+        )
+        .filter((entry) => entry.ownedCopies > 0),
+    );
+    setCardProgressById((current) => {
+      const next = new Map(current);
+      next.set(selectedCardId, optimisticProgress);
+      return next;
+    });
+    try {
+      const result = await evolveCardVersionAction(playerId, selectedCardId);
+      setCollectionState(result.collection);
+      setCardProgressById((current) => {
+        const next = new Map(current);
+        next.set(result.progress.cardId, result.progress);
+        return next;
+      });
+      setEvolutionOverlay({
+        cardId: selectedCardId,
+        fromVersionTier: previousVersionTier,
+        toVersionTier: result.progress.versionTier,
+        level: result.progress.level,
+        consumedCopies: result.consumedCopies,
+      });
+      setTimeout(() => setEvolutionOverlay(null), 2200);
+      setErrorMessage(null);
+    } catch (error) {
+      setCollectionState(previousCollection);
+      setCardProgressById(previousProgressById);
+      setEvolutionOverlay(null);
+      setErrorBanner(error);
+    }
+  };
 
   return (
     <main className="hub-control-room-bg relative box-border w-full h-[100dvh] overflow-hidden px-3 py-3 text-slate-100 sm:px-5 flex flex-col justify-center items-center">
@@ -121,93 +206,11 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
             onToggleOrderDirection={() =>
               setOrderDirection((previousDirection) => (previousDirection === "ASC" ? "DESC" : "ASC"))
             }
-            onInsert={async () => {
-              if (!selectedCollectionCardId) return;
-              const previousDeck = deck;
-              setDeck((currentDeck) => applyOptimisticAddToDeck(currentDeck, selectedCollectionCardId));
-              try {
-                const updatedDeck = await addCardToDeckAction(context, selectedCollectionCardId);
-                setDeck(updatedDeck);
-                setErrorMessage(null);
-              } catch (error) {
-                setDeck(previousDeck);
-                setErrorBanner(error);
-              }
-            }}
-            onRemove={async () => {
-              if (selectedSlotIndex === null) return;
-              const previousDeck = deck;
-              setDeck((currentDeck) => applyOptimisticRemoveFromDeck(currentDeck, selectedSlotIndex));
-              try {
-                const updatedDeck = await removeCardFromDeckAction(context, selectedSlotIndex);
-                setDeck(updatedDeck);
-                setErrorMessage(null);
-              } catch (error) {
-                setDeck(previousDeck);
-                setErrorBanner(error);
-              }
-            }}
+            onInsert={handleInsertSelectedCard}
+            onRemove={handleRemoveSelectedCard}
             canEvolve={canEvolveSelectedCard}
             evolveCost={copiesRequiredToEvolve}
-            onEvolve={async () => {
-              if (!selectedCardId || !canEvolveSelectedCard || copiesRequiredToEvolve === null) return;
-              const previousVersionTier = selectedCardVersionTier;
-              const previousCollection = collectionState;
-              const previousProgressById = new Map(cardProgressById);
-              const optimisticProgress: IPlayerCardProgress = {
-                playerId,
-                cardId: selectedCardId,
-                versionTier: previousVersionTier + 1,
-                level: selectedCardLevel,
-                xp: selectedCardProgress?.xp ?? 0,
-                masteryPassiveSkillId: selectedCardProgress?.masteryPassiveSkillId ?? null,
-                updatedAtIso: new Date().toISOString(),
-              };
-              setEvolutionOverlay({
-                cardId: selectedCardId,
-                fromVersionTier: previousVersionTier,
-                toVersionTier: optimisticProgress.versionTier,
-                level: optimisticProgress.level,
-                consumedCopies: copiesRequiredToEvolve,
-              });
-              setCollectionState((currentCollection) =>
-                currentCollection
-                  .map((entry) =>
-                    entry.card.id === selectedCardId
-                      ? { ...entry, ownedCopies: Math.max(0, entry.ownedCopies - copiesRequiredToEvolve) }
-                      : entry,
-                  )
-                  .filter((entry) => entry.ownedCopies > 0),
-              );
-              setCardProgressById((current) => {
-                const next = new Map(current);
-                next.set(selectedCardId, optimisticProgress);
-                return next;
-              });
-              try {
-                const result = await evolveCardVersionAction(playerId, selectedCardId);
-                setCollectionState(result.collection);
-                setCardProgressById((current) => {
-                  const next = new Map(current);
-                  next.set(result.progress.cardId, result.progress);
-                  return next;
-                });
-                setEvolutionOverlay({
-                  cardId: selectedCardId,
-                  fromVersionTier: previousVersionTier,
-                  toVersionTier: result.progress.versionTier,
-                  level: result.progress.level,
-                  consumedCopies: result.consumedCopies,
-                });
-                setTimeout(() => setEvolutionOverlay(null), 2200);
-                setErrorMessage(null);
-              } catch (error) {
-                setCollectionState(previousCollection);
-                setCardProgressById(previousProgressById);
-                setEvolutionOverlay(null);
-                setErrorBanner(error);
-              }
-            }}
+            onEvolve={handleEvolveSelectedCard}
           />
         </div>
 
@@ -232,6 +235,15 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
           selectedCardLevel={selectedCardLevel}
           selectedCardXp={selectedCardXp}
           selectedCardMasteryPassiveSkillId={selectedCardMasteryPassiveSkillId}
+          nameQuery={nameQuery}
+          typeFilter={typeFilter}
+          canInsertSelectedCard={Boolean(selectedCollectionCardId)}
+          canRemoveSelectedCard={selectedSlotHasCard}
+          canEvolveSelectedCard={canEvolveSelectedCard}
+          evolveCostForSelectedCard={copiesRequiredToEvolve}
+          onInsertSelectedCard={handleInsertSelectedCard}
+          onRemoveSelectedCard={handleRemoveSelectedCard}
+          onEvolveSelectedCard={handleEvolveSelectedCard}
           onClearError={() => setErrorMessage(null)}
           onSelectSlot={(slotIndex) => {
             setErrorMessage(null);

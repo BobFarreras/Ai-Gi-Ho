@@ -28,7 +28,18 @@ Se separa el render por breakpoint sin alterar reglas del dominio:
 3. Filtros desplegables en mobile con botón `Filtros` y panel colapsable.
 4. Desktop conserva su patrón de acciones + filtros visibles.
 
-## Testing de fase 0/1
+## Fase 3 - Workspace mobile unificado
+
+1. `layout/HomeMobileWorkspace.tsx` ahora usa tabs `Deck | Almacén`.
+2. Se renderiza un único contenedor principal de cartas para mobile.
+3. El `Deck` mobile muestra 20 slots en grid de 4 columnas.
+4. El `Almacén` mobile muestra colección filtrada en grid de 4 columnas con indicador `D/U`.
+5. La inspección de carta sigue usando `HomeCardInspectorDialog` con animación de origen.
+6. En mobile, las acciones `Añadir/Remover/Evolucionar` se ejecutan desde el inspector según el origen de selección.
+7. La cabecera del módulo se renombra visualmente a `Arsenal`.
+
+## Testing de fase 0/1/3
 
 1. `layout/HomeResponsiveWorkspace.test.tsx` valida que se montan ambos layouts.
-2. Las pruebas existentes de negocio y acciones del módulo se mantienen.
+2. `layout/HomeMobileWorkspace.test.tsx` valida tabs mobile y apertura del inspector.
+3. Las pruebas existentes de negocio y acciones del módulo se mantienen.

@@ -3,6 +3,7 @@ import { ICollectionCard } from "@/core/entities/home/ICollectionCard";
 import { IDeck } from "@/core/entities/home/IDeck";
 import { IPlayerCardProgress } from "@/core/entities/progression/IPlayerCardProgress";
 import { ICard } from "@/core/entities/ICard";
+import { HomeCollectionTypeFilter } from "@/components/hub/home/home-filters";
 
 export interface IHomeWorkspaceProps {
   deck: IDeck;
@@ -18,6 +19,15 @@ export interface IHomeWorkspaceProps {
   selectedCardLevel: number;
   selectedCardXp: number;
   selectedCardMasteryPassiveSkillId: string | null;
+  nameQuery: string;
+  typeFilter: HomeCollectionTypeFilter;
+  canInsertSelectedCard: boolean;
+  canRemoveSelectedCard: boolean;
+  canEvolveSelectedCard: boolean;
+  evolveCostForSelectedCard: number | null;
+  onInsertSelectedCard: () => Promise<void>;
+  onRemoveSelectedCard: () => Promise<void>;
+  onEvolveSelectedCard: () => Promise<void>;
   onSelectSlot: (slotIndex: number) => void;
   onSelectCollectionCard: (cardId: string) => void;
   onClearError: () => void;

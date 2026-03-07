@@ -1,4 +1,4 @@
-// src/components/hub/home/HomeErrorBanner.tsx - Banner visual para mostrar errores funcionales del módulo Mi Home.
+// src/components/hub/home/HomeErrorBanner.tsx - Banner visual para mostrar errores funcionales del módulo Arsenal.
 interface HomeErrorBannerProps {
   message: string | null;
   onClose: () => void;
@@ -12,7 +12,7 @@ export function HomeErrorBanner({ message, onClose }: HomeErrorBannerProps) {
   return (
     <div className="flex items-start justify-between rounded-xl border border-rose-400/55 bg-rose-500/15 px-4 py-3">
       <div>
-        <p className="text-xs font-black uppercase tracking-[0.2em] text-rose-200">Error de Mi Home</p>
+        <p className="text-xs font-black uppercase tracking-[0.2em] text-rose-200">Error de Arsenal</p>
         <p className="mt-1 text-sm text-rose-100">{message}</p>
       </div>
       <button
