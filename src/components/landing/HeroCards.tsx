@@ -96,7 +96,7 @@ export function HeroCards({ onCardReveal }: { onCardReveal?: (d: number) => void
         transition={{ type: "spring", stiffness: 80, damping: 15, delay: 0.2 }}
         className="absolute z-10"
       >
-        <CardWrapper card={LORE_CARDS[1]} />
+        <Card card={LORE_CARDS[1]} disableHoverEffects />
       </motion.div>
 
       {/* Carta Centro */}
@@ -107,7 +107,7 @@ export function HeroCards({ onCardReveal }: { onCardReveal?: (d: number) => void
         transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.5 }}
         className="absolute z-30"
       >
-        <CardWrapper card={LORE_CARDS[0]} center />
+        <Card card={LORE_CARDS[0]} disableHoverEffects clipToFrameShape disableDefaultShadow />
       </motion.div>
 
       {/* Carta Derecha */}
@@ -118,40 +118,8 @@ export function HeroCards({ onCardReveal }: { onCardReveal?: (d: number) => void
         transition={{ type: "spring", stiffness: 80, damping: 15, delay: 0.8 }}
         className="absolute z-20"
       >
-        <CardWrapper card={LORE_CARDS[2]} />
+        <Card card={LORE_CARDS[2]} disableHoverEffects />
       </motion.div>
-    </div>
-  );
-}
-
-// Sub-componente para manejar el scroll inteligente
-function CardWrapper({ card, center = false }: { card: ICard; center?: boolean }) {
-  return (
-    <div className="group relative">
-      <Card 
-        card={card} 
-        disableHoverEffects 
-        clipToFrameShape={center} 
-        disableDefaultShadow 
-      />
-      {/* Inyectamos un estilo global temporal para el scrollbar "inteligente" 
-          Esto asume que dentro de tu componente <Card /> hay un contenedor de texto.
-          Si puedes editar el CSS de la descripción, añade estas clases:
-      */}
-      <style jsx global>{`
-        .custom-scrollbar-hide::-webkit-scrollbar {
-          width: 4px;
-          opacity: 0;
-          transition: opacity 0.3s;
-        }
-        .custom-scrollbar-hide:hover::-webkit-scrollbar {
-          opacity: 1;
-        }
-        .custom-scrollbar-hide::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.2);
-          border-radius: 10px;
-        }
-      `}</style>
     </div>
   );
 }
