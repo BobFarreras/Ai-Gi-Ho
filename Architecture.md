@@ -325,6 +325,14 @@ UI (app/components) -> UseCases/Services -> Repositories (interfaces core)
 3. Esta política es agnóstica de BD y UI; solo devuelve valores dominio (`nexus`, `playerExperience`).
 4. Persistencia de recompensa quedará en capa de aplicación (fase posterior), no en el motor.
 
+## Subdominio Game (fase 2-3 runtime por modo y progresión)
+
+1. `createMatchController` selecciona controller concreto por modo (`Training`, `Story`, `Tutorial`, `Multiplayer`) con contrato `IMatchController` compartido.
+2. La persistencia post-duelo de EXP de cartas se resuelve en `services/game/match/progression` mediante fábrica por modo:
+   - `TUTORIAL`: no persiste,
+   - resto de modos locales actuales: persistencia remota vía API.
+3. `useBoard` deja de invocar cliente HTTP de progresión de forma directa y delega en servicio de aplicación desacoplado.
+
 ## Subdominio Progresión (fase 6.1)
 
 1. Se incorpora `player_card_progress` como estado canónico de progresión por carta (`version_tier`, `level`, `xp`).

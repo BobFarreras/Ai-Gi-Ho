@@ -9,12 +9,14 @@ import { BoardActionButtons } from "./ui/layout/BoardActionButtons";
 import { BoardPlayersLayer } from "./ui/layers/BoardPlayersLayer";
 import { BoardInteractiveLayer } from "./ui/layers/BoardInteractiveLayer";
 import { ICard } from "@/core/entities/ICard";
+import { IMatchMode } from "@/core/entities/match";
 
 interface IBoardProps {
   initialPlayerDeck?: ICard[] | null;
+  mode?: IMatchMode;
 }
 
-export function Board({ initialPlayerDeck }: IBoardProps) {
+export function Board({ initialPlayerDeck, mode = "TRAINING" }: IBoardProps) {
   const {
     gameState,
     selectedCard,
@@ -73,7 +75,7 @@ export function Board({ initialPlayerDeck }: IBoardProps) {
     playTimerExpired,
     playTimerWarning,
     playButtonClick,
-  } = useBoard(initialPlayerDeck ?? undefined);
+  } = useBoard(initialPlayerDeck ?? undefined, mode);
 
   const player = gameState.playerA;
   const opponent = gameState.playerB;

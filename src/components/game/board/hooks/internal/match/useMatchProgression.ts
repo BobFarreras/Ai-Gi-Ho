@@ -1,31 +1,34 @@
 // src/components/game/board/hooks/internal/match/useMatchProgression.ts - Gestiona la persistencia y proyección de experiencia de cartas al terminar el duelo.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ICard } from "@/core/entities/ICard";
+import { IMatchMode } from "@/core/entities/match";
 import { GameState } from "@/core/use-cases/GameEngine";
-import { applyBattleCardExperienceAction } from "@/services/game/apply-battle-card-experience-action";
 import { appendExperienceSummaryToCombatLog } from "../progression/append-experience-combat-log";
 import { buildCardExperienceEvents } from "../progression/build-card-experience-events";
 import { buildPlayerCardLookup } from "../progression/build-player-card-lookup";
 import { buildProjectedExperienceSummary } from "../progression/build-projected-experience-summary";
 import { IBoardUiError } from "../boardError";
 import type { IAppliedCardExperienceResult } from "@/core/use-cases/progression/ApplyBattleCardExperienceUseCase";
+import { createMatchProgressionService } from "@/services/game/match/progression";
 
 function createBattleExperienceBatchId(): string {
   return `battle-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 interface IUseMatchProgressionParams {
+  mode: IMatchMode;
   gameState: GameState;
   winnerPlayerId: string | "DRAW" | null;
   applyTransition: (transition: (state: GameState) => GameState) => GameState | null;
   setLastError: (value: IBoardUiError | null) => void;
 }
 
-export function useMatchProgression({ gameState, winnerPlayerId, applyTransition, setLastError }: IUseMatchProgressionParams) {
+export function useMatchProgression({ mode, gameState, winnerPlayerId, applyTransition, setLastError }: IUseMatchProgressionParams) {
   const [battleExperienceSummary, setBattleExperienceSummary] = useState<IAppliedCardExperienceResult[]>([]);
   const [isBattleExperiencePending, setIsBattleExperiencePending] = useState(false);
   const [battleId, setBattleId] = useState<string>(() => createBattleExperienceBatchId());
   const battleExperienceCardLookup = useMemo(() => buildPlayerCardLookup(gameState.playerA), [gameState.playerA]);
+  const progressionService = useMemo(() => createMatchProgressionService(mode), [mode]);
   const hasAppliedBattleExperienceRef = useRef(false);
 
   const resetBattleProgression = useCallback(() => {
@@ -46,7 +49,8 @@ export function useMatchProgression({ gameState, winnerPlayerId, applyTransition
     const experienceEvents = buildCardExperienceEvents(gameState.combatLog, gameState.playerA.id);
     const projectedSummary = buildProjectedExperienceSummary(gameState.playerA.id, battleExperienceCardLookup, experienceEvents);
 
-    applyBattleCardExperienceAction(battleId, experienceEvents)
+    progressionService
+      .applyBattleCardExperience(battleId, experienceEvents)
       .then((summary) => {
         const resolvedSummary = summary.length > 0 ? summary : projectedSummary;
         setBattleExperienceSummary(resolvedSummary);
@@ -64,7 +68,7 @@ export function useMatchProgression({ gameState, winnerPlayerId, applyTransition
       .finally(() => {
         setIsBattleExperiencePending(false);
       });
-  }, [applyTransition, battleExperienceCardLookup, battleId, gameState.combatLog, gameState.playerA.id, setLastError, winnerPlayerId]);
+  }, [applyTransition, battleExperienceCardLookup, battleId, gameState.combatLog, gameState.playerA.id, progressionService, setLastError, winnerPlayerId]);
 
   return {
     battleExperienceSummary,

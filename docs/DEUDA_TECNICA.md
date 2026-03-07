@@ -17,7 +17,7 @@
 2. **Fase 1 (parcial completada)**: política de recompensas por modo desacoplada en `core/services/match/rewards`.
 3. **Fase 1 (completada)**: runtime extraído de `useBoard` a `useMatchRuntime` + `useMatchUiState` + `useMatchProgression` + `useMatchAudio`.
 4. **Fase 2 (completada)**: controllers por modo (`Training`, `Story`, `Tutorial`, `Multiplayer`) con misma interfaz.
-5. **Fase 3**: mover persistencia post-duelo a servicio de aplicación por modo.
+5. **Fase 3 (completada)**: persistencia post-duelo movida a servicio de aplicación por modo.
 6. **Fase 4**: retirar hardcodes de jugadores/decks del board y resolver todo por configuración de match.
 
 ## Criterios de salida de deuda (combate)

@@ -2,6 +2,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { GameState } from "@/core/use-cases/GameEngine";
 import { ICard } from "@/core/entities/ICard";
+import { IMatchMode } from "@/core/entities/match";
 import { ICampaignProgress } from "@/core/services/opponent/difficulty/types";
 import { createInitialBoardState } from "./internal/boardInitialState";
 import { useMatchAudio } from "./internal/match/useMatchAudio";
@@ -16,7 +17,7 @@ function resolveWinnerPlayerId(gameState: GameState): string | "DRAW" | null {
   return null;
 }
 
-export function useBoard(initialPlayerDeck?: ICard[]) {
+export function useBoard(initialPlayerDeck?: ICard[], mode: IMatchMode = "TRAINING") {
   const [campaignProgress] = useState<ICampaignProgress>({ chapterIndex: 1, duelIndex: 1, victories: 0 });
   const createInitialState = useCallback(
     () => createInitialBoardState({ playerDeck: initialPlayerDeck }),
@@ -32,6 +33,7 @@ export function useBoard(initialPlayerDeck?: ICard[]) {
     winnerPlayerId,
   });
   const progression = useMatchProgression({
+    mode,
     gameState: uiState.gameState,
     winnerPlayerId,
     applyTransition: runtime.applyTransition,

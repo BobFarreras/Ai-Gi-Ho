@@ -7,3 +7,4 @@ export {
   TutorialMatchController,
   MultiplayerMatchController,
 } from "@/services/game/match/modes";
+export { createMatchProgressionService } from "@/services/game/match/progression";
