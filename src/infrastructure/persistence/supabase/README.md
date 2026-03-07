@@ -15,6 +15,9 @@ Esta carpeta contendrá implementaciones concretas de repositorios de `core/repo
    - `SupabaseCardCollectionRepository`
    - `SupabaseDeckRepository`
    - `SupabaseTransactionRepository`
+6. Adaptadores de Story:
+   - `SupabaseOpponentRepository`
+   - `create-supabase-opponent-repository.ts`
 
 ## Reglas
 

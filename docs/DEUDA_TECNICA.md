@@ -6,7 +6,7 @@
 ### Combate / Match Runtime
 
 1. `useBoard.ts` concentra demasiadas responsabilidades (estado UI, orquestación de turno, progresión post-duelo y errores).
-2. `boardInitialState.ts` mantiene hardcodes de jugadores (`p1/p2`, nombres) y deck rival por defecto.
+2. `boardInitialState.ts` tenía hardcodes de jugadores/decks; ahora se resuelve por `createBoardMatchConfig` (pendiente conectar repositorio de historia real en fase 5).
 3. `initialDeckFactory.ts` mantiene catálogos/decks mock acoplados al entrenamiento.
 4. La persistencia de EXP de cartas se dispara desde hook de UI (`apply-battle-card-experience-action`) en lugar de capa de aplicación de match.
 5. El control de rival IA está acoplado al runtime del board y no entra por contrato de modo.
@@ -18,7 +18,8 @@
 3. **Fase 1 (completada)**: runtime extraído de `useBoard` a `useMatchRuntime` + `useMatchUiState` + `useMatchProgression` + `useMatchAudio`.
 4. **Fase 2 (completada)**: controllers por modo (`Training`, `Story`, `Tutorial`, `Multiplayer`) con misma interfaz.
 5. **Fase 3 (completada)**: persistencia post-duelo movida a servicio de aplicación por modo.
-6. **Fase 4**: retirar hardcodes de jugadores/decks del board y resolver todo por configuración de match.
+6. **Fase 4 (completada)**: hardcodes de jugadores/decks retirados del board y resueltos por configuración de match.
+7. **Fase 5**: conectar `IOpponentRepository` con tablas `story_opponents/story_duels/story_deck_lists` para story sin mocks.
 
 ## Criterios de salida de deuda (combate)
 

@@ -341,6 +341,13 @@ UI (app/components) -> UseCases/Services -> Repositories (interfaces core)
    - barajar mazos con RNG inyectado,
    - generar `runtimeId` inicial de cartas de forma estable.
 4. `useBoard` conserva `matchSeed` estable durante la partida para depuración y futuros replays/sincronización.
+5. `boardInitialState` ya no define ids/nombres/decks hardcodeados; delega en `createBoardMatchConfig` por modo.
+
+## Subdominio Story (preparación fase 5)
+
+1. Se define `IOpponentRepository` en `core/repositories` para cargar duelos de historia desde persistencia.
+2. El contrato de duelo queda tipado en `IStoryDuelDefinition` (capítulo, duelo, oponente, mazo y reglas de arranque).
+3. Objetivo inmediato: conectar este repositorio a tablas `story_opponents`, `story_duels` y `story_deck_lists` sin acoplar UI.
 
 ## Subdominio Progresión (fase 6.1)
 

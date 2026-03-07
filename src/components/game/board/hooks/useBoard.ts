@@ -22,8 +22,8 @@ export function useBoard(initialPlayerDeck?: ICard[], mode: IMatchMode = "TRAINI
   const [campaignProgress] = useState<ICampaignProgress>({ chapterIndex: 1, duelIndex: 1, victories: 0 });
   const [matchSeed] = useState(() => createMatchSeed());
   const createInitialState = useCallback(
-    () => createInitialBoardState({ playerDeck: initialPlayerDeck, seed: matchSeed }),
-    [initialPlayerDeck, matchSeed],
+    () => createInitialBoardState({ mode, playerDeck: initialPlayerDeck, seed: matchSeed }),
+    [initialPlayerDeck, matchSeed, mode],
   );
   const gameStateRef = useRef<GameState>(createInitialState());
   const uiState = useMatchUiState({ gameStateRef, createInitialState });

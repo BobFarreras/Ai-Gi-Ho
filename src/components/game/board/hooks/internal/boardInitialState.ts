@@ -1,35 +1,38 @@
 // src/components/game/board/hooks/internal/boardInitialState.ts - Construye estado inicial del tablero con mazo persistido opcional.
 import { GameEngine, GameState } from "@/core/use-cases/GameEngine";
 import { ICard } from "@/core/entities/ICard";
-import { createMatchSeed } from "@/core/services/random/create-match-seed";
-import { createSeededRandom } from "@/core/services/random/seeded-rng";
-import { createPlayerDeckA, createPlayerDeckB, shuffleDeck } from "./initialDeckFactory";
+import { IMatchMode } from "@/core/entities/match";
+import { createBoardMatchConfig } from "./match/create-board-match-config";
 
 interface ICreateInitialBoardStateInput {
+  mode?: IMatchMode;
   playerDeck?: ICard[] | null;
+  opponentDeck?: ICard[] | null;
   seed?: string;
+  playerId?: string;
+  playerName?: string;
+  opponentId?: string;
+  opponentName?: string;
+  starterPlayerId?: string;
+  openingHandSize?: number;
 }
 
 export function createInitialBoardState(input?: ICreateInitialBoardStateInput): GameState {
-  const seed = input?.seed ?? createMatchSeed();
-  const randomSource = createSeededRandom(seed);
-  const playerDeckSource = input?.playerDeck && input.playerDeck.length > 0 ? input.playerDeck : createPlayerDeckA(randomSource);
-  const playerDeck = shuffleDeck(playerDeckSource.map((card) => ({ ...card })), randomSource);
-  const opponentDeck = createPlayerDeckB(randomSource);
+  const matchConfig = createBoardMatchConfig(input);
   const baseState = GameEngine.createInitialGameState({
     playerA: {
-      id: "p1",
-      name: "Neo (Tú)",
-      deck: playerDeck,
+      id: matchConfig.playerA.id,
+      name: matchConfig.playerA.name,
+      deck: matchConfig.playerA.deck,
     },
     playerB: {
-      id: "p2",
-      name: "Agente Smith",
-      deck: opponentDeck,
+      id: matchConfig.playerB.id,
+      name: matchConfig.playerB.name,
+      deck: matchConfig.playerB.deck,
     },
-    starterPlayerId: "p1",
-    openingHandSize: 4,
-    randomSource,
+    starterPlayerId: matchConfig.starterPlayerId,
+    openingHandSize: matchConfig.openingHandSize,
+    randomSource: matchConfig.randomSource,
   });
 
   return baseState;

@@ -40,4 +40,17 @@ describe("boardInitialState", () => {
     expect(firstHandRuntimeIds).toEqual(secondHandRuntimeIds);
     expect(firstState.playerA.hand.map((card) => card.id)).toEqual(secondState.playerA.hand.map((card) => card.id));
   });
+
+  it("permite inyectar identidad de jugador y oponente sin hardcode local", () => {
+    const state = createInitialBoardState({
+      playerId: "player-123",
+      playerName: "Boby",
+      opponentId: "opponent-abc",
+      opponentName: "Story Boss",
+    });
+    expect(state.playerA.id).toBe("player-123");
+    expect(state.playerA.name).toBe("Boby");
+    expect(state.playerB.id).toBe("opponent-abc");
+    expect(state.playerB.name).toBe("Story Boss");
+  });
 });

@@ -122,7 +122,7 @@ describe("useBoard integración", () => {
       result.current.advancePhase();
     });
 
-    expect(result.current.gameState.activePlayerId).toBe("p2");
+    expect(result.current.gameState.activePlayerId).toBe(result.current.gameState.playerB.id);
 
     act(() => {
       result.current.toggleCardSelection(card!, createMouseEvent());

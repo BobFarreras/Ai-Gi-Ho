@@ -12,6 +12,7 @@ Guía rápida para entender la lógica de tablero y batalla.
    - `ui/layers/BoardInteractiveLayer`
    - `ui/layout/BoardActionButtons`
 2. `useBoard` centraliza estado UI + puente con motor (`GameEngine`).
+3. La configuración inicial del duelo se resuelve en `hooks/internal/match/create-board-match-config.ts` (modo/seed/jugadores/decks), evitando hardcodes en UI.
 3. `usePlayerActions` procesa acciones humanas (invocar, activar, atacar).
 4. `useOpponentTurn` ejecuta pasos del rival con ritmo visual (delays + animación).
 5. `hooks/internal` se organiza por subcarpetas:
