@@ -299,6 +299,21 @@ UI (app/components) -> UseCases/Services -> Repositories (interfaces core)
 2. `getPlayerBoardDeck` resuelve en servidor el mazo guardado del jugador autenticado (`deck slots + colección`).
 3. `/hub/training` inicializa el combate con mazo persistido cuando está completo; si no, usa fallback mock del motor.
 
+## Subdominio Game (fase 0 refactor match desacoplado)
+
+1. Se introduce el subdominio `match` como contrato transversal para soportar `TRAINING`, `STORY`, `MULTIPLAYER` y `TUTORIAL`.
+2. Contratos base en `core/entities/match`:
+   - `IMatchMode`,
+   - `IMatchActionRequest`,
+   - `IMatchConfig`,
+   - `IMatchController`.
+3. Primera implementación en aplicación:
+   - `services/game/match/LocalMatchController`,
+   - `services/game/match/create-match-controller`.
+4. Objetivo de esta fase:
+   - fijar frontera de orquestación de partida antes de extraer lógica de `useBoard`.
+5. Esta fase no cambia reglas del motor (`GameEngine`), solo prepara desacoplamiento de runtime.
+
 ## Subdominio Progresión (fase 6.1)
 
 1. Se incorpora `player_card_progress` como estado canónico de progresión por carta (`version_tier`, `level`, `xp`).
