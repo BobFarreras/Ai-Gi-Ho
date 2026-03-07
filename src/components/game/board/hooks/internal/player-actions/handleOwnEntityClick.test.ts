@@ -51,7 +51,6 @@ describe("handleOwnEntityClick reemplazo", () => {
       setActiveAttackerId: vi.fn(),
       setIsAnimating: vi.fn(),
       setLastError: vi.fn(),
-      setPendingEntityReplacement: vi.fn(),
       setPendingEntityReplacementTargetId,
       setPendingFusionSummon: vi.fn(),
       setPlayingCard: vi.fn(),

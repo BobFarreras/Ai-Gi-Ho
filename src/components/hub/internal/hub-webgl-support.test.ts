@@ -11,10 +11,8 @@ describe("hub-webgl-support", () => {
 
   it("devuelve true si existe al menos un contexto WebGL", () => {
     const fakeContext = {} as RenderingContext;
-    const spy = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation((type: string) => {
-      if (type === "webgl") return fakeContext;
-      return null;
-    });
+    const mockGetContext = ((contextId: string) => (contextId === "webgl" ? fakeContext : null)) as unknown as typeof HTMLCanvasElement.prototype.getContext;
+    const spy = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(mockGetContext);
     expect(supportsWebGL()).toBe(true);
     spy.mockRestore();
   });

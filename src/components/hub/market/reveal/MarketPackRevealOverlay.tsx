@@ -1,10 +1,12 @@
 // src/components/hub/market/reveal/MarketPackRevealOverlay.tsx - Overlay de apertura de sobres con fases de sobre y revelado de cartas.
 "use client";
 
+import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { MarketRevealCardsGrid } from "@/components/hub/market/reveal/MarketRevealCardsGrid";
 import { MarketRevealEnvelope } from "@/components/hub/market/reveal/MarketRevealEnvelope";
 import { usePackRevealPhase } from "@/components/hub/market/internal/usePackRevealPhase";
+import { useHubModuleSfx } from "@/components/hub/internal/use-hub-module-sfx";
 import { ICard } from "@/core/entities/ICard";
 
 interface MarketPackRevealOverlayProps {
@@ -15,6 +17,11 @@ interface MarketPackRevealOverlayProps {
 
 export function MarketPackRevealOverlay({ cards, isOpen, onClose }: MarketPackRevealOverlayProps) {
   const { phase, resetPhase } = usePackRevealPhase({ isOpen });
+  const { play } = useHubModuleSfx();
+  useEffect(() => {
+    if (!isOpen) return;
+    play("PACK_REVEAL");
+  }, [isOpen, play]);
 
   return (
     <AnimatePresence>
@@ -23,7 +30,7 @@ export function MarketPackRevealOverlay({ cards, isOpen, onClose }: MarketPackRe
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[400] flex items-center justify-center bg-[#01050a]/95 backdrop-blur-2xl"
+          className="fixed inset-0 z-[400] flex items-center justify-center bg-[#01050a]/95 p-4 backdrop-blur-2xl"
         >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(192,38,211,0.15),transparent_70%)]" />
           <MarketRevealEnvelope phase={phase} />

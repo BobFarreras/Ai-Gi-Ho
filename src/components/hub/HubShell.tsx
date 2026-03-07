@@ -2,8 +2,8 @@
 import { IHubMapNode } from "@/core/entities/hub/IHubMapNode";
 import { IHubSection } from "@/core/entities/hub/IHubSection";
 import { IPlayerHubProgress } from "@/core/entities/hub/IPlayerHubProgress";
+import { HubSceneBootLoader } from "@/components/hub/boot/HubSceneBootLoader";
 import { CyberBackground } from "@/components/landing/CyberBackground";
-import { HubScene } from "@/components/hub/HubScene";
 
 interface HubShellProps {
   playerLabel: string;
@@ -17,7 +17,7 @@ export function HubShell({ playerLabel, progress, sections, nodes }: HubShellPro
     <main className="relative min-h-screen overflow-hidden text-slate-100">
       <CyberBackground />
       <div className="relative z-20">
-        <HubScene playerLabel={playerLabel} progress={progress} showMetaNodes sections={sections} nodes={nodes} />
+        <HubSceneBootLoader playerLabel={playerLabel} progress={progress} sections={sections} nodes={nodes} />
       </div>
     </main>
   );

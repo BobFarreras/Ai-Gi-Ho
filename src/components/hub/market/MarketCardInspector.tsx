@@ -2,18 +2,41 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { Zap, Swords, Shield, Tag, Lock, ShoppingCart, ScanLine } from "lucide-react";
 import { ICard } from "@/core/entities/ICard";
 import { IMarketCardListing } from "@/core/entities/market/IMarketCardListing";
 import { Card } from "@/components/game/card/Card";
+import { MarketNexusSpendFloat } from "@/components/hub/market/internal/MarketNexusSpendFloat";
 
 interface MarketCardInspectorProps {
   selectedCard: ICard | null;
   selectedListing: IMarketCardListing | null;
-  onBuyCard: (listingId: string) => Promise<void>;
+  isBuyingCard: boolean;
+  onBuyCard: (listingId: string) => Promise<boolean>;
 }
 
-export function MarketCardInspector({ selectedCard, selectedListing, onBuyCard }: MarketCardInspectorProps) {
+export function MarketCardInspector({ selectedCard, selectedListing, isBuyingCard, onBuyCard }: MarketCardInspectorProps) {
+  const [floatingSpendId, setFloatingSpendId] = useState(0);
+  const floatingTimeoutRef = useRef<number | null>(null);
+  useEffect(
+    () => () => {
+      if (floatingTimeoutRef.current === null) return;
+      window.clearTimeout(floatingTimeoutRef.current);
+    },
+    [],
+  );
+  const handleBuyClick = async (listingId: string) => {
+    const wasBought = await onBuyCard(listingId);
+    if (!wasBought) return;
+    setFloatingSpendId((previous) => previous + 1);
+    if (floatingTimeoutRef.current !== null) window.clearTimeout(floatingTimeoutRef.current);
+    floatingTimeoutRef.current = window.setTimeout(() => {
+      setFloatingSpendId(0);
+      floatingTimeoutRef.current = null;
+    }, 1280);
+  };
+
   return (
     <aside className="flex flex-col h-full overflow-hidden p-4 relative">
       <h2 className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-cyan-500/80 shrink-0">
@@ -23,8 +46,6 @@ export function MarketCardInspector({ selectedCard, selectedListing, onBuyCard }
       {selectedCard ? (
         <>
           <div className="home-modern-scroll flex-1 overflow-y-auto pr-2 pb-4">
-
-            {/* Contenedor 3D de la Carta */}
             <div className="relative flex justify-center items-center w-full h-[260px] sm:h-[300px] mb-4 perspective-1000">
               <motion.div
                 whileHover={{ scale: 1.05, rotateY: 5, rotateX: 5 }}
@@ -40,9 +61,7 @@ export function MarketCardInspector({ selectedCard, selectedListing, onBuyCard }
               {selectedCard.name}
             </h3>
 
-            {/* Módulos de Estadísticas (Badges) actualizados */}
             <div className="flex flex-wrap gap-2 mt-3 mb-4">
-              {/* REFACTOR: Uso estricto de selectedCard.archetype */}
               <span className="flex items-center gap-1.5 rounded bg-cyan-950/60 border border-cyan-800/50 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-cyan-300">
                 <Tag size={12} />
                 {selectedCard.type}
@@ -76,31 +95,37 @@ export function MarketCardInspector({ selectedCard, selectedListing, onBuyCard }
 
           <div className="mt-auto pt-4 border-t border-cyan-900/50 shrink-0 bg-[#030c16]">
             {selectedListing ? (
-              <div className="flex flex-col gap-2">
+              <div className="relative flex flex-col gap-2 overflow-visible">
                 <div className="flex justify-between items-center px-1">
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Valor de Mercado</span>
-                  <span className={`text-lg font-black font-mono tracking-widest ${selectedListing.isAvailable ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "text-rose-400"}`}>
-                    {selectedListing.isAvailable ? `${selectedListing.priceNexus} NX` : "NO DISPONIBLE"}
+                  <span className="relative inline-flex overflow-visible">
+                    <MarketNexusSpendFloat
+                      amount={selectedListing.priceNexus}
+                      triggerId={floatingSpendId}
+                      className="-right-1 top-0"
+                    />
+                    <span className={`text-lg font-black font-mono tracking-widest ${selectedListing.isAvailable ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "text-rose-400"}`}>
+                      {selectedListing.isAvailable ? `${selectedListing.priceNexus} NX` : "NO DISPONIBLE"}
+                    </span>
                   </span>
                 </div>
 
-                {/* Botón "Comprar" */}
-                <motion.button
-                  type="button"
-                  disabled={!selectedListing.isAvailable}
-                  onClick={() => onBuyCard(selectedListing.id)}
-                  whileHover={selectedListing.isAvailable ? { scale: 1.02 } : {}}
-                  whileTap={selectedListing.isAvailable ? { scale: 0.98 } : {}}
-                  className={`relative w-full flex items-center justify-center gap-2 py-3 sm:py-3.5 rounded-xl border text-xs font-black uppercase tracking-widest transition-all overflow-hidden group ${selectedListing.isAvailable
-                      ? "border-emerald-500/50 bg-emerald-950/40 text-emerald-300 hover:border-emerald-300 hover:bg-emerald-900/60 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] cursor-pointer"
+                  <motion.button
+                    type="button"
+                    disabled={!selectedListing.isAvailable || isBuyingCard}
+                    onClick={() => handleBuyClick(selectedListing.id)}
+                    whileHover={selectedListing.isAvailable && !isBuyingCard ? { scale: 1.02 } : {}}
+                    whileTap={selectedListing.isAvailable && !isBuyingCard ? { scale: 0.98 } : {}}
+                    className={`relative w-full flex items-center justify-center gap-2 py-3 sm:py-3.5 rounded-xl border text-xs font-black uppercase tracking-widest transition-all overflow-hidden group ${selectedListing.isAvailable
+                      ? `border-emerald-500/50 bg-emerald-950/40 text-emerald-300 ${isBuyingCard ? "cursor-wait opacity-75" : "hover:border-emerald-300 hover:bg-emerald-900/60 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] cursor-pointer"}`
                       : "border-zinc-800 bg-zinc-950/60 text-zinc-500 cursor-not-allowed"
                     }`}
-                >
+                  >
                   {selectedListing.isAvailable ? (
                     <>
                       <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/10 to-emerald-500/0 opacity-0 group-hover:opacity-100 group-hover:animate-[shine_1.5s_infinite] transition-opacity" />
                       <ShoppingCart size={16} className="relative z-10" />
-                      <span className="relative z-10">Comprar</span>
+                      <span className="relative z-10">{isBuyingCard ? "Procesando..." : "Comprar"}</span>
                     </>
                   ) : (
                     <>

@@ -18,6 +18,8 @@ src/components/hub/market
 ├── MarketCardInspector.tsx            # Detalle de carta y compra contextual
 ├── layout/
 │   └── MarketHeaderBar.tsx            # Cabecera con saldo, búsqueda y filtros
+│   ├── MarketDesktopGrid.tsx          # Composición de paneles en escritorio
+│   └── MarketMobileStack.tsx          # Navegación por pestañas en móvil
 ├── listings/
 │   └── MarketListingsPanel.tsx        # Grid principal de cartas
 ├── packs/
@@ -35,6 +37,7 @@ src/components/hub/market
 ├── market-listing-view.ts             # Pipeline de filtrado/ordenado
 └── internal/
     ├── useMarketSceneState.ts         # Estado + acciones de la escena
+    ├── MarketNexusSpendFloat.tsx      # Flotante reutilizable de gasto Nexus (-NX)
     ├── useSyncSelectedListing.ts      # Sincroniza selección y catálogo visible
     ├── usePackRevealPhase.ts          # Máquina de fases del overlay
     ├── format-market-transaction-date.ts
@@ -56,6 +59,33 @@ src/components/hub/market
    - comprar sobres,
    - refrescar `wallet`, `collection`, `transactions`.
 3. `MarketPackRevealOverlay` solo consume estado visual ya resuelto.
+4. `MarketScene` enruta la UI por viewport:
+   - `xl+`: `MarketDesktopGrid` (estructura original en 3 columnas).
+   - `<xl`: `MarketMobileStack` (vista por pestañas + inspector en diálogo).
+   - `PACKS` mobile: selector de sobres + CTA de compra (sin reemplazar listado de cartas libres).
+   - compra de pack mobile bloquea doble tap con estado `Procesando...`.
+5. Estado inicial de mercado:
+   - `selectedPackId = null` para entrar siempre en **cartas sueltas**.
+
+## Audio de Market
+
+Integrado con `useHubModuleSfx`:
+
+1. Abrir detalle/inspector: `DETAIL_OPEN` (`/audio/hub/common/open-detall.mp3`).
+2. Cerrar detalle/inspector: `DIALOG_CLOSE` (`/audio/hub/common/cerrar-dialog.mp3`).
+3. Abrir filtros: `FILTER_OPEN` (`/audio/hub/common/filter.mp3`).
+4. Cerrar filtros: `FILTER_CLOSE` (`/audio/hub/common/cerrar-filtro.mp3`).
+5. Comprar carta individual: `BUY_CARD` (`/audio/hub/market/comprar-carta.mp3`).
+6. Comprar pack: `BUY_PACK` (`/audio/hub/market/comprar-pack.mp3`).
+7. Abrir animación de pack: `PACK_REVEAL` (`/audio/landing/hero.mp3`).
+
+## Manejo de errores
+
+1. Los errores de compra se muestran con `HubErrorDialog` compartido.
+2. El diálogo permite cierre manual (`X`) y autocierre para no bloquear el flujo.
+3. El feedback sonoro de error usa `ERROR_COMMON` (`/audio/hub/common/error-common.mp3`).
+4. La compra de carta no aplica descuento ni animación flotante hasta confirmar respuesta de servidor.
+5. El servidor (caso de uso + repositorios persistentes) es la autoridad final de saldo, stock y disponibilidad.
 
 ## Riesgos comunes (y mitigación)
 
