@@ -1,4 +1,5 @@
 // src/components/game/board/battlefield/internal/pin-slot-entities.test.ts - Verifica que los slots se mantengan estables cuando se elimina una entidad intermedia.
+import { describe, expect, it } from "vitest";
 import { IBoardEntity } from "@/core/entities/IPlayer";
 import { pinSlotEntities } from "./pin-slot-entities";
 
