@@ -3,6 +3,7 @@ import { IDeck } from "@/core/entities/home/IDeck";
 import { ICollectionCard } from "@/core/entities/home/ICollectionCard";
 import { IPlayerCardProgress } from "@/core/entities/progression/IPlayerCardProgress";
 import { HomeMiniCard } from "@/components/hub/home/HomeMiniCard";
+import { DragEvent } from "react";
 
 interface HomeFusionDeckPanelProps {
   deck: IDeck;
@@ -11,6 +12,8 @@ interface HomeFusionDeckPanelProps {
   selectedFusionSlotIndex: number | null;
   selectedCardId: string | null;
   onSelectFusionSlot: (slotIndex: number) => void;
+  onStartDragFusionSlot: (slotIndex: number, event: DragEvent<HTMLElement>) => void;
+  onDropOnFusionSlot: (slotIndex: number, event: DragEvent<HTMLElement>) => void;
 }
 
 export function HomeFusionDeckPanel({
@@ -20,6 +23,8 @@ export function HomeFusionDeckPanel({
   selectedFusionSlotIndex,
   selectedCardId,
   onSelectFusionSlot,
+  onStartDragFusionSlot,
+  onDropOnFusionSlot,
 }: HomeFusionDeckPanelProps) {
   const cardById = new Map(collection.map((entry) => [entry.card.id, entry.card]));
   return (
@@ -30,24 +35,29 @@ export function HomeFusionDeckPanel({
           {deck.fusionSlots.filter((slot) => slot.cardId !== null).length}/2
         </p>
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="mx-auto grid w-full max-w-[220px] grid-cols-2 place-items-center gap-3">
         {deck.fusionSlots.map((slot) => {
           const card = slot.cardId ? cardById.get(slot.cardId) ?? null : null;
           const progress = slot.cardId ? cardProgressById.get(slot.cardId) ?? null : null;
           const isSelected = selectedFusionSlotIndex === slot.index || (slot.cardId !== null && selectedCardId === slot.cardId);
           return (
-            <HomeMiniCard
-              key={`fusion-slot-${slot.index}`}
-              card={card}
-              isSelected={isSelected}
-              label={`Fusión ${slot.index + 1}`}
-              onClick={() => onSelectFusionSlot(slot.index)}
-              showSlotContainer={card === null}
-              versionTier={progress?.versionTier ?? 0}
-              level={progress?.level ?? 0}
-              xp={progress?.xp ?? 0}
-              masteryPassiveSkillId={progress?.masteryPassiveSkillId ?? null}
-            />
+            <div key={`fusion-slot-${slot.index}`} className="w-[76px]">
+              <HomeMiniCard
+                card={card}
+                isSelected={isSelected}
+                label={`Fusión ${slot.index + 1}`}
+                onClick={() => onSelectFusionSlot(slot.index)}
+                isDraggable={card !== null}
+                onDragStart={(event) => onStartDragFusionSlot(slot.index, event)}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={(event) => onDropOnFusionSlot(slot.index, event)}
+                showSlotContainer={card === null}
+                versionTier={progress?.versionTier ?? 0}
+                level={progress?.level ?? 0}
+                xp={progress?.xp ?? 0}
+                masteryPassiveSkillId={progress?.masteryPassiveSkillId ?? null}
+              />
+            </div>
           );
         })}
       </div>

@@ -40,6 +40,17 @@ export async function removeCardFromDeckAction(context: IDeckActionContext, slot
   return parseDeckResponse(response);
 }
 
+export async function addCardToDeckSlotAction(context: IDeckActionContext, cardId: string, slotIndex: number): Promise<IDeck> {
+  void context;
+  const response = await fetch("/api/home/deck/add-slot", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ cardId, slotIndex }),
+    cache: "no-store",
+  });
+  return parseDeckResponse(response);
+}
+
 export async function addCardToFusionDeckAction(context: IDeckActionContext, cardId: string, slotIndex: number): Promise<IDeck> {
   void context;
   const response = await fetch("/api/home/deck/fusion/add", {

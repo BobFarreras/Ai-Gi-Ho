@@ -1,7 +1,7 @@
 // src/components/hub/home/HomeDeckBuilderScene.tsx - Escena principal de Mi Home con interacción de deck y colección.
 "use client";
 
-import { useMemo, useState } from "react";
+import { DragEvent, useMemo, useState } from "react";
 import { ICollectionCard } from "@/core/entities/home/ICollectionCard";
 import { IDeck } from "@/core/entities/home/IDeck";
 import { IPlayerCardProgress } from "@/core/entities/progression/IPlayerCardProgress";
@@ -17,9 +17,16 @@ import {
   HomeCollectionTypeFilter,
 } from "@/components/hub/home/home-filters";
 import { buildHomeCollectionView } from "@/components/hub/home/home-collection-view";
-import { applyOptimisticAddToDeck, applyOptimisticRemoveFromDeck } from "@/components/hub/home/internal/optimistic-deck-updates";
+import {
+  applyOptimisticAddToDeck,
+  applyOptimisticAddToDeckSlot,
+  applyOptimisticAddToFusionSlot,
+  applyOptimisticRemoveFromDeck,
+  applyOptimisticRemoveFromFusion,
+} from "@/components/hub/home/internal/optimistic-deck-updates";
 import {
   addCardToDeckAction,
+  addCardToDeckSlotAction,
   addCardToFusionDeckAction,
   evolveCardVersionAction,
   removeCardFromFusionDeckAction,
@@ -59,6 +66,7 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
   const [orderField, setOrderField] = useState<HomeCollectionOrderField>("NAME");
   const [orderDirection, setOrderDirection] = useState<HomeCollectionOrderDirection>("ASC");
   const [evolutionOverlay, setEvolutionOverlay] = useState<IEvolutionOverlayState | null>(null);
+  const [draggedCard, setDraggedCard] = useState<{ cardId: string; source: "COLLECTION" | "DECK" | "FUSION"; slotIndex?: number } | null>(null);
   
   const cardById = useMemo(() => new Map(collectionState.map((entry) => [entry.card.id, entry.card])), [collectionState]);
   const selectedCardId = useMemo(() => {
@@ -77,24 +85,18 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
   const selectedCardXp = selectedCardProgress?.xp ?? 0;
   const selectedCardMasteryPassiveSkillId = selectedCardProgress?.masteryPassiveSkillId ?? null;
   const deckCardCount = useMemo(() => deck.slots.filter((slot) => slot.cardId !== null).length, [deck.slots]);
-  const deckCopiesByCardId = useMemo(() => {
-    const copies = new Map<string, number>();
-    for (const slot of deck.slots) {
-      if (!slot.cardId) continue;
-      copies.set(slot.cardId, (copies.get(slot.cardId) ?? 0) + 1);
-    }
-    return copies;
-  }, [deck.slots]);
   const selectedCardCopies = selectedCardId ? (collectionState.find((entry) => entry.card.id === selectedCardId)?.ownedCopies ?? 0) : 0;
   const selectedCardDeckCopies = selectedCardId ? countDeckCopies(deck, selectedCardId) : 0;
   const selectedCardAssignedCopies = selectedCardId ? countAssignedCopies(deck, selectedCardId) : 0;
   const selectedCardStorageCopies = selectedCardId ? Math.max(0, selectedCardCopies - selectedCardAssignedCopies) : 0;
-  const selectedCollectionCardType = selectedCollectionCardId
+  const selectedCollectionCardType: string | null = selectedCollectionCardId
     ? (collectionState.find((entry) => entry.card.id === selectedCollectionCardId)?.card.type ?? null)
     : null;
+  const firstEmptyFusionSlotIndex = deck.fusionSlots.findIndex((slot) => slot.cardId === null);
+  const targetFusionSlotIndex = selectedFusionSlotIndex ?? (firstEmptyFusionSlotIndex >= 0 ? firstEmptyFusionSlotIndex : null);
   const canInsertSelectedCard = Boolean(selectedCollectionCardId) && (
-    selectedFusionSlotIndex !== null
-      ? selectedCollectionCardType === "FUSION" && selectedCardStorageCopies > 0
+    selectedCollectionCardType === "FUSION"
+      ? targetFusionSlotIndex !== null && selectedCardStorageCopies > 0
       : selectedCollectionCardType !== "FUSION" && selectedCardDeckCopies < HOME_MAX_DUPLICATES && selectedCardStorageCopies > 0
   );
   const copiesRequiredToEvolve = selectedCardId ? getCopiesNeededForNextVersion(selectedCardVersionTier) : null;
@@ -112,11 +114,11 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
     for (const entry of collectionState) {
       const versionTier = cardProgressById.get(entry.card.id)?.versionTier ?? 0;
       const requiredCopies = getCopiesNeededForNextVersion(versionTier);
-      const storageCopies = Math.max(0, entry.ownedCopies - (deckCopiesByCardId.get(entry.card.id) ?? 0));
+      const storageCopies = Math.max(0, entry.ownedCopies - countAssignedCopies(deck, entry.card.id));
       if (requiredCopies !== null && storageCopies >= requiredCopies) ids.add(entry.card.id);
     }
     return ids;
-  }, [cardProgressById, collectionState, deckCopiesByCardId]);
+  }, [cardProgressById, collectionState, deck]);
   const evolutionCard = evolutionOverlay ? cardById.get(evolutionOverlay.cardId) ?? selectedCard : null;
   const getActionErrorMessage = (error: unknown, fallback: string): string => {
     const rawMessage = error instanceof Error ? error.message : fallback;
@@ -137,9 +139,16 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
   const handleInsertSelectedCard = async (): Promise<IHomeActionResult> => {
     if (!selectedCollectionCardId) return { ok: false, message: "Selecciona una carta del almacén para añadirla." };
     const previousDeck = deck;
-    if (selectedFusionSlotIndex !== null) {
+    if (selectedCollectionCardType === "FUSION") {
+      if (targetFusionSlotIndex === null) {
+        const message = "No hay hueco libre en Bloque Fusiones.";
+        setErrorMessage(message);
+        return { ok: false, message };
+      }
+      setDeck((currentDeck) => applyOptimisticAddToFusionSlot(currentDeck, targetFusionSlotIndex, selectedCollectionCardId));
+      play("ADD_CARD");
       try {
-        const updatedDeck = await addCardToFusionDeckAction(context, selectedCollectionCardId, selectedFusionSlotIndex);
+        const updatedDeck = await addCardToFusionDeckAction(context, selectedCollectionCardId, targetFusionSlotIndex);
         setDeck(updatedDeck);
         setErrorMessage(null);
         return { ok: true };
@@ -150,6 +159,12 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
         return { ok: false, message };
       }
     }
+    if (selectedCollectionCardType === "FUSION") {
+      const message = "Esta carta solo puede añadirse al Bloque Fusiones.";
+      setErrorMessage(message);
+      return { ok: false, message };
+    }
+    play("ADD_CARD");
     setDeck((currentDeck) => applyOptimisticAddToDeck(currentDeck, selectedCollectionCardId));
     try {
       const updatedDeck = await addCardToDeckAction(context, selectedCollectionCardId);
@@ -168,12 +183,16 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
       return { ok: false, message: "Selecciona una carta del deck para removerla." };
     }
     if (selectedFusionSlotIndex !== null) {
+      const previousDeck = deck;
+      play("REMOVE_CARD");
+      setDeck((currentDeck) => applyOptimisticRemoveFromFusion(currentDeck, selectedFusionSlotIndex));
       try {
         const updatedDeck = await removeCardFromFusionDeckAction(context, selectedFusionSlotIndex);
         setDeck(updatedDeck);
         setErrorMessage(null);
         return { ok: true };
       } catch (error) {
+        setDeck(previousDeck);
         const message = getActionErrorMessage(error, "No se pudo retirar la carta del bloque de fusión.");
         setErrorMessage(message);
         return { ok: false, message };
@@ -182,6 +201,7 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
     const mainSlotIndex = selectedSlotIndex;
     if (mainSlotIndex === null) return { ok: false, message: "Selecciona una carta del deck para removerla." };
     const previousDeck = deck;
+    play("REMOVE_CARD");
     setDeck((currentDeck) => applyOptimisticRemoveFromDeck(currentDeck, mainSlotIndex));
     try {
       const updatedDeck = await removeCardFromDeckAction(context, mainSlotIndex);
@@ -199,6 +219,7 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
     if (!selectedCardId || !canEvolveSelectedCard || copiesRequiredToEvolve === null) {
       return { ok: false, message: "No hay copias libres suficientes en almacén para evolucionar esta carta." };
     }
+    play("EVOLUTION_BUTTON");
     const previousVersionTier = selectedCardVersionTier;
     const previousCollection = collectionState;
     const previousProgressById = new Map(cardProgressById);
@@ -259,6 +280,139 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
       return { ok: false, message };
     }
   };
+  const startDragCollectionCard = (cardId: string, event: DragEvent<HTMLElement>) => {
+    event.dataTransfer.effectAllowed = "move";
+    setDraggedCard({ cardId, source: "COLLECTION" });
+  };
+  const startDragDeckSlot = (slotIndex: number, event: DragEvent<HTMLElement>) => {
+    const cardId = deck.slots[slotIndex]?.cardId;
+    if (!cardId) return;
+    event.dataTransfer.effectAllowed = "move";
+    setDraggedCard({ cardId, source: "DECK", slotIndex });
+  };
+  const startDragFusionSlot = (slotIndex: number, event: DragEvent<HTMLElement>) => {
+    const cardId = deck.fusionSlots[slotIndex]?.cardId;
+    if (!cardId) return;
+    event.dataTransfer.effectAllowed = "move";
+    setDraggedCard({ cardId, source: "FUSION", slotIndex });
+  };
+  const handleDropOnDeckSlot = async (slotIndex: number, event: DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    if (!draggedCard) return;
+    if (draggedCard.source === "FUSION") {
+      setErrorMessage("Una carta de FUSIÓN no se puede mover al Deck principal.");
+      setDraggedCard(null);
+      return;
+    }
+    if (draggedCard.source === "DECK") {
+      setDraggedCard(null);
+      return;
+    }
+    const droppedCard = collectionState.find((entry) => entry.card.id === draggedCard.cardId)?.card;
+    if (!droppedCard) {
+      setDraggedCard(null);
+      return;
+    }
+    if (droppedCard.type === "FUSION") {
+      setErrorMessage("Las cartas de FUSIÓN solo se pueden colocar en Bloque Fusiones.");
+      setDraggedCard(null);
+      return;
+    }
+    const previousDeck = deck;
+    if (previousDeck.slots[slotIndex]?.cardId !== null) {
+      setErrorMessage("Ese slot ya está ocupado. Libéralo antes de mover una carta.");
+      setDraggedCard(null);
+      return;
+    }
+    setDeck((currentDeck) => applyOptimisticAddToDeckSlot(currentDeck, slotIndex, draggedCard.cardId));
+    play("ADD_CARD");
+    try {
+      const updatedDeck = await addCardToDeckSlotAction(context, draggedCard.cardId, slotIndex);
+      setDeck(updatedDeck);
+      setSelectedCollectionCardId(draggedCard.cardId);
+      setErrorMessage(null);
+    } catch (error) {
+      setDeck(previousDeck);
+      setErrorMessage(getActionErrorMessage(error, "No se pudo colocar la carta en el slot de deck."));
+    } finally {
+      setDraggedCard(null);
+    }
+  };
+  const handleDropOnFusionSlot = async (slotIndex: number, event: DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    if (!draggedCard) return;
+    if (draggedCard.source === "DECK") {
+      setErrorMessage("Una carta del Deck principal no se puede mover al Bloque Fusiones.");
+      setDraggedCard(null);
+      return;
+    }
+    if (draggedCard.source === "FUSION") {
+      setDraggedCard(null);
+      return;
+    }
+    const droppedCard = collectionState.find((entry) => entry.card.id === draggedCard.cardId)?.card;
+    if (!droppedCard) {
+      setDraggedCard(null);
+      return;
+    }
+    if (droppedCard.type !== "FUSION") {
+      setErrorMessage("Solo cartas de tipo FUSIÓN pueden entrar en Bloque Fusiones.");
+      setDraggedCard(null);
+      return;
+    }
+    const previousDeck = deck;
+    if (previousDeck.fusionSlots[slotIndex]?.cardId !== null) {
+      setErrorMessage("Ese slot de Bloque Fusiones ya está ocupado.");
+      setDraggedCard(null);
+      return;
+    }
+    setDeck((currentDeck) => applyOptimisticAddToFusionSlot(currentDeck, slotIndex, draggedCard.cardId));
+    play("ADD_CARD");
+    try {
+      const updatedDeck = await addCardToFusionDeckAction(context, draggedCard.cardId, slotIndex);
+      setDeck(updatedDeck);
+      setSelectedCollectionCardId(draggedCard.cardId);
+      setErrorMessage(null);
+    } catch (error) {
+      setDeck(previousDeck);
+      setErrorMessage(getActionErrorMessage(error, "No se pudo colocar la carta en Bloque Fusiones."));
+    } finally {
+      setDraggedCard(null);
+    }
+  };
+  const handleDropOnCollectionArea = async (event: DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    if (!draggedCard) return;
+    if (draggedCard.source === "DECK" && typeof draggedCard.slotIndex === "number") {
+      const slotIndex = draggedCard.slotIndex;
+      const previousDeck = deck;
+      setDeck((currentDeck) => applyOptimisticRemoveFromDeck(currentDeck, slotIndex));
+      play("REMOVE_CARD");
+      try {
+        const updatedDeck = await removeCardFromDeckAction(context, slotIndex);
+        setDeck(updatedDeck);
+        setErrorMessage(null);
+      } catch (error) {
+        setDeck(previousDeck);
+        setErrorMessage(getActionErrorMessage(error, "No se pudo devolver la carta al almacén."));
+      }
+    }
+    if (draggedCard.source === "FUSION" && typeof draggedCard.slotIndex === "number") {
+      const slotIndex = draggedCard.slotIndex;
+      const previousDeck = deck;
+      setDeck((currentDeck) => applyOptimisticRemoveFromFusion(currentDeck, slotIndex));
+      play("REMOVE_CARD");
+      try {
+        const updatedDeck = await removeCardFromFusionDeckAction(context, slotIndex);
+        setDeck(updatedDeck);
+        setErrorMessage(null);
+      } catch (error) {
+        setDeck(previousDeck);
+        setErrorMessage(getActionErrorMessage(error, "No se pudo devolver la carta al almacén."));
+      }
+    }
+    setDraggedCard(null);
+  };
 
   return (
     <main className="hub-control-room-bg relative box-border w-full h-[100dvh] overflow-hidden px-3 py-3 text-slate-100 sm:px-5 flex flex-col justify-center items-center">
@@ -271,7 +425,7 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
             deckCount={deckCardCount}
             deckSize={HOME_DECK_SIZE}
             canInsert={canInsertSelectedCard}
-            canRemove={selectedSlotHasCard}
+            canRemove={selectedSlotHasCard || selectedFusionSlotHasCard}
             typeFilter={typeFilter}
             orderField={orderField}
             orderDirection={orderDirection}
@@ -334,9 +488,20 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
           onSelectCollectionCard={(cardId) => {
             setErrorMessage(null);
             setSelectedSlotIndex(null);
-            setSelectedFusionSlotIndex(null);
             setSelectedCollectionCardId((previous) => (previous === cardId ? null : cardId));
             if (selectedCollectionCardId !== cardId) play("DETAIL_OPEN");
+          }}
+          onStartDragCollectionCard={startDragCollectionCard}
+          onStartDragDeckSlot={startDragDeckSlot}
+          onStartDragFusionSlot={startDragFusionSlot}
+          onDropOnDeckSlot={(slotIndex, event) => {
+            void handleDropOnDeckSlot(slotIndex, event);
+          }}
+          onDropOnFusionSlot={(slotIndex, event) => {
+            void handleDropOnFusionSlot(slotIndex, event);
+          }}
+          onDropOnCollectionArea={(event) => {
+            void handleDropOnCollectionArea(event);
           }}
         />
       </section>

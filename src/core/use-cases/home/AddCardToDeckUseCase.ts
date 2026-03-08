@@ -8,6 +8,7 @@ import { assertValidCardId, assertValidPlayerId } from "@/core/use-cases/home/in
 interface IAddCardToDeckInput {
   playerId: string;
   cardId: string;
+  slotIndex?: number;
 }
 
 export class AddCardToDeckUseCase {
@@ -32,7 +33,14 @@ export class AddCardToDeckUseCase {
     if (countAssignedCopies(deck, input.cardId) >= collectionEntry.ownedCopies) {
       throw new GameRuleError("No tienes más copias disponibles de esta carta.");
     }
-    const slotIndex = findFirstEmptyDeckSlot(deck);
+    const slotIndex = input.slotIndex ?? findFirstEmptyDeckSlot(deck);
+    const targetSlot = deck.slots[slotIndex];
+    if (!targetSlot) {
+      throw new GameRuleError("El slot de destino no es válido.");
+    }
+    if (targetSlot.cardId !== null) {
+      throw new GameRuleError("El slot de destino ya está ocupado.");
+    }
     const updatedDeck: IDeck = {
       playerId: deck.playerId,
       slots: deck.slots.map((slot) => ({ ...slot })),

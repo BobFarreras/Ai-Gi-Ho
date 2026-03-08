@@ -47,6 +47,12 @@ function createProps(): IHomeWorkspaceProps {
     onSelectSlot: vi.fn(),
     onSelectFusionSlot: vi.fn(),
     onSelectCollectionCard: vi.fn(),
+    onStartDragCollectionCard: vi.fn(),
+    onStartDragDeckSlot: vi.fn(),
+    onStartDragFusionSlot: vi.fn(),
+    onDropOnDeckSlot: vi.fn(),
+    onDropOnFusionSlot: vi.fn(),
+    onDropOnCollectionArea: vi.fn(),
     onClearError: vi.fn(),
   };
 }
