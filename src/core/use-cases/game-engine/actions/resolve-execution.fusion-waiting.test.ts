@@ -75,5 +75,11 @@ describe("resolveExecution fusión en espera", () => {
     expect(next.playerA.activeExecutions[0].mode).toBe("SET");
     expect(next.playerA.graveyard).toHaveLength(0);
   });
-});
 
+  it("permite continuar el flujo de turno tras quedar en espera por materiales faltantes", () => {
+    const waitingState = GameEngine.resolveExecution(createState(), "p1", "exec-1");
+    const afterNextPhase = GameEngine.nextPhase(waitingState);
+    expect(afterNextPhase.pendingTurnAction).toBeNull();
+    expect(afterNextPhase.phase).toBe("BATTLE");
+  });
+});

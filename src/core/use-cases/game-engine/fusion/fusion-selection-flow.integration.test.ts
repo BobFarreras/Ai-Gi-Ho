@@ -104,5 +104,8 @@ describe("GameEngine flujo de selección de fusión", () => {
     expect(() => GameEngine.startFusionSummon(state, "p1", "fusion-gemgpt", "ATTACK")).toThrow(
       "No puedes fusionar: faltan materiales válidos en el campo.",
     );
+    const afterNextPhase = GameEngine.nextPhase(state);
+    expect(afterNextPhase.phase).toBe("BATTLE");
+    expect(afterNextPhase.pendingTurnAction).toBeNull();
   });
 });
