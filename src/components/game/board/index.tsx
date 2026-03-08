@@ -44,6 +44,7 @@ export function Board({
   const {
     gameState,
     selectedCard,
+    selectedBoardEntityInstanceId,
     playingCard,
     isHistoryOpen,
     activeAttackerId,
@@ -67,6 +68,8 @@ export function Board({
     resolvePendingHandDiscard,
     setSelectedEntityToAttack,
     canSetSelectedEntityToAttack,
+    activateSelectedExecution,
+    canActivateSelectedExecution,
     battleExperienceSummary,
     battleExperienceCardLookup,
     isBattleExperiencePending,
@@ -118,9 +121,10 @@ export function Board({
     [graveyardView, opponent.graveyard, player.graveyard],
   );
   const pendingReplacementTargetCard = useMemo(() => {
-    if (!pendingEntityReplacementTargetId) return null;
-    return player.activeEntities.find((entity) => entity.instanceId === pendingEntityReplacementTargetId)?.card ?? null;
-  }, [pendingEntityReplacementTargetId, player.activeEntities]);
+    if (!pendingEntityReplacementTargetId || !pendingEntityReplacement) return null;
+    const candidates = pendingEntityReplacement.zone === "ENTITIES" ? player.activeEntities : player.activeExecutions;
+    return candidates.find((entity) => entity.instanceId === pendingEntityReplacementTargetId)?.card ?? null;
+  }, [pendingEntityReplacement, pendingEntityReplacementTargetId, player.activeEntities, player.activeExecutions]);
   const visibleGraveyardOwner = graveyardView === "player" ? player.name : opponent.name;
   const narration = useMatchNarration({
     combatLog: gameState.combatLog,
@@ -208,13 +212,26 @@ export function Board({
       />
       <BoardInteractiveLayer
         gameState={gameState} selectedCard={selectedCard} playingCard={playingCard} activeAttackerId={activeAttackerId}
+        selectedBoardEntityInstanceId={selectedBoardEntityInstanceId}
         revealedEntities={revealedEntities} pendingEntitySelectionIds={pendingEntitySelectionIds} pendingDiscardCardIds={pendingDiscardCardIds}
         pendingFusionSelectedEntityIds={pendingFusionSelectedEntityIds}
         isHistoryOpen={isHistoryOpen} isPlayerTurn={isPlayerTurn} lastDamageTargetPlayerId={lastDamageTargetPlayerId} lastDamageEventId={lastDamageEventId}
         lastBuffTargetEntityIds={lastBuffTargetEntityIds} lastBuffStat={lastBuffStat} lastBuffAmount={lastBuffAmount} lastBuffEventId={lastBuffEventId}
         lastCardXpCardId={lastCardXpCardId} lastCardXpAmount={lastCardXpAmount} lastCardXpEventId={lastCardXpEventId} lastCardXpActorPlayerId={lastCardXpActorPlayerId}
         onGraveyardClick={setGraveyardView} onEntityClick={handleEntityClick} onMandatoryCardSelect={resolvePendingHandDiscard}
-        onCardClick={toggleCardSelection} onPlayAction={executePlayAction} onSelectCard={previewCard} onCloseCard={clearSelection}
+        canActivateSelectedExecution={canActivateSelectedExecution}
+        onCardClick={toggleCardSelection} onPlayAction={executePlayAction} onActivateSelectedExecution={() => {
+          playButtonClick();
+          const result = activateSelectedExecution();
+          if (result === "MISSING_MATERIALS") {
+            setAutoModeBannerSignal({
+              id: `fusion-missing-materials-${Date.now()}`,
+              left: "Fusion",
+              right: "Faltan materiales",
+            });
+            playBanner();
+          }
+        }} onSelectCard={previewCard} onCloseCard={clearSelection}
         onCloseHistory={() => setIsHistoryOpen(false)}
       />
       <BoardActionButtons

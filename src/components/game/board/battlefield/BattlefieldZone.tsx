@@ -16,6 +16,7 @@ interface BattlefieldZoneProps {
   graveyardCount: number;
   activeAttackerId: string | null;
   selectedCard: ICard | null;
+  selectedBoardEntityInstanceId: string | null;
   revealedEntities: string[];
   highlightedEntityIds: string[];
   selectedEntityIds: string[];
@@ -28,6 +29,8 @@ interface BattlefieldZoneProps {
   cardXpCardId: string | null;
   cardXpAmount: number | null;
   cardXpEventId: string | null;
+  canActivateSelectedExecution: boolean;
+  onActivateSelectedExecution: () => void;
   onGraveyardClick: (side: "player" | "opponent") => void;
   onEntityClick: (entity: IBoardEntity | null, isOpponentSide: boolean, event: MouseEvent) => void;
 }
@@ -41,6 +44,7 @@ export function BattlefieldZone({
   graveyardCount,
   activeAttackerId,
   selectedCard,
+  selectedBoardEntityInstanceId,
   revealedEntities,
   highlightedEntityIds,
   selectedEntityIds,
@@ -53,6 +57,8 @@ export function BattlefieldZone({
   cardXpCardId,
   cardXpAmount,
   cardXpEventId,
+  canActivateSelectedExecution,
+  onActivateSelectedExecution,
   onGraveyardClick,
   onEntityClick,
 }: BattlefieldZoneProps) {
@@ -81,6 +87,7 @@ export function BattlefieldZone({
         activeExecutions={activeExecutions}
         activeAttackerId={activeAttackerId}
         selectedCard={selectedCard}
+        selectedBoardEntityInstanceId={selectedBoardEntityInstanceId}
         revealedEntities={revealedEntities}
         highlightedEntityIds={highlightedEntityIds}
         selectedEntityIds={selectedEntityIds}
@@ -91,6 +98,8 @@ export function BattlefieldZone({
         cardXpCardId={cardXpCardId}
         cardXpAmount={cardXpAmount}
         cardXpEventId={cardXpEventId}
+        canActivateSelectedExecution={canActivateSelectedExecution}
+        onActivateSelectedExecution={onActivateSelectedExecution}
         onEntityClick={onEntityClick}
       />
       <DeckPile deckCount={deckCount} />

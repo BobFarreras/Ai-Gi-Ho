@@ -3,8 +3,8 @@
 
 import { ICard } from "@/core/entities/ICard";
 import { ICombatLogEvent } from "@/core/entities/ICombatLog";
-import { BattleMode } from "@/core/entities/IPlayer";
 import { IBoardUiError } from "../../hooks/internal/boardError";
+import { IPendingZoneReplacement } from "../../hooks/internal/board-state/pending-replacement";
 import { BattleBannerCenter } from "../BattleBannerCenter";
 import { FusionCinematicLayer } from "../FusionCinematicLayer";
 import { GraveyardBrowser } from "../GraveyardBrowser";
@@ -15,7 +15,7 @@ import { TurnAdvanceGuardOverlay } from "./TurnAdvanceGuardOverlay";
 interface BoardStatusOverlaysProps {
   lastError: IBoardUiError | null;
   pendingActionHint: string | null;
-  pendingEntityReplacement: { cardId: string; mode: BattleMode } | null;
+  pendingEntityReplacement: IPendingZoneReplacement | null;
   pendingEntityReplacementTargetCard: ICard | null;
   combatLog: ICombatLogEvent[];
   playerAId: string;
@@ -98,6 +98,7 @@ export function BoardStatusOverlays({
       )}
       {pendingEntityReplacement && pendingEntityReplacementTargetCard && (
         <EntityReplacementConfirmOverlay
+          zone={pendingEntityReplacement.zone}
           targetCard={pendingEntityReplacementTargetCard}
           onConfirm={onConfirmEntityReplacement}
           onCancel={onCancelEntityReplacement}

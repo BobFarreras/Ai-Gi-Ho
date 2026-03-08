@@ -7,10 +7,11 @@ import { applyExecutionEffect } from "@/core/use-cases/game-engine/actions/inter
 import { appendExecutionResolutionLogs } from "@/core/use-cases/game-engine/actions/internal/execution-logging";
 import { resolveTrapTrigger } from "@/core/use-cases/game-engine/effects/resolve-trap-trigger";
 import { startFusionSummonFromExecution } from "@/core/use-cases/game-engine/fusion/start-fusion-summon-from-execution";
+import { appendCombatLogEvent } from "@/core/use-cases/game-engine/logging/combat-log";
 import { assignPlayers, getPlayerPair } from "@/core/use-cases/game-engine/state/player-utils";
 import { GameState } from "@/core/use-cases/game-engine/state/types";
 
-function resolveFusionWithoutEnoughMaterials(
+function suspendFusionExecutionUntilMaterials(
   state: GameState,
   playerId: string,
   player: IPlayer,
@@ -24,20 +25,48 @@ function resolveFusionWithoutEnoughMaterials(
   }
   const updatedPlayer: IPlayer = {
     ...player,
-    activeExecutions: player.activeExecutions.filter((entity) => entity.instanceId !== executionInstanceId),
-    graveyard: [...player.graveyard, executionEntity.card],
+    activeExecutions: player.activeExecutions.map((entity) =>
+      entity.instanceId === executionInstanceId ? { ...entity, mode: "SET" } : entity,
+    ),
   };
   const withPlayers = assignPlayers(state, updatedPlayer, opponent, isPlayerA);
+  return appendCombatLogEvent(withPlayers, playerId, "MANDATORY_ACTION_RESOLVED", {
+    type: "FUSION_WAITING_MATERIALS",
+    executionCardId: executionEntity.card.id,
+  });
+}
+
+function resolveFusionExecution(
+  withTrapResolution: GameState,
+  playerId: string,
+  player: IPlayer,
+  opponent: IPlayer,
+  isPlayerA: boolean,
+  executionInstanceId: string,
+  recipeId: string,
+): GameState {
+  if (player.activeEntities.length < 2) {
+    return suspendFusionExecutionUntilMaterials(withTrapResolution, playerId, player, opponent, isPlayerA, executionInstanceId);
+  }
+  return startFusionSummonFromExecution(withTrapResolution, playerId, executionInstanceId, recipeId);
+}
+
+function appendExecutionResultLogs(
+  withPlayers: GameState,
+  playerId: string,
+  executionCardId: string,
+  effectResult: ReturnType<typeof applyExecutionEffect>,
+): GameState {
   return appendExecutionResolutionLogs({
     state: withPlayers,
     playerId,
-    executionCardId: executionEntity.card.id,
-    damageTargetPlayerId: null,
-    damageAmount: 0,
-    healApplied: 0,
-    buffStat: null,
-    buffAmount: 0,
-    buffEntityIds: [],
+    executionCardId,
+    damageTargetPlayerId: effectResult.damageTargetPlayerId,
+    damageAmount: effectResult.damageAmount,
+    healApplied: effectResult.healApplied,
+    buffStat: effectResult.buff.stat,
+    buffAmount: effectResult.buff.amount,
+    buffEntityIds: effectResult.buff.entityIds,
   });
 }
 
@@ -72,10 +101,7 @@ export function resolveExecution(state: GameState, playerId: string, executionIn
 
   const effect = executionEntity.card.effect;
   if (effect.action === "FUSION_SUMMON") {
-    if (player.activeEntities.length < 2) {
-      return resolveFusionWithoutEnoughMaterials(withTrapResolution, playerId, player, opponent, isPlayerA, executionInstanceId);
-    }
-    return startFusionSummonFromExecution(withTrapResolution, playerId, executionInstanceId, effect.recipeId);
+    return resolveFusionExecution(withTrapResolution, playerId, player, opponent, isPlayerA, executionInstanceId, effect.recipeId);
   }
   const effectResult = applyExecutionEffect(player, opponent, effect);
   let updatedPlayer: IPlayer = effectResult.player;
@@ -91,15 +117,5 @@ export function resolveExecution(state: GameState, playerId: string, executionIn
   };
 
   const withPlayers = assignPlayers(withTrapResolution, updatedPlayer, updatedOpponent, isPlayerA);
-  return appendExecutionResolutionLogs({
-    state: withPlayers,
-    playerId,
-    executionCardId: executionEntity.card.id,
-    damageTargetPlayerId: effectResult.damageTargetPlayerId,
-    damageAmount: effectResult.damageAmount,
-    healApplied: effectResult.healApplied,
-    buffStat: effectResult.buff.stat,
-    buffAmount: effectResult.buff.amount,
-    buffEntityIds: effectResult.buff.entityIds,
-  });
+  return appendExecutionResultLogs(withPlayers, playerId, executionEntity.card.id, effectResult);
 }

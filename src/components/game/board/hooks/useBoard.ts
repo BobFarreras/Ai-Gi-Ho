@@ -3,6 +3,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { GameState } from "@/core/use-cases/GameEngine";
 import { ICard } from "@/core/entities/ICard";
 import { IMatchMode } from "@/core/entities/match";
+import { GameEngine } from "@/core/use-cases/GameEngine";
 import { ICampaignProgress } from "@/core/services/opponent/difficulty/types";
 import { createMatchSeed } from "@/core/services/random/create-match-seed";
 import { createInitialBoardState, ICreateInitialBoardStateInput } from "./internal/boardInitialState";
@@ -16,6 +17,17 @@ function resolveWinnerPlayerId(gameState: GameState): string | "DRAW" | null {
   if (gameState.playerA.healthPoints <= 0) return gameState.playerB.id;
   if (gameState.playerB.healthPoints <= 0) return gameState.playerA.id;
   return null;
+}
+
+function isExecutionWaitingForFusionMaterials(state: GameState, executionInstanceId: string): boolean {
+  const waitingExecution = state.playerA.activeExecutions.find((entity) => entity.instanceId === executionInstanceId);
+  if (!waitingExecution) return false;
+  return (
+    waitingExecution.mode === "SET" &&
+    waitingExecution.card.type === "EXECUTION" &&
+    waitingExecution.card.effect?.action === "FUSION_SUMMON" &&
+    state.pendingTurnAction === null
+  );
 }
 
 export function useBoard(initialPlayerDeck?: ICard[], mode: IMatchMode = "TRAINING", initialConfig?: ICreateInitialBoardStateInput) {
@@ -56,10 +68,46 @@ export function useBoard(initialPlayerDeck?: ICard[], mode: IMatchMode = "TRAINI
     progression.resetBattleProgression();
     uiState.restartMatch();
   }, [progression, uiState]);
+  const selectedActivatableExecution = useMemo(() => {
+    if (!uiState.selectedBoardEntityInstanceId) return null;
+    return (
+      uiState.gameState.playerA.activeExecutions.find(
+        (entity) =>
+          entity.instanceId === uiState.selectedBoardEntityInstanceId &&
+          entity.mode === "SET" &&
+          entity.card.type === "EXECUTION",
+      ) ?? null
+    );
+  }, [uiState.gameState.playerA.activeExecutions, uiState.selectedBoardEntityInstanceId]);
+  const canActivateSelectedExecution =
+    Boolean(selectedActivatableExecution) &&
+    !winnerPlayerId &&
+    uiState.isPlayerTurn &&
+    uiState.gameState.phase === "MAIN_1" &&
+    !uiState.isActionLocked &&
+    uiState.gameState.pendingTurnAction?.playerId !== uiState.gameState.playerA.id;
+  const activateSelectedExecution = useCallback((): "NOOP" | "ACTIVATED" | "MISSING_MATERIALS" => {
+    if (!canActivateSelectedExecution || !selectedActivatableExecution) return "NOOP";
+    const activated = runtime.applyTransition((state) =>
+      GameEngine.changeEntityMode(state, state.playerA.id, selectedActivatableExecution.instanceId, "ACTIVATE"),
+    );
+    if (!activated) return "NOOP";
+    const resolved = runtime.applyTransition((state) =>
+      GameEngine.resolveExecution(state, state.playerA.id, selectedActivatableExecution.instanceId),
+    );
+    if (!resolved) return "NOOP";
+    if (isExecutionWaitingForFusionMaterials(resolved, selectedActivatableExecution.instanceId)) {
+      uiState.clearSelection();
+      return "MISSING_MATERIALS";
+    }
+    uiState.clearSelection();
+    return "ACTIVATED";
+  }, [canActivateSelectedExecution, runtime, selectedActivatableExecution, uiState]);
 
   return {
     gameState: uiState.gameState,
     selectedCard: uiState.selectedCard,
+    selectedBoardEntityInstanceId: uiState.selectedBoardEntityInstanceId,
     playingCard: uiState.playingCard,
     isHistoryOpen: uiState.isHistoryOpen,
     activeAttackerId: uiState.activeAttackerId,
@@ -98,6 +146,8 @@ export function useBoard(initialPlayerDeck?: ICard[], mode: IMatchMode = "TRAINI
     resolvePendingHandDiscard: runtime.resolvePendingHandDiscard,
     setSelectedEntityToAttack: runtime.setSelectedEntityToAttack,
     canSetSelectedEntityToAttack: runtime.canSetSelectedEntityToAttack,
+    activateSelectedExecution,
+    canActivateSelectedExecution,
     battleExperienceSummary: progression.battleExperienceSummary,
     battleExperienceCardLookup: progression.battleExperienceCardLookup,
     isBattleExperiencePending: progression.isBattleExperiencePending,

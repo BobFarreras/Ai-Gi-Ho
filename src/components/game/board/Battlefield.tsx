@@ -21,6 +21,7 @@ interface BattlefieldProps {
   opponentGraveyardCount: number;
   activeAttackerId: string | null;
   selectedCard: ICard | null;
+  selectedBoardEntityInstanceId: string | null;
   revealedEntities?: string[];
   highlightedPlayerEntityIds?: string[];
   selectedFusionMaterialIds?: string[];
@@ -36,6 +37,8 @@ interface BattlefieldProps {
   cardXpActorPlayerId?: string | null;
   playerId: string;
   opponentId: string;
+  canActivateSelectedExecution: boolean;
+  onActivateSelectedExecution: () => void;
   onGraveyardClick: (side: "player" | "opponent") => void;
   onEntityClick: (entity: IBoardEntity | null, isOpponentSide: boolean, event: React.MouseEvent) => void;
 }
@@ -53,6 +56,7 @@ export function Battlefield({
   opponentGraveyardCount,
   activeAttackerId,
   selectedCard,
+  selectedBoardEntityInstanceId,
   revealedEntities = [],
   highlightedPlayerEntityIds = [],
   selectedFusionMaterialIds = [],
@@ -68,6 +72,8 @@ export function Battlefield({
   cardXpActorPlayerId = null,
   playerId,
   opponentId,
+  canActivateSelectedExecution,
+  onActivateSelectedExecution,
   onGraveyardClick,
   onEntityClick,
 }: BattlefieldProps) {
@@ -104,6 +110,7 @@ export function Battlefield({
             graveyardCount={opponentGraveyardCount}
             activeAttackerId={activeAttackerId}
             selectedCard={selectedCard}
+            selectedBoardEntityInstanceId={selectedBoardEntityInstanceId}
             revealedEntities={revealedEntities}
             highlightedEntityIds={[]}
             selectedEntityIds={[]}
@@ -116,6 +123,8 @@ export function Battlefield({
             cardXpCardId={cardXpActorPlayerId === opponentId ? cardXpCardId : null}
             cardXpAmount={cardXpActorPlayerId === opponentId ? cardXpAmount : null}
             cardXpEventId={cardXpActorPlayerId === opponentId ? cardXpEventId : null}
+            canActivateSelectedExecution={false}
+            onActivateSelectedExecution={onActivateSelectedExecution}
             onGraveyardClick={onGraveyardClick}
             onEntityClick={onEntityClick}
           />
@@ -131,6 +140,7 @@ export function Battlefield({
             graveyardCount={playerGraveyardCount}
             activeAttackerId={activeAttackerId}
             selectedCard={selectedCard}
+            selectedBoardEntityInstanceId={selectedBoardEntityInstanceId}
             revealedEntities={revealedEntities}
             highlightedEntityIds={highlightedPlayerEntityIds}
             selectedEntityIds={selectedFusionMaterialIds}
@@ -143,6 +153,8 @@ export function Battlefield({
             cardXpCardId={cardXpActorPlayerId === playerId ? cardXpCardId : null}
             cardXpAmount={cardXpActorPlayerId === playerId ? cardXpAmount : null}
             cardXpEventId={cardXpActorPlayerId === playerId ? cardXpEventId : null}
+            canActivateSelectedExecution={canActivateSelectedExecution}
+            onActivateSelectedExecution={onActivateSelectedExecution}
             onGraveyardClick={onGraveyardClick}
             onEntityClick={onEntityClick}
           />

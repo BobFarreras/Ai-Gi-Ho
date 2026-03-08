@@ -1,9 +1,9 @@
 // src/components/game/board/hooks/internal/board-state/useBoardUiState.ts - Gestiona estado UI local del tablero y flujos pendientes de interacción.
 import { MutableRefObject, useCallback, useState } from "react";
 import { ICard } from "@/core/entities/ICard";
-import { BattleMode } from "@/core/entities/IPlayer";
 import { GameState } from "@/core/use-cases/GameEngine";
 import { IBoardUiError } from "../boardError";
+import { IPendingZoneReplacement } from "./pending-replacement";
 
 export function useBoardUiState(
   gameStateRef: MutableRefObject<GameState>,
@@ -11,13 +11,14 @@ export function useBoardUiState(
 ) {
   const [gameState, setGameState] = useState<GameState>(() => createInitialState());
   const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
+  const [selectedBoardEntityInstanceId, setSelectedBoardEntityInstanceId] = useState<string | null>(null);
   const [playingCard, setPlayingCard] = useState<ICard | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [activeAttackerId, setActiveAttackerId] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [revealedEntities, setRevealedEntities] = useState<string[]>([]);
   const [lastError, setLastError] = useState<IBoardUiError | null>(null);
-  const [pendingEntityReplacement, setPendingEntityReplacement] = useState<{ cardId: string; mode: BattleMode } | null>(null);
+  const [pendingEntityReplacement, setPendingEntityReplacement] = useState<IPendingZoneReplacement | null>(null);
   const [pendingEntityReplacementTargetId, setPendingEntityReplacementTargetId] = useState<string | null>(null);
   const [pendingFusionSummon, setPendingFusionSummon] = useState<{ cardId: string; mode: "ATTACK" | "DEFENSE"; materials: string[] } | null>(null);
   const [isFusionCinematicActive, setIsFusionCinematicActive] = useState(false);
@@ -28,6 +29,7 @@ export function useBoardUiState(
 
   const clearSelection = useCallback(() => {
     setSelectedCard(null);
+    setSelectedBoardEntityInstanceId(null);
     setPlayingCard(null);
     setActiveAttackerId(null);
     setPendingEntityReplacementTargetId(null);
@@ -36,6 +38,7 @@ export function useBoardUiState(
 
   const previewCard = useCallback((card: ICard) => {
     setSelectedCard(card);
+    setSelectedBoardEntityInstanceId(null);
     setPlayingCard(null);
     setActiveAttackerId(null);
   }, []);
@@ -78,6 +81,8 @@ export function useBoardUiState(
     setGameState,
     selectedCard,
     setSelectedCard,
+    selectedBoardEntityInstanceId,
+    setSelectedBoardEntityInstanceId,
     playingCard,
     setPlayingCard,
     isHistoryOpen,
