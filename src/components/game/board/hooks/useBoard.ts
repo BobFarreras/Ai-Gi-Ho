@@ -7,6 +7,7 @@ import { GameEngine } from "@/core/use-cases/GameEngine";
 import { ICampaignProgress } from "@/core/services/opponent/difficulty/types";
 import { createMatchSeed } from "@/core/services/random/create-match-seed";
 import { createInitialBoardState, ICreateInitialBoardStateInput } from "./internal/boardInitialState";
+import { sleep } from "./internal/sleep";
 import { useMatchAudio } from "./internal/match/useMatchAudio";
 import { useMatchProgression } from "./internal/match/useMatchProgression";
 import { useMatchRuntime } from "./internal/match/useMatchRuntime";
@@ -29,6 +30,7 @@ function isExecutionWaitingForFusionMaterials(state: GameState, executionInstanc
     state.pendingTurnAction === null
   );
 }
+const EXECUTION_ACTIVATION_PREVIEW_MS = 720;
 
 export function useBoard(initialPlayerDeck?: ICard[], mode: IMatchMode = "TRAINING", initialConfig?: ICreateInitialBoardStateInput) {
   const [campaignProgress] = useState<ICampaignProgress>({ chapterIndex: 1, duelIndex: 1, victories: 0 });
@@ -86,15 +88,21 @@ export function useBoard(initialPlayerDeck?: ICard[], mode: IMatchMode = "TRAINI
     uiState.gameState.phase === "MAIN_1" &&
     !uiState.isActionLocked &&
     uiState.gameState.pendingTurnAction?.playerId !== uiState.gameState.playerA.id;
-  const activateSelectedExecution = useCallback((): "NOOP" | "ACTIVATED" | "MISSING_MATERIALS" => {
+  const activateSelectedExecution = useCallback(async (): Promise<"NOOP" | "ACTIVATED" | "MISSING_MATERIALS"> => {
     if (!canActivateSelectedExecution || !selectedActivatableExecution) return "NOOP";
+    uiState.setIsAnimating(true);
     const activated = runtime.applyTransition((state) =>
       GameEngine.changeEntityMode(state, state.playerA.id, selectedActivatableExecution.instanceId, "ACTIVATE"),
     );
-    if (!activated) return "NOOP";
+    if (!activated) {
+      uiState.setIsAnimating(false);
+      return "NOOP";
+    }
+    await sleep(EXECUTION_ACTIVATION_PREVIEW_MS);
     const resolved = runtime.applyTransition((state) =>
       GameEngine.resolveExecution(state, state.playerA.id, selectedActivatableExecution.instanceId),
     );
+    uiState.setIsAnimating(false);
     if (!resolved) return "NOOP";
     if (isExecutionWaitingForFusionMaterials(resolved, selectedActivatableExecution.instanceId)) {
       uiState.clearSelection();

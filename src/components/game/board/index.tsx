@@ -221,16 +221,18 @@ export function Board({
         onGraveyardClick={setGraveyardView} onEntityClick={handleEntityClick} onMandatoryCardSelect={resolvePendingHandDiscard}
         canActivateSelectedExecution={canActivateSelectedExecution}
         onCardClick={toggleCardSelection} onPlayAction={executePlayAction} onActivateSelectedExecution={() => {
-          playButtonClick();
-          const result = activateSelectedExecution();
-          if (result === "MISSING_MATERIALS") {
-            setAutoModeBannerSignal({
-              id: `fusion-missing-materials-${Date.now()}`,
-              left: "Fusion",
-              right: "Faltan materiales",
-            });
-            playBanner();
-          }
+          void (async () => {
+            playButtonClick();
+            const result = await activateSelectedExecution();
+            if (result === "MISSING_MATERIALS") {
+              setAutoModeBannerSignal({
+                id: `fusion-missing-materials-${Date.now()}`,
+                left: "Fusion",
+                right: "Faltan materiales",
+              });
+              playBanner();
+            }
+          })();
         }} onSelectCard={previewCard} onCloseCard={clearSelection}
         onCloseHistory={() => setIsHistoryOpen(false)}
       />
