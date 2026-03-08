@@ -219,6 +219,21 @@ UI (app/components) -> UseCases/Services -> Repositories (interfaces core)
 4. Los nodos de sección usan decoradores por tipo en `src/components/hub/nodes/*` para mantener SRP visual.
 5. `CyberBackground` se mantiene como base visual compartida del hub.
 
+## Combate (Bloque nuevo - Fase 0 preparada)
+
+1. ADR base del bloque:
+   - `docs/adr/2026-03-08-combat-block-banner-fusion-destroyed.md`.
+2. Se define política de banners transitorios `latest-wins` para evitar backlog visual bajo spam de acciones.
+3. Se fija contrato de fusión reforzada:
+   - materiales + carta mágica + carta final existente en `fusionDeck`.
+4. Se fija doble ubicación de `fusionDeck`:
+   - **Arsenal/Home**: debajo del contenedor del deck principal.
+   - **Tablero/Combate**: junto a zonas de deck/cementerio para consulta rápida.
+5. Se formaliza nueva zona de juego `destroyedPile` separada de `graveyard` para futuras mecánicas.
+6. Se acuerda guarda de integridad para salir de Arsenal:
+   - deck principal obligatorio de `20/20`,
+   - validación en UI y capa de aplicación.
+
 ## Subdominio Mi Home (Deck Builder)
 
 1. Entidades: `IDeck`, `IDeckCardSlot`, `ICollectionCard`.
@@ -298,6 +313,67 @@ UI (app/components) -> UseCases/Services -> Repositories (interfaces core)
 1. `Board` acepta `initialPlayerDeck` opcional para evitar dependencia rígida de mazos mock.
 2. `getPlayerBoardDeck` resuelve en servidor el mazo guardado del jugador autenticado (`deck slots + colección`).
 3. `/hub/training` inicializa el combate con mazo persistido cuando está completo; si no, usa fallback mock del motor.
+
+## Subdominio Game (fase 0 refactor match desacoplado)
+
+1. Se introduce el subdominio `match` como contrato transversal para soportar `TRAINING`, `STORY`, `MULTIPLAYER` y `TUTORIAL`.
+2. Contratos base en `core/entities/match`:
+   - `IMatchMode`,
+   - `IMatchActionRequest`,
+   - `IMatchConfig`,
+   - `IMatchController`.
+3. Primera implementación en aplicación:
+   - `services/game/match/LocalMatchController`,
+   - `services/game/match/create-match-controller`.
+4. Objetivo de esta fase:
+   - fijar frontera de orquestación de partida antes de extraer lógica de `useBoard`.
+5. Esta fase no cambia reglas del motor (`GameEngine`), solo prepara desacoplamiento de runtime.
+
+## Subdominio Game (fase 1 recompensas desacopladas por modo)
+
+1. Se introduce política pura de recompensas en `core/services/match/rewards`.
+2. Cálculo por modo:
+   - `TUTORIAL`: sin recompensa,
+   - `TRAINING`: curva base reducida,
+   - `STORY`: escala por `storyOpponentTier`,
+   - `MULTIPLAYER`: curva competitiva separada.
+3. Esta política es agnóstica de BD y UI; solo devuelve valores dominio (`nexus`, `playerExperience`).
+4. Persistencia de recompensa quedará en capa de aplicación (fase posterior), no en el motor.
+
+## Subdominio Game (fase 2-3 runtime por modo y progresión)
+
+1. `createMatchController` selecciona controller concreto por modo (`Training`, `Story`, `Tutorial`, `Multiplayer`) con contrato `IMatchController` compartido.
+2. La persistencia post-duelo de EXP de cartas se resuelve en `services/game/match/progression` mediante fábrica por modo:
+   - `TUTORIAL`: no persiste,
+   - resto de modos locales actuales: persistencia remota vía API.
+3. `useBoard` deja de invocar cliente HTTP de progresión de forma directa y delega en servicio de aplicación desacoplado.
+
+## Subdominio Game (fase 4 determinismo por seed)
+
+1. Se introduce RNG determinista en `core/services/random/seeded-rng.ts` para que el arranque de partida sea reproducible.
+2. `createInitialGameState` acepta `randomSource` inyectable (sin acoplarse a `Math.random`).
+3. `boardInitialState` usa `seed` de partida para:
+   - barajar mazos con RNG inyectado,
+   - generar `runtimeId` inicial de cartas de forma estable.
+4. `useBoard` conserva `matchSeed` estable durante la partida para depuración y futuros replays/sincronización.
+5. `boardInitialState` ya no define ids/nombres/decks hardcodeados; delega en `createBoardMatchConfig` por modo.
+
+## Subdominio Story (preparación fase 5)
+
+1. Se define `IOpponentRepository` en `core/repositories` para cargar duelos de historia desde persistencia.
+2. El contrato de duelo queda tipado en `IStoryDuelDefinition` (capítulo, duelo, oponente, mazo y reglas de arranque).
+3. Objetivo inmediato: conectar este repositorio a tablas `story_opponents`, `story_duels` y `story_deck_lists` sin acoplar UI.
+
+## Subdominio Story (fase 5 implementación base)
+
+1. El mapa Story (`/hub/story`) se alimenta desde repositorios (`IOpponentRepository` + progreso de duelo por jugador).
+2. La navegación de nodos usa bloqueo por prerequisito (`unlock_requirement_duel_id`).
+3. El duelo Story usa `Board` en modo `STORY` con identidad y mazo de oponente inyectados por configuración.
+4. El cierre de duelo se registra vía `POST /api/story/duels/complete`.
+5. Recompensa de primera victoria:
+   - `Nexus` al monedero,
+   - `player_experience` global,
+   - cartas configuradas en `story_duel_reward_cards` (garantizadas y probabilísticas).
 
 ## Subdominio Progresión (fase 6.1)
 

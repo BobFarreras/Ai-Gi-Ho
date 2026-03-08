@@ -1,15 +1,29 @@
 // src/components/game/board/hooks/useBoard.integration.test.ts - Pruebas de integración del hook principal del tablero.
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { ICard } from "@/core/entities/ICard";
 import { useBoard } from "./useBoard";
 
 function createMouseEvent(): React.MouseEvent {
   return { stopPropagation: vi.fn() } as unknown as React.MouseEvent;
 }
 
+const integrationEntityCard: ICard = {
+  id: "entity-integration-alpha",
+  name: "Integration Alpha",
+  description: "Carta estable para pruebas de integración del hook.",
+  type: "ENTITY",
+  faction: "NEUTRAL",
+  cost: 2,
+  attack: 1200,
+  defense: 1000,
+};
+
 describe("useBoard integración", () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    window.localStorage.setItem("board-turn-help", "0");
+    window.localStorage.setItem("board-auto-phase", "1");
   });
 
   afterEach(() => {
@@ -122,7 +136,7 @@ describe("useBoard integración", () => {
       result.current.advancePhase();
     });
 
-    expect(result.current.gameState.activePlayerId).toBe("p2");
+    expect(result.current.gameState.activePlayerId).toBe(result.current.gameState.playerB.id);
 
     act(() => {
       result.current.toggleCardSelection(card!, createMouseEvent());
@@ -134,18 +148,16 @@ describe("useBoard integración", () => {
   });
 
   it("debería cambiar a DEFENSE al pulsar dos veces la misma entidad atacante en BATTLE", async () => {
-    const { result } = renderHook(() => useBoard());
-    let entityCard = result.current.gameState.playerA.hand.find((card) => card.type === "ENTITY");
-    for (let attempt = 0; attempt < 8 && !entityCard; attempt += 1) {
-      act(() => {
-        result.current.restartMatch();
-      });
-      entityCard = result.current.gameState.playerA.hand.find((card) => card.type === "ENTITY");
-    }
+    const forcedDeck: ICard[] = Array.from({ length: 20 }, (_, index) => ({
+      ...integrationEntityCard,
+      id: `${integrationEntityCard.id}-${index}`,
+      name: `${integrationEntityCard.name} ${index + 1}`,
+      runtimeId: `integration-entity-${index + 1}`,
+    }));
+    const { result } = renderHook(() => useBoard(forcedDeck));
+    const entityCard = result.current.gameState.playerA.hand.find((card) => card.type === "ENTITY");
     expect(entityCard).toBeDefined();
-    if (!entityCard) {
-      throw new Error("Se requiere una entidad en mano para este test.");
-    }
+    if (!entityCard) throw new Error("Se requiere una entidad en mano para este test.");
 
     act(() => {
       result.current.toggleCardSelection(entityCard, createMouseEvent());
@@ -175,5 +187,19 @@ describe("useBoard integración", () => {
     const updated = result.current.gameState.playerA.activeEntities.find((entity) => entity.instanceId === summoned.instanceId);
     expect(updated?.mode).toBe("DEFENSE");
     expect(result.current.activeAttackerId).toBeNull();
+  });
+
+  it("debería pasar automáticamente al rival si en BATTLE no hay atacantes disponibles", async () => {
+    const { result } = renderHook(() => useBoard());
+    expect(result.current.gameState.phase).toBe("MAIN_1");
+    act(() => {
+      result.current.advancePhase();
+    });
+    expect(result.current.gameState.phase).toBe("BATTLE");
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(420);
+    });
+    expect(result.current.gameState.activePlayerId).toBe(result.current.gameState.playerB.id);
+    expect(result.current.gameState.phase).toBe("MAIN_1");
   });
 });

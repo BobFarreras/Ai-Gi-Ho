@@ -38,6 +38,23 @@
    - progreso por carta y jugador (`version_tier`, `level`, `xp`, pasiva de mastery).
 14. `public.player_card_xp_batches`:
    - registro idempotente por batalla para evitar aplicar la EXP del mismo duelo más de una vez.
+15. `public.story_opponents`:
+   - catálogo de oponentes de historia (dificultad, perfil IA, estado activo).
+16. `public.story_deck_lists`:
+   - listas de mazo versionadas por oponente.
+17. `public.story_deck_list_cards`:
+   - composición de mazo por slot (`card_id`, `copies`).
+18. `public.story_duels`:
+   - definición de cada duelo por capítulo/índice con recompensas Nexus/EXP y reglas de inicio.
+19. `public.story_duel_reward_cards`:
+   - cartas recompensa por duelo (garantizadas o probabilísticas).
+20. `public.player_story_duel_progress`:
+   - progreso por jugador y duelo (wins/losses/resultado y timestamps).
+21. `public.player_progress.player_experience`:
+   - experiencia global del jugador para progresión del arquitecto.
+22. `public.player_fusion_deck_slots`:
+   - bloque de 2 slots dedicado a cartas de tipo `FUSION`.
+   - separado del deck principal de 20 slots.
 
 ## Fase 2 (Perfil y Progreso)
 
@@ -132,7 +149,45 @@
    - lectura e inserción solo para `auth.uid() = player_id`.
 4. Flujo esperado:
    - el endpoint `POST /api/game/progression/apply-battle-exp` requiere `battleId`.
-   - si se repite el mismo `battleId`, la respuesta es vacía y no duplica EXP.
+  - si se repite el mismo `battleId`, la respuesta es vacía y no duplica EXP.
+
+## Fase 5 (Story: oponentes, duelos y recompensas)
+
+1. Ejecuta `docs/supabase/sql/008_phase_5_story_opponents_duels.sql`.
+2. Verifica tablas:
+   - `public.story_opponents`
+   - `public.story_deck_lists`
+   - `public.story_deck_list_cards`
+   - `public.story_duels`
+   - `public.story_duel_reward_cards`
+   - `public.player_story_duel_progress`
+3. Verifica semilla inicial:
+   - 5 oponentes base,
+   - 5 duelos (capítulo 1 y 2),
+   - recompensas de Nexus/EXP y cartas por duelo.
+4. Verifica RLS:
+   - catálogos de historia solo lectura para `authenticated`,
+   - progreso de duelo solo propietario (`auth.uid() = player_id`).
+5. Contrato de aplicación preparado:
+   - `IOpponentRepository` + `IStoryDuelDefinition` para eliminar hardcode de Story en UI.
+
+## Fase 5.1 (Experiencia global del jugador)
+
+1. Ejecuta `docs/supabase/sql/009_phase_5_player_progress_experience.sql`.
+2. Verifica columna:
+   - `public.player_progress.player_experience` (default `0`, no negativo).
+3. Uso previsto:
+   - recompensas de Story incrementan esta columna al ganar por primera vez cada duelo.
+
+## Fase 2.x (Bloque de fusión dedicado en Arsenal)
+
+1. Ejecuta `docs/supabase/sql/010_phase_2_fusion_deck_slots.sql`.
+2. Verifica tabla:
+   - `public.player_fusion_deck_slots`.
+3. Verifica bootstrap en alta de usuario:
+   - 2 filas por jugador (`slot_index` 0 y 1).
+4. Verifica RLS:
+   - `SELECT/INSERT/UPDATE` solo para `auth.uid() = player_id`.
 
 ## Notas
 

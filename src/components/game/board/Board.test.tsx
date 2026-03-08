@@ -49,6 +49,7 @@ describe('Componente UI: Board y Subcomponentes', () => {
     vi.mocked(useBoardModule.useBoard).mockReturnValue({
       gameState: mockGameState,
       selectedCard: null,
+      selectedBoardEntityInstanceId: null,
       playingCard: null,
       isHistoryOpen: false,
       activeAttackerId: null,
@@ -64,6 +65,8 @@ describe('Componente UI: Board y Subcomponentes', () => {
       isPlayerTurn: true,
       isMuted: false,
       isPaused: false,
+      isAutoPhaseEnabled: true,
+      isTurnHelpEnabled: true,
       isFusionCinematicActive: false,
       lastDamageTargetPlayerId: null,
       lastDamageAmount: null,
@@ -90,18 +93,29 @@ describe('Componente UI: Board y Subcomponentes', () => {
       executePlayAction: vi.fn(),
       handleEntityClick: vi.fn(),
       advancePhase: vi.fn(),
+      confirmAdvancePhase: vi.fn(),
+      cancelAdvancePhase: vi.fn(),
+      pendingAdvanceWarning: null,
       handleTimerExpired: vi.fn(),
       confirmEntityReplacement: vi.fn(),
       cancelEntityReplacement: vi.fn(),
       restartMatch: vi.fn(),
       toggleMute: vi.fn(),
       togglePause: vi.fn(),
+      toggleAutoPhase: vi.fn(),
       setIsFusionCinematicActive: vi.fn(),
       setSelectedEntityToAttack: vi.fn(),
       canSetSelectedEntityToAttack: false,
+      activateSelectedExecution: vi.fn(),
+      canActivateSelectedExecution: false,
       battleExperienceSummary: [],
       battleExperienceCardLookup: {},
       isBattleExperiencePending: false,
+      matchSeed: "test-seed",
+      playTimerExpired: vi.fn(),
+      playTimerWarning: vi.fn(),
+      playButtonClick: vi.fn(),
+      playBanner: vi.fn(),
     });
   });
 
@@ -124,8 +138,8 @@ describe('Componente UI: Board y Subcomponentes', () => {
 
     render(<Board />);
 
-    // Hacemos click en el botón de historial usando su nombre accesible
-    const historyBtn = screen.getByRole('button', { name: /abrir historial de batalla/i });
+    fireEvent.click(screen.getByRole('button', { name: /abrir acciones/i }));
+    const historyBtn = screen.getByRole('button', { name: /abrir historial/i });
     fireEvent.click(historyBtn);
 
     // Verificamos que se haya llamado en modo toggle
@@ -143,8 +157,8 @@ describe('Componente UI: Board y Subcomponentes', () => {
 
     render(<Board />);
 
-    expect(screen.queryByText(/ir a combate/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/pasar turno/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/turno rival/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /fase invocar/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /pasar a combate/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /pasar turno/i })).toBeDisabled();
   });
 });
