@@ -12,6 +12,7 @@ Guía rápida para entender la lógica de tablero y batalla.
    - `ui/layers/BoardInteractiveLayer`
    - `ui/layout/BoardActionButtons`
 2. `useBoard` centraliza estado UI + puente con motor (`GameEngine`).
+3. La configuración inicial del duelo se resuelve en `hooks/internal/match/create-board-match-config.ts` (modo/seed/jugadores/decks), evitando hardcodes en UI.
 3. `usePlayerActions` procesa acciones humanas (invocar, activar, atacar).
 4. `useOpponentTurn` ejecuta pasos del rival con ritmo visual (delays + animación).
 5. `hooks/internal` se organiza por subcarpetas:
@@ -120,6 +121,20 @@ Guía rápida para entender la lógica de tablero y batalla.
    - apertura/cierre de sidebars,
    - victoria/derrota/empate.
 
+## Narración reactiva
+
+1. La narración se resuelve sin consultas a BD durante el duelo.
+2. `Board` recibe un `narrationPack` pre-cargado (o usa pack por defecto local).
+3. `useMatchNarration` traduce `combatLog` y resultado final en acciones narrativas:
+   - `HUD`: burbuja breve junto al avatar en `PlayerHUD`.
+   - `CINEMATIC`: overlay lateral para inicio/fusión/final.
+4. Los disparadores actuales:
+   - inicio de combate (`TURN_STARTED` inicial),
+   - ataque directo (`BATTLE_RESOLVED` sin defensor),
+   - invocación de fusión (`FUSION_SUMMONED`),
+   - cierre de partida (`winnerPlayerId`).
+5. El audio de narración se reproduce en cola local para evitar solapes.
+
 ## Interacción avanzada
 
 1. En `BATTLE`, al pulsar dos veces la misma entidad atacante propia:
@@ -144,3 +159,4 @@ Guía rápida para entender la lógica de tablero y batalla.
 4. Render y animación de campo: `src/components/game/board/battlefield/*`.
 5. Subcomponentes internos de UI del historial: `src/components/game/board/ui/internal/combat-log-row/*`.
 6. Subcomponentes internos de zona de batalla: `src/components/game/board/battlefield/internal/*`.
+7. Narración y scripts: `src/components/game/board/narration/*`.

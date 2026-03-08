@@ -184,3 +184,25 @@ El motor registra eventos técnicos para trazabilidad y UI:
 1. El hub (`/hub`) funciona como capa de navegación previa al motor de combate.
 2. El estado de desbloqueo de módulos (historia/multijugador) se resuelve en `HubService` antes de entrar a cada ruta.
 3. El módulo `training` puede reutilizar temporalmente el flujo de combate existente mientras se define tutorial guiado dedicado.
+
+## 16. Runtime de Match desacoplado (Fase 0)
+
+1. Se definen contratos de match en `core/entities/match` para unificar entrada de modos:
+   - `TRAINING`, `STORY`, `MULTIPLAYER`, `TUTORIAL`.
+2. Se crea `IMatchController` como frontera de orquestación por modo.
+3. Primera implementación disponible:
+   - `services/game/match/LocalMatchController`,
+   - fábrica `createMatchController`.
+4. Esta fase no modifica reglas del `GameEngine`; prepara desacoplamiento para fases siguientes.
+
+## 17. Recompensas por modo desacopladas (Fase 1)
+
+1. Se añade política pura de recompensas de duelo en `core/services/match/rewards/match-reward-policy.ts`.
+2. La política calcula:
+   - `nexus`,
+   - `playerExperience`.
+3. Reglas iniciales:
+   - `TUTORIAL`: siempre `0`.
+   - `STORY`: recompensa escalada por tier del oponente.
+   - `TRAINING` y `MULTIPLAYER`: curvas separadas.
+4. El motor de juego sigue sin llamadas a BD; la persistencia de recompensas se aplicará fuera del motor.

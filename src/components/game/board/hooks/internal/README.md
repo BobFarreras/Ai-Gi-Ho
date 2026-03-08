@@ -1,3 +1,4 @@
+<!-- src/components/game/board/hooks/internal/README.md - Documenta la arquitectura interna de hooks del tablero tras la extracción por subdominios. -->
 # Board Hooks Internal
 
 Submódulos internos para reducir complejidad de `useBoard` y mantener SRP.
@@ -18,7 +19,13 @@ Submódulos internos para reducir complejidad de `useBoard` y mantener SRP.
    - `boardCombatFeedback.ts`: deltas de daño/curación/buffs.
    - `buildUseBoardResult.ts`: construcción del contrato público de `useBoard`.
 
-3. `player-actions/`
+3. `match/`
+   - `useMatchUiState.ts`: agrega estado UI y derivados de HUD/feedback.
+   - `useMatchRuntime.ts`: transiciones del motor, turnos y acciones del jugador.
+   - `useMatchProgression.ts`: persistencia/proyección de EXP de cartas post-duelo.
+   - `useMatchAudio.ts`: fachada de audio del duelo (SFX + soundtrack).
+
+4. `player-actions/`
    - `useToggleCardSelection.ts`
    - `useExecutePlayAction.ts`
    - `useHandleEntityClick.ts`
@@ -26,16 +33,17 @@ Submódulos internos para reducir complejidad de `useBoard` y mantener SRP.
    - `handleOpponentEntityClick.ts`
    - `constants.ts` y `types.ts`
 
-4. `opponent-turn/`
+5. `opponent-turn/`
    - `runMainPhaseStep.ts`
    - `runBattlePhaseStep.ts`
    - `autoPick.ts`
    - `types.ts`
 
-5. Hooks fachada
+6. Hooks fachada
    - `usePlayerActions.ts`: compone subhooks de `player-actions/`.
    - `useOpponentTurn.ts`: orquesta paso del rival con `opponent-turn/`.
    - `useGameAudio.ts`: SFX + soundtrack.
+   - `useBoard.ts` (nivel superior): compositor fino que integra `match/*`.
 
 ## Reglas
 

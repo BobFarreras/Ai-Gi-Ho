@@ -1,3 +1,4 @@
+<!-- src/components/game/board/ui/README.md - Documenta componentes visuales y capas de la UI del tablero. -->
 # Board UI Module
 
 Componentes visuales del tablero. Renderiza estado y eventos, sin reglas de dominio.
@@ -12,7 +13,7 @@ Componentes visuales del tablero. Renderiza estado y eventos, sin reglas de domi
    - Usa submódulos en `internal/combat-log-row/`.
 
 3. `DuelResultOverlay.tsx`
-   - Overlay de fin de partida.
+   - Overlay de fin de partida con layout adaptativo de recompensas y EXP.
 
 4. `GraveyardBrowser.tsx`
    - Navegador visual de cementerio (jugador/rival).
@@ -25,6 +26,9 @@ Componentes visuales del tablero. Renderiza estado y eventos, sin reglas de domi
 
 7. `OpponentHandFan.tsx`
    - Representación de mano rival.
+
+8. `CinematicNarrationOverlay.tsx`
+   - Overlay lateral para diálogos especiales (inicio, fusión, final).
 
 ## Subcarpetas
 
@@ -39,6 +43,18 @@ Componentes visuales del tablero. Renderiza estado y eventos, sin reglas de domi
 
 4. `internal/combat-log-row/`
    - Helpers de presentación para filas del `CombatLog`.
+
+5. `internal/DuelResultRewardsPanel.tsx`
+   - Sidebar compacto con EXP/Nexus/regalo del jugador.
+
+6. `internal/DuelResultFireworks.tsx`
+   - Fuegos artificiales visuales en victoria.
+
+7. `internal/duel-result-card-density.ts`
+   - Regla de densidad para ajustar el tamaño de cartas según cantidad.
+
+8. `../narration/*`
+   - Contratos y selector de eventos narrativos desacoplados del motor.
 
 ## Reglas de módulo
 

@@ -102,6 +102,9 @@ describe('Componente UI: Board y Subcomponentes', () => {
       battleExperienceSummary: [],
       battleExperienceCardLookup: {},
       isBattleExperiencePending: false,
+      playTimerExpired: vi.fn(),
+      playTimerWarning: vi.fn(),
+      playButtonClick: vi.fn(),
     });
   });
 

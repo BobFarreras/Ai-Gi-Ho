@@ -1,21 +1,46 @@
 // src/components/game/board/index.tsx - Componente principal del tablero con capas visuales y control de interacción.
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useBoard } from "./hooks/useBoard";
 import { DuelResultOverlay } from "./ui/DuelResultOverlay";
-import { useGameAudio } from "./hooks/internal/useGameAudio";
 import { BoardStatusOverlays } from "./ui/overlays/BoardStatusOverlays";
 import { BoardTopBar } from "./ui/layout/BoardTopBar";
 import { BoardActionButtons } from "./ui/layout/BoardActionButtons";
 import { BoardPlayersLayer } from "./ui/layers/BoardPlayersLayer";
 import { BoardInteractiveLayer } from "./ui/layers/BoardInteractiveLayer";
+import { CinematicNarrationOverlay } from "./ui/CinematicNarrationOverlay";
 import { ICard } from "@/core/entities/ICard";
+import { IMatchMode } from "@/core/entities/match";
+import { ICreateInitialBoardStateInput } from "@/components/game/board/hooks/internal/boardInitialState";
+import { IDuelResultRewardSummary } from "./ui/internal/duel-result-reward-summary";
+import { IMatchNarrationPack } from "./narration/types";
+import { useMatchNarration } from "./hooks/internal/match/useMatchNarration";
 
 interface IBoardProps {
   initialPlayerDeck?: ICard[] | null;
+  mode?: IMatchMode;
+  initialConfig?: ICreateInitialBoardStateInput;
+  duelResultRewardSummary?: IDuelResultRewardSummary | null;
+  narrationPack?: IMatchNarrationPack | null;
+  playerAvatarUrl?: string | null;
+  opponentAvatarUrl?: string | null;
+  resultActionLabel?: string;
+  onResultAction?: () => void;
+  onMatchResolved?: (result: { winnerPlayerId: string | "DRAW"; playerId: string; mode: IMatchMode; matchSeed: string }) => void;
 }
 
-export function Board({ initialPlayerDeck }: IBoardProps) {
+export function Board({
+  initialPlayerDeck,
+  mode = "TRAINING",
+  initialConfig,
+  duelResultRewardSummary,
+  narrationPack,
+  playerAvatarUrl = null,
+  opponentAvatarUrl = null,
+  resultActionLabel,
+  onResultAction,
+  onMatchResolved,
+}: IBoardProps) {
   const {
     gameState,
     selectedCard,
@@ -71,11 +96,16 @@ export function Board({ initialPlayerDeck }: IBoardProps) {
     setIsFusionCinematicActive,
     toggleMute,
     togglePause,
-  } = useBoard(initialPlayerDeck ?? undefined);
+    playTimerExpired,
+    playTimerWarning,
+    playButtonClick,
+    matchSeed,
+  } = useBoard(initialPlayerDeck ?? undefined, mode, initialConfig);
 
   const player = gameState.playerA;
   const opponent = gameState.playerB;
   const [graveyardView, setGraveyardView] = useState<"player" | "opponent" | null>(null);
+  const resolvedWinnerRef = useRef<string | "DRAW" | null>(null);
   const visibleGraveyardCards = useMemo(
     () => (graveyardView === "player" ? player.graveyard : graveyardView === "opponent" ? opponent.graveyard : []),
     [graveyardView, opponent.graveyard, player.graveyard],
@@ -85,18 +115,25 @@ export function Board({ initialPlayerDeck }: IBoardProps) {
     return player.activeEntities.find((entity) => entity.instanceId === pendingEntityReplacementTargetId)?.card ?? null;
   }, [pendingEntityReplacementTargetId, player.activeEntities]);
   const visibleGraveyardOwner = graveyardView === "player" ? player.name : opponent.name;
-  const { playTimerExpired, playTimerWarning, playButtonClick } = useGameAudio({
+  const narration = useMatchNarration({
     combatLog: gameState.combatLog,
     winnerPlayerId,
     playerId: player.id,
-    isHistoryOpen,
-    hasSelectedCard: Boolean(selectedCard),
-    lastErrorCode: lastError?.code ?? null,
+    opponentId: opponent.id,
     isMuted,
-    isPaused,
+    narrationPack,
   });
 
-
+  useEffect(() => {
+    if (!winnerPlayerId) {
+      resolvedWinnerRef.current = null;
+      return;
+    }
+    if (!onMatchResolved) return;
+    if (resolvedWinnerRef.current === winnerPlayerId) return;
+    onMatchResolved({ winnerPlayerId, playerId: player.id, mode, matchSeed });
+    resolvedWinnerRef.current = winnerPlayerId;
+  }, [winnerPlayerId, onMatchResolved, player.id, mode, matchSeed]);
   return (
     <div className="board-space-bg relative w-full h-screen overflow-hidden font-sans cursor-crosshair" onClick={clearSelection}>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(34,211,238,0.12),transparent_52%)] pointer-events-none" />
@@ -125,6 +162,12 @@ export function Board({ initialPlayerDeck }: IBoardProps) {
         onPreviewCard={previewCard}
 
       />
+      <CinematicNarrationOverlay
+        action={narration.activeCinematicAction}
+        playerId={player.id}
+        playerAvatarUrl={playerAvatarUrl}
+        opponentAvatarUrl={opponentAvatarUrl}
+      />
       <BoardTopBar
         turn={gameState.turn}
         phase={gameState.phase}
@@ -142,6 +185,10 @@ export function Board({ initialPlayerDeck }: IBoardProps) {
         player={player} opponent={opponent} isPlayerTurn={isPlayerTurn} opponentDifficulty={opponentDifficulty}
         lastDamageTargetPlayerId={lastDamageTargetPlayerId} lastDamageAmount={lastDamageAmount} lastDamageEventId={lastDamageEventId}
         lastHealTargetPlayerId={lastHealTargetPlayerId} lastHealAmount={lastHealAmount} lastHealEventId={lastHealEventId}
+        playerAvatarUrl={playerAvatarUrl}
+        opponentAvatarUrl={opponentAvatarUrl}
+        playerDialogueMessage={narration.hudDialogueByPlayerId[player.id] ?? null}
+        opponentDialogueMessage={narration.hudDialogueByPlayerId[opponent.id] ?? null}
       />
       <BoardInteractiveLayer
         gameState={gameState} selectedCard={selectedCard} playingCard={playingCard} activeAttackerId={activeAttackerId}
@@ -171,6 +218,9 @@ export function Board({ initialPlayerDeck }: IBoardProps) {
         battleExperienceSummary={battleExperienceSummary}
         battleExperienceCardLookup={battleExperienceCardLookup}
         isBattleExperiencePending={isBattleExperiencePending}
+        rewardSummary={duelResultRewardSummary}
+        resultActionLabel={resultActionLabel}
+        onResultAction={onResultAction}
         onRestart={restartMatch}
       />
     </div>

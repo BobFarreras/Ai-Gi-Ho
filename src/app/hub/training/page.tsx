@@ -8,7 +8,7 @@ export default async function TrainingPage() {
   return (
     <main className="min-h-screen bg-zinc-950">
       <HubSectionEntryBurst />
-      <Board initialPlayerDeck={playerDeck} />
+      <Board mode="TRAINING" initialPlayerDeck={playerDeck} />
     </main>
   );
 }
