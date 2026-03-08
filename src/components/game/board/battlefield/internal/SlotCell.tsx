@@ -1,4 +1,4 @@
-// src/components/game/board/battlefield/internal/SlotCell.tsx - Renderiza un slot individual (vacío u ocupado) del tablero con VFX y estados visuales.
+// src/components/game/board/battlefield/internal/SlotCell.tsx
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
@@ -49,7 +49,9 @@ interface IXpFloatingEvent {
   type: "XP";
   amount: number;
 }
+
 type FloatingEvent = IStatFloatingEvent | IXpFloatingEvent;
+
 function buildFloatingEvents(
   entity: IBoardEntity | null,
   buffEventId: string | null,
@@ -70,6 +72,7 @@ function buildFloatingEvents(
   }
   return events;
 }
+
 export function SlotCell({
   index,
   entity,
@@ -96,20 +99,24 @@ export function SlotCell({
   const isActivating = entity?.mode === "ACTIVATE";
   const isHighlighted = entity ? highlightedEntityIds.includes(entity.instanceId) : false;
   const isSelected = entity ? selectedEntityIds.includes(entity.instanceId) : false;
+  
   const isExecutionSelectedForActivation =
     !isOpponentSide &&
     entity?.mode === "SET" &&
     entity.card.type === "EXECUTION" &&
     selectedBoardEntityInstanceId === entity.instanceId &&
     canActivateSelectedExecution;
+    
   const floatingEvents = buildFloatingEvents(entity, buffEventId, buffStat, buffAmount, buffedEntityIds, cardXpEventId, cardXpCardId, cardXpAmount);
   const visibility = resolveEntityVisibility(entity ?? undefined, isRevealed);
   const motionState = resolveEntityMotionState({ isAttacking, isActivating, isOpponentSide, isHorizontal: visibility.isHorizontal });
   const targetX = -120 - index * 105;
+
   return (
     <div data-slot-index={index} style={{ transformStyle: "preserve-3d" }} className="relative w-24 h-36 border-2 border-cyan-500/30 rounded-lg bg-cyan-950/40 flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.15)_inset] group hover:border-cyan-300 transition-colors duration-300">
       {entity && <ExecutionActivationVfx entity={entity} isOpponentSide={isOpponentSide} />}
       {entity && floatingEvents.length > 0 && <CardFloatingQueueVfx entityId={entity.instanceId} events={floatingEvents} />}
+      
       <AnimatePresence>
         {entity ? (
           <motion.div
@@ -119,12 +126,17 @@ export function SlotCell({
             animate={motionState.animate}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             exit={{ opacity: [1, 0], scale: [0.28, 0.1], x: targetX, y: 0, transition: { duration: 0.4 } }}
-            className={cn("w-65 h-85 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 origin-center cursor-pointer", isAttacking ? "ring-4 ring-red-500 shadow-[0_0_30px_rgba(239,68,68,1)] animate-pulse rounded-xl" : "", isHighlighted ? "ring-4 ring-amber-400 shadow-[0_0_35px_rgba(251,191,36,0.8)] animate-pulse rounded-xl" : "", isSelected ? "ring-4 ring-cyan-300 shadow-[0_0_35px_rgba(34,211,238,0.9)] rounded-xl" : "")}
+            className={cn(
+              "w-65 h-85 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 origin-center cursor-pointer", 
+              isAttacking ? "ring-4 ring-red-500 shadow-[0_0_30px_rgba(239,68,68,1)] animate-pulse rounded-xl" : "", 
+              isHighlighted ? "ring-4 ring-amber-400 shadow-[0_0_35px_rgba(251,191,36,0.8)] animate-pulse rounded-xl" : "", 
+              isSelected ? "ring-4 ring-cyan-300 shadow-[0_0_35px_rgba(34,211,238,0.9)] rounded-xl" : ""
+            )}
             data-board-card-id={entity.card.id}
             data-board-entity-instance-id={entity.instanceId}
             onClick={(event) => onEntityClick(entity, isOpponentSide, event)}
           >
-            {isExecutionSelectedForActivation && <ExecutionActivateButton onActivateSelectedExecution={onActivateSelectedExecution} />}
+            {/* CONTENIDO DE LA CARTA (FaceUp o FaceDown) */}
             {visibility.isFaceDown ? (
               <div className="absolute w-full h-full flex items-center justify-center">
                 <CardBack isHorizontal={visibility.isHorizontal} />
@@ -138,9 +150,24 @@ export function SlotCell({
                 {isSelected && <span className="absolute top-2 left-2 px-2 py-0.5 text-[10px] font-black rounded-md bg-cyan-300 text-cyan-950 shadow-[0_0_14px_rgba(34,211,238,0.9)]">MATERIAL</span>}
               </div>
             )}
+
+            {/* BOTÓN DE ACTIVACIÓN (Renderizado al final para que quede por encima de la carta) */}
+            <AnimatePresence>
+              {isExecutionSelectedForActivation && (
+                <ExecutionActivateButton onActivateSelectedExecution={onActivateSelectedExecution} />
+              )}
+            </AnimatePresence>
+            
           </motion.div>
         ) : (
-          <motion.span key={`empty-${index}`} initial={{ opacity: 0 }} animate={{ opacity: 0.5 }} exit={{ opacity: 0 }} className="absolute text-cyan-500/30 text-[10px] font-black font-mono tracking-widest group-hover:opacity-100 cursor-pointer w-full h-full flex items-center justify-center" onClick={(event) => onEntityClick(null, isOpponentSide, event)}>
+          <motion.span 
+            key={`empty-${index}`} 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 0.5 }} 
+            exit={{ opacity: 0 }} 
+            className="absolute text-cyan-500/30 text-[10px] font-black font-mono tracking-widest group-hover:opacity-100 cursor-pointer w-full h-full flex items-center justify-center" 
+            onClick={(event) => onEntityClick(null, isOpponentSide, event)}
+          >
             SLOT_{index + 1}
           </motion.span>
         )}
