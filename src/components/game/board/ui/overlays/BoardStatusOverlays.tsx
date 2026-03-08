@@ -10,6 +10,7 @@ import { FusionCinematicLayer } from "../FusionCinematicLayer";
 import { GraveyardBrowser } from "../GraveyardBrowser";
 import { PauseOverlay } from "./PauseOverlay";
 import { EntityReplacementConfirmOverlay } from "./EntityReplacementConfirmOverlay";
+import { TurnAdvanceGuardOverlay } from "./TurnAdvanceGuardOverlay";
 
 interface BoardStatusOverlaysProps {
   lastError: IBoardUiError | null;
@@ -33,7 +34,10 @@ interface BoardStatusOverlaysProps {
   onCancelEntityReplacement: () => void;
   onCloseGraveyard: () => void;
   onPreviewCard: (card: ICard) => void;
- 
+  pendingAdvanceWarning: "MAIN_SKIP_ACTIONS" | "BATTLE_SKIP_ATTACKS" | null;
+  onConfirmAdvancePhase: (disableHelp: boolean) => void;
+  onCancelAdvancePhase: () => void;
+  externalBannerSignal?: { id: string; left: string; right: string } | null;
 }
 
 export function BoardStatusOverlays({
@@ -58,7 +62,10 @@ export function BoardStatusOverlays({
   onCancelEntityReplacement,
   onCloseGraveyard,
   onPreviewCard,
-  
+  pendingAdvanceWarning,
+  onConfirmAdvancePhase,
+  onCancelAdvancePhase,
+  externalBannerSignal = null,
 }: BoardStatusOverlaysProps) {
   return (
     <>
@@ -97,8 +104,20 @@ export function BoardStatusOverlays({
         />
       )}
 
-      <BattleBannerCenter events={combatLog} playerAId={playerAId} playerAName={playerAName} playerBId={playerBId} playerBName={playerBName} />
+      <BattleBannerCenter
+        events={combatLog}
+        playerAId={playerAId}
+        playerAName={playerAName}
+        playerBId={playerBId}
+        playerBName={playerBName}
+        externalBannerSignal={externalBannerSignal}
+      />
       <PauseOverlay isPaused={isPaused} onResume={onResumePause} />
+      <TurnAdvanceGuardOverlay
+        warning={pendingAdvanceWarning}
+        onConfirm={onConfirmAdvancePhase}
+        onCancel={onCancelAdvancePhase}
+      />
       <FusionCinematicLayer
         events={combatLog}
         onActiveChange={(active) => {

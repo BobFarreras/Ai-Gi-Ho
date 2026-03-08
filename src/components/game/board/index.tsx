@@ -92,18 +92,25 @@ export function Board({
     restartMatch,
     isMuted,
     isPaused,
+    isAutoPhaseEnabled,
     isFusionCinematicActive,
     setIsFusionCinematicActive,
     toggleMute,
     togglePause,
+    toggleAutoPhase,
     playTimerExpired,
     playTimerWarning,
     playButtonClick,
+    playBanner,
+    pendingAdvanceWarning,
+    confirmAdvancePhase,
+    cancelAdvancePhase,
     matchSeed,
   } = useBoard(initialPlayerDeck ?? undefined, mode, initialConfig);
 
   const player = gameState.playerA;
   const opponent = gameState.playerB;
+  const [autoModeBannerSignal, setAutoModeBannerSignal] = useState<{ id: string; left: string; right: string } | null>(null);
   const [graveyardView, setGraveyardView] = useState<"player" | "opponent" | null>(null);
   const resolvedWinnerRef = useRef<string | "DRAW" | null>(null);
   const visibleGraveyardCards = useMemo(
@@ -166,7 +173,10 @@ export function Board({
         onCancelEntityReplacement={() => { playButtonClick(); cancelEntityReplacement(); }}
         onCloseGraveyard={() => setGraveyardView(null)}
         onPreviewCard={previewCard}
-
+        pendingAdvanceWarning={pendingAdvanceWarning}
+        onConfirmAdvancePhase={confirmAdvancePhase}
+        onCancelAdvancePhase={cancelAdvancePhase}
+        externalBannerSignal={autoModeBannerSignal}
       />
       <CinematicNarrationOverlay
         action={narration.activeCinematicAction}
@@ -210,10 +220,21 @@ export function Board({
       <BoardActionButtons
         isMuted={isMuted}
         isPaused={isPaused}
+        isAutoPhaseEnabled={isAutoPhaseEnabled}
         isHistoryOpen={isHistoryOpen}
         canSetSelectedEntityToAttack={canSetSelectedEntityToAttack}
         onToggleMute={() => { playButtonClick(); toggleMute(); }}
         onTogglePause={() => { playButtonClick(); togglePause(); }}
+        onToggleAutoPhase={() => {
+          playBanner();
+          toggleAutoPhase();
+          const nextEnabled = !isAutoPhaseEnabled;
+          setAutoModeBannerSignal({
+            id: `auto-mode-${Date.now()}-${nextEnabled ? "on" : "off"}`,
+            left: "Modo Automático",
+            right: nextEnabled ? "Activado" : "Desactivado",
+          });
+        }}
         onToggleHistory={() => { playButtonClick(); setIsHistoryOpen((previous) => !previous); }}
         onSetSelectedEntityToAttack={() => { playButtonClick(); setSelectedEntityToAttack(); }}
       />

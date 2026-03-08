@@ -10,6 +10,8 @@ function createMouseEvent(): React.MouseEvent {
 describe("useBoard integración", () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    window.localStorage.setItem("board-turn-help", "0");
+    window.localStorage.setItem("board-auto-phase", "1");
   });
 
   afterEach(() => {

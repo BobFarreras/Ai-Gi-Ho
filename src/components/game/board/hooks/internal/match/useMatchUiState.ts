@@ -46,6 +46,8 @@ export interface IUseMatchUiStateResult {
   isFusionCinematicActive: boolean;
   isMuted: boolean;
   isPaused: boolean;
+  isAutoPhaseEnabled: boolean;
+  isTurnHelpEnabled: boolean;
   isPlayerTurn: boolean;
   isActionLocked: boolean;
   combatFeedback: ReturnType<typeof buildBoardCombatFeedback>;
@@ -62,10 +64,14 @@ export interface IUseMatchUiStateResult {
   setPendingEntityReplacementTargetId: (value: string | null) => void;
   setPendingFusionSummon: (value: { cardId: string; mode: "ATTACK" | "DEFENSE"; materials: string[] } | null) => void;
   setIsFusionCinematicActive: (value: boolean) => void;
+  setIsAutoPhaseEnabled: (value: boolean | ((previous: boolean) => boolean)) => void;
+  setIsTurnHelpEnabled: (value: boolean | ((previous: boolean) => boolean)) => void;
   clearSelection: () => void;
   previewCard: (card: ICard) => void;
   clearError: () => void;
   toggleMute: () => void;
   togglePause: () => void;
+  toggleAutoPhase: () => void;
+  disableTurnHelp: () => void;
   restartMatch: () => void;
 }
