@@ -98,6 +98,20 @@ Eventos conectados vía `useHubModuleSfx`:
 5. Mostrar overlay de evolución: `EVOLUTION_OVERLAY` (`/audio/hub/arsenal/evolution.mp3`).
 6. Pulsar botón evolucionar: `EVOLUTION_BUTTON` (`/audio/landing/button-click.mp3`).
 
+## Reglas de salida y combate (deck 20/20)
+
+1. Salir de `Arsenal` con el botón `Menú` queda bloqueado si el deck principal no está en `20/20`.
+2. El bloqueo muestra `HubErrorDialog` con causa explícita (`Deck incompleto`).
+3. Entrar a `Training` o `Story Duel` también valida `20/20` en servidor.
+4. Si no cumple, se muestra pantalla de bloqueo con CTA a `/hub/home`.
+
+## Drag & Drop instantáneo
+
+1. `Collection -> Deck/Fusion` aplica actualización optimista inmediata y rollback si falla persistencia.
+2. `Deck/Fusion -> Collection` también es optimista para mantener respuesta instantánea.
+3. `Deck -> Deck` y `Fusion -> Fusion` permiten recolocar cartas entre slots vacíos.
+4. Se mantiene feedback sonoro de `ADD_CARD` y `REMOVE_CARD` en desktop y mobile.
+
 ## Testing de fase 0/1/3
 
 1. `layout/HomeResponsiveWorkspace.test.tsx` valida que se montan ambos layouts.

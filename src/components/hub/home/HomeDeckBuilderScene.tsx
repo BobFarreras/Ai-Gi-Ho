@@ -2,6 +2,7 @@
 "use client";
 
 import { DragEvent, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ICollectionCard } from "@/core/entities/home/ICollectionCard";
 import { IDeck } from "@/core/entities/home/IDeck";
 import { IPlayerCardProgress } from "@/core/entities/progression/IPlayerCardProgress";
@@ -51,6 +52,7 @@ interface IEvolutionOverlayState {
 }
 
 export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initialCardProgress }: HomeDeckBuilderSceneProps) {
+  const router = useRouter();
   const { play } = useHubModuleSfx();
   const [deck, setDeck] = useState<IDeck>(initialDeck);
   const [collectionState, setCollectionState] = useState<ICollectionCard[]>(collection);
@@ -305,7 +307,45 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
       return;
     }
     if (draggedCard.source === "DECK") {
-      setDraggedCard(null);
+      if (typeof draggedCard.slotIndex !== "number") {
+        setDraggedCard(null);
+        return;
+      }
+      const sourceIndex = draggedCard.slotIndex;
+      if (sourceIndex === slotIndex) {
+        setDraggedCard(null);
+        return;
+      }
+      const sourceCardId = deck.slots[sourceIndex]?.cardId;
+      const targetCardId = deck.slots[slotIndex]?.cardId;
+      if (!sourceCardId) {
+        setDraggedCard(null);
+        return;
+      }
+      if (targetCardId !== null) {
+        setErrorMessage("El slot de destino ya está ocupado.");
+        setDraggedCard(null);
+        return;
+      }
+      const previousDeck = deck;
+      setDeck((currentDeck) => {
+        const withoutSource = applyOptimisticRemoveFromDeck(currentDeck, sourceIndex);
+        return applyOptimisticAddToDeckSlot(withoutSource, slotIndex, sourceCardId);
+      });
+      play("ADD_CARD");
+      try {
+        const deckAfterRemove = await removeCardFromDeckAction(context, sourceIndex);
+        const finalDeck = await addCardToDeckSlotAction({ ...context, deck: deckAfterRemove }, sourceCardId, slotIndex);
+        setDeck(finalDeck);
+        setSelectedSlotIndex(slotIndex);
+        setSelectedCollectionCardId(null);
+        setErrorMessage(null);
+      } catch (error) {
+        setDeck(previousDeck);
+        setErrorMessage(getActionErrorMessage(error, "No se pudo mover la carta al slot de deck."));
+      } finally {
+        setDraggedCard(null);
+      }
       return;
     }
     const droppedCard = collectionState.find((entry) => entry.card.id === draggedCard.cardId)?.card;
@@ -347,7 +387,45 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
       return;
     }
     if (draggedCard.source === "FUSION") {
-      setDraggedCard(null);
+      if (typeof draggedCard.slotIndex !== "number") {
+        setDraggedCard(null);
+        return;
+      }
+      const sourceIndex = draggedCard.slotIndex;
+      if (sourceIndex === slotIndex) {
+        setDraggedCard(null);
+        return;
+      }
+      const sourceCardId = deck.fusionSlots[sourceIndex]?.cardId;
+      const targetCardId = deck.fusionSlots[slotIndex]?.cardId;
+      if (!sourceCardId) {
+        setDraggedCard(null);
+        return;
+      }
+      if (targetCardId !== null) {
+        setErrorMessage("El slot de fusión de destino ya está ocupado.");
+        setDraggedCard(null);
+        return;
+      }
+      const previousDeck = deck;
+      setDeck((currentDeck) => {
+        const withoutSource = applyOptimisticRemoveFromFusion(currentDeck, sourceIndex);
+        return applyOptimisticAddToFusionSlot(withoutSource, slotIndex, sourceCardId);
+      });
+      play("ADD_CARD");
+      try {
+        const deckAfterRemove = await removeCardFromFusionDeckAction(context, sourceIndex);
+        const finalDeck = await addCardToFusionDeckAction({ ...context, deck: deckAfterRemove }, sourceCardId, slotIndex);
+        setDeck(finalDeck);
+        setSelectedFusionSlotIndex(slotIndex);
+        setSelectedCollectionCardId(null);
+        setErrorMessage(null);
+      } catch (error) {
+        setDeck(previousDeck);
+        setErrorMessage(getActionErrorMessage(error, "No se pudo mover la carta al Bloque Fusiones."));
+      } finally {
+        setDraggedCard(null);
+      }
       return;
     }
     const droppedCard = collectionState.find((entry) => entry.card.id === draggedCard.cardId)?.card;
@@ -413,6 +491,14 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
     }
     setDraggedCard(null);
   };
+  const handleBackToHub = () => {
+    if (deckCardCount < HOME_DECK_SIZE) {
+      play("ERROR_COMMON");
+      setErrorMessage(`Deck incompleto (${deckCardCount}/${HOME_DECK_SIZE}). Completa 20 cartas antes de salir de Arsenal.`);
+      return;
+    }
+    router.push("/hub");
+  };
 
   return (
     <main className="hub-control-room-bg relative box-border w-full h-[100dvh] overflow-hidden px-3 py-3 text-slate-100 sm:px-5 flex flex-col justify-center items-center">
@@ -441,6 +527,7 @@ export function HomeDeckBuilderScene({ playerId, initialDeck, collection, initia
             canEvolve={canEvolveSelectedCard}
             evolveCost={copiesRequiredToEvolve}
             onEvolve={handleEvolveSelectedCard}
+            onBackToHub={handleBackToHub}
           />
         </div>
 
