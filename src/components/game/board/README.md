@@ -176,3 +176,54 @@ Guía rápida para entender la lógica de tablero y batalla.
    - `handOverlapPx`,
    - `handYOffsetPx`,
    - `handContainerHeightPx`.
+
+## Shell móvil (fase 0-2)
+
+1. `Board` conmuta por viewport entre:
+   - layout desktop existente,
+   - shell móvil base.
+2. Piezas nuevas del shell móvil:
+   - `hooks/internal/layout/use-board-viewport-mode.ts`,
+   - `ui/layout/BoardMobileTopBar.tsx`,
+   - `ui/layout/BoardMobileActionsFab.tsx`,
+   - `ui/OpponentHandCompact.tsx`.
+3. En esta fase solo cambia la composición visual; reglas y motor se mantienen en `useBoard` y `GameEngine`.
+
+## Fase 3 móvil: paneles laterales como diálogo
+
+1. En móvil, `SidePanels` desktop se desactiva.
+2. El detalle de carta e historial se renderizan como diálogos laterales:
+   - izquierda: detalle de carta,
+   - derecha: combat log.
+3. Archivo de esta capa:
+   - `ui/overlays/BoardMobilePanelsDialog.tsx`.
+
+## Incidencias resueltas (mobile board) y solución aplicada
+
+1. **Selección incoherente entre mano/tablero/oponente**
+   - **Problema:** en móvil, algunas selecciones del oponente se interpretaban como mano y mostraban acciones incorrectas.
+   - **Solución:** se unificó la detección de origen (`HAND`/`BOARD`) con inferencia por `instanceId` y fallback por `selectedCard` mapeada a entidades activas. Además, prioridad explícita a `playingCard` para evitar falsos positivos.
+
+2. **Overlay móvil bloqueando ataque en fase de combate**
+   - **Problema:** al seleccionar entidad propia en `BATTLE`, el overlay impedía flujo de ataque.
+   - **Solución:** en combate se desactiva overlay para selección de tablero propia; se mantiene interacción nativa de ataque.
+
+3. **Mano del oponente no adaptativa según dispositivo**
+   - **Problema:** en algunos tamaños quedaba descentrada o invadía HUD/turno.
+   - **Solución:** `BoardMobileTopBar` calcula en runtime el hueco real entre bloque de turno y HUD rival, y centra la mano dentro de ese espacio. `OpponentHand` se centra internamente por `left-1/2`.
+
+4. **Escala de cartas de mano del oponente fija**
+   - **Problema:** con distintas resoluciones o número de cartas se recortaban visualmente.
+   - **Solución:** escala calculada por fórmula (`ancho disponible`, `nº cartas`, `separación`) con clamps para evitar extremos.
+
+5. **Mano del jugador en móvil heredando comportamiento desktop**
+   - **Problema:** distribución irregular (se veían pocas cartas, solapes inconsistentes).
+   - **Solución:** se creó componente dedicado `MobilePlayerHand` con layout y spacing responsive propios, separado de `PlayerHand` desktop.
+
+6. **Botones de fase poco legibles en móvil**
+   - **Problema:** recortes y poca legibilidad en anchos reducidos.
+   - **Solución:** rediseño horizontal adaptativo por ancho de viewport, con texto solo en fase activa y animación de barrido de fase.
+
+7. **Overlay de carta seleccionada con contraste bajo**
+   - **Problema:** botones de acción con color poco visible.
+   - **Solución:** se subió saturación, contraste y glow en botones de acción; se movieron acciones arriba junto al cierre para lectura rápida.

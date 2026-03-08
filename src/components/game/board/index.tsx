@@ -6,15 +6,21 @@ import { DuelResultOverlay } from "./ui/DuelResultOverlay";
 import { BoardStatusOverlays } from "./ui/overlays/BoardStatusOverlays";
 import { BoardTopBar } from "./ui/layout/BoardTopBar";
 import { BoardActionButtons } from "./ui/layout/BoardActionButtons";
+import { BoardMobileTopBar } from "./ui/layout/BoardMobileTopBar";
+import { BoardMobileActionsFab } from "./ui/layout/BoardMobileActionsFab";
+import { BoardMobilePhaseControls } from "./ui/layout/BoardMobilePhaseControls";
 import { BoardPlayersLayer } from "./ui/layers/BoardPlayersLayer";
 import { BoardInteractiveLayer } from "./ui/layers/BoardInteractiveLayer";
 import { CinematicNarrationOverlay } from "./ui/CinematicNarrationOverlay";
+import { PlayerHUD } from "./PlayerHUD";
+import { BoardMobilePanelsDialog } from "./ui/overlays/BoardMobilePanelsDialog";
 import { ICard } from "@/core/entities/ICard";
 import { IMatchMode } from "@/core/entities/match";
 import { ICreateInitialBoardStateInput } from "@/components/game/board/hooks/internal/boardInitialState";
 import { IDuelResultRewardSummary } from "./ui/internal/duel-result-reward-summary";
 import { IMatchNarrationPack } from "./narration/types";
 import { useMatchNarration } from "./hooks/internal/match/useMatchNarration";
+import { useBoardViewportMode } from "./hooks/internal/layout/use-board-viewport-mode";
 
 interface IBoardProps {
   initialPlayerDeck?: ICard[] | null;
@@ -147,6 +153,7 @@ export function Board({
     isMuted,
     narrationPack,
   });
+  const { isMobile } = useBoardViewportMode();
   const pendingGraveyardSelectionRefs = useMemo(() => {
     const pending = gameState.pendingTurnAction;
     if (!pending || pending.type !== "SELECT_GRAVEYARD_CARD" || pending.playerId !== player.id) return [];
@@ -225,28 +232,85 @@ export function Board({
         playerAvatarUrl={playerAvatarUrl}
         opponentAvatarUrl={opponentAvatarUrl}
       />
-      <BoardTopBar
-        turn={gameState.turn}
-        phase={gameState.phase}
-        pendingActionType={gameState.pendingTurnAction?.type ?? null}
-        pendingActionPlayerId={gameState.pendingTurnAction?.playerId ?? null}
-        isPlayerTurn={isPlayerTurn}
-        isPaused={isPaused}
-        hasWinner={Boolean(winnerPlayerId)}
-        onTimeUp={() => { playTimerExpired(); handleTimerExpired(); }}
-        onWarning={playTimerWarning}
-      />
-      <BoardPlayersLayer
-        player={player} opponent={opponent} isPlayerTurn={isPlayerTurn} opponentDifficulty={opponentDifficulty}
-        lastDamageTargetPlayerId={lastDamageTargetPlayerId} lastDamageAmount={lastDamageAmount} lastDamageEventId={lastDamageEventId}
-        lastHealTargetPlayerId={lastHealTargetPlayerId} lastHealAmount={lastHealAmount} lastHealEventId={lastHealEventId}
-        playerAvatarUrl={playerAvatarUrl}
-        opponentAvatarUrl={opponentAvatarUrl}
-        playerDialogueMessage={narration.hudDialogueByPlayerId[player.id] ?? null}
-        opponentDialogueMessage={narration.hudDialogueByPlayerId[opponent.id] ?? null}
-        phase={gameState.phase}
-        onAdvancePhase={advancePhase}
-      />
+      {isMobile ? (
+        <BoardMobileTopBar
+          hand={opponent.hand}
+          turn={gameState.turn}
+          phase={gameState.phase}
+          pendingActionType={gameState.pendingTurnAction?.type ?? null}
+          pendingActionPlayerId={gameState.pendingTurnAction?.playerId ?? null}
+          isActive={isPlayerTurn}
+          isPaused={isPaused}
+          hasWinner={Boolean(winnerPlayerId)}
+          onTimeUp={() => {
+            playTimerExpired();
+            handleTimerExpired();
+          }}
+          onWarning={playTimerWarning}
+        />
+      ) : (
+        <BoardTopBar
+          turn={gameState.turn}
+          phase={gameState.phase}
+          pendingActionType={gameState.pendingTurnAction?.type ?? null}
+          pendingActionPlayerId={gameState.pendingTurnAction?.playerId ?? null}
+          isPlayerTurn={isPlayerTurn}
+          isPaused={isPaused}
+          hasWinner={Boolean(winnerPlayerId)}
+          onTimeUp={() => { playTimerExpired(); handleTimerExpired(); }}
+          onWarning={playTimerWarning}
+        />
+      )}
+      {isMobile ? (
+        <>
+          <PlayerHUD
+            isOpponent={true}
+            player={opponent}
+            isActiveTurn={!isPlayerTurn}
+            badgeText={`Dificultad ${opponentDifficulty}`}
+            wasDamagedThisAction={lastDamageTargetPlayerId === opponent.id}
+            damageAmount={lastDamageAmount}
+            damagePulseKey={lastDamageEventId}
+            wasHealedThisAction={lastHealTargetPlayerId === opponent.id}
+            healAmount={lastHealAmount}
+            healPulseKey={lastHealEventId}
+            avatarUrl={opponentAvatarUrl}
+            dialogueMessage={narration.hudDialogueByPlayerId[opponent.id] ?? null}
+            containerClassName="!top-0 !right-0 !z-[280] !w-[clamp(11.8rem,35vw,16.4rem)] !h-[clamp(5.4rem,10.2vh,6.9rem)]"
+            showPhaseControls={false}
+          />
+          <PlayerHUD
+            isOpponent={false}
+            player={player}
+            isActiveTurn={isPlayerTurn}
+            wasDamagedThisAction={lastDamageTargetPlayerId === player.id}
+            damageAmount={lastDamageAmount}
+            damagePulseKey={lastDamageEventId}
+            wasHealedThisAction={lastHealTargetPlayerId === player.id}
+            healAmount={lastHealAmount}
+            healPulseKey={lastHealEventId}
+            avatarUrl={playerAvatarUrl}
+            dialogueMessage={narration.hudDialogueByPlayerId[player.id] ?? null}
+            phase={gameState.phase}
+            onAdvancePhase={advancePhase}
+            containerClassName="!bottom-0 !left-0 !right-auto !z-[280] !justify-end !w-[clamp(11.8rem,36vw,16.8rem)] !h-[clamp(5.6rem,10.5vh,7.1rem)]"
+            showPhaseControls={false}
+          />
+          <BoardMobilePhaseControls phase={gameState.phase} isPlayerTurn={isPlayerTurn} hasWinner={Boolean(winnerPlayerId)} onAdvancePhase={advancePhase} />
+        </>
+      ) : (
+        <BoardPlayersLayer
+          player={player} opponent={opponent} isPlayerTurn={isPlayerTurn} opponentDifficulty={opponentDifficulty}
+          lastDamageTargetPlayerId={lastDamageTargetPlayerId} lastDamageAmount={lastDamageAmount} lastDamageEventId={lastDamageEventId}
+          lastHealTargetPlayerId={lastHealTargetPlayerId} lastHealAmount={lastHealAmount} lastHealEventId={lastHealEventId}
+          playerAvatarUrl={playerAvatarUrl}
+          opponentAvatarUrl={opponentAvatarUrl}
+          playerDialogueMessage={narration.hudDialogueByPlayerId[player.id] ?? null}
+          opponentDialogueMessage={narration.hudDialogueByPlayerId[opponent.id] ?? null}
+          phase={gameState.phase}
+          onAdvancePhase={advancePhase}
+        />
+      )}
       <BoardInteractiveLayer
         gameState={gameState} selectedCard={selectedCard} playingCard={playingCard} activeAttackerId={activeAttackerId}
         selectedBoardEntityInstanceId={selectedBoardEntityInstanceId}
@@ -258,6 +322,7 @@ export function Board({
         onGraveyardClick={setGraveyardView} onEntityClick={handleEntityClick} onMandatoryCardSelect={resolvePendingHandDiscard}
         onDestroyedClick={setDestroyedView}
         canActivateSelectedExecution={canActivateSelectedExecution}
+        canSetSelectedEntityToAttack={canSetSelectedEntityToAttack}
         onCardClick={toggleCardSelection} onPlayAction={executePlayAction} onActivateSelectedExecution={() => {
           void (async () => {
             playButtonClick();
@@ -272,29 +337,65 @@ export function Board({
             }
           })();
         }} onSelectCard={previewCard} onCloseCard={clearSelection}
+        onSetSelectedEntityToAttack={setSelectedEntityToAttack}
         onCloseHistory={() => setIsHistoryOpen(false)}
+        isMobileLayout={isMobile}
       />
-      <BoardActionButtons
-        isMuted={isMuted}
-        isPaused={isPaused}
-        isAutoPhaseEnabled={isAutoPhaseEnabled}
-        isHistoryOpen={isHistoryOpen}
-        canSetSelectedEntityToAttack={canSetSelectedEntityToAttack}
-        onToggleMute={() => { playButtonClick(); toggleMute(); }}
-        onTogglePause={() => { playButtonClick(); togglePause(); }}
-        onToggleAutoPhase={() => {
-          playBanner();
-          toggleAutoPhase();
-          const nextEnabled = !isAutoPhaseEnabled;
-          setAutoModeBannerSignal({
-            id: `auto-mode-${Date.now()}-${nextEnabled ? "on" : "off"}`,
-            left: "Modo Automático",
-            right: nextEnabled ? "Activado" : "Desactivado",
-          });
-        }}
-        onToggleHistory={() => { playButtonClick(); setIsHistoryOpen((previous) => !previous); }}
-        onSetSelectedEntityToAttack={() => { playButtonClick(); setSelectedEntityToAttack(); }}
-      />
+      {isMobile && (
+        <BoardMobilePanelsDialog
+          selectedCard={null}
+          gameState={gameState}
+          isHistoryOpen={isHistoryOpen}
+          onSelectCard={previewCard}
+          onCloseCard={clearSelection}
+          onCloseHistory={() => setIsHistoryOpen(false)}
+        />
+      )}
+      {isMobile ? (
+        <BoardMobileActionsFab
+          isMuted={isMuted}
+          isPaused={isPaused}
+          isAutoPhaseEnabled={isAutoPhaseEnabled}
+          isHistoryOpen={isHistoryOpen}
+          canSetSelectedEntityToAttack={canSetSelectedEntityToAttack}
+          onToggleMute={() => { playButtonClick(); toggleMute(); }}
+          onTogglePause={() => { playButtonClick(); togglePause(); }}
+          onToggleAutoPhase={() => {
+            playBanner();
+            toggleAutoPhase();
+            const nextEnabled = !isAutoPhaseEnabled;
+            setAutoModeBannerSignal({
+              id: `auto-mode-${Date.now()}-${nextEnabled ? "on" : "off"}`,
+              left: "Modo Automático",
+              right: nextEnabled ? "Activado" : "Desactivado",
+            });
+          }}
+          onToggleHistory={() => { playButtonClick(); setIsHistoryOpen((previous) => !previous); }}
+          onSetSelectedEntityToAttack={() => { playButtonClick(); setSelectedEntityToAttack(); }}
+        />
+      ) : (
+        <BoardActionButtons
+          isMuted={isMuted}
+          isPaused={isPaused}
+          isAutoPhaseEnabled={isAutoPhaseEnabled}
+          isHistoryOpen={isHistoryOpen}
+          canSetSelectedEntityToAttack={canSetSelectedEntityToAttack}
+          onToggleMute={() => { playButtonClick(); toggleMute(); }}
+          onTogglePause={() => { playButtonClick(); togglePause(); }}
+          onToggleAutoPhase={() => {
+            playBanner();
+            toggleAutoPhase();
+            const nextEnabled = !isAutoPhaseEnabled;
+            setAutoModeBannerSignal({
+              id: `auto-mode-${Date.now()}-${nextEnabled ? "on" : "off"}`,
+              left: "Modo Automático",
+              right: nextEnabled ? "Activado" : "Desactivado",
+            });
+          }}
+          onToggleHistory={() => { playButtonClick(); setIsHistoryOpen((previous) => !previous); }}
+          onSetSelectedEntityToAttack={() => { playButtonClick(); setSelectedEntityToAttack(); }}
+        />
+      )}
       <DuelResultOverlay
         winnerPlayerId={winnerPlayerId}
         playerA={player}
