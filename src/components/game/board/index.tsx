@@ -1,6 +1,6 @@
 // src/components/game/board/index.tsx - Componente principal del tablero con capas visuales y control de interacción.
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBoard } from "./hooks/useBoard";
 import { DuelResultOverlay } from "./ui/DuelResultOverlay";
 import { BoardStatusOverlays } from "./ui/overlays/BoardStatusOverlays";
@@ -65,6 +65,7 @@ export function Board({
     executePlayAction,
     handleEntityClick,
     advancePhase,
+    resolvePendingTurnAction,
     resolvePendingHandDiscard,
     setSelectedEntityToAttack,
     canSetSelectedEntityToAttack,
@@ -116,10 +117,11 @@ export function Board({
   const [autoModeBannerSignal, setAutoModeBannerSignal] = useState<{ id: string; left: string; right: string } | null>(null);
   const [graveyardView, setGraveyardView] = useState<"player" | "opponent" | null>(null);
   const [destroyedView, setDestroyedView] = useState<"player" | "opponent" | null>(null);
+  const effectiveGraveyardView = gameState.pendingTurnAction?.type === "SELECT_GRAVEYARD_CARD" && gameState.pendingTurnAction.playerId === player.id ? "player" : graveyardView;
   const resolvedWinnerRef = useRef<string | "DRAW" | null>(null);
   const visibleGraveyardCards = useMemo(
-    () => (graveyardView === "player" ? player.graveyard : graveyardView === "opponent" ? opponent.graveyard : []),
-    [graveyardView, opponent.graveyard, player.graveyard],
+    () => (effectiveGraveyardView === "player" ? player.graveyard : effectiveGraveyardView === "opponent" ? opponent.graveyard : []),
+    [effectiveGraveyardView, opponent.graveyard, player.graveyard],
   );
   const visibleDestroyedCards = useMemo(
     () =>
@@ -135,7 +137,7 @@ export function Board({
     const candidates = pendingEntityReplacement.zone === "ENTITIES" ? player.activeEntities : player.activeExecutions;
     return candidates.find((entity) => entity.instanceId === pendingEntityReplacementTargetId)?.card ?? null;
   }, [pendingEntityReplacement, pendingEntityReplacementTargetId, player.activeEntities, player.activeExecutions]);
-  const visibleGraveyardOwner = graveyardView === "player" ? player.name : opponent.name;
+  const visibleGraveyardOwner = effectiveGraveyardView === "player" ? player.name : opponent.name;
   const visibleDestroyedOwner = destroyedView === "player" ? player.name : opponent.name;
   const narration = useMatchNarration({
     combatLog: gameState.combatLog,
@@ -145,6 +147,25 @@ export function Board({
     isMuted,
     narrationPack,
   });
+  const pendingGraveyardSelectionRefs = useMemo(() => {
+    const pending = gameState.pendingTurnAction;
+    if (!pending || pending.type !== "SELECT_GRAVEYARD_CARD" || pending.playerId !== player.id) return [];
+    return player.graveyard
+      .filter((card) => !pending.cardType || card.type === pending.cardType)
+      .map((card) => card.runtimeId ?? card.id);
+  }, [gameState.pendingTurnAction, player.graveyard, player.id]);
+  const onOverlayCardSelect = useCallback(
+    (card: ICard) => {
+      const pending = gameState.pendingTurnAction;
+      if (pending?.type === "SELECT_GRAVEYARD_CARD" && pending.playerId === player.id) {
+        resolvePendingTurnAction(card.runtimeId ?? card.id);
+        setGraveyardView(null);
+        return;
+      }
+      previewCard(card);
+    },
+    [gameState.pendingTurnAction, player.id, previewCard, resolvePendingTurnAction],
+  );
 
   useEffect(() => {
     if (!winnerPlayerId) {
@@ -180,9 +201,10 @@ export function Board({
         onResumePause={() => { playButtonClick(); togglePause(); }}
         isFusionCinematicActive={isFusionCinematicActive}
         setIsFusionCinematicActive={setIsFusionCinematicActive}
-        graveyardView={graveyardView}
+        graveyardView={effectiveGraveyardView}
         graveyardOwnerName={visibleGraveyardOwner}
         graveyardCards={visibleGraveyardCards}
+        graveyardSelectableCardRefs={effectiveGraveyardView === "player" ? pendingGraveyardSelectionRefs : []}
         destroyedView={destroyedView}
         destroyedOwnerName={visibleDestroyedOwner}
         destroyedCards={visibleDestroyedCards}
@@ -191,7 +213,7 @@ export function Board({
         onCancelEntityReplacement={() => { playButtonClick(); cancelEntityReplacement(); }}
         onCloseGraveyard={() => setGraveyardView(null)}
         onCloseDestroyed={() => setDestroyedView(null)}
-        onPreviewCard={previewCard}
+        onPreviewCard={onOverlayCardSelect}
         pendingAdvanceWarning={pendingAdvanceWarning}
         onConfirmAdvancePhase={confirmAdvancePhase}
         onCancelAdvancePhase={cancelAdvancePhase}

@@ -2,11 +2,7 @@
 import { CardArchetype, ICardEffect } from "@/core/entities/ICard";
 import { IPlayer } from "@/core/entities/IPlayer";
 import { GameRuleError } from "@/core/errors/GameRuleError";
-import {
-  applyReturnGraveyardCardToField,
-  applyReturnGraveyardCardToHand,
-  IExecutionSystemEvent,
-} from "@/core/use-cases/game-engine/actions/internal/execution-return-effects";
+import { IExecutionSystemEvent } from "@/core/use-cases/game-engine/actions/internal/execution-return-effects";
 
 interface IBuffSummary {
   entityIds: string[];
@@ -31,7 +27,7 @@ export function applyExecutionEffect(player: IPlayer, opponent: IPlayer, effect:
   const buff: IBuffSummary = { entityIds: [], stat: null, amount: 0 };
   let damageTargetPlayerId: string | null = null;
   let damageAmount = 0;
-  let systemEvents: IExecutionSystemEvent[] = [];
+  const systemEvents: IExecutionSystemEvent[] = [];
 
   switch (effect.action) {
     case "DAMAGE":
@@ -59,10 +55,8 @@ export function applyExecutionEffect(player: IPlayer, opponent: IPlayer, effect:
       buff.amount = effect.value;
       break;
     case "RETURN_GRAVEYARD_CARD_TO_HAND":
-      ({ updatedPlayer, events: systemEvents } = applyReturnGraveyardCardToHand(updatedPlayer, effect));
-      break;
     case "RETURN_GRAVEYARD_CARD_TO_FIELD":
-      ({ updatedPlayer, events: systemEvents } = applyReturnGraveyardCardToField(updatedPlayer, effect));
+      throw new GameRuleError("Este efecto requiere selección de cementerio y se resuelve en una acción pendiente.");
       break;
     default:
       break;

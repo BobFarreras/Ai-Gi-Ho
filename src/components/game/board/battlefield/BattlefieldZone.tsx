@@ -81,13 +81,8 @@ export function BattlefieldZone({
         isDamageFlashing ? "bg-red-900/35 shadow-[0_0_40px_rgba(239,68,68,0.4)_inset]" : "",
       )}
     >
-      <GraveyardPile
-        isOpponentSide={isOpponentSide}
-        topGraveCard={topGraveCard}
-        graveyardCount={graveyardCount}
-        onClick={onGraveyardClick}
-      />
-      <DestroyedPile isOpponentSide={isOpponentSide} destroyedCount={destroyedCount} onClick={onDestroyedClick} />
+      <FusionDeckPile fusionDeckCount={fusionDeckCount} />
+      <DeckPile deckCount={deckCount} />
       <BattlefieldLanes
         isOpponentSide={isOpponentSide}
         activeEntities={activeEntities}
@@ -109,8 +104,13 @@ export function BattlefieldZone({
         onActivateSelectedExecution={onActivateSelectedExecution}
         onEntityClick={onEntityClick}
       />
-      <FusionDeckPile fusionDeckCount={fusionDeckCount} />
-      <DeckPile deckCount={deckCount} />
+      <GraveyardPile
+        isOpponentSide={isOpponentSide}
+        topGraveCard={topGraveCard}
+        graveyardCount={graveyardCount}
+        onClick={onGraveyardClick}
+      />
+      <DestroyedPile isOpponentSide={isOpponentSide} destroyedCount={destroyedCount} onClick={onDestroyedClick} />
     </div>
   );
 }

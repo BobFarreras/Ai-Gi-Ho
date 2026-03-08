@@ -59,11 +59,6 @@ function validateMaterialsAgainstRecipe(recipe: IFusionRecipe, materials: [IBoar
     }
     if (pending.length > 0) throw new ValidationError("Los arquetipos de los materiales no cumplen la receta.");
   }
-  if (recipe.requiredEnergyPerMaterial) {
-    const minMaterialEnergy = recipe.requiredEnergyPerMaterial;
-    const hasInvalidMaterial = materials.some((material) => material.card.cost < minMaterialEnergy);
-    if (hasInvalidMaterial) throw new ValidationError("Uno de los materiales no alcanza la energía mínima requerida.");
-  }
 }
 
 function validateFusionEnergy(
@@ -72,10 +67,8 @@ function validateFusionEnergy(
   materials: [IBoardEntity, IBoardEntity],
   recipeTotalEnergy: number | null,
 ): void {
-  if (recipeTotalEnergy) {
-    const totalEnergy = materials.reduce((sum, material) => sum + material.card.cost, 0);
-    if (totalEnergy < recipeTotalEnergy) throw new ValidationError("La energía total de materiales no alcanza la receta.");
-  }
-  const fusionEnergyCost = fusionCard.fusionEnergyRequirement ?? recipeTotalEnergy ?? fusionCard.cost;
-  if (player.currentEnergy < fusionEnergyCost) throw new GameRuleError("No tienes energía suficiente para fusionar.");
+  void player;
+  void fusionCard;
+  void materials;
+  void recipeTotalEnergy;
 }

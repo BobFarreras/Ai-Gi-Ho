@@ -29,6 +29,11 @@ export function useHandleTimerExpired({ gameStateRef, isAnimating, executeAdvanc
         autoPick.forEach((instanceId) => resolvePendingTurnAction(instanceId));
         return;
       }
+      if (pendingAction.type === "SELECT_GRAVEYARD_CARD") {
+        const candidate = [...currentState.playerA.graveyard].reverse().find((card) => !pendingAction.cardType || card.type === pendingAction.cardType);
+        if (candidate) resolvePendingTurnAction(candidate.runtimeId ?? candidate.id);
+        return;
+      }
       return;
     }
     executeAdvancePhase();

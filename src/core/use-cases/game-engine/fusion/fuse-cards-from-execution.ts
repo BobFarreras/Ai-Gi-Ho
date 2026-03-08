@@ -58,16 +58,6 @@ function validateMaterials(recipe: NonNullable<ReturnType<typeof getFusionRecipe
     }
     if (pending.length > 0) throw new ValidationError("Los arquetipos de los materiales no cumplen la receta.");
   }
-  if (recipe.requiredEnergyPerMaterial) {
-    const minEnergy = recipe.requiredEnergyPerMaterial;
-    if (materials.some((material) => material.card.cost < minEnergy)) {
-      throw new ValidationError("Uno de los materiales no alcanza la energía mínima requerida.");
-    }
-  }
-  if (recipe.requiredTotalEnergy) {
-    const total = materials.reduce((sum, material) => sum + material.card.cost, 0);
-    if (total < recipe.requiredTotalEnergy) throw new ValidationError("La energía total de materiales no alcanza la receta.");
-  }
 }
 
 function buildUpdatedPlayer(

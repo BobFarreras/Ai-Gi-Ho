@@ -29,6 +29,7 @@ interface BoardStatusOverlaysProps {
   graveyardView: "player" | "opponent" | null;
   graveyardOwnerName: string;
   graveyardCards: ICard[];
+  graveyardSelectableCardRefs?: string[];
   destroyedView?: "player" | "opponent" | null;
   destroyedOwnerName?: string;
   destroyedCards?: ICard[];
@@ -61,6 +62,7 @@ export function BoardStatusOverlays({
   graveyardView,
   graveyardOwnerName,
   graveyardCards,
+  graveyardSelectableCardRefs = [],
   destroyedView = null,
   destroyedOwnerName = "",
   destroyedCards = [],
@@ -142,6 +144,7 @@ export function BoardStatusOverlays({
         title="Cementerio"
         emptyMessage="No hay cartas en este cementerio."
         cards={graveyardCards}
+        selectableCardRefs={graveyardSelectableCardRefs}
         onClose={onCloseGraveyard}
         onSelectCard={onPreviewCard}
       />

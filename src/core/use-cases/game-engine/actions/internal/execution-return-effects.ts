@@ -1,5 +1,5 @@
 // src/core/use-cases/game-engine/actions/internal/execution-return-effects.ts - Resuelve retornos desde cementerio a mano/campo con reglas de overflow seguro.
-import { CardType, IReturnGraveyardCardToFieldEffect, IReturnGraveyardCardToHandEffect } from "@/core/entities/ICard";
+import { CardType, ICard, IReturnGraveyardCardToFieldEffect, IReturnGraveyardCardToHandEffect } from "@/core/entities/ICard";
 import { BattleMode, IPlayer } from "@/core/entities/IPlayer";
 import { GameRuleError } from "@/core/errors/GameRuleError";
 
@@ -8,12 +8,12 @@ export interface IExecutionSystemEvent {
   payload: Record<string, unknown>;
 }
 
-function pickGraveyardCard(graveyard: readonly { id: string; type: CardType }[], cardType?: CardType): string | null {
-  for (let index = graveyard.length - 1; index >= 0; index -= 1) {
-    const card = graveyard[index];
-    if (!cardType || card.type === cardType) return card.id;
-  }
-  return null;
+function resolveSelectedGraveyardCard(graveyard: readonly ICard[], selectedCardReference: string, cardType?: CardType): [ICard, number] {
+  const targetIndex = graveyard.findIndex((card) => (card.runtimeId ?? card.id) === selectedCardReference);
+  const targetCard = targetIndex >= 0 ? graveyard[targetIndex] : null;
+  if (!targetCard) throw new GameRuleError("La carta seleccionada no está en el cementerio.");
+  if (cardType && targetCard.type !== cardType) throw new GameRuleError("La carta seleccionada no cumple el tipo permitido.");
+  return [targetCard, targetIndex];
 }
 
 function createRevivedEntity(cardId: string, cardType: CardType, cardIndex: number): { instanceId: string; mode: BattleMode } {
@@ -24,11 +24,9 @@ function createRevivedEntity(cardId: string, cardType: CardType, cardIndex: numb
 export function applyReturnGraveyardCardToHand(
   player: IPlayer,
   effect: IReturnGraveyardCardToHandEffect,
+  selectedCardReference: string,
 ): { updatedPlayer: IPlayer; events: IExecutionSystemEvent[] } {
-  const targetId = pickGraveyardCard(player.graveyard, effect.cardType);
-  if (!targetId) throw new GameRuleError("No hay cartas válidas en cementerio para devolver a la mano.");
-  const targetIndex = player.graveyard.findIndex((card) => card.id === targetId);
-  const targetCard = player.graveyard[targetIndex];
+  const [targetCard, targetIndex] = resolveSelectedGraveyardCard(player.graveyard, selectedCardReference, effect.cardType);
   const nextGraveyard = player.graveyard.filter((_, index) => index !== targetIndex);
   const events: IExecutionSystemEvent[] = [];
   let nextHand = [...player.hand];
@@ -52,11 +50,9 @@ export function applyReturnGraveyardCardToHand(
 export function applyReturnGraveyardCardToField(
   player: IPlayer,
   effect: IReturnGraveyardCardToFieldEffect,
+  selectedCardReference: string,
 ): { updatedPlayer: IPlayer; events: IExecutionSystemEvent[] } {
-  const targetId = pickGraveyardCard(player.graveyard, effect.cardType);
-  if (!targetId) throw new GameRuleError("No hay cartas válidas en cementerio para devolver al tablero.");
-  const targetIndex = player.graveyard.findIndex((card) => card.id === targetId);
-  const targetCard = player.graveyard[targetIndex];
+  const [targetCard, targetIndex] = resolveSelectedGraveyardCard(player.graveyard, selectedCardReference, effect.cardType);
   const nextGraveyard = player.graveyard.filter((_, index) => index !== targetIndex);
   const events: IExecutionSystemEvent[] = [];
   const isEntity = targetCard.type === "ENTITY";
