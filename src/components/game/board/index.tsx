@@ -115,10 +115,20 @@ export function Board({
   const opponent = gameState.playerB;
   const [autoModeBannerSignal, setAutoModeBannerSignal] = useState<{ id: string; left: string; right: string } | null>(null);
   const [graveyardView, setGraveyardView] = useState<"player" | "opponent" | null>(null);
+  const [destroyedView, setDestroyedView] = useState<"player" | "opponent" | null>(null);
   const resolvedWinnerRef = useRef<string | "DRAW" | null>(null);
   const visibleGraveyardCards = useMemo(
     () => (graveyardView === "player" ? player.graveyard : graveyardView === "opponent" ? opponent.graveyard : []),
     [graveyardView, opponent.graveyard, player.graveyard],
+  );
+  const visibleDestroyedCards = useMemo(
+    () =>
+      destroyedView === "player"
+        ? (player.destroyedPile ?? [])
+        : destroyedView === "opponent"
+          ? (opponent.destroyedPile ?? [])
+          : [],
+    [destroyedView, opponent.destroyedPile, player.destroyedPile],
   );
   const pendingReplacementTargetCard = useMemo(() => {
     if (!pendingEntityReplacementTargetId || !pendingEntityReplacement) return null;
@@ -126,6 +136,7 @@ export function Board({
     return candidates.find((entity) => entity.instanceId === pendingEntityReplacementTargetId)?.card ?? null;
   }, [pendingEntityReplacement, pendingEntityReplacementTargetId, player.activeEntities, player.activeExecutions]);
   const visibleGraveyardOwner = graveyardView === "player" ? player.name : opponent.name;
+  const visibleDestroyedOwner = destroyedView === "player" ? player.name : opponent.name;
   const narration = useMatchNarration({
     combatLog: gameState.combatLog,
     winnerPlayerId,
@@ -172,10 +183,14 @@ export function Board({
         graveyardView={graveyardView}
         graveyardOwnerName={visibleGraveyardOwner}
         graveyardCards={visibleGraveyardCards}
+        destroyedView={destroyedView}
+        destroyedOwnerName={visibleDestroyedOwner}
+        destroyedCards={visibleDestroyedCards}
         onCloseError={() => { playButtonClick(); clearError(); }}
         onConfirmEntityReplacement={() => { playButtonClick(); confirmEntityReplacement(); }}
         onCancelEntityReplacement={() => { playButtonClick(); cancelEntityReplacement(); }}
         onCloseGraveyard={() => setGraveyardView(null)}
+        onCloseDestroyed={() => setDestroyedView(null)}
         onPreviewCard={previewCard}
         pendingAdvanceWarning={pendingAdvanceWarning}
         onConfirmAdvancePhase={confirmAdvancePhase}
@@ -219,6 +234,7 @@ export function Board({
         lastBuffTargetEntityIds={lastBuffTargetEntityIds} lastBuffStat={lastBuffStat} lastBuffAmount={lastBuffAmount} lastBuffEventId={lastBuffEventId}
         lastCardXpCardId={lastCardXpCardId} lastCardXpAmount={lastCardXpAmount} lastCardXpEventId={lastCardXpEventId} lastCardXpActorPlayerId={lastCardXpActorPlayerId}
         onGraveyardClick={setGraveyardView} onEntityClick={handleEntityClick} onMandatoryCardSelect={resolvePendingHandDiscard}
+        onDestroyedClick={setDestroyedView}
         canActivateSelectedExecution={canActivateSelectedExecution}
         onCardClick={toggleCardSelection} onPlayAction={executePlayAction} onActivateSelectedExecution={() => {
           void (async () => {

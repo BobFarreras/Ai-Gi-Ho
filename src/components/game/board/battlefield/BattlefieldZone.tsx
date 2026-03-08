@@ -34,6 +34,7 @@ interface BattlefieldZoneProps {
   canActivateSelectedExecution: boolean;
   onActivateSelectedExecution: () => void;
   onGraveyardClick: (side: "player" | "opponent") => void;
+  onDestroyedClick?: (side: "player" | "opponent") => void;
   onEntityClick: (entity: IBoardEntity | null, isOpponentSide: boolean, event: MouseEvent) => void;
 }
 
@@ -64,6 +65,7 @@ export function BattlefieldZone({
   canActivateSelectedExecution,
   onActivateSelectedExecution,
   onGraveyardClick,
+  onDestroyedClick = () => undefined,
   onEntityClick,
 }: BattlefieldZoneProps) {
   const isOpponentSide = side === "opponent";
@@ -85,7 +87,7 @@ export function BattlefieldZone({
         graveyardCount={graveyardCount}
         onClick={onGraveyardClick}
       />
-      <DestroyedPile destroyedCount={destroyedCount} />
+      <DestroyedPile isOpponentSide={isOpponentSide} destroyedCount={destroyedCount} onClick={onDestroyedClick} />
       <BattlefieldLanes
         isOpponentSide={isOpponentSide}
         activeEntities={activeEntities}

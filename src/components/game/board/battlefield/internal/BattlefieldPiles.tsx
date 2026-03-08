@@ -76,12 +76,24 @@ export function FusionDeckPile({ fusionDeckCount }: { fusionDeckCount: number })
   );
 }
 
-export function DestroyedPile({ destroyedCount }: { destroyedCount: number }) {
+interface DestroyedPileProps {
+  isOpponentSide: boolean;
+  destroyedCount: number;
+  onClick: (side: "player" | "opponent") => void;
+}
+
+export function DestroyedPile({ isOpponentSide, destroyedCount, onClick }: DestroyedPileProps) {
+  const side = isOpponentSide ? "opponent" : "player";
   return (
-    <div className="relative w-24 h-36 border-2 border-amber-500/40 rounded-lg shadow-[0_0_28px_rgba(245,158,11,0.24)] flex flex-col items-center justify-center bg-amber-950/20 overflow-hidden">
+    <button
+      type="button"
+      aria-label={`Abrir zona destruida ${isOpponentSide ? "rival" : "jugador"}`}
+      onClick={() => onClick(side)}
+      className="relative w-24 h-36 border-2 border-amber-500/40 rounded-lg shadow-[0_0_28px_rgba(245,158,11,0.24)] flex flex-col items-center justify-center bg-amber-950/20 overflow-hidden transition-colors hover:border-amber-300/70"
+    >
       <span className="relative z-10 bg-black/90 px-2 py-1 rounded-md text-amber-300 font-mono text-[11px] border border-amber-900/80">
         DEST {destroyedCount}
       </span>
-    </div>
+    </button>
   );
 }

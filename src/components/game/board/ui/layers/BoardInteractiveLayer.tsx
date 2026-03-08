@@ -32,6 +32,7 @@ interface BoardInteractiveLayerProps {
   lastCardXpEventId: string | null;
   lastCardXpActorPlayerId: string | null;
   onGraveyardClick: (side: "player" | "opponent") => void;
+  onDestroyedClick?: (side: "player" | "opponent") => void;
   onEntityClick: (entity: IBoardEntity | null, isOpponentSide: boolean, event: React.MouseEvent) => Promise<void>;
   onMandatoryCardSelect: (cardId: string) => void;
   onCardClick: (card: ICard, event?: React.MouseEvent) => void;
@@ -66,6 +67,7 @@ export function BoardInteractiveLayer({
   lastCardXpEventId,
   lastCardXpActorPlayerId,
   onGraveyardClick,
+  onDestroyedClick = () => undefined,
   onEntityClick,
   onMandatoryCardSelect,
   onCardClick,
@@ -117,6 +119,7 @@ export function BoardInteractiveLayer({
           canActivateSelectedExecution={canActivateSelectedExecution}
           onActivateSelectedExecution={onActivateSelectedExecution}
           onGraveyardClick={onGraveyardClick}
+          onDestroyedClick={onDestroyedClick}
           onEntityClick={onEntityClick}
         />
       </div>

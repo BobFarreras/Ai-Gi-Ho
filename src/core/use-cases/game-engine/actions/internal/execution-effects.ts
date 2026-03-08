@@ -1,6 +1,12 @@
+// src/core/use-cases/game-engine/actions/internal/execution-effects.ts - Aplica efectos de ejecución sobre estado de jugadores y expone eventos sistémicos.
 import { CardArchetype, ICardEffect } from "@/core/entities/ICard";
 import { IPlayer } from "@/core/entities/IPlayer";
 import { GameRuleError } from "@/core/errors/GameRuleError";
+import {
+  applyReturnGraveyardCardToField,
+  applyReturnGraveyardCardToHand,
+  IExecutionSystemEvent,
+} from "@/core/use-cases/game-engine/actions/internal/execution-return-effects";
 
 interface IBuffSummary {
   entityIds: string[];
@@ -15,6 +21,7 @@ export interface IExecutionEffectResult {
   buff: IBuffSummary;
   damageTargetPlayerId: string | null;
   damageAmount: number;
+  systemEvents: IExecutionSystemEvent[];
 }
 
 export function applyExecutionEffect(player: IPlayer, opponent: IPlayer, effect: ICardEffect): IExecutionEffectResult {
@@ -24,6 +31,7 @@ export function applyExecutionEffect(player: IPlayer, opponent: IPlayer, effect:
   const buff: IBuffSummary = { entityIds: [], stat: null, amount: 0 };
   let damageTargetPlayerId: string | null = null;
   let damageAmount = 0;
+  let systemEvents: IExecutionSystemEvent[] = [];
 
   switch (effect.action) {
     case "DAMAGE":
@@ -50,11 +58,17 @@ export function applyExecutionEffect(player: IPlayer, opponent: IPlayer, effect:
       buff.stat = "ATTACK";
       buff.amount = effect.value;
       break;
+    case "RETURN_GRAVEYARD_CARD_TO_HAND":
+      ({ updatedPlayer, events: systemEvents } = applyReturnGraveyardCardToHand(updatedPlayer, effect));
+      break;
+    case "RETURN_GRAVEYARD_CARD_TO_FIELD":
+      ({ updatedPlayer, events: systemEvents } = applyReturnGraveyardCardToField(updatedPlayer, effect));
+      break;
     default:
       break;
   }
 
-  return { player: updatedPlayer, opponent: updatedOpponent, healApplied, buff, damageTargetPlayerId, damageAmount };
+  return { player: updatedPlayer, opponent: updatedOpponent, healApplied, buff, damageTargetPlayerId, damageAmount, systemEvents };
 }
 
 function drawCards(player: IPlayer, amount: number): IPlayer {

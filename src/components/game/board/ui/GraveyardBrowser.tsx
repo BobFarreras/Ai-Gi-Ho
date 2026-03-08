@@ -1,3 +1,4 @@
+// src/components/game/board/ui/GraveyardBrowser.tsx - Overlay reutilizable para navegar cartas del cementerio o zona destruida.
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
@@ -8,12 +9,22 @@ import { Card } from "@/components/game/card/Card";
 interface GraveyardBrowserProps {
   isOpen: boolean;
   ownerName: string;
+  title?: string;
+  emptyMessage?: string;
   cards: ICard[];
   onClose: () => void;
   onSelectCard: (card: ICard) => void;
 }
 
-export function GraveyardBrowser({ isOpen, ownerName, cards, onClose, onSelectCard }: GraveyardBrowserProps) {
+export function GraveyardBrowser({
+  isOpen,
+  ownerName,
+  title = "Cementerio",
+  emptyMessage = "No hay cartas en esta zona.",
+  cards,
+  onClose,
+  onSelectCard,
+}: GraveyardBrowserProps) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -32,12 +43,12 @@ export function GraveyardBrowser({ isOpen, ownerName, cards, onClose, onSelectCa
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4 border-b border-zinc-700/70 pb-3">
-              <h3 className="text-lg text-cyan-200 font-black uppercase tracking-wider">Cementerio de {ownerName}</h3>
-              <button aria-label="Cerrar cementerio" onClick={onClose} className="text-zinc-300 hover:text-white">
+              <h3 className="text-lg text-cyan-200 font-black uppercase tracking-wider">{title} de {ownerName}</h3>
+              <button aria-label="Cerrar zona de cartas" onClick={onClose} className="text-zinc-300 hover:text-white">
                 <X size={20} />
               </button>
             </div>
-            {cards.length === 0 && <p className="text-zinc-400">No hay cartas en este cementerio.</p>}
+            {cards.length === 0 && <p className="text-zinc-400">{emptyMessage}</p>}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[58vh] overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-zinc-500/70 [&::-webkit-scrollbar-track]:bg-transparent">
               {cards.map((card, index) => (
                 <button

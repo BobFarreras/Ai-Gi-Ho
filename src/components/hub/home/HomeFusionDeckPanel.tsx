@@ -1,4 +1,4 @@
-// src/components/hub/home/HomeFusionDeckPanel.tsx - Panel compacto del bloque de fusión con 2 slots dedicados en Arsenal.
+// src/components/hub/home/HomeFusionDeckPanel.tsx
 import { IDeck } from "@/core/entities/home/IDeck";
 import { ICollectionCard } from "@/core/entities/home/ICollectionCard";
 import { IPlayerCardProgress } from "@/core/entities/progression/IPlayerCardProgress";
@@ -27,19 +27,28 @@ export function HomeFusionDeckPanel({
   onDropOnFusionSlot,
 }: HomeFusionDeckPanelProps) {
   const cardById = new Map(collection.map((entry) => [entry.card.id, entry.card]));
+  
   return (
-    <section className="mt-3 rounded-2xl border border-fuchsia-700/40 bg-[#120617]/65 p-3">
-      <div className="mb-2 flex items-center justify-between border-b border-fuchsia-900/50 pb-2">
-        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-fuchsia-200">Bloque Fusión</h3>
-        <p className="text-[11px] font-semibold text-fuchsia-100/80">
+    // ESTILO WIREFRAME: bg-transparent, sin blur, solo bordes definidos y un levísimo resplandor interno
+    <section className="mt-3 rounded-2xl border border-cyan-500/40 bg-transparent p-3 shadow-[inset_0_0_20px_rgba(34,211,238,0.05)]">
+      
+      {/* HEADER */}
+      <div className="mb-2 flex items-center justify-between border-b border-cyan-900/60 pb-2">
+        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]">
+          Bloque Fusión
+        </h3>
+        <p className="text-[11px] font-semibold text-cyan-100/80">
           {deck.fusionSlots.filter((slot) => slot.cardId !== null).length}/2
         </p>
       </div>
+
+      {/* SLOTS */}
       <div className="mx-auto grid w-full max-w-[220px] grid-cols-2 place-items-center gap-3">
         {deck.fusionSlots.map((slot) => {
           const card = slot.cardId ? cardById.get(slot.cardId) ?? null : null;
           const progress = slot.cardId ? cardProgressById.get(slot.cardId) ?? null : null;
           const isSelected = selectedFusionSlotIndex === slot.index || (slot.cardId !== null && selectedCardId === slot.cardId);
+          
           return (
             <div key={`fusion-slot-${slot.index}`} className="w-[76px]">
               <HomeMiniCard
@@ -61,6 +70,7 @@ export function HomeFusionDeckPanel({
           );
         })}
       </div>
+      
     </section>
   );
 }

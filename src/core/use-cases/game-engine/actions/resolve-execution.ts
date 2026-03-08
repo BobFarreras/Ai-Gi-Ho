@@ -57,7 +57,7 @@ function appendExecutionResultLogs(
   executionCardId: string,
   effectResult: ReturnType<typeof applyExecutionEffect>,
 ): GameState {
-  return appendExecutionResolutionLogs({
+  let withLogs = appendExecutionResolutionLogs({
     state: withPlayers,
     playerId,
     executionCardId,
@@ -68,6 +68,10 @@ function appendExecutionResultLogs(
     buffAmount: effectResult.buff.amount,
     buffEntityIds: effectResult.buff.entityIds,
   });
+  for (const systemEvent of effectResult.systemEvents) {
+    withLogs = appendCombatLogEvent(withLogs, playerId, systemEvent.eventType, systemEvent.payload);
+  }
+  return withLogs;
 }
 
 /**

@@ -176,6 +176,8 @@ export function formatCombatLogEvent(event: ICombatLogEvent, labels: IPlayerLabe
       return `${actor} activa una trampa. (+20 EXP)`;
     case "CARD_TO_GRAVEYARD":
       return `${actor} envía carta al cementerio.`;
+    case "CARD_TO_DESTROYED":
+      return `${actor} destruye una carta.`;
     case "MANDATORY_ACTION_RESOLVED":
       return `${actor} resuelve acción obligatoria.`;
     case "FUSION_SUMMONED":

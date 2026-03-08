@@ -44,6 +44,7 @@ interface BattlefieldProps {
   canActivateSelectedExecution: boolean;
   onActivateSelectedExecution: () => void;
   onGraveyardClick: (side: "player" | "opponent") => void;
+  onDestroyedClick?: (side: "player" | "opponent") => void;
   onEntityClick: (entity: IBoardEntity | null, isOpponentSide: boolean, event: React.MouseEvent) => void;
 }
 
@@ -83,6 +84,7 @@ export function Battlefield({
   canActivateSelectedExecution,
   onActivateSelectedExecution,
   onGraveyardClick,
+  onDestroyedClick = () => undefined,
   onEntityClick,
 }: BattlefieldProps) {
   const [zoom, setZoom] = useState(1);
@@ -136,6 +138,7 @@ export function Battlefield({
             canActivateSelectedExecution={false}
             onActivateSelectedExecution={onActivateSelectedExecution}
             onGraveyardClick={onGraveyardClick}
+            onDestroyedClick={onDestroyedClick}
             onEntityClick={onEntityClick}
           />
 
@@ -168,6 +171,7 @@ export function Battlefield({
             canActivateSelectedExecution={canActivateSelectedExecution}
             onActivateSelectedExecution={onActivateSelectedExecution}
             onGraveyardClick={onGraveyardClick}
+            onDestroyedClick={onDestroyedClick}
             onEntityClick={onEntityClick}
           />
         </div>

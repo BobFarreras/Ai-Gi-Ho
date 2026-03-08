@@ -29,10 +29,14 @@ interface BoardStatusOverlaysProps {
   graveyardView: "player" | "opponent" | null;
   graveyardOwnerName: string;
   graveyardCards: ICard[];
+  destroyedView?: "player" | "opponent" | null;
+  destroyedOwnerName?: string;
+  destroyedCards?: ICard[];
   onCloseError: () => void;
   onConfirmEntityReplacement: () => void;
   onCancelEntityReplacement: () => void;
   onCloseGraveyard: () => void;
+  onCloseDestroyed?: () => void;
   onPreviewCard: (card: ICard) => void;
   pendingAdvanceWarning: "MAIN_SKIP_ACTIONS" | "BATTLE_SKIP_ATTACKS" | null;
   onConfirmAdvancePhase: (disableHelp: boolean) => void;
@@ -57,10 +61,14 @@ export function BoardStatusOverlays({
   graveyardView,
   graveyardOwnerName,
   graveyardCards,
+  destroyedView = null,
+  destroyedOwnerName = "",
+  destroyedCards = [],
   onCloseError,
   onConfirmEntityReplacement,
   onCancelEntityReplacement,
   onCloseGraveyard,
+  onCloseDestroyed = () => undefined,
   onPreviewCard,
   pendingAdvanceWarning,
   onConfirmAdvancePhase,
@@ -131,8 +139,19 @@ export function BoardStatusOverlays({
       <GraveyardBrowser
         isOpen={graveyardView !== null}
         ownerName={graveyardOwnerName}
+        title="Cementerio"
+        emptyMessage="No hay cartas en este cementerio."
         cards={graveyardCards}
         onClose={onCloseGraveyard}
+        onSelectCard={onPreviewCard}
+      />
+      <GraveyardBrowser
+        isOpen={destroyedView !== null}
+        ownerName={destroyedOwnerName}
+        title="Zona Destruida"
+        emptyMessage="No hay cartas destruidas."
+        cards={destroyedCards}
+        onClose={onCloseDestroyed}
         onSelectCard={onPreviewCard}
       />
     </>
