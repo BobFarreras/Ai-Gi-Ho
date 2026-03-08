@@ -1,13 +1,13 @@
-// src/components/game/board/PlayerHUD.tsx
+// src/components/game/board/PlayerHUD.tsx - HUD de jugador/oponente con LP, energía, avatar diagonal y burbujas reactivas.
 "use client";
-
 import { motion } from "framer-motion";
 import { Zap } from "lucide-react";
 import { IPlayer } from "@/core/entities/IPlayer";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { HudFloatingDelta } from "./internal/HudFloatingDelta";
-
+import { HudAvatarSlot } from "./internal/HudAvatarSlot";
+import { HudDialogueBubble } from "./internal/HudDialogueBubble";
 interface PlayerHUDProps {
   isOpponent: boolean;
   player: IPlayer;
@@ -19,8 +19,9 @@ interface PlayerHUDProps {
   wasHealedThisAction?: boolean;
   healPulseKey?: string | null;
   healAmount?: number | null;
+  avatarUrl?: string | null;
+  dialogueMessage?: string | null;
 }
-
 export function PlayerHUD({
   isOpponent,
   player,
@@ -32,14 +33,14 @@ export function PlayerHUD({
   wasHealedThisAction = false,
   healPulseKey = null,
   healAmount = null,
+  avatarUrl = null,
+  dialogueMessage = null,
 }: PlayerHUDProps) {
   const lastProcessedDamageEventId = useRef<string | null>(null);
   const lastProcessedHealEventId = useRef<string | null>(null);
   const [damageTaken, setDamageTaken] = useState<number | null>(null);
   const [healGained, setHealGained] = useState<number | null>(null);
   const [isShaking, setIsShaking] = useState(false);
-
-  // Hook para detectar daño y disparar la animación
   useEffect(() => {
     if (!wasDamagedThisAction) return;
     if (!damagePulseKey || lastProcessedDamageEventId.current === damagePulseKey) {
@@ -86,13 +87,7 @@ export function PlayerHUD({
       clearTimeout(timer);
     };
   }, [healAmount, healPulseKey, wasHealedThisAction]);
-
-  const healthPercentage = Math.max(0, Math.min(100, (player.healthPoints / player.maxHealthPoints) * 100));
-
-  // Animación de vibración de la UI
-  const shakeAnimation = isShaking 
-    ? { x: isOpponent ? [0, -10, 10, -10, 10, 0] : [0, 10, -10, 10, -10, 0] } 
-    : { x: 0 };
+  const shakeAnimation = isShaking ? { x: isOpponent ? [0, -10, 10, -10, 10, 0] : [0, 10, -10, 10, -10, 0] } : { x: 0 };
 
   return (
     <motion.div
@@ -102,41 +97,27 @@ export function PlayerHUD({
       className={cn(
         "absolute z-[100] flex flex-col w-72 pointer-events-none drop-shadow-2xl transition-all duration-300",
         isActiveTurn ? "scale-[1.02] drop-shadow-[0_0_30px_rgba(34,211,238,0.35)]" : "opacity-80",
-        isOpponent ? "top-6 right-6 items-end" : "bottom-6 left-6 items-start"
+        isOpponent ? "top-6 right-6 items-end" : "bottom-6 left-6 items-start",
       )}
     >
       <HudFloatingDelta value={damageTaken} sign="-" isOpponent={isOpponent} color="red" />
       <HudFloatingDelta value={healGained} sign="+" isOpponent={isOpponent} color="blue" />
+      <HudDialogueBubble isOpponent={isOpponent} message={dialogueMessage} />
 
-      <div className="bg-zinc-950/90 border border-zinc-700/50 backdrop-blur-xl px-4 py-1.5 mb-1 relative overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.8)]">
-        <div className={cn("absolute inset-0 opacity-20", isOpponent ? "bg-red-500" : "bg-cyan-500")} />
-        <div className="flex items-center gap-2">
-          <span className="font-black tracking-widest text-white uppercase text-sm drop-shadow-md">{player.name}</span>
-          {badgeText && (
-            <span className="text-[10px] px-2 py-0.5 border border-amber-300/60 bg-amber-500/20 text-amber-200 rounded uppercase tracking-widest font-black">
-              {badgeText}
-            </span>
-          )}
-          {isActiveTurn && (
-            <span className="text-[10px] px-2 py-0.5 border border-cyan-300/60 bg-cyan-500/20 text-cyan-200 rounded uppercase tracking-widest font-black animate-pulse">
-              Turno Activo
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div 
-        className="w-full h-8 bg-zinc-950/90 border border-white/10 relative backdrop-blur-xl shadow-inner"
-        style={{ clipPath: isOpponent ? "polygon(5% 0, 100% 0, 100% 100%, 0 100%)" : "polygon(0 0, 95% 0, 100% 100%, 0 100%)" }}
-      >
-        <motion.div 
-          className={cn("h-full absolute top-0", isOpponent ? "bg-red-600 right-0" : "bg-cyan-500 left-0")}
-          initial={{ width: "100%" }} animate={{ width: `${healthPercentage}%` }} transition={{ type: "spring", stiffness: 100 }}
-          style={{ boxShadow: isOpponent ? "0 0 25px rgba(220,38,38,1)" : "0 0 25px rgba(6,182,212,1)" }}
+      <div className={cn("mb-6 flex items-start gap-2", isOpponent ? "flex-row-reverse" : "flex-row")}>
+        <HudAvatarSlot
+          isOpponent={isOpponent}
+          playerName={player.name}
+          healthPoints={player.healthPoints}
+          maxHealthPoints={player.maxHealthPoints}
+          isActiveTurn={isActiveTurn}
+          avatarUrl={avatarUrl}
         />
-        <div className={cn("absolute top-1 font-black text-white text-lg drop-shadow-[0_2px_4px_rgba(0,0,0,1)]", isOpponent ? "right-6" : "left-6")}>
-          {player.healthPoints} LP
-        </div>
+        {badgeText ? (
+          <span className="mt-1 text-[10px] px-2 py-0.5 border border-amber-300/60 bg-amber-500/20 text-amber-200 rounded uppercase tracking-widest font-black">
+            {badgeText}
+          </span>
+        ) : null}
       </div>
 
       <div className={cn("flex mt-2 space-x-1", isOpponent ? "justify-end" : "justify-start")}>

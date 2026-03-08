@@ -26,6 +26,7 @@ interface IStoryDuelRow {
 interface IStoryOpponentRow {
   id: string;
   display_name: string;
+  avatar_url: string | null;
   difficulty: StoryOpponentDifficulty;
 }
 
@@ -63,7 +64,7 @@ export class SupabaseOpponentRepository implements IOpponentRepository {
     if (duelResult.error) throw new ValidationError("No se pudo cargar la lista de duelos Story.");
     const duels = (duelResult.data ?? []) as IStoryDuelRow[];
     const opponentIds = Array.from(new Set(duels.map((duel) => duel.opponent_id)));
-    const opponentsResult = await this.client.from("story_opponents").select("id,display_name,difficulty").in("id", opponentIds);
+    const opponentsResult = await this.client.from("story_opponents").select("id,display_name,avatar_url,difficulty").in("id", opponentIds);
     if (opponentsResult.error) throw new ValidationError("No se pudo cargar el catálogo de oponentes Story.");
     const opponentRows = (opponentsResult.data ?? []) as IStoryOpponentRow[];
     const opponentById = new Map(opponentRows.map((row) => [row.id, row]));
@@ -100,7 +101,7 @@ export class SupabaseOpponentRepository implements IOpponentRepository {
 
     const opponentResult = await this.client
       .from("story_opponents")
-      .select("id,display_name,difficulty")
+      .select("id,display_name,avatar_url,difficulty")
       .eq("id", duelResult.data.opponent_id)
       .eq("is_active", true)
       .single<IStoryOpponentRow>();
@@ -128,6 +129,7 @@ export class SupabaseOpponentRepository implements IOpponentRepository {
       description: duelResult.data.description,
       opponentId: opponentResult.data.id,
       opponentName: opponentResult.data.display_name,
+      opponentAvatarUrl: opponentResult.data.avatar_url,
       opponentDifficulty: opponentResult.data.difficulty,
       opponentDeckCardIds: mapStoryDeckCardIds((deckResult.data ?? []) as IStoryDeckCardRow[]),
       openingHandSize: duelResult.data.opening_hand_size,

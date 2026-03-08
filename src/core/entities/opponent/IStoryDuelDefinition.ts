@@ -16,6 +16,7 @@ export interface IStoryDuelDefinition {
   description: string;
   opponentId: string;
   opponentName: string;
+  opponentAvatarUrl?: string | null;
   opponentDifficulty: StoryOpponentDifficulty;
   opponentDeckCardIds: string[];
   openingHandSize: number;

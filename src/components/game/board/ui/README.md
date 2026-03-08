@@ -1,3 +1,4 @@
+<!-- src/components/game/board/ui/README.md - Documenta componentes visuales y capas de la UI del tablero. -->
 # Board UI Module
 
 Componentes visuales del tablero. Renderiza estado y eventos, sin reglas de dominio.
@@ -26,6 +27,9 @@ Componentes visuales del tablero. Renderiza estado y eventos, sin reglas de domi
 7. `OpponentHandFan.tsx`
    - Representación de mano rival.
 
+8. `CinematicNarrationOverlay.tsx`
+   - Overlay lateral para diálogos especiales (inicio, fusión, final).
+
 ## Subcarpetas
 
 1. `layers/`
@@ -48,6 +52,9 @@ Componentes visuales del tablero. Renderiza estado y eventos, sin reglas de domi
 
 7. `internal/duel-result-card-density.ts`
    - Regla de densidad para ajustar el tamaño de cartas según cantidad.
+
+8. `../narration/*`
+   - Contratos y selector de eventos narrativos desacoplados del motor.
 
 ## Reglas de módulo
 

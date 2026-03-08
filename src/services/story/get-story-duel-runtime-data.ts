@@ -13,11 +13,13 @@ export interface IStoryDuelRuntimeData {
   chapter: number;
   duelIndex: number;
   duelTitle: string;
+  duelDescription: string;
   isUnlocked: boolean;
   playerDeck: ICard[];
   opponentDeck: ICard[];
   opponentId: string;
   opponentName: string;
+  opponentAvatarUrl?: string | null;
 }
 
 export async function getStoryDuelRuntimeData(chapter: number, duelIndex: number): Promise<IStoryDuelRuntimeData | null> {
@@ -47,10 +49,12 @@ export async function getStoryDuelRuntimeData(chapter: number, duelIndex: number
     chapter: duel.chapter,
     duelIndex: duel.duelIndex,
     duelTitle: duel.title,
+    duelDescription: duel.description,
     isUnlocked,
     playerDeck,
     opponentDeck,
     opponentId: duel.opponentId,
     opponentName: duel.opponentName,
+    opponentAvatarUrl: duel.opponentAvatarUrl ?? null,
   };
 }

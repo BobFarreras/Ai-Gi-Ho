@@ -8,22 +8,39 @@ import { BoardTopBar } from "./ui/layout/BoardTopBar";
 import { BoardActionButtons } from "./ui/layout/BoardActionButtons";
 import { BoardPlayersLayer } from "./ui/layers/BoardPlayersLayer";
 import { BoardInteractiveLayer } from "./ui/layers/BoardInteractiveLayer";
+import { CinematicNarrationOverlay } from "./ui/CinematicNarrationOverlay";
 import { ICard } from "@/core/entities/ICard";
 import { IMatchMode } from "@/core/entities/match";
 import { ICreateInitialBoardStateInput } from "@/components/game/board/hooks/internal/boardInitialState";
 import { IDuelResultRewardSummary } from "./ui/internal/duel-result-reward-summary";
+import { IMatchNarrationPack } from "./narration/types";
+import { useMatchNarration } from "./hooks/internal/match/useMatchNarration";
 
 interface IBoardProps {
   initialPlayerDeck?: ICard[] | null;
   mode?: IMatchMode;
   initialConfig?: ICreateInitialBoardStateInput;
   duelResultRewardSummary?: IDuelResultRewardSummary | null;
+  narrationPack?: IMatchNarrationPack | null;
+  playerAvatarUrl?: string | null;
+  opponentAvatarUrl?: string | null;
   resultActionLabel?: string;
   onResultAction?: () => void;
   onMatchResolved?: (result: { winnerPlayerId: string | "DRAW"; playerId: string; mode: IMatchMode; matchSeed: string }) => void;
 }
 
-export function Board({ initialPlayerDeck, mode = "TRAINING", initialConfig, duelResultRewardSummary, resultActionLabel, onResultAction, onMatchResolved }: IBoardProps) {
+export function Board({
+  initialPlayerDeck,
+  mode = "TRAINING",
+  initialConfig,
+  duelResultRewardSummary,
+  narrationPack,
+  playerAvatarUrl = null,
+  opponentAvatarUrl = null,
+  resultActionLabel,
+  onResultAction,
+  onMatchResolved,
+}: IBoardProps) {
   const {
     gameState,
     selectedCard,
@@ -98,6 +115,14 @@ export function Board({ initialPlayerDeck, mode = "TRAINING", initialConfig, due
     return player.activeEntities.find((entity) => entity.instanceId === pendingEntityReplacementTargetId)?.card ?? null;
   }, [pendingEntityReplacementTargetId, player.activeEntities]);
   const visibleGraveyardOwner = graveyardView === "player" ? player.name : opponent.name;
+  const narration = useMatchNarration({
+    combatLog: gameState.combatLog,
+    winnerPlayerId,
+    playerId: player.id,
+    opponentId: opponent.id,
+    isMuted,
+    narrationPack,
+  });
 
   useEffect(() => {
     if (!winnerPlayerId) {
@@ -137,6 +162,12 @@ export function Board({ initialPlayerDeck, mode = "TRAINING", initialConfig, due
         onPreviewCard={previewCard}
 
       />
+      <CinematicNarrationOverlay
+        action={narration.activeCinematicAction}
+        playerId={player.id}
+        playerAvatarUrl={playerAvatarUrl}
+        opponentAvatarUrl={opponentAvatarUrl}
+      />
       <BoardTopBar
         turn={gameState.turn}
         phase={gameState.phase}
@@ -154,6 +185,10 @@ export function Board({ initialPlayerDeck, mode = "TRAINING", initialConfig, due
         player={player} opponent={opponent} isPlayerTurn={isPlayerTurn} opponentDifficulty={opponentDifficulty}
         lastDamageTargetPlayerId={lastDamageTargetPlayerId} lastDamageAmount={lastDamageAmount} lastDamageEventId={lastDamageEventId}
         lastHealTargetPlayerId={lastHealTargetPlayerId} lastHealAmount={lastHealAmount} lastHealEventId={lastHealEventId}
+        playerAvatarUrl={playerAvatarUrl}
+        opponentAvatarUrl={opponentAvatarUrl}
+        playerDialogueMessage={narration.hudDialogueByPlayerId[player.id] ?? null}
+        opponentDialogueMessage={narration.hudDialogueByPlayerId[opponent.id] ?? null}
       />
       <BoardInteractiveLayer
         gameState={gameState} selectedCard={selectedCard} playingCard={playingCard} activeAttackerId={activeAttackerId}
