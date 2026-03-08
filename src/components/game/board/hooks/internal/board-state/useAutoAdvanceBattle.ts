@@ -12,6 +12,7 @@ interface IUseAutoAdvanceBattleParams {
   isPlayerTurn: boolean;
   isAutoPhaseEnabled: boolean;
   advancePhase: () => void;
+  onAutoAdvanced: () => void;
 }
 
 function resolveWinner(state: GameState): string | "DRAW" | null {
@@ -21,7 +22,7 @@ function resolveWinner(state: GameState): string | "DRAW" | null {
   return null;
 }
 
-export function useAutoAdvanceBattle({ gameState, gameStateRef, winnerPlayerId, isAnimating, isPlayerTurn, isAutoPhaseEnabled, advancePhase }: IUseAutoAdvanceBattleParams) {
+export function useAutoAdvanceBattle({ gameState, gameStateRef, winnerPlayerId, isAnimating, isPlayerTurn, isAutoPhaseEnabled, advancePhase, onAutoAdvanced }: IUseAutoAdvanceBattleParams) {
   useEffect(() => {
     if (!isAutoPhaseEnabled) return;
     if (resolveAdvanceWarning(gameState) === "BATTLE_SKIP_ATTACKS") return;
@@ -53,6 +54,7 @@ export function useAutoAdvanceBattle({ gameState, gameStateRef, winnerPlayerId, 
         activeEntities: latestState.playerA.activeEntities,
       });
       if (!canAdvanceNow) return;
+      onAutoAdvanced();
       advancePhase();
     }, 260);
     return () => window.clearTimeout(timeoutId);
@@ -67,6 +69,7 @@ export function useAutoAdvanceBattle({ gameState, gameStateRef, winnerPlayerId, 
     isAnimating,
     isPlayerTurn,
     isAutoPhaseEnabled,
+    onAutoAdvanced,
     winnerPlayerId,
   ]);
 }

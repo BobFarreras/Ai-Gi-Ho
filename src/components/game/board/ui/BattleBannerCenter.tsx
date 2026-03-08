@@ -19,6 +19,10 @@ const DISPLAY_MS = 2200;
 const CRITICAL_EVENT_TYPES: ICombatLogEvent["eventType"][] = [
   "TURN_STARTED",
   "PHASE_CHANGED",
+  "AUTO_PHASE_ADVANCED",
+  "TURN_GUARD_SHOWN",
+  "TURN_GUARD_CONFIRMED",
+  "TURN_GUARD_CANCELLED",
 ];
 
 export function BattleBannerCenter({

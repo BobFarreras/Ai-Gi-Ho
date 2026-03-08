@@ -49,6 +49,19 @@ describe("turn-decision", () => {
     expect(result).toBe(false);
   });
 
+  it("no auto-pasa cuando hay 2 atacantes y solo uno ya atacó", () => {
+    const result = canAutoAdvanceBattle({
+      phase: "BATTLE",
+      winnerPlayerId: null,
+      isAnimating: false,
+      isPlayerTurn: true,
+      pendingTurnActionPlayerId: null,
+      playerId: "p1",
+      activeEntities: [createEntity("ATTACK", true, false), createEntity("ATTACK", false, false)],
+    });
+    expect(result).toBe(false);
+  });
+
   it("muestra aviso de salto de combate cuando aún hay acciones", () => {
     const warning = shouldShowAdvanceWarning({ phase: "BATTLE", hasAvailableBattleActions: true, hasPlayableMainActions: false });
     expect(warning).toBe("BATTLE_SKIP_ATTACKS");

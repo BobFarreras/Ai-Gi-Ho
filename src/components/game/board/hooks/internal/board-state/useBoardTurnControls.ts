@@ -4,6 +4,8 @@ import { ICard } from "@/core/entities/ICard";
 import { GameEngine, GameState } from "@/core/use-cases/GameEngine";
 import { useAutoAdvanceBattle } from "./useAutoAdvanceBattle";
 import { useAdvancePhaseGuard } from "./useAdvancePhaseGuard";
+import { useHandleTimerExpired } from "./useHandleTimerExpired";
+import { useTurnTelemetry } from "./useTurnTelemetry";
 
 interface IUseBoardTurnControlsParams {
   gameState: GameState;
@@ -52,6 +54,7 @@ export function useBoardTurnControls({
   setActiveAttackerId,
   setPlayingCard,
 }: IUseBoardTurnControlsParams): IUseBoardTurnControlsResult {
+  const telemetry = useTurnTelemetry({ applyTransition });
   const selectedDefenseEntity = selectedCard
     ? gameState.playerA.activeEntities.find(
         (entity) => entity.card.id === selectedCard.id && (entity.mode === "DEFENSE" || entity.mode === "SET") && !entity.hasAttackedThisTurn,
@@ -85,33 +88,28 @@ export function useBoardTurnControls({
     assertPlayerTurn,
     executeAdvancePhase,
     disableTurnHelp,
+    onGuardShown: telemetry.logTurnGuardShown,
+    onGuardConfirmed: telemetry.logTurnGuardConfirmed,
+    onGuardCancelled: telemetry.logTurnGuardCancelled,
   });
 
-  useAutoAdvanceBattle({ gameState, gameStateRef, winnerPlayerId, isAnimating, isPlayerTurn, isAutoPhaseEnabled, advancePhase: executeAdvancePhase });
+  useAutoAdvanceBattle({
+    gameState,
+    gameStateRef,
+    winnerPlayerId,
+    isAnimating,
+    isPlayerTurn,
+    isAutoPhaseEnabled,
+    advancePhase: executeAdvancePhase,
+    onAutoAdvanced: telemetry.logAutoPhaseAdvanced,
+  });
 
-  const handleTimerExpired = useCallback(() => {
-    const currentState = gameStateRef.current;
-    const hasWinnerNow = currentState.playerA.healthPoints <= 0 || currentState.playerB.healthPoints <= 0;
-    if (hasWinnerNow || currentState.activePlayerId !== currentState.playerA.id || isAnimating) return;
-    const pendingAction = currentState.pendingTurnAction;
-    if (pendingAction?.playerId === currentState.playerA.id) {
-      if (pendingAction.type === "DISCARD_FOR_HAND_LIMIT") {
-        const leftmostCard = currentState.playerA.hand[0];
-        if (leftmostCard) resolvePendingTurnAction(leftmostCard.runtimeId ?? leftmostCard.id);
-        return;
-      }
-      if (pendingAction.type === "SELECT_FUSION_MATERIALS") {
-        const available = currentState.playerA.activeEntities
-          .map((entity) => entity.instanceId)
-          .filter((instanceId) => !pendingAction.selectedMaterialInstanceIds.includes(instanceId));
-        const autoPick = available.slice(0, 2 - pendingAction.selectedMaterialInstanceIds.length);
-        autoPick.forEach((instanceId) => resolvePendingTurnAction(instanceId));
-        return;
-      }
-      return;
-    }
-    executeAdvancePhase();
-  }, [executeAdvancePhase, gameStateRef, isAnimating, resolvePendingTurnAction]);
+  const handleTimerExpired = useHandleTimerExpired({
+    gameStateRef,
+    isAnimating,
+    executeAdvancePhase,
+    resolvePendingTurnAction,
+  });
 
   const resolvePendingHandDiscard = useCallback(
     (cardId: string) => {

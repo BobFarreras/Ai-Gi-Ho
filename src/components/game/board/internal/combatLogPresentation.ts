@@ -91,6 +91,18 @@ export function buildBannerMessage(event: ICombatLogEvent, labels: IPlayerLabels
         : event.phase;
     return { left: actor, right: `Fase ${toPhase === "MAIN_1" ? "Despliegue" : "Combate"}` };
   }
+  if (event.eventType === "AUTO_PHASE_ADVANCED") {
+    return { left: "Modo Automático", right: "Avance de fase" };
+  }
+  if (event.eventType === "TURN_GUARD_SHOWN") {
+    return { left: "Ayuda de turno", right: "Confirmación" };
+  }
+  if (event.eventType === "TURN_GUARD_CONFIRMED") {
+    return { left: "Ayuda de turno", right: "Continuar" };
+  }
+  if (event.eventType === "TURN_GUARD_CANCELLED") {
+    return { left: "Ayuda de turno", right: "Volver" };
+  }
 
   return null;
 }
@@ -190,6 +202,14 @@ export function formatCombatLogEvent(event: ICombatLogEvent, labels: IPlayerLabe
             : 0;
         return `${actor} sube ${levelCardId} de Lv ${oldLevel} a Lv ${newLevel}.`;
       }
+    case "AUTO_PHASE_ADVANCED":
+      return `${actor} activa avance automático de fase.`;
+    case "TURN_GUARD_SHOWN":
+      return `${actor} recibe aviso de ayuda antes de avanzar fase.`;
+    case "TURN_GUARD_CONFIRMED":
+      return `${actor} confirma el avance de fase sugerido.`;
+    case "TURN_GUARD_CANCELLED":
+      return `${actor} cancela el avance de fase sugerido.`;
     default:
       return `${actor} ejecuta una acción.`;
   }

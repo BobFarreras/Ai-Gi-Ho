@@ -11,6 +11,9 @@ interface IUseAdvancePhaseGuardParams {
   assertPlayerTurn: () => boolean;
   executeAdvancePhase: () => void;
   disableTurnHelp: () => void;
+  onGuardShown: (warning: "MAIN_SKIP_ACTIONS" | "BATTLE_SKIP_ATTACKS") => void;
+  onGuardConfirmed: () => void;
+  onGuardCancelled: () => void;
 }
 
 export function useAdvancePhaseGuard({
@@ -21,6 +24,9 @@ export function useAdvancePhaseGuard({
   assertPlayerTurn,
   executeAdvancePhase,
   disableTurnHelp,
+  onGuardShown,
+  onGuardConfirmed,
+  onGuardCancelled,
 }: IUseAdvancePhaseGuardParams) {
   const [pendingAdvanceWarning, setPendingAdvanceWarning] = useState<"MAIN_SKIP_ACTIONS" | "BATTLE_SKIP_ATTACKS" | null>(null);
   const advancePhase = useCallback(() => {
@@ -34,17 +40,22 @@ export function useAdvancePhaseGuard({
       executeAdvancePhase();
       return;
     }
+    onGuardShown(warning);
     setPendingAdvanceWarning(warning);
-  }, [assertPlayerTurn, executeAdvancePhase, gameState, isAnimating, isTurnHelpEnabled, winnerPlayerId]);
+  }, [assertPlayerTurn, executeAdvancePhase, gameState, isAnimating, isTurnHelpEnabled, onGuardShown, winnerPlayerId]);
   const confirmAdvancePhase = useCallback(
     (shouldDisableHelp: boolean) => {
       if (shouldDisableHelp) disableTurnHelp();
+      onGuardConfirmed();
       setPendingAdvanceWarning(null);
       executeAdvancePhase();
     },
-    [disableTurnHelp, executeAdvancePhase],
+    [disableTurnHelp, executeAdvancePhase, onGuardConfirmed],
   );
-  const cancelAdvancePhase = useCallback(() => setPendingAdvanceWarning(null), []);
+  const cancelAdvancePhase = useCallback(() => {
+    onGuardCancelled();
+    setPendingAdvanceWarning(null);
+  }, [onGuardCancelled]);
 
   return { advancePhase, confirmAdvancePhase, cancelAdvancePhase, pendingAdvanceWarning };
 }
