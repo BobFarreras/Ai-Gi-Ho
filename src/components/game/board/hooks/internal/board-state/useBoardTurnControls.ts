@@ -1,5 +1,5 @@
-// src/components/game/board/hooks/internal/board-state/useBoardTurnControls.ts - Centraliza controles de fase, timer y resolución de acciones pendientes del jugador.
-import { MutableRefObject, useCallback } from "react";
+// src/components/game/board/hooks/internal/board-state/useBoardTurnControls.ts - Centraliza controles de fase, timer, auto-pase y resolución de acciones pendientes del jugador.
+import { MutableRefObject, useCallback, useEffect } from "react";
 import { ICard } from "@/core/entities/ICard";
 import { GameEngine, GameState } from "@/core/use-cases/GameEngine";
 
@@ -73,11 +73,29 @@ export function useBoardTurnControls({
     clearError();
   }, [applyTransition, assertPlayerTurn, clearError, clearSelection, isAnimating, winnerPlayerId]);
 
+  useEffect(() => {
+    if (winnerPlayerId || isAnimating || !isPlayerTurn || gameState.phase !== "BATTLE") return;
+    if (gameState.pendingTurnAction?.playerId === gameState.playerA.id) return;
+    const hasAvailableAttacker = gameState.playerA.activeEntities.some(
+      (entity) => entity.mode === "ATTACK" && !entity.hasAttackedThisTurn && !entity.isNewlySummoned,
+    );
+    if (hasAvailableAttacker) return;
+    const timeoutId = window.setTimeout(() => advancePhase(), 260);
+    return () => window.clearTimeout(timeoutId);
+  }, [
+    advancePhase,
+    gameState.pendingTurnAction,
+    gameState.phase,
+    gameState.playerA.activeEntities,
+    gameState.playerA.id,
+    isAnimating,
+    isPlayerTurn,
+    winnerPlayerId,
+  ]);
+
   const handleTimerExpired = useCallback(() => {
     const currentState = gameStateRef.current;
-    const hasWinnerNow =
-      currentState.playerA.healthPoints <= 0 ||
-      currentState.playerB.healthPoints <= 0;
+    const hasWinnerNow = currentState.playerA.healthPoints <= 0 || currentState.playerB.healthPoints <= 0;
     if (hasWinnerNow || currentState.activePlayerId !== currentState.playerA.id || isAnimating) return;
     const pendingAction = currentState.pendingTurnAction;
     if (pendingAction?.playerId === currentState.playerA.id) {

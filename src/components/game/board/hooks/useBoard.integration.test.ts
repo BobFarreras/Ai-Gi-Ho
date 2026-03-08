@@ -176,4 +176,18 @@ describe("useBoard integración", () => {
     expect(updated?.mode).toBe("DEFENSE");
     expect(result.current.activeAttackerId).toBeNull();
   });
+
+  it("debería pasar automáticamente al rival si en BATTLE no hay atacantes disponibles", async () => {
+    const { result } = renderHook(() => useBoard());
+    expect(result.current.gameState.phase).toBe("MAIN_1");
+    act(() => {
+      result.current.advancePhase();
+    });
+    expect(result.current.gameState.phase).toBe("BATTLE");
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(420);
+    });
+    expect(result.current.gameState.activePlayerId).toBe(result.current.gameState.playerB.id);
+    expect(result.current.gameState.phase).toBe("MAIN_1");
+  });
 });

@@ -28,6 +28,7 @@ type MatchNarrationAction =
   | { type: "CLEAR_ACTIVE" };
 
 const initialState: IMatchNarrationState = { queue: [], activeAction: null, hudDialogueByPlayerId: {} };
+const RESULT_NARRATION_DELAY_MS = 1900;
 
 function reducer(state: IMatchNarrationState, action: MatchNarrationAction): IMatchNarrationState {
   if (action.type === "ENQUEUE") {
@@ -88,7 +89,11 @@ export function useMatchNarration({ combatLog, winnerPlayerId, playerId, opponen
     if (queuedResultRef.current || !winnerPlayerId) return;
     const resultAction = selectNarrationActionForResult(winnerPlayerId, pack, { playerId, opponentId });
     queuedResultRef.current = true;
-    dispatch({ type: "ENQUEUE", actions: resultAction ? [resultAction] : [] });
+    if (!resultAction) return;
+    const timeout = window.setTimeout(() => {
+      dispatch({ type: "ENQUEUE", actions: [resultAction] });
+    }, RESULT_NARRATION_DELAY_MS);
+    return () => window.clearTimeout(timeout);
   }, [winnerPlayerId, pack, playerId, opponentId]);
 
   useEffect(() => {

@@ -134,6 +134,12 @@ export function Board({
     onMatchResolved({ winnerPlayerId, playerId: player.id, mode, matchSeed });
     resolvedWinnerRef.current = winnerPlayerId;
   }, [winnerPlayerId, onMatchResolved, player.id, mode, matchSeed]);
+
+  useEffect(() => {
+    if (!winnerPlayerId) return;
+    setIsHistoryOpen(false);
+  }, [winnerPlayerId, setIsHistoryOpen]);
+
   return (
     <div className="board-space-bg relative w-full h-screen overflow-hidden font-sans cursor-crosshair" onClick={clearSelection}>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(34,211,238,0.12),transparent_52%)] pointer-events-none" />
@@ -171,13 +177,11 @@ export function Board({
       <BoardTopBar
         turn={gameState.turn}
         phase={gameState.phase}
-        hasNormalSummonedThisTurn={gameState.hasNormalSummonedThisTurn}
         pendingActionType={gameState.pendingTurnAction?.type ?? null}
         pendingActionPlayerId={gameState.pendingTurnAction?.playerId ?? null}
         isPlayerTurn={isPlayerTurn}
         isPaused={isPaused}
         hasWinner={Boolean(winnerPlayerId)}
-        onAdvancePhase={advancePhase}
         onTimeUp={() => { playTimerExpired(); handleTimerExpired(); }}
         onWarning={playTimerWarning}
       />
@@ -189,6 +193,8 @@ export function Board({
         opponentAvatarUrl={opponentAvatarUrl}
         playerDialogueMessage={narration.hudDialogueByPlayerId[player.id] ?? null}
         opponentDialogueMessage={narration.hudDialogueByPlayerId[opponent.id] ?? null}
+        phase={gameState.phase}
+        onAdvancePhase={advancePhase}
       />
       <BoardInteractiveLayer
         gameState={gameState} selectedCard={selectedCard} playingCard={playingCard} activeAttackerId={activeAttackerId}

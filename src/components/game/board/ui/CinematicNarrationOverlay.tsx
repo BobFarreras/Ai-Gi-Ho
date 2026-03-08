@@ -27,18 +27,20 @@ export function CinematicNarrationOverlay({ action, playerId, playerAvatarUrl, o
         transition={{ type: "spring", stiffness: 220, damping: 24 }}
         className={`pointer-events-none absolute z-[176] ${isPlayerActor ? "bottom-24 left-6" : "top-14 right-6"}`}
       >
-        <div className={`flex max-w-[min(88vw,560px)] items-end gap-3 ${isPlayerActor ? "flex-row" : "flex-row-reverse"}`}>
-          <div className="relative h-[140px] w-[140px] shrink-0 overflow-hidden [clip-path:polygon(8%_0,100%_0,100%_92%,0_100%,0_8%)]">
+        <div className={`flex max-w-[min(88vw,620px)] items-center gap-3 ${isPlayerActor ? "flex-row" : "flex-row-reverse"}`}>
+          <div className="relative h-[170px] w-[170px] shrink-0 overflow-visible bg-transparent">
             {avatarUrl ? (
-              <Image src={avatarUrl} alt="Retrato de duelista" fill sizes="140px" className="object-cover drop-shadow-[0_0_24px_rgba(34,211,238,0.45)]" />
+              <Image src={avatarUrl} alt="Retrato de duelista" fill sizes="170px" className="object-contain drop-shadow-[0_0_24px_rgba(34,211,238,0.45)]" />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-sm font-black uppercase tracking-[0.15em] text-cyan-100">{isPlayerActor ? "YOU" : "CPU"}</div>
             )}
           </div>
-          <div className="relative rounded-xl border-2 border-black bg-white px-4 py-3 text-left text-black shadow-[0_8px_0_rgba(0,0,0,0.9)]">
+          <div className="relative -translate-y-3 rounded-xl border-2 border-black bg-white px-4 py-3 text-left text-black shadow-[0_8px_0_rgba(0,0,0,0.9)]">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-black/70">{isPlayerActor ? "Arquitecto" : "Oponente"}</p>
             <p className="text-sm font-black leading-snug">{action.line.text}</p>
-            <span className={`absolute top-full h-3 w-3 -mt-[7px] rotate-45 border-b-2 border-r-2 border-black bg-white ${isPlayerActor ? "left-6" : "right-6"}`} />
+            <span
+              className={`absolute top-1/2 h-3 w-3 -translate-y-1/2 rotate-45 border-black bg-white ${isPlayerActor ? "-left-[7px] border-l-2 border-b-2" : "-right-[7px] border-t-2 border-r-2"}`}
+            />
           </div>
         </div>
       </motion.div>
