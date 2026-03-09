@@ -42,7 +42,7 @@ pnpm quality:check
 
 ## Documentación relacionada
 
-1. `Architecture.md`: estructura y dependencias por capas.
+1. `Architecture.md` + `docs/architecture/*`: arquitectura modular vigente por capas/subdominios.
 2. `MOTOR_JUEGO.md`: reglas funcionales del motor y ciclo de turnos.
 3. `Agents.md`: normas obligatorias de calidad y contribución.
 4. `src/core/use-cases/game-engine/README.md`: invariantes y contratos del motor.
