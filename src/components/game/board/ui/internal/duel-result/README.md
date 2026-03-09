@@ -1,5 +1,5 @@
 <!-- src/components/game/board/ui/internal/duel-result/README.md - Agrupa piezas reutilizables del overlay de resultado del duelo. -->
-# Duel Result Internal
+# Internos de Resultado de Duelo
 
 1. `DuelResultExperienceCard.tsx`
    - Carta animada con progreso de EXP.
@@ -15,3 +15,4 @@
    - Animación de barra/level de experiencia.
 7. `use-duel-result-overlay-state.ts`
    - Estado de control del overlay de resultado.
+

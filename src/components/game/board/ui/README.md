@@ -1,5 +1,5 @@
 <!-- src/components/game/board/ui/README.md - Documenta componentes visuales y capas de la UI del tablero. -->
-# Board UI Module
+# Módulo UI del Board
 
 Componentes visuales del tablero. Renderiza estado y eventos, sin reglas de dominio.
 
@@ -62,4 +62,5 @@ Componentes visuales del tablero. Renderiza estado y eventos, sin reglas de domi
 1. No introducir reglas del motor aquí.
 2. Las decisiones de dominio se obtienen desde hooks/casos de uso.
 3. Mantener accesibilidad en elementos interactivos (`aria-label` o texto visible).
+
 

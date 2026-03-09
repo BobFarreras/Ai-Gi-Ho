@@ -1,5 +1,5 @@
 <!-- src/services/README.md - Mapa de servicios de aplicación y orquestación entre UI, core e infraestructura. -->
-# Services
+# Módulo de Servicios
 
 ## Objetivo
 
@@ -19,3 +19,4 @@ Orquestar flujos de aplicación sin meter lógica de render en UI ni detalles de
 ## Regla de dependencia
 
 `components/app -> services -> core` y servicios usan infraestructura solo para composición de repositorios.
+

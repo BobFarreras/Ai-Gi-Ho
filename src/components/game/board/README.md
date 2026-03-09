@@ -1,5 +1,5 @@
 <!-- src/components/game/board/README.md - Guía del módulo Board: flujo, reglas, overlays y puntos de extensión. -->
-# Board Module
+# Módulo Board
 
 Guía rápida para entender la lógica de tablero y batalla.
 
@@ -251,3 +251,4 @@ Guía rápida para entender la lógica de tablero y batalla.
      - `ui/overlays/internal/BoardErrorOverlay.tsx`
      - `ui/overlays/internal/BoardZoneBrowsers.tsx`
    - Pendiente: mantener esta segmentación en futuras iteraciones de UX sin volver a agrupar responsabilidades.
+

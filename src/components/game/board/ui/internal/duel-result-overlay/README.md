@@ -1,5 +1,5 @@
 <!-- src/components/game/board/ui/internal/duel-result-overlay/README.md - Describe la segmentación interna del overlay de resultado. -->
-# Duel Result Overlay Internal
+# Internos de Overlay de Resultado
 
 Submódulos de UI para separar responsabilidades de `DuelResultOverlay.tsx`.
 
@@ -17,3 +17,4 @@ Submódulos de UI para separar responsabilidades de `DuelResultOverlay.tsx`.
    - Composición visual para móvil.
 7. `DuelResultDesktopContent.tsx`
    - Composición visual para escritorio.
+

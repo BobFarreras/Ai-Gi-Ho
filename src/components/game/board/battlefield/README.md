@@ -1,5 +1,5 @@
-<!-- src/components/game/board/battlefield/README.md - Descripción breve del módulo. -->
-# Battlefield Module
+<!-- src/components/game/board/battlefield/README.md - Componentes visuales del campo de batalla y animaciones de entidades. -->
+# Módulo Battlefield
 
 Render del campo de batalla, slots y VFX de acciones de combate/ejecución.
 
@@ -41,5 +41,6 @@ Render del campo de batalla, slots y VFX de acciones de combate/ejecución.
 1. El módulo no modifica reglas de combate.
 2. Solo renderiza estado recibido por props.
 3. Toda interacción vuelve al hook/controlador superior.
+
 
 

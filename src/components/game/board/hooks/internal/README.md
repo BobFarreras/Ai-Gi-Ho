@@ -1,5 +1,5 @@
 <!-- src/components/game/board/hooks/internal/README.md - Documenta la arquitectura interna de hooks del tablero tras la extracción por subdominios. -->
-# Board Hooks Internal
+# Hooks Internos del Board
 
 Submódulos internos para reducir complejidad de `useBoard` y mantener SRP.
 
@@ -51,3 +51,4 @@ Submódulos internos para reducir complejidad de `useBoard` y mantener SRP.
 1. No meter reglas de dominio aquí; van en `core/use-cases`.
 2. Mantener tests co-localizados al módulo que validan.
 3. Si un archivo supera 150 líneas, extraer submódulos en la misma carpeta funcional.
+

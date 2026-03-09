@@ -1,5 +1,5 @@
 <!-- src/components/game/board/internal/README.md - Documenta submódulos internos del shell Board. -->
-# Board Internal
+# Internos del Board
 
 Esta carpeta contiene submódulos de composición para mantener `Board` legible y cumplir SRP.
 
@@ -15,3 +15,4 @@ Esta carpeta contiene submódulos de composición para mantener `Board` legible 
    - HUD de jugadores y controles de fase por viewport.
 5. `BoardActionControlsSection.tsx`
    - Paneles de historial/detalle y botones de acción globales.
+

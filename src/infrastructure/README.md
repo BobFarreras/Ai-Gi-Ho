@@ -1,5 +1,5 @@
 <!-- src/infrastructure/README.md - Inventario de adaptadores externos y persistencia del proyecto. -->
-# Infrastructure
+# Módulo de Infraestructura
 
 ## Objetivo
 
@@ -16,3 +16,4 @@ Implementar adaptadores concretos de persistencia e integración externa sin con
 
 1. Ningún componente UI debe importar SDKs externos desde aquí.
 2. Los contratos viven en `core/repositories`; aquí solo se implementan.
+

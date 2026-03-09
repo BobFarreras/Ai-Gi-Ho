@@ -1,5 +1,5 @@
 <!-- src/components/hub/home/internal/actions/README.md - Describe acciones orquestadas del builder de Home extraídas del contenedor principal. -->
-# Home Actions
+# Acciones de Home
 
 ## Qué contiene
 
@@ -10,3 +10,4 @@
 ## Objetivo
 
 Mantener `HomeDeckBuilderScene` como orquestador de UI y mover flujos async/optimistas a módulos reutilizables.
+

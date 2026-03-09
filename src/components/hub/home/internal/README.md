@@ -1,5 +1,5 @@
 <!-- src/components/hub/home/internal/README.md - Detalla utilidades internas del módulo Home para mutaciones y estado optimista. -->
-# Home Internal
+# Internos de Home
 
 ## Estructura recomendada
 
@@ -14,3 +14,4 @@
 ## Regla de uso
 
 Solo debe ser consumido por componentes/hooks del módulo `home`.
+

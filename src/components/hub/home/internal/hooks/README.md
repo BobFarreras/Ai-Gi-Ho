@@ -1,5 +1,5 @@
 <!-- src/components/hub/home/internal/hooks/README.md - Índice de hooks internos del módulo Home para estado, acciones y handlers de interacción. -->
-# Home Internal Hooks
+# Hooks Internos de Home
 
 ## Objetivo
 
@@ -13,3 +13,4 @@ Concentrar lógica de estado/orquestación en hooks reutilizables y mantener `Ho
 4. `use-home-selection-view.ts`: cálculo derivado de disponibilidad y evolución.
 5. `use-deck-mutation-guard.ts`: guard de concurrencia para mutaciones optimistas.
 6. `create-home-drop-handlers.ts`: factoría de handlers `drop` para reducir complejidad del hook principal.
+

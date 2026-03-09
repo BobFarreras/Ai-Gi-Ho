@@ -33,3 +33,4 @@ Hooks públicos del tablero. Este módulo actúa como fachada para la lógica de
 2. Errores del motor se traducen a mensajes UI.
 3. La fuente de verdad de acciones y resultado es `GameState`.
 
+

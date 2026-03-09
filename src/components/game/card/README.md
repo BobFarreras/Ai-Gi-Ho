@@ -1,5 +1,5 @@
 <!-- src/components/game/card/README.md - Documenta la capa visual de cartas y sus subcomponentes de frame/efectos. -->
-# Card Module
+# Módulo de Cartas
 
 ## Responsabilidad
 
@@ -15,3 +15,4 @@ Renderizar cartas del juego (entidad, ejecución, trampa, fusión) con variantes
 
 1. En móvil se usa modo de holograma ligero para mantener fluidez.
 2. Los efectos visuales pesados deben quedar detrás de flags de performance.
+

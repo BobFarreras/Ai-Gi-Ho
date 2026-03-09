@@ -1,5 +1,5 @@
 <!-- src/app/README.md - Guía de entradas App Router, páginas de módulo y API routes. -->
-# App Router
+# Módulo App Router
 
 ## Qué contiene
 
@@ -18,3 +18,4 @@
 1. `api/`: endpoints HTTP.
 2. `hub/`: módulos jugables del hub.
 3. `(auth)/`: flujo de login/registro.
+

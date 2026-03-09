@@ -1,5 +1,5 @@
 <!-- src/components/hub/market/internal/README.md - Explica estado interno del market, store Zustand y acciones de compra. -->
-# Market Internal
+# Internos de Market
 
 ## Responsabilidad
 
@@ -14,3 +14,4 @@ Orquestar estado de escena, acciones de compra y conciliación optimista del mó
 ## Regla
 
 No incluir render UI en este nivel; solo estado y orquestación.
+

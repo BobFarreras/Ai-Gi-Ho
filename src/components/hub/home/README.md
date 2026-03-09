@@ -125,3 +125,4 @@ Eventos conectados vía `useHubModuleSfx`:
 1. `layout/HomeResponsiveWorkspace.test.tsx` valida que se montan ambos layouts.
 2. `layout/HomeMobileWorkspace.test.tsx` valida tabs mobile y apertura del inspector.
 3. Las pruebas existentes de negocio y acciones del módulo se mantienen.
+
