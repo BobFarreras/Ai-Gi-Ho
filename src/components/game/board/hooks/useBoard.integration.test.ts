@@ -31,33 +31,18 @@ describe("useBoard integración", () => {
   });
 
   it("debería jugar una carta válida desde la mano del jugador", async () => {
-    const { result } = renderHook(() => useBoard());
-    let playableCard =
-      result.current.gameState.playerA.hand.find((card) => card.type === "ENTITY") ??
-      result.current.gameState.playerA.hand.find(
-        (card) =>
-          card.type === "EXECUTION" &&
-          card.effect !== undefined &&
-          (card.effect.action === "DAMAGE" || card.effect.action === "HEAL" || card.effect.action === "DRAW_CARD"),
-      );
-
-    for (let attempt = 0; attempt < 8 && !playableCard; attempt += 1) {
-      act(() => {
-        result.current.restartMatch();
-      });
-      playableCard =
-        result.current.gameState.playerA.hand.find((card) => card.type === "ENTITY") ??
-        result.current.gameState.playerA.hand.find(
-          (card) =>
-            card.type === "EXECUTION" &&
-            card.effect !== undefined &&
-            (card.effect.action === "DAMAGE" || card.effect.action === "HEAL" || card.effect.action === "DRAW_CARD"),
-        );
-    }
+    const forcedDeck: ICard[] = Array.from({ length: 20 }, (_, index) => ({
+      ...integrationEntityCard,
+      id: `${integrationEntityCard.id}-playable-${index}`,
+      name: `${integrationEntityCard.name} Playable ${index + 1}`,
+      runtimeId: `integration-playable-${index + 1}`,
+    }));
+    const { result } = renderHook(() => useBoard(forcedDeck));
+    const playableCard = result.current.gameState.playerA.hand.find((card) => card.type === "ENTITY");
 
     expect(playableCard).toBeDefined();
     if (!playableCard) {
-      throw new Error("La mano inicial debe incluir al menos una carta ENTITY o EXECUTION.");
+      throw new Error("La mano inicial debe incluir al menos una carta ENTITY.");
     }
     act(() => {
       result.current.toggleCardSelection(playableCard, createMouseEvent());
