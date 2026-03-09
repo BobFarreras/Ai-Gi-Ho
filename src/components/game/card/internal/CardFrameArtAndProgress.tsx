@@ -27,14 +27,26 @@ export function CardFrameArtAndProgress({
         {!isPerformanceMode && card.bgUrl ? <Image src={card.bgUrl} alt="" fill sizes="260px" className="absolute inset-0 z-0 object-cover" /> : null}
         {!isPerformanceMode ? <div className="absolute inset-0 z-0 bg-cyan-500/10 mix-blend-overlay" /> : null}
         {!isOnBoard && card.renderUrl && (
-          <Image
-            src={card.renderUrl}
-            alt={card.name}
-            fill
-            sizes={renderImageSizes}
-            quality={renderImageQuality}
-            className={isPerformanceMode ? "absolute inset-0 z-10 object-contain p-1" : "absolute inset-0 z-10 object-contain p-1 drop-shadow-[0_4px_6px_rgba(0,0,0,0.65)]"}
-          />
+          isPerformanceMode ? (
+            <Image
+              src={card.renderUrl}
+              alt={card.name}
+              fill
+              loading="lazy"
+              sizes="96px"
+              quality={40}
+              className="absolute inset-0 z-10 object-contain p-1"
+            />
+          ) : (
+            <Image
+              src={card.renderUrl}
+              alt={card.name}
+              fill
+              sizes={renderImageSizes}
+              quality={renderImageQuality}
+              className="absolute inset-0 z-10 object-contain p-1 drop-shadow-[0_4px_6px_rgba(0,0,0,0.65)]"
+            />
+          )
         )}
         {!disableHoverEffects && !isPerformanceMode ? (
           <div className="absolute top-0 h-0.5 w-full bg-cyan-400/50 opacity-0 group-hover:animate-[ping_2s_infinite] group-hover:opacity-100" />

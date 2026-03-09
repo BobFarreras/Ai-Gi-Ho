@@ -38,16 +38,16 @@ async function measureScenario(browser, baseUrl, profile, scenario) {
     await installWebVitalsObservers(page);
     await applyThrottling(page, profile);
     await page.goto(`${baseUrl}${scenario.path}`, { waitUntil: "networkidle", timeout: 60000 });
-    await runScenarioInteractions(page, scenario.id);
+    const interactionsExecuted = await runScenarioInteractions(page, scenario.id);
     const metrics = await readWebVitals(page);
     const interactions = await page.evaluate(() => {
       const perfStore = window.__AIGIOH_PERF__?.interactions ?? [];
       return perfStore.slice(-20);
     });
-    return { profile, scenario: scenario.id, path: scenario.path, metrics, interactions, error: null };
+    return { profile, scenario: scenario.id, path: scenario.path, metrics, interactions, interactionsExecuted, error: null };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Fallo desconocido";
-    return { profile, scenario: scenario.id, path: scenario.path, metrics: { lcp: -1, cls: -1, inp: -1 }, interactions: [], error: message };
+    return { profile, scenario: scenario.id, path: scenario.path, metrics: { lcp: -1, cls: -1, inp: -1 }, interactions: [], interactionsExecuted: 0, error: message };
   } finally {
     await context.close();
   }

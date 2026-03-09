@@ -1,7 +1,7 @@
 // scripts/performance/baseline-observer.mjs - Inyecta observers de Web Vitals (LCP/CLS/INP) en la página bajo prueba.
 export async function installWebVitalsObservers(page) {
   await page.addInitScript(() => {
-    const state = { lcp: 0, cls: 0, inp: 0 };
+    const state = { lcp: -1, cls: 0, inp: -1 };
     window.__AIGIOH_AUTOPERF__ = state;
 
     try {

@@ -4,7 +4,7 @@
 import { Card } from "@/components/game/card/Card";
 import { useVirtualGridWindow } from "@/components/hub/internal/useVirtualGridWindow";
 import { IMarketCardListing } from "@/core/entities/market/IMarketCardListing";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface MarketListingsPanelProps {
   listings: IMarketCardListing[];
@@ -13,6 +13,7 @@ interface MarketListingsPanelProps {
 
 export function MarketListingsPanel({ listings, onSelectCard }: MarketListingsPanelProps) {
   const scrollRef = useRef<HTMLElement>(null);
+  const [isInitialBatchActive, setIsInitialBatchActive] = useState(true);
   const windowState = useVirtualGridWindow({
     containerRef: scrollRef,
     itemCount: listings.length,
@@ -21,7 +22,13 @@ export function MarketListingsPanel({ listings, onSelectCard }: MarketListingsPa
     gap: 12,
     overscanRows: 2,
   });
-  const visibleListings = listings.slice(windowState.startIndex, windowState.endIndex);
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => setIsInitialBatchActive(false), 650);
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+  const initialEndIndex = Math.min(windowState.endIndex, windowState.startIndex + 8);
+  const endIndex = isInitialBatchActive ? initialEndIndex : windowState.endIndex;
+  const visibleListings = listings.slice(windowState.startIndex, endIndex);
   return (
     <section
       ref={scrollRef}

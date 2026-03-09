@@ -26,6 +26,7 @@ export function buildMarkdownReport(payload) {
       lines.push(`- LCP: ${metricLabel(result.metrics.lcp, 0)} ms`);
       lines.push(`- CLS: ${metricLabel(result.metrics.cls, 3)}`);
       lines.push(`- INP: ${metricLabel(result.metrics.inp, 0)} ms`);
+      lines.push(`- Interacciones ejecutadas: ${result.interactionsExecuted ?? 0}`);
       if (Array.isArray(result.interactions) && result.interactions.length > 0) {
         const sorted = [...result.interactions].sort((a, b) => b.durationMs - a.durationMs).slice(0, 3);
         const top = sorted.map((sample) => `${sample.action}:${metricLabel(sample.durationMs, 0)}ms`).join(", ");
