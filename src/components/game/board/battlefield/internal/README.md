@@ -8,4 +8,4 @@
 3. `use-battlefield-mobile-fit.ts`: ajuste móvil de escala y offset vertical.
 4. `battlefield-props-equality.ts`: comparator memoizado de props.
 5. Otros submódulos históricos:
-`BattlefieldLanes`, `BattlefieldPiles`, `SlotCell`, utilidades de visibilidad y motion.
+`BattlefieldLanes`, `BattlefieldPiles`, `SlotCell`, `SlotCellEntity`, `slot-cell-*`, utilidades de visibilidad y motion.

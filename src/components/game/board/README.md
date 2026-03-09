@@ -159,7 +159,8 @@ Guía rápida para entender la lógica de tablero y batalla.
 4. Render y animación de campo: `src/components/game/board/battlefield/*`.
 5. Subcomponentes internos de UI del historial: `src/components/game/board/ui/internal/combat-log-row/*`.
 6. Subcomponentes internos de zona de batalla: `src/components/game/board/battlefield/internal/*`.
-7. Narración y scripts: `src/components/game/board/narration/*`.
+7. Subcomponentes internos de mano del jugador: `src/components/game/board/internal/player-hand/*`.
+8. Narración y scripts: `src/components/game/board/narration/*`.
 
 ## Responsive desktop (fase previa a móvil)
 
