@@ -1,7 +1,7 @@
 // src/components/hub/market/internal/useMarketSceneState.ts - Encapsula estado y acciones del MarketScene para reducir complejidad del componente.
 "use client";
 
-import { MutableRefObject, useMemo, useRef, useState } from "react";
+import { MutableRefObject, startTransition, useMemo, useRef, useState } from "react";
 import { buildMarketListingView } from "@/components/hub/market/market-listing-view";
 import { useSyncSelectedListing } from "@/components/hub/market/internal/useSyncSelectedListing";
 import { MarketOrderDirection, MarketOrderField, MarketTypeFilter } from "@/components/hub/market/market-filters";
@@ -128,21 +128,27 @@ export function useMarketSceneState(input: UseMarketSceneStateInput) {
       const previousCollection = collectionRef.current;
       const previousTransactions = transactionsRef.current;
       const optimistic = applyOptimisticBuyCard(previousCatalog, previousCollection, listingId);
-      setCatalog(optimistic.catalog);
-      setCollection(optimistic.collection);
+      startTransition(() => {
+        setCatalog(optimistic.catalog);
+        setCollection(optimistic.collection);
+      });
       try {
         const result = await buyMarketCardAction(input.playerId, listingId);
         play("BUY_CARD");
-        setCatalog(result.catalog);
-        setTransactions(result.transactions);
-        setCollection(result.collection);
+        startTransition(() => {
+          setCatalog(result.catalog);
+          setTransactions(result.transactions);
+          setCollection(result.collection);
+        });
         setErrorMessage(null);
         endInteraction(telemetry, "ok");
         return true;
       } catch (error) {
-        setCatalog(previousCatalog);
-        setCollection(previousCollection);
-        setTransactions(previousTransactions);
+        startTransition(() => {
+          setCatalog(previousCatalog);
+          setCollection(previousCollection);
+          setTransactions(previousTransactions);
+        });
         setErrorMessage(mapMarketErrorMessage(error, "No se pudo comprar la carta en este momento."));
         endInteraction(telemetry, "error");
         return false;
@@ -161,14 +167,18 @@ export function useMarketSceneState(input: UseMarketSceneStateInput) {
       const previousTransactions = transactionsRef.current;
       const pack = previousCatalog.packs.find((entry) => entry.id === packId);
       if (pack && previousCatalog.wallet.nexus >= pack.priceNexus) {
-        setCatalog((current) => ({ ...current, wallet: { ...current.wallet, nexus: current.wallet.nexus - pack.priceNexus } }));
+        startTransition(() => {
+          setCatalog((current) => ({ ...current, wallet: { ...current.wallet, nexus: current.wallet.nexus - pack.priceNexus } }));
+        });
       }
       try {
         const result = await buyPackAction(input.playerId, packId);
         play("BUY_PACK");
-        setCatalog(result.catalog);
-        setTransactions(result.transactions);
-        setCollection(result.collection);
+        startTransition(() => {
+          setCatalog(result.catalog);
+          setTransactions(result.transactions);
+          setCollection(result.collection);
+        });
         const cardMap = new Map(result.catalog.listings.map((listing) => [listing.card.id, listing.card]));
         const openedCards = result.openedCardIds
           .map((cardId) => cardMap.get(cardId))
@@ -179,9 +189,11 @@ export function useMarketSceneState(input: UseMarketSceneStateInput) {
         endInteraction(telemetry, "ok");
         return true;
       } catch (error) {
-        setCatalog(previousCatalog);
-        setCollection(previousCollection);
-        setTransactions(previousTransactions);
+        startTransition(() => {
+          setCatalog(previousCatalog);
+          setCollection(previousCollection);
+          setTransactions(previousTransactions);
+        });
         setErrorMessage(mapMarketErrorMessage(error, "No se pudo comprar el sobre en este momento."));
         endInteraction(telemetry, "error");
         return false;

@@ -1,6 +1,14 @@
 <!-- docs/performance/README.md - Guía para activar telemetría de rendimiento en desarrollo y revisar métricas de interacción. -->
 # Telemetría de Rendimiento (Desarrollo)
 
+## Fase 1: Baseline y objetivos
+
+Usa esta guía para capturar una línea base reproducible:
+
+1. [Protocolo Fase 1](./PHASE-1-BASELINE.md)
+2. [Plantilla de reporte](./BASELINE-REPORT-TEMPLATE.md)
+3. Comando automático: `pnpm perf:baseline:mobile`
+
 ## Activación
 
 1. Abre la app en navegador.

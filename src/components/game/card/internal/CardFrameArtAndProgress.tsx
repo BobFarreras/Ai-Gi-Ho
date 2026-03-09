@@ -19,6 +19,8 @@ export function CardFrameArtAndProgress({
   disableHoverEffects = false,
   isPerformanceMode = false,
 }: CardFrameArtAndProgressProps) {
+  const renderImageSizes = isPerformanceMode ? "96px" : "260px";
+  const renderImageQuality = isPerformanceMode ? 55 : 75;
   return (
     <div className="relative z-10 mt-2 flex flex-grow flex-col items-center justify-start px-3">
       <div className="group relative mb-1.5 flex h-36 w-full shrink-0 items-center justify-center overflow-hidden rounded-sm bg-black shadow-[inset_0_0_30px_rgba(0,0,0,1)]">
@@ -29,7 +31,8 @@ export function CardFrameArtAndProgress({
             src={card.renderUrl}
             alt={card.name}
             fill
-            sizes="260px"
+            sizes={renderImageSizes}
+            quality={renderImageQuality}
             className={isPerformanceMode ? "absolute inset-0 z-10 object-contain p-1" : "absolute inset-0 z-10 object-contain p-1 drop-shadow-[0_4px_6px_rgba(0,0,0,0.65)]"}
           />
         )}
