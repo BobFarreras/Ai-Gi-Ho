@@ -27,6 +27,7 @@ Usa esta guía para capturar una línea base reproducible:
 5. Reportes: `docs/performance/results/combat-e2e-real-*.json|.md`.
 6. También soporta `.env.local` automáticamente (`PERF_EMAIL`, `PERF_PASSWORD`, `PERF_BASE_URL`) sin pasar credenciales por CLI.
 7. Perfil por defecto: `realistic` (sin throttling artificial). Stress: `pnpm perf:combat:e2e:real:stress:auto:prod`.
+8. El flujo es estricto y determinista: no usa taps por coordenadas ni fallback silencioso; si no encuentra controles válidos, falla con error explícito.
 
 ## Activación
 

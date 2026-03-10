@@ -43,20 +43,61 @@ async function installObservers(page) {
   });
 }
 
-async function runStep(page, label, selectors) {
-  const startedAt = Date.now();
-  for (const selector of selectors) {
-    const locator = page.locator(selector);
-    if ((await locator.count()) < 1) continue;
-    try {
-      await locator.first().click({ timeout: 1800 });
-      await page.waitForTimeout(500);
-      return { label, ok: true, selector, durationMs: Date.now() - startedAt };
-    } catch {}
+async function clickFirstEnabled(page, selectors, timeoutMs = 12000) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    for (const selector of selectors) {
+      const locator = page.locator(selector).first();
+      if ((await locator.count()) < 1) continue;
+      const visible = await locator.isVisible().catch(() => false);
+      const enabled = await locator.isEnabled().catch(() => false);
+      if (!visible || !enabled) continue;
+      await locator.click({ timeout: 1500 });
+      return selector;
+    }
+    await page.waitForTimeout(120);
   }
-  await page.mouse.click(206, 510);
-  await page.waitForTimeout(500);
-  return { label, ok: false, selector: "fallback-tap", durationMs: Date.now() - startedAt };
+  throw new Error(`No se encontró control habilitado para selectors: ${selectors.join(" | ")}`);
+}
+
+async function runStrictStep(page, label, selectors, timeoutMs = 12000) {
+  const startedAt = Date.now();
+  const selector = await clickFirstEnabled(page, selectors, timeoutMs);
+  await page.waitForTimeout(420);
+  return { label, ok: true, selector, durationMs: Date.now() - startedAt };
+}
+
+async function playAnyValidHandAction(page) {
+  const startedAt = Date.now();
+  const handCards = page.locator("button[aria-label^='Carta ']");
+  const count = await handCards.count();
+  const actionPriority = [
+    "button[aria-label='Activar ejecución desde mano']",
+    "button[aria-label='Armar trampa']",
+    "button[aria-label='Invocar en ataque']",
+    "button[aria-label='Invocar en defensa']",
+    "button[aria-label='Colocar ejecución en set']",
+  ];
+  for (let index = 0; index < count; index += 1) {
+    const card = handCards.nth(index);
+    if (!(await card.isVisible().catch(() => false))) continue;
+    await card.click({ timeout: 1500 });
+    await page.waitForTimeout(250);
+    for (const actionSelector of actionPriority) {
+      const button = page.locator(actionSelector).first();
+      if ((await button.count()) > 0 && (await button.isVisible().catch(() => false)) && (await button.isEnabled().catch(() => false))) {
+        await button.click({ timeout: 1500 });
+        await page.waitForTimeout(420);
+        return { label: "Jugar carta desde mano", ok: true, selector: actionSelector, durationMs: Date.now() - startedAt };
+      }
+    }
+    const closeButton = page.locator("button[aria-label='Cerrar selección']").first();
+    if ((await closeButton.count()) > 0) {
+      await closeButton.click({ timeout: 1500 });
+      await page.waitForTimeout(180);
+    }
+  }
+  throw new Error("No se encontró ninguna acción válida de mano para ejecutar de forma determinista.");
 }
 
 async function applyMobileProfile(page, profile) {
@@ -157,11 +198,11 @@ async function main() {
     await page.waitForURL("**/hub/story/chapter/**/duel/**", { timeout: 30000 });
     await page.waitForTimeout(2200);
 
-    steps.push(await runStep(page, "Abrir acciones mobile", ["button[aria-label='Abrir acciones']", "button[aria-label='Cerrar acciones']"]));
-    steps.push(await runStep(page, "Pasar a combate", ["button[aria-label='Pasar a combate']", "button:has-text('Combate')"]));
-    steps.push(await runStep(page, "Seleccionar carta", ["button[aria-label*='Carta ']", "button[aria-label='Cambiar a ataque']"]));
-    steps.push(await runStep(page, "Activar ejecución/trampa", ["button[aria-label='Activar ejecución seleccionada']", "button:has-text('Activar')"]));
-    steps.push(await runStep(page, "Pasar turno", ["button[aria-label='Pasar turno']", "button:has-text('Pasar')"]));
+    steps.push(await runStrictStep(page, "Abrir acciones mobile", ["button[aria-label='Abrir acciones']", "button[aria-label='Cerrar acciones']"]));
+    steps.push(await playAnyValidHandAction(page));
+    steps.push(await runStrictStep(page, "Pasar a combate", ["button[aria-label='Pasar a combate']", "button:has-text('Combate')"]));
+    steps.push(await runStrictStep(page, "Abrir historial", ["button[aria-label='Abrir historial']", "button[aria-label='Cerrar historial']"]));
+    steps.push(await runStrictStep(page, "Cerrar historial", ["button[aria-label='Cerrar historial']", "button[aria-label='Abrir historial']"]));
     await page.waitForTimeout(1600);
 
     const bodyText = await page.locator("body").innerText();
