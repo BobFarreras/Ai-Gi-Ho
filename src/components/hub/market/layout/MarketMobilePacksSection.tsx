@@ -65,7 +65,7 @@ export function MarketMobilePacksSection(props: MarketMobilePacksSectionProps) {
       </section>
 
       <section className="min-h-0 flex-1 overflow-hidden rounded-lg border border-cyan-800/35 bg-[#031020]/55">
-        <MarketListingsPanel listings={props.packListings} onSelectCard={props.onSelectPackCard} />
+        <MarketListingsPanel listings={props.packListings} isPerformanceMode={true} onSelectCard={props.onSelectPackCard} />
       </section>
 
       <button

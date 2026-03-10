@@ -79,6 +79,12 @@ Se separa el render por breakpoint sin alterar reglas del dominio:
 3. La vibración evita desplazamiento horizontal para no generar scroll lateral en almacén.
 4. En mobile se fuerza `overflow-x-hidden` en el contenedor de almacén para robustez visual.
 
+## Perfil visual de cartas (Fase 2 rendimiento)
+
+1. En desktop (`HomeCollectionPanel`) las mini-cartas usan render completo para conservar fondo visual.
+2. En móvil (`HomeMobileCollectionPanel`) se activa `isPerformanceMode` para reducir coste de pintura.
+3. Esta separación mantiene legibilidad en desktop y estabilidad de FPS en móvil.
+
 ## Errores y seguridad de interacción
 
 1. Los errores funcionales de Arsenal se muestran con `HubErrorDialog` (animado, con `X` y autocierre).

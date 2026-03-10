@@ -10,9 +10,10 @@ import { ICard } from "@/core/entities/ICard";
 interface MarketVaultCollectionTabProps {
   collection: ICollectionCard[];
   onSelectCard: (card: ICard) => void;
+  isPerformanceMode: boolean;
 }
 
-export function MarketVaultCollectionTab({ collection, onSelectCard }: MarketVaultCollectionTabProps) {
+export function MarketVaultCollectionTab({ collection, onSelectCard, isPerformanceMode }: MarketVaultCollectionTabProps) {
   const renderLimit = useProgressiveRenderLimit({ total: collection.length, initialLimit: 16, step: 12, intervalMs: 70 });
   const visibleCollection = collection.slice(0, renderLimit);
   return (
@@ -32,7 +33,12 @@ export function MarketVaultCollectionTab({ collection, onSelectCard }: MarketVau
           <div className="pointer-events-none relative h-full w-full overflow-hidden rounded">
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <div className="origin-center scale-[0.31]">
-                <Card card={entry.card} disableHoverEffects disableDefaultShadow isPerformanceMode />
+                <Card
+                  card={entry.card}
+                  disableHoverEffects={isPerformanceMode}
+                  disableDefaultShadow={isPerformanceMode}
+                  isPerformanceMode={isPerformanceMode}
+                />
               </div>
             </div>
           </div>

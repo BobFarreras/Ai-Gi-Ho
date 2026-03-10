@@ -9,9 +9,10 @@ import { useEffect, useRef, useState } from "react";
 interface MarketListingsPanelProps {
   listings: IMarketCardListing[];
   onSelectCard: (listing: IMarketCardListing) => void;
+  isPerformanceMode: boolean;
 }
 
-export function MarketListingsPanel({ listings, onSelectCard }: MarketListingsPanelProps) {
+export function MarketListingsPanel({ listings, onSelectCard, isPerformanceMode }: MarketListingsPanelProps) {
   const scrollRef = useRef<HTMLElement>(null);
   const [isInitialBatchActive, setIsInitialBatchActive] = useState(true);
   const windowState = useVirtualGridWindow({
@@ -68,7 +69,12 @@ export function MarketListingsPanel({ listings, onSelectCard }: MarketListingsPa
               {/* Contenedor seguro para escalar la carta sin romper el layout */}
               <div className="absolute inset-0 flex top-5 items-center justify-center pointer-events-none">
                 <div className="scale-[0.24] origin-center sm:scale-[0.28] md:scale-[0.3]">
-                  <Card card={listing.card} disableHoverEffects disableDefaultShadow isPerformanceMode />
+                  <Card
+                    card={listing.card}
+                    disableHoverEffects={isPerformanceMode}
+                    disableDefaultShadow={isPerformanceMode}
+                    isPerformanceMode={isPerformanceMode}
+                  />
                 </div>
               </div>
             </button>

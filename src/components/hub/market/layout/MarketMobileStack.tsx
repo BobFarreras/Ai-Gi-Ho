@@ -95,7 +95,7 @@ export function MarketMobileStack(props: MarketMobileStackProps) {
       </nav>
 
       <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-cyan-900/30 bg-black/40 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
-        {activePanel === "LISTINGS" ? <MarketListingsPanel listings={props.listings} onSelectCard={handleSelectListing} /> : null}
+        {activePanel === "LISTINGS" ? <MarketListingsPanel listings={props.listings} isPerformanceMode={true} onSelectCard={handleSelectListing} /> : null}
         {activePanel === "PACKS" ? (
           <MarketMobilePacksSection
             packs={props.packs}
@@ -112,6 +112,7 @@ export function MarketMobileStack(props: MarketMobileStackProps) {
             collection={props.collection}
             transactions={props.transactions}
             catalogListings={props.catalogListings}
+            isPerformanceMode={true}
             onSelectCard={handleSelectVaultCard}
           />
         ) : null}

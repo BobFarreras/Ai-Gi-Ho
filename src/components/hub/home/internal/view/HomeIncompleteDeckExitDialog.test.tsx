@@ -22,7 +22,7 @@ describe("HomeIncompleteDeckExitDialog", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Salir Igual" }));
     fireEvent.click(screen.getByRole("button", { name: "Ir al Market" }));
-    fireEvent.click(screen.getByRole("button", { name: "Cerrar" }));
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
 
     expect(onExitToHub).toHaveBeenCalledTimes(1);
     expect(onGoToMarket).toHaveBeenCalledTimes(1);

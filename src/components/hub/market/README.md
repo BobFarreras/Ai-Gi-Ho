@@ -53,6 +53,9 @@ src/components/hub/market
 3. Un archivo por responsabilidad; objetivo `< 150` líneas.
 4. Todo elemento interactivo con `aria-label`.
 5. Estado de escena gestionado con store local Zustand para minimizar re-renders.
+6. Render de carta adaptativo por layout:
+   - desktop: calidad completa (fondo visual activo),
+   - móvil: modo `isPerformanceMode` para reducir coste.
 
 ## Dependencias y flujo
 
