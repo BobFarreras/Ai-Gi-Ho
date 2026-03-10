@@ -4,6 +4,7 @@ import { createSupabaseOpponentRepository } from "@/infrastructure/persistence/s
 import { createSupabasePlayerStoryDuelProgressRepository } from "@/infrastructure/persistence/supabase/create-supabase-player-story-duel-progress-repository";
 import { createSupabasePlayerStoryWorldRepository } from "@/infrastructure/persistence/supabase/create-supabase-player-story-world-repository";
 import { IStoryMapRuntimeData, IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
+import { mergeStoryMapVisualDefinition } from "@/services/story/merge-story-map-visual-definition";
 import {
   buildStoryWorldGraph,
   resolveStoryUnlockedNodeIds,
@@ -48,5 +49,10 @@ export async function getStoryMapRuntimeData(): Promise<IStoryMapRuntimeData | n
       href: node.href,
     };
   });
-  return { playerId: session.user.id, nodes: runtimeNodes, currentNodeId, history };
+  return {
+    playerId: session.user.id,
+    nodes: mergeStoryMapVisualDefinition(runtimeNodes),
+    currentNodeId,
+    history,
+  };
 }

@@ -12,6 +12,7 @@ Definir cómo se modela el mapa, desbloqueos, navegación e integración con due
 3. `docs/story/03-narrative-engine.md`: motor de briefing narrativo por capítulo.
 4. `docs/story/PHASES-4-11-REPORT.md`: reporte de implementación y trazabilidad de fases.
 5. `docs/story/NARRACION_OPONENTES.md`: narrativa y personalidad de oponentes.
+6. `src/services/story/map-definitions/`: layout visual editable por acto (sin tocar reglas de dominio).
 
 ## Estado actual
 
@@ -20,3 +21,4 @@ Definir cómo se modela el mapa, desbloqueos, navegación e integración con due
 3. Fase 2 implementada: casos de uso Story en `src/core/use-cases/story/`.
 4. Fase 3 implementada: persistencia de cursor/historial Story en Supabase.
 5. Fase 7 implementada: briefing narrativo dinámico por capítulo/acto.
+6. Fase B implementada: definiciones visuales locales por acto + merge con runtime real.

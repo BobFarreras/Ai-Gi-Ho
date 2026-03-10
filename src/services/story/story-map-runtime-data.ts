@@ -18,6 +18,10 @@ export interface IStoryMapNodeRuntime {
   isUnlocked: boolean;
   unlockRequirementNodeId?: string | null;
   href: string;
+  position?: {
+    x: number;
+    y: number;
+  };
 }
 
 export interface IStoryMapRuntimeData {

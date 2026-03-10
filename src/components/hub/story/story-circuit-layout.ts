@@ -28,6 +28,11 @@ export function buildStoryNodePositionMap(nodes: IStoryMapNodeRuntime[]): Record
   const positions: Record<string, IStoryCircuitPosition> = {};
 
   for (const node of sortedNodes) {
+    if (!node.position) continue;
+    positions[node.id] = { x: node.position.x, y: node.position.y };
+  }
+
+  for (const node of sortedNodes) {
     const parentId = node.unlockRequirementNodeId ?? null;
     if (!parentId) continue;
     const group = childrenByParent.get(parentId) ?? [];
@@ -38,9 +43,10 @@ export function buildStoryNodePositionMap(nodes: IStoryMapNodeRuntime[]): Record
   const roots = sortedNodes.filter(
     (node) => !node.unlockRequirementNodeId || !nodeById.has(node.unlockRequirementNodeId),
   );
+  const unresolvedRoots = roots.filter((root) => !positions[root.id]);
   const rootSpacing = 380;
-  const rootStartX = 1000 - ((roots.length - 1) * rootSpacing) / 2;
-  roots.forEach((root, index) => {
+  const rootStartX = 1000 - ((unresolvedRoots.length - 1) * rootSpacing) / 2;
+  unresolvedRoots.forEach((root, index) => {
     positions[root.id] = { x: rootStartX + index * rootSpacing, y: 1700 };
   });
 
@@ -56,7 +62,7 @@ export function buildStoryNodePositionMap(nodes: IStoryMapNodeRuntime[]): Record
     const siblingSpacing = 340;
     children.forEach((child, index) => {
       const offset = (index - (children.length - 1) / 2) * siblingSpacing;
-      positions[child.id] = { x: parentPosition.x + offset, y: parentPosition.y - 260 };
+      if (!positions[child.id]) positions[child.id] = { x: parentPosition.x + offset, y: parentPosition.y - 260 };
       placeChildren(child.id);
     });
   };
