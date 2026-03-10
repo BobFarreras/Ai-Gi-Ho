@@ -199,3 +199,27 @@ Evitar saltos instantáneos del avatar al mover el cursor Story y proteger la in
 1. Al mover nodo, avatar ya no hace salto seco.
 2. Durante tránsito no se puede re-seleccionar nodos.
 3. `pnpm lint`, tests Story relevantes y `pnpm build` en verde.
+
+## Fase E - Diálogos narrativos por nodo
+
+### Objetivo
+
+Añadir narrativa interactiva encadenada para nodos virtuales (`EVENT`, `REWARD_*`) sin acoplar la UI a la persistencia.
+
+### Implementado
+
+1. Resolver de diálogo por `nodeId` con fallback por `nodeType`:
+   - `src/services/story/resolve-story-node-interaction-dialogue.ts`.
+2. Hook de estado secuencial del diálogo:
+   - `src/components/hub/story/internal/use-story-node-interaction-dialog.ts`.
+3. Modal dedicado de interacción narrativa:
+   - `src/components/hub/story/internal/StoryNodeInteractionDialog.tsx`.
+4. Integración en `StoryScene`:
+   - acción primaria virtual abre secuencia,
+   - lock de interacción mientras el diálogo está activo.
+
+### Validación
+
+1. Nodos virtuales abren modal narrativo con avance por líneas.
+2. Nodos de duelo real no abren diálogo local.
+3. `pnpm lint`, tests Story relevantes y `pnpm build` en verde.

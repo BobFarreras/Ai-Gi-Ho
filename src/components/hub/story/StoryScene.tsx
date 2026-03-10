@@ -5,8 +5,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "zustand";
 import { StoryCircuitMap } from "./StoryCircuitMap";
+import { StoryNodeInteractionDialog } from "./internal/StoryNodeInteractionDialog";
 import { StorySidebar } from "./internal/StorySidebar";
 import { createStorySceneStore, StorySceneStore } from "./internal/story-scene-store";
+import { useStoryNodeInteractionDialog } from "./internal/use-story-node-interaction-dialog";
 import { IStoryMapRuntimeData } from "@/services/story/story-map-runtime-data";
 import { IStoryChapterBriefing } from "@/services/story/build-story-chapter-briefing";
 import { resolveStoryPrimaryAction } from "@/services/story/resolve-story-primary-action";
@@ -34,6 +36,7 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
   const [isMoving, setIsMoving] = useState(false);
   const [movementError, setMovementError] = useState<string | null>(null);
   const [interactionFeedback, setInteractionFeedback] = useState<string | null>(null);
+  const interactionDialog = useStoryNodeInteractionDialog();
   const selectedNode = selectedNodeId ? nodesById[selectedNodeId] ?? null : null;
   const primaryAction = resolveStoryPrimaryAction(selectedNode);
 
@@ -71,7 +74,12 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
       return;
     }
     if (primaryAction.mode === "VIRTUAL_INTERACTION") {
-      setInteractionFeedback(`Interacción completada: ${selectedNode.title}.`);
+      const opened = interactionDialog.start(selectedNode);
+      if (!opened) {
+        setInteractionFeedback(`Interacción completada: ${selectedNode.title}.`);
+        return;
+      }
+      setInteractionFeedback(`Interacción iniciada: ${selectedNode.title}.`);
     }
   };
 
@@ -85,13 +93,14 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
             selectedNode &&
               selectedNode.isUnlocked &&
               !selectedNode.isVirtualNode &&
-              selectedNode.id !== currentNodeId,
+              selectedNode.id !== currentNodeId &&
+              !interactionDialog.isOpen,
           )}
-          isMoving={isMoving}
+          isMoving={isMoving || interactionDialog.isOpen}
           movementError={movementError}
           interactionFeedback={interactionFeedback}
           primaryActionLabel={primaryAction.label}
-          canRunPrimaryAction={primaryAction.isEnabled}
+          canRunPrimaryAction={primaryAction.isEnabled && !interactionDialog.isOpen}
           onMove={handleMove}
           onPrimaryAction={handlePrimaryAction}
           onDeselect={() => setSelectedNodeId(null)}
@@ -103,8 +112,15 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
           nodes={runtime.nodes}
           currentNodeId={currentNodeId}
           selectedNodeId={selectedNodeId}
-          isInteractionLocked={isMoving}
+          isInteractionLocked={isMoving || interactionDialog.isOpen}
           onSelectNode={setSelectedNodeId}
+        />
+        <StoryNodeInteractionDialog
+          isOpen={interactionDialog.isOpen}
+          title={interactionDialog.dialogueTitle}
+          line={interactionDialog.currentLine}
+          onNext={interactionDialog.next}
+          onClose={interactionDialog.close}
         />
       </div>
     </div>
