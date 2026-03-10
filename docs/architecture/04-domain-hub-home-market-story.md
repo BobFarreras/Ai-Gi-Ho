@@ -24,3 +24,4 @@
 1. Carga de oponente/duelo desde casos de uso y repositorios.
 2. Cierre de duelo vía endpoint dedicado y recompensa posterior.
 3. Integración con `Board` en modo `STORY` sin duplicar lógica del motor.
+4. Desbloqueo y navegación del mapa mediante grafo puro en `core/services/story/world`.

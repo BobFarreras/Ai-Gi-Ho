@@ -3,16 +3,10 @@ import { getCurrentUserSession } from "@/services/auth/get-current-user-session"
 import { createSupabaseOpponentRepository } from "@/infrastructure/persistence/supabase/create-supabase-opponent-repository";
 import { createSupabasePlayerStoryDuelProgressRepository } from "@/infrastructure/persistence/supabase/create-supabase-player-story-duel-progress-repository";
 import { IStoryMapRuntimeData, IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
-
-function buildNodeMap(rawNodes: IStoryMapNodeRuntime[]): IStoryMapNodeRuntime[] {
-  const completedById = new Set(rawNodes.filter((node) => node.isCompleted).map((node) => node.id));
-  return rawNodes.map((node, index) => {
-    if (index === 0) return { ...node, isUnlocked: true };
-    const previousNode = rawNodes[index - 1];
-    const unlockBySequence = previousNode ? completedById.has(previousNode.id) : true;
-    return { ...node, isUnlocked: node.isUnlocked || unlockBySequence };
-  });
-}
+import {
+  buildStoryWorldGraph,
+  resolveStoryUnlockedNodeIds,
+} from "@/core/services/story/world/build-story-world-graph";
 
 export async function getStoryMapRuntimeData(): Promise<IStoryMapRuntimeData | null> {
   const session = await getCurrentUserSession();
@@ -24,24 +18,27 @@ export async function getStoryMapRuntimeData(): Promise<IStoryMapRuntimeData | n
     progressRepository.listByPlayerId(session.user.id),
   ]);
   const progressByDuelId = new Map(progress.map((entry) => [entry.duelId, entry]));
-  const completedById = new Set(progress.filter((entry) => entry.bestResult === "WON").map((entry) => entry.duelId));
-  const rawNodes: IStoryMapNodeRuntime[] = duels.map((duel) => {
-    const duelProgress = progressByDuelId.get(duel.id);
-    const unlockedByRequirement = duel.unlockRequirementDuelId ? completedById.has(duel.unlockRequirementDuelId) : true;
+  const completedNodeIds = progress
+    .filter((entry) => entry.bestResult === "WON")
+    .map((entry) => entry.duelId);
+  const worldGraph = buildStoryWorldGraph(duels);
+  const unlockedNodeIds = new Set(resolveStoryUnlockedNodeIds(worldGraph, completedNodeIds));
+  const runtimeNodes: IStoryMapNodeRuntime[] = worldGraph.nodes.map((node) => {
+    const duelProgress = progressByDuelId.get(node.id);
     return {
-      id: duel.id,
-      chapter: duel.chapter,
-      duelIndex: duel.duelIndex,
-      title: duel.title,
-      opponentName: duel.opponentName,
-      difficulty: duel.opponentDifficulty,
-      rewardNexus: duel.rewardNexus,
-      rewardPlayerExperience: duel.rewardPlayerExperience,
-      isBossDuel: duel.isBossDuel,
+      id: node.id,
+      chapter: node.chapter,
+      duelIndex: node.duelIndex,
+      title: node.title,
+      opponentName: node.opponentName,
+      difficulty: node.difficulty,
+      rewardNexus: node.rewardNexus,
+      rewardPlayerExperience: node.rewardPlayerExperience,
+      isBossDuel: node.nodeType === "BOSS",
       isCompleted: duelProgress?.bestResult === "WON",
-      isUnlocked: unlockedByRequirement,
-      href: `/hub/story/chapter/${duel.chapter}/duel/${duel.duelIndex}`,
+      isUnlocked: unlockedNodeIds.has(node.id),
+      href: node.href,
     };
   });
-  return { playerId: session.user.id, nodes: buildNodeMap(rawNodes) };
+  return { playerId: session.user.id, nodes: runtimeNodes };
 }
