@@ -59,7 +59,7 @@
    - cursor de navegación Story del jugador (`current_node_id`).
    - 1 fila por usuario.
 24. `public.player_story_history_events`:
-   - historial de eventos Story (`MOVE`, `NODE_RESOLVED`, `REWARD_GRANTED`).
+   - historial de eventos Story (`MOVE`, `NODE_RESOLVED`, `REWARD_GRANTED`, `INTERACTION`).
    - múltiples filas por usuario ordenadas por `created_at`.
 
 ## Fase 2 (Perfil y Progreso)
@@ -205,7 +205,14 @@
    - ambas tablas solo visibles/modificables por el propio usuario (`auth.uid() = player_id`).
 4. Uso previsto:
    - `player_story_world_state`: nodo actual del mapa Story.
-   - `player_story_history_events`: timeline de movimiento, resolución de nodo y recompensas.
+   - `player_story_history_events`: timeline de movimiento, resolución de nodo, recompensas e interacciones.
+
+## Fase E (Interacciones narrativas virtuales)
+
+1. Ejecuta `docs/supabase/sql/014_phase_e_story_virtual_interactions.sql`.
+2. Ajustes principales:
+   - `player_story_history_events.kind` acepta `INTERACTION`.
+   - `player_story_history_events.node_id` ya no requiere FK a `story_duels` para permitir nodos virtuales.
 
 ## Notas
 

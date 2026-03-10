@@ -223,3 +223,27 @@ Añadir narrativa interactiva encadenada para nodos virtuales (`EVENT`, `REWARD_
 1. Nodos virtuales abren modal narrativo con avance por líneas.
 2. Nodos de duelo real no abren diálogo local.
 3. `pnpm lint`, tests Story relevantes y `pnpm build` en verde.
+
+## Fase F - Persistencia de interacción narrativa
+
+### Objetivo
+
+Registrar en backend las interacciones de nodos virtuales para trazabilidad y variantes de diálogo por repetición.
+
+### Implementado
+
+1. Nuevo caso de uso:
+   - `src/core/use-cases/story/RegisterStoryInteractionUseCase.ts`.
+2. API dedicada:
+   - `POST /api/story/world/interact`.
+3. Evento de historial nuevo:
+   - `INTERACTION` en entidades y repositorio Story.
+4. Resolver de diálogo con variante por contador de interacciones.
+5. Migración SQL:
+   - `docs/supabase/sql/014_phase_e_story_virtual_interactions.sql`.
+
+### Validación
+
+1. Interacción virtual se persiste y aparece en historial Story.
+2. Repetir interacción muestra texto resumido de reintento.
+3. `pnpm lint`, tests Story relevantes y `pnpm build` en verde.

@@ -64,9 +64,23 @@ function buildFallbackDialogue(node: IStoryMapNodeRuntime): IStoryNodeInteractio
 /**
  * Devuelve la secuencia narrativa para nodos virtuales. Nodos de duelo no generan diálogo local.
  */
-export function resolveStoryNodeInteractionDialogue(node: IStoryMapNodeRuntime): IStoryNodeInteractionDialogue | null {
+export function resolveStoryNodeInteractionDialogue(
+  node: IStoryMapNodeRuntime,
+  interactionCount = 1,
+): IStoryNodeInteractionDialogue | null {
   if (!node.isVirtualNode && node.nodeType !== "EVENT" && node.nodeType !== "REWARD_CARD" && node.nodeType !== "REWARD_NEXUS") {
     return null;
   }
-  return DIALOGUE_BY_NODE_ID[node.id] ?? buildFallbackDialogue(node);
+  const firstDialogue = DIALOGUE_BY_NODE_ID[node.id] ?? buildFallbackDialogue(node);
+  if (interactionCount <= 1) return firstDialogue;
+  return {
+    title: firstDialogue.title,
+    lines: [
+      {
+        speaker: "Sistema",
+        text: `Registro recurrente detectado (${interactionCount}). Optimizando resumen narrativo.`,
+      },
+      ...firstDialogue.lines.slice(0, 1),
+    ],
+  };
 }

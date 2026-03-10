@@ -13,7 +13,7 @@ interface IStoryHistoryRow {
   event_id: string;
   player_id: string;
   node_id: string;
-  kind: "MOVE" | "NODE_RESOLVED" | "REWARD_GRANTED";
+  kind: "MOVE" | "NODE_RESOLVED" | "REWARD_GRANTED" | "INTERACTION";
   details: string;
   created_at: string;
 }

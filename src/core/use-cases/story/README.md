@@ -11,6 +11,7 @@ Orquestar estado y acciones del modo Story sin acoplar UI ni infraestructura.
 2. `MoveToStoryNodeUseCase`: valida movimiento entre nodos conectados.
 3. `ResolveStoryNodeUseCase`: marca nodo resuelto y expande desbloqueos.
 4. `CommitStoryProgressUseCase`: persiste nodo actual e historial Story.
+5. `RegisterStoryInteractionUseCase`: persiste eventos narrativos de nodos virtuales.
 
 ## Nota de arquitectura
 

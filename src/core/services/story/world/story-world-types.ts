@@ -37,7 +37,7 @@ export interface IStoryWorldGraph {
 export interface IStoryWorldHistoryEvent {
   eventId: string;
   nodeId: string;
-  kind: "MOVE" | "NODE_RESOLVED" | "REWARD_GRANTED";
+  kind: "MOVE" | "NODE_RESOLVED" | "REWARD_GRANTED" | "INTERACTION";
   createdAtIso: string;
   details: string;
 }

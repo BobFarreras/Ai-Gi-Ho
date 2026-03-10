@@ -25,8 +25,8 @@ export function useStoryNodeInteractionDialog() {
     return state.dialogue.lines[state.index] ?? null;
   }, [state.dialogue, state.index]);
 
-  const start = (node: IStoryMapNodeRuntime): boolean => {
-    const dialogue = resolveStoryNodeInteractionDialogue(node);
+  const start = (node: IStoryMapNodeRuntime, interactionCount = 1): boolean => {
+    const dialogue = resolveStoryNodeInteractionDialogue(node, interactionCount);
     if (!dialogue) return false;
     setState({ dialogue, index: 0 });
     return true;

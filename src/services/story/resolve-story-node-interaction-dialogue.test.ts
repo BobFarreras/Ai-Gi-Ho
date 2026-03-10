@@ -41,6 +41,15 @@ describe("resolveStoryNodeInteractionDialogue", () => {
     expect(dialogue?.lines[0]?.text).toContain("interacción narrativa");
   });
 
+  it("devuelve variante resumida cuando el nodo ya fue interactuado", () => {
+    const dialogue = resolveStoryNodeInteractionDialogue(
+      createNode({ id: "story-ch1-event-briefing" }),
+      3,
+    );
+
+    expect(dialogue?.lines[0]?.text).toContain("Registro recurrente");
+  });
+
   it("no genera diálogo para nodo de duelo real", () => {
     const dialogue = resolveStoryNodeInteractionDialogue(
       createNode({ id: "story-ch1-duel-1", nodeType: "DUEL", isVirtualNode: false, href: "/hub/story/chapter/1/duel/1" }),

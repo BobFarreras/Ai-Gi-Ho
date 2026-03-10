@@ -1,5 +1,5 @@
 // src/core/entities/story/IPlayerStoryHistoryEvent.ts - Evento persistido del historial Story para trazabilidad del mapa narrativo.
-export type StoryHistoryEventKind = "MOVE" | "NODE_RESOLVED" | "REWARD_GRANTED";
+export type StoryHistoryEventKind = "MOVE" | "NODE_RESOLVED" | "REWARD_GRANTED" | "INTERACTION";
 
 export interface IPlayerStoryHistoryEvent {
   eventId: string;
