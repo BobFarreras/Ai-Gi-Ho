@@ -5,16 +5,19 @@ import Link from "next/link";
 import { useState } from "react";
 import { useStore } from "zustand";
 import { StoryCircuitMap } from "@/components/hub/story/StoryCircuitMap";
+import { StoryBriefingPanel } from "@/components/hub/story/internal/StoryBriefingPanel";
 import { StoryHistoryPanel } from "@/components/hub/story/internal/StoryHistoryPanel";
 import { createStorySceneStore, StorySceneStore } from "@/components/hub/story/internal/story-scene-store";
 import { resolveStoryNodeInteraction } from "@/core/services/story/world/resolve-story-node-interaction";
+import { IStoryChapterBriefing } from "@/services/story/build-story-chapter-briefing";
 import { IStoryMapRuntimeData } from "@/services/story/story-map-runtime-data";
 
 interface StorySceneProps {
   runtime: IStoryMapRuntimeData;
+  briefing: IStoryChapterBriefing;
 }
 
-export function StoryScene({ runtime }: StorySceneProps) {
+export function StoryScene({ runtime, briefing }: StorySceneProps) {
   const [store] = useState<StorySceneStore>(() =>
     createStorySceneStore({
       nodes: runtime.nodes,
@@ -86,6 +89,7 @@ export function StoryScene({ runtime }: StorySceneProps) {
           {movementError ? <p className="mt-2 text-xs text-rose-300">{movementError}</p> : null}
         </article>
       ) : null}
+      <StoryBriefingPanel briefing={briefing} />
       <StoryHistoryPanel history={history} />
     </section>
   );

@@ -1,6 +1,7 @@
 // src/app/hub/story/page.tsx - Renderiza el mapa de circuito Story con nodos de oponentes y desbloqueo progresivo.
 import Link from "next/link";
 import { StoryScene } from "@/components/hub/story/StoryScene";
+import { buildStoryChapterBriefing } from "@/services/story/build-story-chapter-briefing";
 import { getStoryMapRuntimeData } from "@/services/story/get-story-map-runtime-data";
 
 export default async function StoryPage() {
@@ -18,6 +19,10 @@ export default async function StoryPage() {
       </main>
     );
   }
+  const maxUnlockedChapter = runtime.nodes
+    .filter((node) => node.isUnlocked)
+    .reduce((maxChapter, node) => Math.max(maxChapter, node.chapter), 1);
+  const briefing = buildStoryChapterBriefing(maxUnlockedChapter);
   return (
     <main className="hub-control-room-bg min-h-dvh px-4 py-6 sm:px-6">
       <div className="mx-auto mb-4 flex w-full max-w-6xl items-center justify-between rounded-xl border border-cyan-400/30 bg-slate-950/80 px-4 py-3 text-cyan-100">
@@ -29,7 +34,7 @@ export default async function StoryPage() {
           Volver
         </Link>
       </div>
-      <StoryScene runtime={runtime} />
+      <StoryScene runtime={runtime} briefing={briefing} />
     </main>
   );
 }

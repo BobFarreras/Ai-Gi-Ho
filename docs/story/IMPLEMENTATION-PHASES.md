@@ -60,3 +60,22 @@ Desacoplar la acción principal de la UI respecto al tipo de nodo Story.
 1. El label de acción en inspector depende del `nodeType`.
 2. El mapa muestra etiqueta de tipo por nodo.
 3. `pnpm lint`, `pnpm test`, `pnpm build` en verde.
+
+## Fase 7 - Motor narrativo de capítulo
+
+### Objetivo
+
+Mostrar contexto de acto/capítulo en el mapa sin hardcodear texto en componentes.
+
+### Implementado
+
+1. Servicio `build-story-chapter-briefing`.
+2. Tests del servicio y fallback.
+3. Panel UI de briefing (`StoryBriefingPanel`).
+4. Integración en `StoryPage` con capítulo desbloqueado máximo.
+
+### Validación
+
+1. El mapa muestra briefing narrativo del capítulo activo.
+2. Capítulos no definidos usan fallback estable.
+3. `pnpm lint`, `pnpm test`, `pnpm build` en verde.
