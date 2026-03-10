@@ -10,6 +10,7 @@ interface IStorySceneState {
   nodesById: Record<string, IStoryMapNodeRuntime>;
   setSelectedNodeId: (nodeId: string | null) => void;
   setCurrentNodeId: (nodeId: string | null) => void;
+  setHistory: (history: IPlayerStoryHistoryEvent[]) => void;
 }
 
 function createNodesById(nodes: IStoryMapNodeRuntime[]): Record<string, IStoryMapNodeRuntime> {
@@ -31,6 +32,7 @@ export function createStorySceneStore(input: {
     nodesById: createNodesById(input.nodes),
     setSelectedNodeId: (selectedNodeId) => set({ selectedNodeId }),
     setCurrentNodeId: (currentNodeId) => set({ currentNodeId }),
+    setHistory: (history) => set({ history }),
   }));
 }
 

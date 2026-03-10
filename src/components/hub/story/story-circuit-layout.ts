@@ -4,6 +4,11 @@ interface IStoryCircuitPosition {
   top: string;
 }
 
+export interface IStoryCircuitSegment {
+  from: IStoryCircuitPosition;
+  to: IStoryCircuitPosition;
+}
+
 const DESKTOP_PATH: ReadonlyArray<IStoryCircuitPosition> = [
   { left: "10%", top: "58%" },
   { left: "28%", top: "36%" },
@@ -26,4 +31,19 @@ export function resolveStoryNodePosition(index: number, isMobile: boolean): ISto
   const last = source[source.length - 1];
   const overflow = index - source.length + 1;
   return { left: last.left, top: `${Math.min(90, Number.parseFloat(last.top) + overflow * 8)}%` };
+}
+
+/**
+ * Genera segmentos visuales del camino principal para reforzar lectura de progresión.
+ */
+export function resolveStoryPathSegments(totalNodes: number, isMobile: boolean): IStoryCircuitSegment[] {
+  if (totalNodes <= 1) return [];
+  const segments: IStoryCircuitSegment[] = [];
+  for (let index = 1; index < totalNodes; index += 1) {
+    segments.push({
+      from: resolveStoryNodePosition(index - 1, isMobile),
+      to: resolveStoryNodePosition(index, isMobile),
+    });
+  }
+  return segments;
 }

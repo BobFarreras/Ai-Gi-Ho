@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
-import { resolveStoryNodePosition } from "@/components/hub/story/story-circuit-layout";
+import { resolveStoryNodePosition, resolveStoryPathSegments } from "@/components/hub/story/story-circuit-layout";
 import { useViewportWidth } from "@/components/hub/internal/use-viewport-width";
 
 interface StoryCircuitMapProps {
@@ -24,10 +24,25 @@ function resolveNodeTone(node: IStoryMapNodeRuntime): string {
 export function StoryCircuitMap({ nodes, selectedNodeId = null, currentNodeId = null, onSelectNode }: StoryCircuitMapProps) {
   const viewportWidth = useViewportWidth();
   const isMobile = viewportWidth < 768;
+  const segments = resolveStoryPathSegments(nodes.length, isMobile);
   return (
     <section className="relative mx-auto h-[74vh] max-h-[780px] min-h-[520px] w-full max-w-6xl overflow-hidden rounded-3xl border border-cyan-400/30 bg-[radial-gradient(circle_at_30%_40%,rgba(34,211,238,0.16),transparent_52%),linear-gradient(180deg,rgba(2,6,23,0.94),rgba(2,18,36,0.96))]">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(34,211,238,0.08)_1px,transparent_1px),linear-gradient(0deg,rgba(34,211,238,0.06)_1px,transparent_1px)] bg-[size:42px_42px]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(59,130,246,0.18),transparent_42%)]" />
+      <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden>
+        {segments.map((segment, index) => (
+          <line
+            key={`segment-${index}`}
+            x1={segment.from.left}
+            y1={segment.from.top}
+            x2={segment.to.left}
+            y2={segment.to.top}
+            stroke="rgba(34,211,238,0.45)"
+            strokeWidth="2"
+            strokeDasharray="6 6"
+          />
+        ))}
+      </svg>
       {nodes.map((node, index) => {
         const nodePosition = resolveStoryNodePosition(index, isMobile);
         const lockedReason = node.isUnlocked ? "" : "Derrota el nodo anterior para desbloquear.";

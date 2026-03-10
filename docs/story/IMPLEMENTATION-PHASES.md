@@ -21,3 +21,22 @@ Separar el estado de interacción del mapa Story de la capa de renderizado.
 1. Mapa renderiza con nodo seleccionado.
 2. Historial Story visible en panel inferior.
 3. `pnpm lint`, `pnpm test`, `pnpm build` en verde.
+
+## Fase 5 - Navegación semi-abierta y rutas
+
+### Objetivo
+
+Permitir movimiento explícito por nodos desbloqueados y mostrar caminos visuales.
+
+### Implementado
+
+1. API `POST /api/story/world/move` con casos de uso Story.
+2. Persistencia del movimiento en estado/historial Story.
+3. Rutas visuales en `StoryCircuitMap` (segmentos entre nodos).
+4. Panel de nodo en `StoryScene` con acción `Moverse aquí`.
+
+### Validación
+
+1. El movimiento a nodo bloqueado devuelve error controlado.
+2. El movimiento válido actualiza nodo actual e historial.
+3. `pnpm lint`, `pnpm test`, `pnpm build` en verde.
