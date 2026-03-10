@@ -1,6 +1,6 @@
 // src/app/hub/story/page.tsx - Renderiza el mapa de circuito Story con nodos de oponentes y desbloqueo progresivo.
 import Link from "next/link";
-import { StoryCircuitMap } from "@/components/hub/story/StoryCircuitMap";
+import { StoryScene } from "@/components/hub/story/StoryScene";
 import { getStoryMapRuntimeData } from "@/services/story/get-story-map-runtime-data";
 
 export default async function StoryPage() {
@@ -29,7 +29,7 @@ export default async function StoryPage() {
           Volver
         </Link>
       </div>
-      <StoryCircuitMap nodes={runtime.nodes} />
+      <StoryScene runtime={runtime} />
     </main>
   );
 }
