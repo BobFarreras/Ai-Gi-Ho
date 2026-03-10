@@ -97,3 +97,25 @@ Alinear entrada a combate con el estado real del mundo Story (nodo activo + desb
 1. Si el jugador no está en el nodo, no entra al duelo.
 2. Si el nodo está activo y desbloqueado, el flujo de combate funciona.
 3. `pnpm lint`, `pnpm test`, `pnpm build` en verde.
+
+## Fase 9 - Hardening de rendimiento Story (mobile)
+
+### Objetivo
+
+Reducir coste visual del mapa Story en móviles low-end sin cambiar flujo de juego.
+
+### Implementado
+
+1. Perfil de rendimiento Story por viewport:
+   - `resolve-story-performance-profile.ts`.
+2. `StoryCircuitMap` aplica degradación visual en low-power:
+   - menos capas decorativas,
+   - sin trazado SVG de caminos,
+   - sombras reducidas.
+3. `StoryHistoryPanel` modo compacto para móvil.
+
+### Validación
+
+1. En móvil estrecho se reducen efectos del mapa.
+2. En desktop se mantiene estética completa.
+3. `pnpm lint`, `pnpm test`, `pnpm build` en verde.

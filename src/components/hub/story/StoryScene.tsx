@@ -7,8 +7,10 @@ import { useStore } from "zustand";
 import { StoryCircuitMap } from "@/components/hub/story/StoryCircuitMap";
 import { StoryBriefingPanel } from "@/components/hub/story/internal/StoryBriefingPanel";
 import { StoryHistoryPanel } from "@/components/hub/story/internal/StoryHistoryPanel";
+import { resolveStoryPerformanceProfile } from "@/components/hub/story/internal/resolve-story-performance-profile";
 import { createStorySceneStore, StorySceneStore } from "@/components/hub/story/internal/story-scene-store";
 import { resolveStoryNodeInteraction } from "@/core/services/story/world/resolve-story-node-interaction";
+import { useViewportWidth } from "@/components/hub/internal/use-viewport-width";
 import { IStoryChapterBriefing } from "@/services/story/build-story-chapter-briefing";
 import { IStoryMapRuntimeData } from "@/services/story/story-map-runtime-data";
 
@@ -18,6 +20,8 @@ interface StorySceneProps {
 }
 
 export function StoryScene({ runtime, briefing }: StorySceneProps) {
+  const viewportWidth = useViewportWidth();
+  const profile = resolveStoryPerformanceProfile(viewportWidth);
   const [store] = useState<StorySceneStore>(() =>
     createStorySceneStore({
       nodes: runtime.nodes,
@@ -90,7 +94,7 @@ export function StoryScene({ runtime, briefing }: StorySceneProps) {
         </article>
       ) : null}
       <StoryBriefingPanel briefing={briefing} />
-      <StoryHistoryPanel history={history} />
+      <StoryHistoryPanel history={history} isCompact={profile.shouldReduceMapEffects} />
     </section>
   );
 }

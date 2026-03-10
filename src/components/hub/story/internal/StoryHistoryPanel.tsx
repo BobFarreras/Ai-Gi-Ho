@@ -3,13 +3,14 @@ import { IPlayerStoryHistoryEvent } from "@/core/entities/story/IPlayerStoryHist
 
 interface StoryHistoryPanelProps {
   history: IPlayerStoryHistoryEvent[];
+  isCompact?: boolean;
 }
 
-export function StoryHistoryPanel({ history }: StoryHistoryPanelProps) {
+export function StoryHistoryPanel({ history, isCompact = false }: StoryHistoryPanelProps) {
   return (
     <aside className="rounded-xl border border-cyan-500/30 bg-slate-950/80 p-3 text-cyan-100">
       <h2 className="text-[11px] font-black uppercase tracking-[0.2em] text-cyan-300">Historial Story</h2>
-      <div className="home-modern-scroll mt-2 max-h-[200px] space-y-2 overflow-y-auto pr-1">
+      <div className={`home-modern-scroll mt-2 space-y-2 overflow-y-auto pr-1 ${isCompact ? "max-h-[140px]" : "max-h-[200px]"}`}>
         {history.length === 0 ? (
           <p className="text-xs text-slate-400">Sin eventos todavía.</p>
         ) : (
