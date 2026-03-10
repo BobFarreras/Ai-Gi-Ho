@@ -22,7 +22,10 @@ export function useStoryAutoNodeSelection(input: IUseStoryAutoNodeSelectionInput
     const selectedNode = input.selectedNode;
     if (!selectedNode || input.isBusy) return;
     if (!selectedNode.isUnlocked) return;
-    if (selectedNode.isVirtualNode && selectedNode.nodeType === "MOVE") return;
+    if (selectedNode.isVirtualNode && selectedNode.nodeType === "MOVE") {
+      if (selectedNode.id !== input.currentNodeId) input.onAutoMove();
+      return;
+    }
     if (lastSelectionRef.current === selectedNode.id) return;
     lastSelectionRef.current = selectedNode.id;
 

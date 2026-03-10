@@ -303,9 +303,9 @@ Escalar el mapa Story a una experiencia más de mundo semi-abierto con mayor den
 1. Zoom del mapa:
    - rueda de ratón,
    - controles `+`, `-`, `1x`.
-2. Nodo inicial exclusivo del jugador (`story-ch1-player-start`) sin oponente en plataforma de spawn.
-3. Múltiples interacciones por camino (4-5+) y rutas que se reencuentran con enlaces visuales adicionales.
-4. Plataformas de ambiente no rectangulares para evitar bloques rígidos.
+2. Nodo inicial exclusivo del jugador (`story-ch1-player-start`) y siguiente pasarela vacía jugable (`MOVE`).
+3. Múltiples interacciones por camino (4-5+) y rutas tipo árbol con reconvergencias selectivas (no obligatorias).
+4. Plataformas vacías jugables modeladas como nodos `MOVE` (sin icono de oponente).
 5. Restricción de desbloqueo reforzada:
    - nodos detrás de un duelo/interacción previa permanecen inactivos hasta completar requisito.
 

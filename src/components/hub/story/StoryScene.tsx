@@ -38,6 +38,13 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
   const handleMove = async () => {
     if (!selectedNodeId || isMoving) return;
     setIsMoving(true); setMovementError(null); setInteractionFeedback(null);
+    if (selectedNode?.isVirtualNode && selectedNode.nodeType === "MOVE") {
+      setCurrentNodeId(selectedNode.id);
+      setInteractionFeedback(`Desplazamiento completado: ${selectedNode.title}.`);
+      await new Promise((resolve) => setTimeout(resolve, 550));
+      setIsMoving(false);
+      return;
+    }
     try {
       const response = await fetch("/api/story/world/move", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ nodeId: selectedNodeId }) });
       if (!response.ok) throw new Error("Movimiento inválido.");
@@ -70,7 +77,14 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
         <StorySidebar
           briefing={briefing}
           selectedNode={selectedNode}
-          canMove={Boolean(selectedNode && selectedNode.isUnlocked && !selectedNode.isVirtualNode && selectedNode.id !== currentNodeId && !isInteracting && !interactionDialog.isOpen)}
+          canMove={Boolean(
+            selectedNode &&
+              selectedNode.isUnlocked &&
+              (selectedNode.nodeType === "MOVE" || !selectedNode.isVirtualNode) &&
+              selectedNode.id !== currentNodeId &&
+              !isInteracting &&
+              !interactionDialog.isOpen,
+          )}
           isMoving={isBusy}
           movementError={movementError}
           interactionFeedback={interactionFeedback}

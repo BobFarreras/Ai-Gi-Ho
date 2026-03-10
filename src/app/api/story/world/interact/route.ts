@@ -21,6 +21,8 @@ function canInteractVirtualNode(input: {
   interactedNodeIds: string[];
 }): boolean {
   if (!input.requiredNodeId) return true;
+  const requiredVirtualNode = findStoryVirtualNodeDefinition(input.requiredNodeId);
+  if (requiredVirtualNode?.nodeType === "MOVE") return true;
   return input.completedNodeIds.includes(input.requiredNodeId) || input.interactedNodeIds.includes(input.requiredNodeId);
 }
 

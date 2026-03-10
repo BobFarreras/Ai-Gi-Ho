@@ -12,7 +12,8 @@ interface StoryMapNodeProps {
   onClick: () => void;
 }
 
-function resolveHologramAsset(node: IStoryMapNodeRuntime): { src: string; alt: string } {
+function resolveHologramAsset(node: IStoryMapNodeRuntime): { src: string; alt: string } | null {
+  if (node.nodeType === "MOVE") return null;
   if (node.nodeType === "BOSS" || node.nodeType === "DUEL") {
     return { src: "/assets/story/opponents/opp-ch1-apprentice/avatar-GenNvim.png", alt: "Oponente" };
   }
@@ -55,21 +56,26 @@ export function StoryMapNode({ node, isSelected, onClick }: StoryMapNodeProps) {
             node.isBossDuel ? "rotate-45 rounded-lg border-fuchsia-500" : "border-cyan-500",
             node.isCompleted && "border-emerald-500",
             isDefeatedDuel && "opacity-40 saturate-0",
+            node.nodeType === "MOVE" && "border-emerald-400/60 bg-emerald-950/35",
           )}
         >
-          <div className={cn("relative h-full w-full", node.isBossDuel && "-rotate-45")}>
-            <Image
-              src={hologram.src}
-              alt={hologram.alt}
-              fill
-              sizes="80px"
-              quality={55}
-              className={cn(
-                "object-contain",
-                node.nodeType === "DUEL" || node.nodeType === "BOSS" ? "object-cover" : "p-1",
-              )}
-            />
-          </div>
+          {hologram ? (
+            <div className={cn("relative h-full w-full", node.isBossDuel && "-rotate-45")}>
+              <Image
+                src={hologram.src}
+                alt={hologram.alt}
+                fill
+                sizes="80px"
+                quality={55}
+                className={cn(
+                  "object-contain",
+                  node.nodeType === "DUEL" || node.nodeType === "BOSS" ? "object-cover" : "p-1",
+                )}
+              />
+            </div>
+          ) : (
+            <div className="h-5 w-5 rounded-full border border-emerald-300/60 bg-emerald-500/15" />
+          )}
         </div>
       </motion.div>
 

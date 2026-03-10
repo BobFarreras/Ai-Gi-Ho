@@ -59,7 +59,7 @@ describe("useStoryAutoNodeSelection", () => {
     expect(onAutoMove).not.toHaveBeenCalled();
   });
 
-  it("no dispara interacción automática en nodo virtual de movimiento", () => {
+  it("dispara auto-move en nodo virtual de movimiento", () => {
     const onAutoMove = vi.fn();
     const onAutoInteract = vi.fn();
     renderHook(() =>
@@ -72,7 +72,7 @@ describe("useStoryAutoNodeSelection", () => {
       }),
     );
 
-    expect(onAutoMove).not.toHaveBeenCalled();
+    expect(onAutoMove).toHaveBeenCalledTimes(1);
     expect(onAutoInteract).not.toHaveBeenCalled();
   });
 });

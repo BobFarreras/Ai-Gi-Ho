@@ -10,6 +10,7 @@ function resolveVirtualNodeUnlocked(input: {
   if (!input.dependencyNodeId) return true;
   const dependencyNode = input.nodesById.get(input.dependencyNodeId);
   if (!dependencyNode) return false;
+  if (dependencyNode.nodeType === "MOVE") return dependencyNode.isUnlocked || dependencyNode.isCompleted;
   return dependencyNode.isCompleted;
 }
 
