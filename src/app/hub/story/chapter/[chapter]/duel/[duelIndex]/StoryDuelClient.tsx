@@ -1,13 +1,15 @@
 // src/app/hub/story/chapter/[chapter]/duel/[duelIndex]/StoryDuelClient.tsx - Orquesta duelo Story en cliente y registra resultado/recompensas al finalizar.
 "use client";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Board } from "@/components/game/board";
 import { IDuelResultRewardSummary } from "@/components/game/board/ui/internal/duel-result/duel-result-reward-summary";
 import { ICard } from "@/core/entities/ICard";
 import { StoryDuelOutcome } from "@/services/story/duel-flow/story-duel-outcome";
 import { buildStoryOpponentNarrationPack } from "@/services/story/build-story-opponent-narration-pack";
+import { resolveStoryCoinToss } from "@/services/story/duel-flow/resolve-story-coin-toss";
 import { postStoryDuelCompletion } from "./story-duel-completion-client";
+import { StoryDuelCoinTossOverlay } from "./StoryDuelCoinTossOverlay";
 
 interface StoryDuelClientProps {
   chapter: number;
@@ -29,13 +31,24 @@ export function StoryDuelClient(props: StoryDuelClientProps) {
   const [status, setStatus] = useState<string | null>(null);
   const [rewardSummary, setRewardSummary] = useState<IDuelResultRewardSummary | null>(null);
   const [resultTransition, setResultTransition] = useState<{ outcome: StoryDuelOutcome; duelNodeId: string; returnNodeId: string } | null>(null);
+  const [isCoinTossVisible, setIsCoinTossVisible] = useState(true);
   const hasPostedResultRef = useRef(false);
   const playerAvatarUrl = "/assets/story/player/bob.png";
   const resolvedOpponentAvatarUrl = props.opponentAvatarUrl ?? "/assets/story/opponents/opp-ch1-apprentice/avatar-GenNvim.png";
+  const [coinToss] = useState(() =>
+    resolveStoryCoinToss({
+      playerId: props.playerId,
+      opponentId: props.opponentId,
+    }),
+  );
   const narrationPack = useMemo(
     () => buildStoryOpponentNarrationPack({ opponentId: props.opponentId, opponentName: props.opponentName, duelDescription: props.duelDescription }),
     [props.duelDescription, props.opponentId, props.opponentName],
   );
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => setIsCoinTossVisible(false), 1450);
+    return () => window.clearTimeout(timeoutId);
+  }, []);
   const pushBackToStory = (input: { outcome: StoryDuelOutcome; duelNodeId: string; returnNodeId: string }) => {
     const query = new URLSearchParams({
       duelOutcome: input.outcome,
@@ -97,7 +110,7 @@ export function StoryDuelClient(props: StoryDuelClientProps) {
           opponentId: props.opponentId,
           opponentName: props.opponentName,
           opponentDeck: props.opponentDeck,
-          starterPlayerId: props.playerId,
+          starterPlayerId: coinToss.starterPlayerId,
           openingHandSize: 4,
         }}
         opponentAvatarUrl={resolvedOpponentAvatarUrl}
@@ -114,6 +127,14 @@ export function StoryDuelClient(props: StoryDuelClientProps) {
         }}
         onExitMatch={() => void handleAbortMatch()}
         onMatchResolved={handleMatchResolved}
+      />
+      <StoryDuelCoinTossOverlay
+        isVisible={isCoinTossVisible}
+        starterSide={coinToss.starterSide}
+        playerName={props.playerName}
+        opponentName={props.opponentName}
+        playerAvatarUrl={playerAvatarUrl}
+        opponentAvatarUrl={resolvedOpponentAvatarUrl}
       />
     </main>
   );

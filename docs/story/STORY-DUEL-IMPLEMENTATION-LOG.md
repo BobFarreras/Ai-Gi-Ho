@@ -101,3 +101,29 @@ Disponer de un circuito de prueba que cubra tipos Story aún no ejercitados en e
 
 ### Validación (TDD)
 - Test actualizado de `resolveStoryPrimaryAction` para `BOSS` virtual.
+
+## Fase 4 - Coin Toss previo al combate Story
+
+### Objetivo
+Decidir de forma explícita y visible quién inicia el turno antes del combate, con base 50/50 y soporte futuro para modificadores.
+
+### Cambios aplicados
+1. Se implementó servicio puro `resolveStoryCoinToss` con:
+   - probabilidad base 50/50,
+   - modificadores de inicio (`playerStartBonusPercent`, `opponentStartBonusPercent`),
+   - opción de `randomValue` inyectable para pruebas.
+2. `StoryDuelClient` usa el resultado del coin toss para `starterPlayerId`.
+3. Se añadió overlay visual `StoryDuelCoinTossOverlay` al entrar al duelo.
+
+### Archivos creados
+- `src/services/story/duel-flow/resolve-story-coin-toss.ts`
+- `src/services/story/duel-flow/resolve-story-coin-toss.test.ts`
+- `src/app/hub/story/chapter/[chapter]/duel/[duelIndex]/StoryDuelCoinTossOverlay.tsx`
+
+### Archivos modificados
+- `src/app/hub/story/chapter/[chapter]/duel/[duelIndex]/StoryDuelClient.tsx`
+
+### Validación (TDD)
+- Test unitario de `resolveStoryCoinToss` para:
+  - base 50/50
+  - aplicación de bonus de probabilidad.
