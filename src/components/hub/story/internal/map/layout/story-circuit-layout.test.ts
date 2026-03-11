@@ -1,10 +1,11 @@
-// src/components/hub/story/story-circuit-layout.test.ts - Verifica prioridad de posición explícita y segmentos en layout Story.
+// src/components/hub/story/internal/map/layout/story-circuit-layout.test.ts - Verifica prioridad de posición explícita y segmentos en layout Story.
 import { describe, expect, it } from "vitest";
 import {
   buildStoryNodePositionMap,
   resolveStoryPathSegments,
-} from "@/components/hub/story/story-circuit-layout";
+} from "@/components/hub/story/internal/map/layout/story-circuit-layout";
 import { IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
+import { listStoryActMapDefinitions } from "@/services/story/map-definitions/story-map-definition-registry";
 
 function buildNode(id: string, unlockRequirementNodeId: string | null, position?: { x: number; y: number }): IStoryMapNodeRuntime {
   return {
@@ -46,5 +47,22 @@ describe("buildStoryNodePositionMap", () => {
 
     expect(segments).toHaveLength(1);
     expect(segments[0]).toEqual({ from: { x: 1000, y: 1200 }, to: { x: 1000, y: 900 } });
+  });
+
+  it("evita coordenadas solapadas en el acto 1 para mejorar interacción visual", () => {
+    const act1 = listStoryActMapDefinitions().find((definition) => definition.act === 1);
+    expect(act1).toBeDefined();
+    const allPositions = [...(act1?.nodes ?? []), ...(act1?.virtualNodes ?? [])].map(
+      (node) => node.position,
+    );
+    const minDistance = 40;
+    for (let index = 0; index < allPositions.length; index += 1) {
+      for (let next = index + 1; next < allPositions.length; next += 1) {
+        const deltaX = allPositions[index].x - allPositions[next].x;
+        const deltaY = allPositions[index].y - allPositions[next].y;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        expect(distance).toBeGreaterThan(minDistance);
+      }
+    }
   });
 });

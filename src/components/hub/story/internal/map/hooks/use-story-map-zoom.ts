@@ -1,4 +1,4 @@
-// src/components/hub/story/internal/use-story-map-zoom.ts - Gestiona zoom del mapa Story con rueda y controles discretos.
+// src/components/hub/story/internal/map/hooks/use-story-map-zoom.ts - Gestiona zoom del mapa Story con rueda y controles discretos.
 "use client";
 
 import { useMotionValue } from "framer-motion";

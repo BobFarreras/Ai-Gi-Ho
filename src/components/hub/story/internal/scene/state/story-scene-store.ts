@@ -1,4 +1,4 @@
-// src/components/hub/story/internal/story-scene-store.ts - Store local Zustand para estado UI del mapa Story sin acoplar dominio.
+// src/components/hub/story/internal/scene/state/story-scene-store.ts - Store local Zustand para estado UI del mapa Story sin acoplar dominio.
 import { create } from "zustand";
 import { IPlayerStoryHistoryEvent } from "@/core/entities/story/IPlayerStoryHistoryEvent";
 import { IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
@@ -14,6 +14,7 @@ interface IStorySceneState {
 }
 
 function createNodesById(nodes: IStoryMapNodeRuntime[]): Record<string, IStoryMapNodeRuntime> {
+  // Normaliza por id para lecturas O(1) desde paneles y acciones.
   return Object.fromEntries(nodes.map((node) => [node.id, node]));
 }
 
@@ -25,9 +26,14 @@ export function createStorySceneStore(input: {
   currentNodeId: string | null;
   history: IPlayerStoryHistoryEvent[];
 }) {
+  const defaultNodeId =
+    input.currentNodeId ??
+    input.nodes.find((node) => node.id === "story-ch1-player-start")?.id ??
+    input.nodes[0]?.id ??
+    null;
   return create<IStorySceneState>((set) => ({
-    selectedNodeId: input.currentNodeId ?? input.nodes[0]?.id ?? null,
-    currentNodeId: input.currentNodeId,
+    selectedNodeId: defaultNodeId,
+    currentNodeId: defaultNodeId,
     history: input.history,
     nodesById: createNodesById(input.nodes),
     setSelectedNodeId: (selectedNodeId) => set({ selectedNodeId }),

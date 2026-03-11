@@ -5,11 +5,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "zustand";
 import { StoryCircuitMap } from "./StoryCircuitMap";
-import { StoryNodeInteractionDialog } from "./internal/StoryNodeInteractionDialog";
-import { StorySidebar } from "./internal/StorySidebar";
-import { useStoryAutoNodeSelection } from "./internal/use-story-auto-node-selection";
-import { createStorySceneStore, StorySceneStore } from "./internal/story-scene-store";
-import { useStoryNodeInteractionDialog } from "./internal/use-story-node-interaction-dialog";
+import { StoryNodeInteractionDialog } from "./internal/scene/dialog/StoryNodeInteractionDialog";
+import { StorySidebar } from "./internal/scene/panels/StorySidebar";
+import { createStorySceneStore, StorySceneStore } from "./internal/scene/state/story-scene-store";
+import { useStoryNodeInteractionDialog } from "./internal/scene/dialog/use-story-node-interaction-dialog";
 import { IStoryMapRuntimeData } from "@/services/story/story-map-runtime-data";
 import { IStoryChapterBriefing } from "@/services/story/build-story-chapter-briefing";
 import { resolveStoryPrimaryAction } from "@/services/story/resolve-story-primary-action";
@@ -19,6 +18,7 @@ interface IStoryInteractResponse { history: IStoryMapRuntimeData["history"]; int
 
 export function StoryScene({ runtime, briefing }: IStorySceneProps) {
   const router = useRouter();
+  // La store local evita que cambios de un subpanel provoquen re-render global del mapa.
   const [store] = useState<StorySceneStore>(() => createStorySceneStore({ nodes: runtime.nodes, currentNodeId: runtime.currentNodeId, history: runtime.history }));
   const selectedNodeId = useStore(store, (state) => state.selectedNodeId);
   const currentNodeId = useStore(store, (state) => state.currentNodeId);
@@ -36,20 +36,16 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
   const selectedNode = selectedNodeId ? nodesById[selectedNodeId] ?? null : null;
   const primaryAction = resolveStoryPrimaryAction(selectedNode);
   const isBusy = isMoving || isInteracting || interactionDialog.isOpen;
+
+  // Separa la animación visual del guardado real para mantener feedback inmediato en UI.
   const centerAvatarOnNode = async (nodeId: string) => {
     setCurrentNodeId(nodeId); setAvatarVisualTarget({ nodeId, stance: "CENTER" }); await new Promise((resolve) => setTimeout(resolve, 260));
   };
 
+  // Movimiento secuencial del jugador: validación backend + transición lateral -> centrado.
   const handleMove = async (triggerActionAfterMove = false) => {
     if (!selectedNodeId || isMoving) return;
     setIsMoving(true); setMovementError(null); setInteractionFeedback(null);
-    if (selectedNode?.isVirtualNode && selectedNode.nodeType === "MOVE") {
-      setAvatarVisualTarget({ nodeId: selectedNode.id, stance: "SIDE" }); await new Promise((resolve) => setTimeout(resolve, 420)); await centerAvatarOnNode(selectedNode.id);
-      setInteractionFeedback(`Desplazamiento completado: ${selectedNode.title}.`);
-      await new Promise((resolve) => setTimeout(resolve, 550));
-      setIsMoving(false); setAvatarVisualTarget(null);
-      return;
-    }
     try {
       const response = await fetch("/api/story/world/move", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ nodeId: selectedNodeId }) });
       if (!response.ok) throw new Error("Movimiento inválido.");
@@ -60,13 +56,14 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
     } catch { setMovementError("No se pudo mover al nodo seleccionado."); } finally { setIsMoving(false); }
   };
 
+  // Acción primaria del nodo: o navegación a duelo real o interacción narrativa virtual.
   const handlePrimaryAction = async (targetNode = selectedNode) => {
     if (!targetNode) return;
     setInteractionFeedback(null);
     const targetMode = resolveStoryPrimaryAction(targetNode);
     if (targetMode.mode === "DISABLED") return;
     setAvatarVisualTarget({ nodeId: targetNode.id, stance: "SIDE" }); await new Promise((resolve) => setTimeout(resolve, 420));
-    if (targetMode.mode === "ROUTE") { await centerAvatarOnNode(targetNode.id); router.push(targetNode.href); return; }
+    if (targetMode.mode === "ROUTE") { router.push(targetNode.href); return; }
     if (targetMode.mode !== "VIRTUAL_INTERACTION") return;
     try {
       setIsInteracting(true);
@@ -79,8 +76,6 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
       setInteractionFeedback(opened ? `Interacción iniciada: ${targetNode.title}.` : `Interacción completada: ${targetNode.title}.`);
     } catch { setInteractionFeedback("No se pudo registrar la interacción narrativa."); } finally { setIsInteracting(false); }
   };
-
-  useStoryAutoNodeSelection({ selectedNode, currentNodeId, isBusy, onAutoMove: () => void handleMove(true), onAutoInteract: () => void handlePrimaryAction() });
 
   return (
     <div className="flex h-full w-full flex-1 overflow-hidden border-t border-cyan-900/50 bg-black font-sans">
@@ -100,7 +95,7 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
           movementError={movementError}
           interactionFeedback={interactionFeedback}
           primaryActionLabel={primaryAction.label}
-          canRunPrimaryAction={primaryAction.isEnabled && !isBusy}
+          canRunPrimaryAction={primaryAction.isEnabled && !isBusy && selectedNode?.id === currentNodeId}
           onMove={() => void handleMove(false)}
           onPrimaryAction={() => void handlePrimaryAction()}
           onDeselect={() => setSelectedNodeId(null)}

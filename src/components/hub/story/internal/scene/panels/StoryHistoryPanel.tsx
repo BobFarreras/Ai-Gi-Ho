@@ -1,4 +1,4 @@
-// src/components/hub/story/internal/StoryHistoryPanel.tsx - Panel compacto con historial de eventos Story recientes del jugador.
+// src/components/hub/story/internal/scene/panels/StoryHistoryPanel.tsx - Panel compacto con historial de eventos Story recientes del jugador.
 import { IPlayerStoryHistoryEvent } from "@/core/entities/story/IPlayerStoryHistoryEvent";
 
 interface StoryHistoryPanelProps {

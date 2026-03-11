@@ -1,9 +1,9 @@
-// src/components/hub/story/internal/use-story-avatar-travel.ts - Gestiona movimiento visual del avatar Story entre nodos con estado de tránsito.
+// src/components/hub/story/internal/map/hooks/use-story-avatar-travel.ts - Gestiona movimiento visual del avatar Story entre nodos con estado de tránsito.
 "use client";
 
 import { animate, useMotionValue } from "framer-motion";
 import { useEffect, useRef } from "react";
-import { IStoryCircuitPosition } from "@/components/hub/story/story-circuit-layout";
+import { IStoryCircuitPosition } from "@/components/hub/story/internal/map/layout/story-circuit-layout";
 
 interface IUseStoryAvatarTravelInput {
   targetNodeId: string | null;

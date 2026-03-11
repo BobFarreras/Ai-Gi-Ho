@@ -1,4 +1,4 @@
-// src/components/hub/story/internal/StoryNodeInteractionDialog.tsx - Modal narrativo para interacciones de nodos Story no-duelo.
+// src/components/hub/story/internal/scene/dialog/StoryNodeInteractionDialog.tsx - Modal narrativo para interacciones de nodos Story no-duelo.
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";

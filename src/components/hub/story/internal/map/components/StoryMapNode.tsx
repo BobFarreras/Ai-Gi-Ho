@@ -1,4 +1,4 @@
-// src/components/hub/story/internal/StoryMapNode.tsx - Nodo interactivo del mapa Story con holograma y base visual según estado.
+// src/components/hub/story/internal/map/components/StoryMapNode.tsx - Nodo interactivo del mapa Story con holograma y base visual según estado.
 "use client";
 
 import Image from "next/image";
@@ -9,6 +9,7 @@ import { IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
 interface StoryMapNodeProps {
   node: IStoryMapNodeRuntime;
   isSelected: boolean;
+  isCurrentNode?: boolean;
   onClick: () => void;
 }
 
@@ -23,9 +24,10 @@ function resolveHologramAsset(node: IStoryMapNodeRuntime): { src: string; alt: s
   return { src: "/assets/renders/react.png", alt: "Nodo de movimiento" };
 }
 
-export function StoryMapNode({ node, isSelected, onClick }: StoryMapNodeProps) {
+export function StoryMapNode({ node, isSelected, isCurrentNode, onClick }: StoryMapNodeProps) {
   const hologram = resolveHologramAsset(node);
   const isDefeatedDuel = node.isCompleted && (node.nodeType === "DUEL" || node.nodeType === "BOSS");
+  const isStartNode = node.id === "story-ch1-player-start";
 
   return (
     <motion.button
@@ -47,16 +49,18 @@ export function StoryMapNode({ node, isSelected, onClick }: StoryMapNodeProps) {
         className={cn(
           "absolute bottom-8 z-20 flex h-20 w-20 items-center justify-center transition-all duration-300",
           isSelected && "scale-125 drop-shadow-[0_0_20px_rgba(6,182,212,0.8)]",
+          isCurrentNode && "scale-110 drop-shadow-[0_0_24px_rgba(16,185,129,0.85)]",
         )}
       >
-        <div className="pointer-events-none absolute inset-0 z-30 overflow-hidden rounded-full bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-[length:100%_4px] opacity-50 mix-blend-overlay" />
+   
         <div
           className={cn(
-            "relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border-2 bg-black/50 backdrop-blur-sm",
+            "relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border-2 bg-black/85 backdrop-blur-sm",
             node.isBossDuel ? "rotate-45 rounded-lg border-fuchsia-500" : "border-cyan-500",
             node.isCompleted && "border-emerald-500",
             isDefeatedDuel && "opacity-40 saturate-0",
             node.nodeType === "MOVE" && "border-emerald-400/60 bg-emerald-950/35",
+            isCurrentNode && "border-emerald-300",
           )}
         >
           {hologram ? (
@@ -74,7 +78,10 @@ export function StoryMapNode({ node, isSelected, onClick }: StoryMapNodeProps) {
               />
             </div>
           ) : (
-            <div className="h-5 w-5 rounded-full border border-emerald-300/60 bg-emerald-500/15" />
+            <div className={cn(
+              "rounded-full border border-emerald-300/60 bg-emerald-500/15",
+              isStartNode ? "h-10 w-10" : "h-5 w-5",
+            )} />
           )}
         </div>
       </motion.div>
@@ -87,6 +94,7 @@ export function StoryMapNode({ node, isSelected, onClick }: StoryMapNodeProps) {
             : isSelected
               ? "border-cyan-400 bg-cyan-900 shadow-[0_0_30px_rgba(6,182,212,0.6)]"
               : "border-slate-700 bg-slate-900",
+          isCurrentNode && "border-emerald-300 bg-emerald-900/70",
         )}
       >
         <div
@@ -96,6 +104,11 @@ export function StoryMapNode({ node, isSelected, onClick }: StoryMapNodeProps) {
           )}
         />
       </div>
+      {isCurrentNode ? (
+        <span className="absolute -top-5 z-30 rounded border border-emerald-300/70 bg-black/80 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-emerald-200 shadow-[0_0_12px_rgba(16,185,129,0.45)]">
+          Jugador
+        </span>
+      ) : null}
 
       {isSelected ? (
         <span className="absolute -bottom-6 z-30 whitespace-nowrap rounded-md border border-cyan-500/50 bg-black/90 px-3 py-1 text-[10px] font-black tracking-widest text-cyan-300 shadow-xl backdrop-blur-md">

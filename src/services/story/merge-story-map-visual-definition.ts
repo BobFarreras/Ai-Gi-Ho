@@ -10,7 +10,7 @@ function resolveVirtualNodeUnlocked(input: {
   if (!input.dependencyNodeId) return true;
   const dependencyNode = input.nodesById.get(input.dependencyNodeId);
   if (!dependencyNode) return false;
-  if (dependencyNode.nodeType === "MOVE") return dependencyNode.isUnlocked || dependencyNode.isCompleted;
+  if (dependencyNode.nodeType === "MOVE") return dependencyNode.isCompleted;
   return dependencyNode.isCompleted;
 }
 
@@ -25,6 +25,9 @@ export function mergeStoryMapVisualDefinition(
   const nodeById = new Map(nextNodes.map((node) => [node.id, node]));
   const interactedNodeIdSet = new Set(
     history.filter((event) => event.kind === "INTERACTION").map((event) => event.nodeId),
+  );
+  const movedNodeIdSet = new Set(
+    history.filter((event) => event.kind === "MOVE").map((event) => event.nodeId),
   );
 
   for (const actDefinition of listStoryActMapDefinitions()) {
@@ -52,7 +55,10 @@ export function mergeStoryMapVisualDefinition(
         rewardNexus: virtualNode.rewardNexus,
         rewardPlayerExperience: virtualNode.rewardPlayerExperience,
         isBossDuel: virtualNode.isBossDuel,
-        isCompleted: interactedNodeIdSet.has(virtualNode.id),
+        isCompleted:
+          virtualNode.nodeType === "MOVE"
+            ? movedNodeIdSet.has(virtualNode.id)
+            : interactedNodeIdSet.has(virtualNode.id),
         isUnlocked: resolveVirtualNodeUnlocked({
           dependencyNodeId: virtualNode.unlockRequirementNodeId,
           nodesById: nodeById,

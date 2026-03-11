@@ -1,4 +1,4 @@
-// src/components/hub/story/internal/StoryBriefingPanel.tsx
+// src/components/hub/story/internal/scene/panels/StoryBriefingPanel.tsx - Resumen narrativo del acto con objetivo activo.
 "use client";
 
 import { motion } from "framer-motion";

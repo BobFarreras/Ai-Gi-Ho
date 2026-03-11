@@ -1,4 +1,4 @@
-// src/components/hub/story/internal/StorySidebar.tsx - Panel lateral Story con briefing y acciones de nodo sin recarga completa.
+// src/components/hub/story/internal/scene/panels/StorySidebar.tsx - Panel lateral Story con briefing y acciones de nodo sin recarga completa.
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
@@ -33,6 +33,7 @@ export function StorySidebar({
   onPrimaryAction,
   onDeselect,
 }: StorySidebarProps) {
+  // Este panel consume solo estado derivado para no acoplarse al motor de movimiento.
   return (
     <aside className="relative flex h-full w-full flex-col overflow-x-hidden overflow-y-auto bg-slate-950/90 backdrop-blur-xl">
       <div className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(transparent_50%,rgba(6,182,212,0.03)_50%)] bg-[length:100%_4px]" />

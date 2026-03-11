@@ -9,12 +9,12 @@ import {
   buildStoryNodePositionMap,
   resolveStoryNodePosition,
   resolveStoryPathSegments,
-} from "@/components/hub/story/story-circuit-layout";
-import { StoryMapNode } from "./internal/StoryMapNode";
-import { useStoryAvatarTravel } from "./internal/use-story-avatar-travel";
-import { StoryMapPlatforms } from "./internal/StoryMapPlatforms";
-import { StoryMapZoomControls } from "./internal/StoryMapZoomControls";
-import { useStoryMapZoom } from "./internal/use-story-map-zoom";
+} from "@/components/hub/story/internal/map/layout/story-circuit-layout";
+import { StoryMapNode } from "./internal/map/components/StoryMapNode";
+import { useStoryAvatarTravel } from "./internal/map/hooks/use-story-avatar-travel";
+
+import { StoryMapZoomControls } from "./internal/map/components/StoryMapZoomControls";
+import { useStoryMapZoom } from "./internal/map/hooks/use-story-map-zoom";
 import { listStoryMapPlatforms } from "@/services/story/map-definitions/story-map-definition-registry";
 
 interface StoryCircuitMapProps {
@@ -26,6 +26,19 @@ interface StoryCircuitMapProps {
   onSelectNode: (nodeId: string | null) => void;
 }
 
+function resolveAvatarAnchor(input: {
+  nodeId: string;
+  stance: "CENTER" | "SIDE";
+  positionMap: Record<string, { x: number; y: number }>;
+}): { x: number; y: number } {
+  const nodePosition = resolveStoryNodePosition(input.nodeId, input.positionMap);
+  const platformY = nodePosition.y + 74;
+  if (input.stance === "SIDE") {
+    return { x: nodePosition.x - 92, y: platformY };
+  }
+  return { x: nodePosition.x, y: platformY };
+}
+
 export function StoryCircuitMap({
   nodes,
   currentNodeId,
@@ -34,6 +47,7 @@ export function StoryCircuitMap({
   isInteractionLocked,
   onSelectNode,
 }: StoryCircuitMapProps) {
+  // Cámara y zoom separados de la lógica de nodos para mantener SRP del componente.
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const cameraX = useMotionValue(0);
   const cameraY = useMotionValue(0);
@@ -43,12 +57,18 @@ export function StoryCircuitMap({
   const platforms = useMemo(() => listStoryMapPlatforms(), []);
   const avatarTargetNodeId = avatarVisualTarget?.nodeId ?? currentNodeId;
   const avatarNode = nodes.find((node) => node.id === avatarTargetNodeId) ?? nodes.find((node) => node.id === "story-ch1-player-start") ?? nodes[0];
-  const resolvePosition = (nodeId: string) => resolveStoryNodePosition(nodeId, positionMap);
-  const { avatarX, avatarY } = useStoryAvatarTravel({ targetNodeId: avatarNode?.id ?? null, resolvePosition });
-  const avatarPosBase = resolveStoryNodePosition(avatarNode?.id ?? "", positionMap);
-  const avatarPos = avatarVisualTarget?.stance === "SIDE"
-    ? { x: avatarPosBase.x + 118, y: avatarPosBase.y - 4 }
-    : avatarPosBase;
+  const visualStance = avatarVisualTarget?.stance ?? "CENTER";
+  // El avatar se ancla a la plataforma del nodo para que ambos queden en el mismo plano visual.
+  const avatarPos = avatarNode
+    ? resolveAvatarAnchor({ nodeId: avatarNode.id, stance: visualStance, positionMap })
+    : { x: 1000, y: 1000 };
+  const resolveTravelPosition = (nodeId: string) =>
+    resolveAvatarAnchor({ nodeId, stance: "CENTER", positionMap });
+  const { avatarX, avatarY } = useStoryAvatarTravel({
+    targetNodeId: avatarNode?.id ?? null,
+    resolvePosition: resolveTravelPosition,
+  });
+  const avatarSideOffsetX = visualStance === "SIDE" ? -92 : 0;
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -69,34 +89,29 @@ export function StoryCircuitMap({
         if (!isInteractionLocked) onSelectNode(null);
       }}
     >
-      <div
-        className="pointer-events-none absolute inset-0 opacity-20"
-        style={{ transform: "rotateX(60deg) scale(2)", transformOrigin: "center" }}
-      >
-        <div className="h-full w-full bg-[linear-gradient(rgba(6,182,212,0.3)_2px,transparent_2px),linear-gradient(90deg,rgba(6,182,212,0.3)_2px,transparent_2px)] bg-[size:100px_100px]" />
-      </div>
       <motion.div
         drag
         dragConstraints={mapContainerRef}
         dragElastic={0.1}
         style={{ x: cameraX, y: cameraY, scale: zoom }}
-        className="absolute left-0 top-0 h-[2000px] w-[2000px]"
+        className="absolute left-0 top-0 h-[2200px] w-[3400px]"
       >
-        <svg className="pointer-events-none absolute inset-0 z-0 h-full w-full">
+        <svg className="pointer-events-none absolute inset-0 z-10 h-full w-full">
           {segments.map((segment, index) => <motion.line key={`path-${index}`} x1={segment.from.x} y1={segment.from.y} x2={segment.to.x} y2={segment.to.y} stroke="rgba(6, 182, 212, 0.4)" strokeWidth="6" strokeDasharray="15 15" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.2, delay: index * 0.08 }} />)}
         </svg>
-        <StoryMapPlatforms platforms={platforms} />
+    
         {nodes.map((node) => {
           const position = resolveStoryNodePosition(node.id, positionMap);
           return (
             <div
               key={node.id}
-              className="absolute z-10 -translate-x-1/2 -translate-y-1/2"
+              className="absolute z-30 -translate-x-1/2 -translate-y-1/2"
               style={{ top: position.y, left: position.x }}
             >
               <StoryMapNode
                 node={node}
                 isSelected={selectedNodeId === node.id}
+                isCurrentNode={currentNodeId === node.id}
                 onClick={() => {
                   if (!isInteractionLocked) onSelectNode(node.id);
                 }}
@@ -106,22 +121,20 @@ export function StoryCircuitMap({
         })}
 
         <motion.div
-          className="pointer-events-none absolute z-30 flex w-24 -translate-x-1/2 -translate-y-full flex-col items-center"
+          className="pointer-events-none absolute z-40 flex w-20 -translate-x-1/2 -translate-y-full flex-col items-center"
           initial={false}
-          style={{ top: avatarY, left: avatarX }}
+          style={{ top: avatarY, left: avatarX, x: avatarSideOffsetX }}
         >
-          <div className="mb-2 h-0 w-0 animate-bounce border-l-[8px] border-r-[8px] border-t-[10px] border-l-transparent border-r-transparent border-t-emerald-400" />
-          <div className="relative mb-2 h-20 w-20 overflow-hidden rounded-full border-2 border-emerald-400 bg-black shadow-[0_0_30px_#10b981]">
+          <div className="relative h-20 w-20 overflow-hidden rounded-full border-2 border-emerald-400 bg-black shadow-[0_0_22px_rgba(16,185,129,0.6)]">
             <Image
               src="/assets/story/player/bob.png"
               alt="Avatar del jugador"
               fill
               sizes="80px"
               quality={55}
-              className="object-cover opacity-90"
+              className="object-cover"
             />
           </div>
-          <div className="absolute bottom-0 h-6 w-16 rounded-[50%] border-2 border-emerald-400 opacity-60 shadow-[0_0_20px_#10b981]" />
         </motion.div>
         {isInteractionLocked ? (
           <div className="pointer-events-none absolute left-1/2 top-8 z-40 -translate-x-1/2 rounded border border-emerald-400/50 bg-black/80 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-200">

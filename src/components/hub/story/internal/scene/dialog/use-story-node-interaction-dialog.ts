@@ -1,4 +1,4 @@
-// src/components/hub/story/internal/use-story-node-interaction-dialog.ts - Gestiona estado secuencial de diálogos de interacción Story.
+// src/components/hub/story/internal/scene/dialog/use-story-node-interaction-dialog.ts - Gestiona estado secuencial de diálogos de interacción Story.
 "use client";
 
 import { useMemo, useState } from "react";

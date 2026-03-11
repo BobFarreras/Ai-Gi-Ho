@@ -1,4 +1,4 @@
-// src/components/hub/story/story-circuit-layout.ts - Calcula posiciones y segmentos de nodos Story de forma dinámica según dependencias.
+// src/components/hub/story/internal/map/layout/story-circuit-layout.ts - Calcula posiciones y segmentos de nodos Story de forma dinámica según dependencias.
 import { IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
 
 export interface IStoryCircuitPosition {

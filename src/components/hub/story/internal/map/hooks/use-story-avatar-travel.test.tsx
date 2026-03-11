@@ -1,7 +1,7 @@
-// src/components/hub/story/internal/use-story-avatar-travel.test.tsx - Comprueba transición visual del avatar Story entre nodos.
+// src/components/hub/story/internal/map/hooks/use-story-avatar-travel.test.tsx - Comprueba transición visual del avatar Story entre nodos.
 import { renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { useStoryAvatarTravel } from "@/components/hub/story/internal/use-story-avatar-travel";
+import { useStoryAvatarTravel } from "@/components/hub/story/internal/map/hooks/use-story-avatar-travel";
 
 vi.mock("framer-motion", async () => {
   const actual = await vi.importActual<typeof import("framer-motion")>("framer-motion");

@@ -28,7 +28,7 @@ describe("mergeStoryMapVisualDefinition", () => {
 
     const merged = mergeStoryMapVisualDefinition(nodes);
 
-    expect(merged[0]?.position).toEqual({ x: 1000, y: 1480 });
+    expect(merged[0]?.position).toEqual({ x: 520, y: 980 });
   });
 
   it("mantiene nodos sin cambios si no hay definición visual", () => {
@@ -52,7 +52,7 @@ describe("mergeStoryMapVisualDefinition", () => {
     ];
 
     const merged = mergeStoryMapVisualDefinition(nodes);
-    const virtualNode = merged.find((node) => node.id === "story-ch1-event-briefing");
+    const virtualNode = merged.find((node) => node.id === "story-ch1-reward-card-beta");
 
     expect(virtualNode?.isVirtualNode).toBe(true);
     expect(virtualNode?.isUnlocked).toBe(true);

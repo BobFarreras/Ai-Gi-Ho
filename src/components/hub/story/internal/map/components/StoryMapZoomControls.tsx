@@ -1,4 +1,4 @@
-// src/components/hub/story/internal/StoryMapZoomControls.tsx - Controles de zoom del mapa Story para desktop y mobile.
+// src/components/hub/story/internal/map/components/StoryMapZoomControls.tsx - Controles de zoom del mapa Story para desktop y mobile.
 interface IStoryMapZoomControlsProps {
   onZoomIn: () => void;
   onZoomOut: () => void;

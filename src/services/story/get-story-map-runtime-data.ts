@@ -50,8 +50,19 @@ export async function getStoryMapRuntimeData(): Promise<IStoryMapRuntimeData | n
     };
   });
   const mergedNodes = mergeStoryMapVisualDefinition(runtimeNodes, history);
-  const defaultStartNodeId = mergedNodes.find((node) => node.id === "story-ch1-player-start")?.id ?? mergedNodes[0]?.id ?? null;
-  const effectiveCurrentNodeId = currentNodeId ?? defaultStartNodeId;
+  const defaultStartNodeId =
+    mergedNodes.find((node) => node.id === "story-ch1-player-start")?.id ??
+    mergedNodes[0]?.id ??
+    null;
+  const hasValidCurrentNode = Boolean(
+    currentNodeId &&
+      mergedNodes.some((node) => node.id === currentNodeId && node.isUnlocked),
+  );
+  const hasProgressSignal =
+    completedNodeIds.length > 0 ||
+    history.some((event) => event.kind === "MOVE" || event.kind === "INTERACTION");
+  const effectiveCurrentNodeId =
+    hasValidCurrentNode && hasProgressSignal ? currentNodeId : defaultStartNodeId;
   return {
     playerId: session.user.id,
     nodes: mergedNodes,

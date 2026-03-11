@@ -48,6 +48,20 @@ async function commitStoryNodeResolution(input: {
   await commitUseCase.execute({ playerId: input.playerId, progress: resolved.progress });
 }
 
+async function moveBackOnStoryDefeat(input: {
+  playerId: string;
+  nodeId: string;
+  opponentRepository: SupabaseOpponentRepository;
+  storyProgressRepository: SupabasePlayerStoryDuelProgressRepository;
+  storyWorldRepository: SupabasePlayerStoryWorldRepository;
+}) {
+  const worldStateUseCase = new GetStoryWorldStateUseCase(input.opponentRepository, input.storyProgressRepository);
+  const worldState = await worldStateUseCase.execute({ playerId: input.playerId });
+  const node = worldState.graph.nodes.find((entry) => entry.id === input.nodeId);
+  const fallbackNodeId = node?.unlockRequirementNodeId ?? "story-ch1-player-start";
+  await input.storyWorldRepository.saveCurrentNodeId(input.playerId, fallbackNodeId);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const response = NextResponse.json({ ok: true }, { status: 200 });
@@ -71,6 +85,14 @@ export async function POST(request: NextRequest) {
     if (payload.didWin) {
       // Si la migración de historial Story aún no está aplicada, no bloqueamos el cierre de duelo.
       await commitStoryNodeResolution({
+        playerId,
+        nodeId: duel.id,
+        opponentRepository,
+        storyProgressRepository,
+        storyWorldRepository,
+      }).catch(() => undefined);
+    } else {
+      await moveBackOnStoryDefeat({
         playerId,
         nodeId: duel.id,
         opponentRepository,
