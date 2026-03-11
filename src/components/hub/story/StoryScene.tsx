@@ -56,12 +56,12 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
   const handleMove = async (triggerActionAfterMove = false) => {
     if (!selectedNodeId || isMoving) return;
     setIsMoving(true); setMovementError(null); setInteractionFeedback(null);
-    sceneSfx.playMove();
     try {
       const response = await fetch("/api/story/world/move", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ nodeId: selectedNodeId }) });
       if (!response.ok) throw new Error("Movimiento inválido.");
       const payload = (await response.json()) as { currentNodeId: string | null };
       if (payload.currentNodeId) {
+        sceneSfx.playMove();
         const targetNode = nodesById[payload.currentNodeId] ?? null;
         const shouldStaySide = Boolean(targetNode) && targetNode.nodeType !== "MOVE" && !targetNode.isCompleted;
         setCurrentNodeId(payload.currentNodeId);
