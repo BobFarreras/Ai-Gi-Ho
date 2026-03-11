@@ -8,11 +8,11 @@ import { IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
 import {
   buildStoryNodePositionMap,
   resolveStoryNodePosition,
+  resolveStoryNodePlatformAnchor,
   resolveStoryPathSegments,
   resolveStoryNodeTokenAnchor,
 } from "@/components/hub/story/internal/map/layout/story-circuit-layout";
 import { StoryMapNode } from "./internal/map/components/StoryMapNode";
-import { useStoryAvatarTravel } from "./internal/map/hooks/use-story-avatar-travel";
 import { StoryMapZoomControls } from "./internal/map/components/StoryMapZoomControls";
 import { useStoryMapZoom } from "./internal/map/hooks/use-story-map-zoom";
 import {
@@ -30,15 +30,18 @@ interface StoryCircuitMapProps {
 }
 
 function resolveAvatarAnchor(input: {
-  nodeId: string;
+  node: IStoryMapNodeRuntime;
   stance: "CENTER" | "SIDE";
   positionMap: Record<string, { x: number; y: number }>;
 }): { x: number; y: number } {
-  const tokenAnchor = resolveStoryNodeTokenAnchor(input.nodeId, input.positionMap);
+  const isPlatformAnchorNode = input.node.nodeType === "MOVE" || input.node.isCompleted;
+  const baseAnchor = isPlatformAnchorNode
+    ? resolveStoryNodePlatformAnchor(input.node.id, input.positionMap)
+    : resolveStoryNodeTokenAnchor(input.node.id, input.positionMap);
   if (input.stance === "SIDE") {
-    return { x: tokenAnchor.x - 92, y: tokenAnchor.y };
+    return { x: baseAnchor.x - 92, y: baseAnchor.y };
   }
-  return tokenAnchor;
+  return baseAnchor;
 }
 
 export function StoryCircuitMap({
@@ -51,34 +54,37 @@ export function StoryCircuitMap({
 }: StoryCircuitMapProps) {
   // Cámara y zoom separados de la lógica de nodos para mantener SRP del componente.
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const hasCenteredCamera = useRef(false);
   const cameraX = useMotionValue(0);
   const cameraY = useMotionValue(0);
+  const avatarX = useMotionValue(1000);
+  const avatarY = useMotionValue(1000);
   const positionMap = useMemo(() => buildStoryNodePositionMap(nodes), [nodes]);
   const { zoom, zoomIn, zoomOut, resetZoom, handleWheel } = useStoryMapZoom();
   const segments = useMemo(() => resolveStoryPathSegments(nodes, positionMap), [nodes, positionMap]);
   const avatarTargetNodeId = avatarVisualTarget?.nodeId ?? currentNodeId;
   const avatarNode = nodes.find((node) => node.id === avatarTargetNodeId) ?? nodes.find((node) => node.id === "story-ch1-player-start") ?? nodes[0];
   const visualStance = avatarVisualTarget?.stance ?? "CENTER";
-  // El avatar se ancla a la plataforma del nodo para que ambos queden en el mismo plano visual.
   const avatarPos = avatarNode
-    ? resolveAvatarAnchor({ nodeId: avatarNode.id, stance: visualStance, positionMap })
+    ? resolveAvatarAnchor({ node: avatarNode, stance: visualStance, positionMap })
     : { x: 1000, y: 1000 };
-  const resolveTravelPosition = (nodeId: string) =>
-    resolveAvatarAnchor({ nodeId, stance: "CENTER", positionMap });
-  const { avatarX, avatarY } = useStoryAvatarTravel({
-    targetNodeId: avatarNode?.id ?? null,
-    resolvePosition: resolveTravelPosition,
-  });
   const avatarSideOffsetX = visualStance === "SIDE" ? -resolveStoryNodeSideOffsetPx() : 0;
 
   useEffect(() => {
+    animate(avatarX, avatarPos.x, { type: "spring", stiffness: 140, damping: 22 });
+    animate(avatarY, avatarPos.y, { type: "spring", stiffness: 140, damping: 22 });
+  }, [avatarPos.x, avatarPos.y, avatarX, avatarY]);
+
+  useEffect(() => {
+    if (hasCenteredCamera.current) return;
     if (!mapContainerRef.current) return;
     const containerWidth = mapContainerRef.current.clientWidth;
     const containerHeight = mapContainerRef.current.clientHeight;
     const targetX = containerWidth / 2 - avatarPos.x;
     const targetY = containerHeight / 2 - avatarPos.y + 100;
-    animate(cameraX, targetX, { type: "spring", stiffness: 80, damping: 20, mass: 1 });
-    animate(cameraY, targetY, { type: "spring", stiffness: 80, damping: 20, mass: 1 });
+    cameraX.set(targetX);
+    cameraY.set(targetY);
+    hasCenteredCamera.current = true;
   }, [avatarPos.x, avatarPos.y, cameraX, cameraY]);
 
   return (
