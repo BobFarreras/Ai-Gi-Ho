@@ -11,6 +11,7 @@ export interface IStoryMapNodeRuntime {
   nodeType: StoryWorldNodeType;
   difficulty: StoryOpponentDifficulty;
   rewardNexus: number;
+  rewardCardId?: string;
   rewardPlayerExperience: number;
   isBossDuel: boolean;
   isCompleted: boolean;

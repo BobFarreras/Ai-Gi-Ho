@@ -29,11 +29,13 @@ export const storyAct1MapDefinition: IStoryActMapDefinition = {
     v({ id: "story-ch1-player-start", duelIndex: 90, nodeType: "MOVE", title: "Plataforma Inicial", unlockRequirementNodeId: null, position: { x: 260, y: 980 } }),
     v({ id: "story-ch1-path-blank-1", duelIndex: 91, nodeType: "MOVE", title: "Paso", unlockRequirementNodeId: "story-ch1-player-start", position: { x: 520, y: 980 } }),
     v({ id: "story-ch1-reward-nexus-beta", duelIndex: 109, nodeType: "REWARD_NEXUS", title: "Moneda", rewardNexus: 200, unlockRequirementNodeId: "story-ch1-duel-1", position: { x: 1040, y: 980 } }),
+    v({ id: "story-ch1-reward-card-windows92", duelIndex: 110, nodeType: "REWARD_CARD", title: "Carta", rewardCardId: "trap-windows92-crash", unlockRequirementNodeId: "story-ch1-reward-nexus-beta", position: { x: 1300, y: 980 } }),
   ],
   platforms: [
     { id: "act1-p-1", position: { x: 260, y: 980 }, size: 170, style: "METAL" },
     { id: "act1-p-2", position: { x: 520, y: 980 }, size: 170, style: "METAL" },
     { id: "act1-p-3", position: { x: 780, y: 980 }, size: 170, style: "NEON" },
     { id: "act1-p-4", position: { x: 1040, y: 980 }, size: 170, style: "RUIN" },
+    { id: "act1-p-5", position: { x: 1300, y: 980 }, size: 170, style: "RUIN" },
   ],
 };

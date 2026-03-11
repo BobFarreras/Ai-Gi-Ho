@@ -8,13 +8,17 @@ interface IStorySceneSfxMap {
   BUTTON_CLICK: string;
   MOVE: string;
   REWARD_NEXUS: string;
+  REWARD_CARD: string;
+  DUEL_START: string;
 }
 
 const STORY_SCENE_SFX_PATHS: IStorySceneSfxMap = {
   NODE_SELECT: "/audio/hub/arsenal/añadir.mp3",
   BUTTON_CLICK: "/audio/landing/button-click.mp3",
-  MOVE: "/audio/story/effects/movimiento.mp3",
+  MOVE: "/audio/story/effects/movimento.mp3",
   REWARD_NEXUS: "/audio/story/effects/moneda.mp3",
+  REWARD_CARD: "/audio/story/effects/obtener-carta.mp3",
+  DUEL_START: "/audio/landing/formulario.mp3",
 };
 
 function safeReplay(audio: HTMLAudioElement | null): void {
@@ -39,8 +43,15 @@ export function useStorySceneSfx() {
     for (const [id, path] of entries) {
       const audio = new Audio(path);
       audio.preload = "auto";
-      audio.volume = id === "REWARD_NEXUS" ? 0.5 : 0.4;
+      audio.volume = id === "REWARD_NEXUS" || id === "REWARD_CARD" ? 0.5 : 0.4;
       audioByIdRef.current[id] = audio;
+    }
+    // Compatibilidad con typo histórico del nombre de archivo de movimiento.
+    const movementAudio = audioByIdRef.current.MOVE;
+    if (movementAudio) {
+      movementAudio.onerror = () => {
+        movementAudio.src = "/audio/story/effects/movimiento.mp3";
+      };
     }
     return () => {
       for (const id of Object.keys(audioByIdRef.current) as Array<keyof IStorySceneSfxMap>) {
@@ -58,5 +69,7 @@ export function useStorySceneSfx() {
     playButtonClick: () => safeReplay(audioByIdRef.current.BUTTON_CLICK ?? null),
     playMove: () => safeReplay(audioByIdRef.current.MOVE ?? null),
     playRewardNexus: () => safeReplay(audioByIdRef.current.REWARD_NEXUS ?? null),
+    playRewardCard: () => safeReplay(audioByIdRef.current.REWARD_CARD ?? null),
+    playDuelStart: () => safeReplay(audioByIdRef.current.DUEL_START ?? null),
   };
 }

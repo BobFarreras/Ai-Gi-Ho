@@ -83,6 +83,7 @@ export function mergeStoryMapVisualDefinition(
         nodeType: virtualNode.nodeType,
         difficulty: virtualNode.difficulty,
         rewardNexus: virtualNode.rewardNexus,
+        rewardCardId: virtualNode.rewardCardId,
         rewardPlayerExperience: virtualNode.rewardPlayerExperience,
         isBossDuel: virtualNode.isBossDuel,
         isCompleted:

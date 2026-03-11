@@ -23,6 +23,7 @@ export interface IStoryMapVirtualNodeDefinition {
   opponentName: string;
   difficulty: StoryOpponentDifficulty;
   rewardNexus: number;
+  rewardCardId?: string;
   rewardPlayerExperience: number;
   isBossDuel: boolean;
   unlockRequirementNodeId: string | null;

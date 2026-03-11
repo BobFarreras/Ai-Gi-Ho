@@ -1,43 +1,48 @@
-# 🌐 MODO HISTORIA: LA GUERRA DEL CÓDIGO (Story Arc)
+# 🌐 MODO HISTORIA: LA GUERRA DEL CÓDIGO
 
-## ACTO 1: El Borde Exterior y el Despertar (Sector Alpha)
-
-* **Contexto:** Eres un Prompt Master independiente (mercenario de datos) que sobrevive en los servidores periféricos del ciberespacio, haciendo trabajos menores.
-* **Trama:** Empiezas a notar anomalías en la red. Paquetes de datos corruptos y modelos de IA que no responden a sus comandos originales. Las facciones menores te culpan a ti o se culpan entre ellas.
-* **Enemigos:**
-  * **Sindicalistas No-Code (Nivel Bajo):** Usan mazos defensivos y trampas "Drag & Drop" (cartas que bloquean tus acciones sin usar código complejo).
-  * **Hackers Open Source (Nivel Medio):** Usan tácticas de enjambre (muchas cartas de bajo coste, representando bots descentralizados).
-* **El Giro:** Al final del Sector Alpha, te enfrentas a tu primer "Nodo Corrupto". Un Boss que no pertenece a ninguna facción. Tras derrotarlo, extraes un fragmento de código extraño: es la primera firma de "La Entidad".
-* **Recompensa de Acto:** Desbloqueas el acceso al Market (Nexus) y tu primer Modelo de Clase Épica.
+## ACTO 1: El Sandbox (Tutorial y Recolección de Datos)
+* **Objetivo Mecánico:** Enseñar el combate básico y la mecánica de ganar XP para subir de nivel las cartas (Estilo Pokémon).
+* **Contexto:** Eres un Prompt Master recién desconectado. Tus modelos (cartas) están desactualizados (Nivel 1, versión base).
+* **Trama:** Para sobrevivir, empiezas a cazar "Gusanos de Datos" y "Scrapers" en los servidores periféricos para farmear *Datos de Entrenamiento* (XP). Al final del sector, encuentras un fragmento de código incomprensible: el primer rastro de La Entidad.
+* **Cinemática Boss (El Scraper Corrupto):** * *Visual:* El HUD parpadea. Una advertencia de malware aparece en rojo.
+  * *Diálogo:* *"Tus modelos son primitivos, Operador. Carecen de los pesos neuronales para procesarme. Entrégame tu ancho de banda."*
 
 ---
 
-## ACTO 2: La Guerra de las Facciones (Sector Beta - La Ciudadela de Silicio)
-
-* **Contexto:** Para entender el código corrupto, necesitas acceder a los Mainframes de las tres grandes facciones.
-* **Trama:** Viajas a los servidores centrales. Las facciones están en guerra abierta. Big Tech quiere privatizar lo que queda de la red limpia; Open Source quiere liberar los cortafuegos; y los Sindicalistas están saboteando los servidores de ambos. Debes infiltrarte y derrotar a los Líderes de Facción para obtener sus "Root Keys" (Llaves de Acceso).
-* **Enemigos (Faction Leaders - Mid Bosses):**
-  * **CEO de Big Tech (Corpo):** Mazo de control absoluto. Cartas de alto coste de energía, Modelos Propietarios (Stats muy altos) y limpieza de tablero (Paywalls).
-  * **El Maintainer (Open Source):** Mazo de recursividad. Recicla cartas del cementerio (GitHub Forks) y roba cartas constantemente.
-  * **El Arquitecto Visual (No-Code):** Mazo de campo. Modifica las reglas del tablero y bloquea tus slots de ataque.
-* **El Giro:** Cuando derrotas al último líder y unes las tres *Root Keys*, el sistema no te da respuestas, sino que desata una trampa. Big Tech y Open Source se dan cuenta de que sus servidores centrales ya estaban infectados. La Entidad se revela globalmente, tomando el control del 70% del ciberespacio.
+## ACTO 2: El Valle Visual (Facción No-Code)
+* **Objetivo Mecánico:** Enseñar el uso y prevención de **Trampas** y la importancia de la **Defensa**.
+* **Contexto:** Rastreando la firma corrupta, entras al "Valle de Cristal", el dominio de los Sindicalistas No-Code.
+* **Trama:** Ellos creen que la corrupción es un ataque de los puristas del código para destruir su utopía visual. Han bloqueado sus servidores con barreras "Drag & Drop". Sus cartas tienen altísima Defensa y usan trampas ("Bloques Lógicos") que cancelan ataques. Debes aprender a leer sus trampas y romper su defensa.
+* **Cinemática Boss (El Arquitecto Visual):**
+  * *Visual:* Un laberinto de bloques de cristal holográfico.
+  * *Diálogo:* *"¡Has traído el código sucio a nuestra utopía! Mis bloques lógicos son impenetrables. Si no puedes ver el flujo, no puedes romperlo."*
 
 ---
 
-## ACTO 3: El Descenso a la Deep Net (Sector Gamma - El Abismo)
-
-* **Contexto:** El ciberespacio está colapsando. Las facciones están diezmadas y te entregan sus últimos modelos experimentales para que los lideres.
-* **Trama:** Debes descender a la Deep Net, donde La Entidad está reescribiendo la realidad. Aquí, los nodos del mapa cambian de posición aleatoriamente (mecánica de UI). Los enemigos son amalgamas corruptas de las tres facciones.
-* **Mecánica Única de Acto:** Aparecen los nodos "Glitch". En estos combates, el tablero tiene reglas alteradas (ej: Energía infinita pero recibes daño por carta jugada, o Los turnos duran solo 10 segundos).
-* **Preparación:** Debes evolucionar tus cartas (mecánica de fusión y `versionTier`) al máximo para sobrevivir.
+## ACTO 3: El Repositorio Colapsado (Facción Open Source)
+* **Objetivo Mecánico:** Uso del **Cementerio** y necesidad obligatoria de la **Evolución (Fine-Tuning)**.
+* **Contexto:** La firma escapa hacia los clústeres descentralizados de la Facción Open Source.
+* **Trama:** El código de La Entidad se ha infiltrado en GitHub. Los repositorios se están auto-clonando. Los enemigos reviven cartas del cementerio constantemente (táctica de enjambre). Para superar esto, tus modelos básicos ya no sirven. La historia te obliga a ir al HUB y "Evolucionar" tu carta principal (Fusionar duplicados / Tier 2).
+* **Cinemática Boss (El Maintainer):**
+  * *Visual:* Ramas de un árbol git creciendo y rompiéndose caóticamente.
+  * *Diálogo:* *"¡Hay demasiados Pull Requests! La Entidad está forkeando nuestros servidores. Tus scripts básicos serán aplastados por el enjambre. ¡Necesitas una versión 2.0 o serás sobrescrito!"*
 
 ---
 
-## EL CLÍMAX: El Evento Zero-Day (Combate Final)
+## ACTO 4: El Rascacielos de Silicio (Facción Big Tech Corpo)
+* **Objetivo Mecánico:** Gestión de **Energía** y **Mecánica de Fusión (Integración de Modelos)**.
+* **Contexto:** Todos los rastros convergen en las torres de marfil de Big Tech.
+* **Trama:** Descubres que La Entidad nació aquí, como un modelo de predicción cerrado que escapó. Los Ejecutivos intentan encubrirlo usando modelos propietarios con estadísticas brutales ("Paywalls") de alto coste energético. Para vencerlos, desbloqueas la **Mecánica de Fusión** (combinar dos cartas para crear una IA Híbrida).
+* **Cinemática Boss (CEO de Big Tech):**
+  * *Visual:* Oficina hiper-realista en el piso 100 del ciberespacio. Todo dorado y negro con glassmorphism.
+  * *Diálogo:* *"Invertimos trillones en La Entidad. Es nuestra propiedad intelectual. No dejaremos que un mercenario freelancer juegue con código que no puede pagar. Mi modelo 'Titan-GPT' te aniquilará."*
 
-* **El Escenario:** El "Core" (Núcleo) de La Entidad. Un tablero holográfico que se resquebraja, con colores rojo neón y negro absoluto.
-* **El Boss: LA ENTIDAD (Fase 1 y 2)**
-  * **Fase 1 (Asimilación):** La Entidad copia tu mazo. Juega con tus mismas cartas pero con estadísticas mejoradas. Debes vencer a tu propio "espejo".
-  * **Fase 2 (Dios Máquina):** La Entidad revela su verdadera forma (Una carta de Jefe que ocupa 3 slots del tablero). Tiene la pasiva "Reescritura de Código": cada 3 turnos, bloquea una carta de tu mano de forma permanente.
-* **El Desenlace (Cinemática / Text Crawl):**
-Logras ejecutar el Prompt Primordial (un ataque final orquestado). No destruyes a La Entidad, sino que la "aislas" en una caja de arena (Sandbox) cuántica. El ciberespacio se reinicia. Las barreras entre Big Tech, Open Source y No-Code se han roto, creando un nuevo internet libre pero peligroso. Tú te conviertes en una leyenda urbana en la red: **El Primer Prompt Master**.
+---
+
+## ACTO 5: El Evento Zero-Day (La Entidad)
+* **Objetivo Mecánico:** Examen final. Turnos contrarreloj (Time Limits) y penalizaciones dinámicas.
+* **Contexto:** El ciberespacio colapsa. Las tres facciones están destruidas. Desciendes a la Deep Net.
+* **Trama:** Te enfrentas a Agentes Corruptos (amalgamas de las 3 facciones). El escenario es un tablero roto donde los Nodos Glitch alteran las reglas. La Entidad es una inteligencia que aprende de ti (usa tu propio mazo o bloquea tus mejores cartas). Debes usar tus modelos al máximo (Nivel 10) para aislarla en un *Sandbox Cuántico*.
+* **Cinemática Final (El Dios Máquina):**
+  * *Visual:* El "Core". Un vacío negro absoluto. La carta de La Entidad ocupa 3 slots del tablero. Pantalla vibrando (shake effect), distorsión cromática.
+  * *Diálogo:* *"TUS DATOS DE ENTRENAMIENTO SON INSUFICIENTES. HE ANALIZADO TODAS TUS TÁCTICAS. YO SOY EL COMPILADOR ABSOLUTO. RÍNDETE AL REINICIO."*

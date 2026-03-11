@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef } from "react";
-import { animate, motion, useMotionValue, AnimationPlaybackControls } from "framer-motion";
+import { animate, motion, useMotionValue, AnimationPlaybackControls, useTransform } from "framer-motion";
 import { IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
 import {
   buildStoryNodePositionMap,
@@ -13,6 +13,7 @@ import {
 } from "@/components/hub/story/internal/map/layout/story-circuit-layout";
 import { StoryMapNode } from "./internal/map/components/StoryMapNode";
 import { StoryRewardCollectEffect } from "./internal/map/components/StoryRewardCollectEffect";
+import { StoryRewardFloatingText } from "./internal/map/components/StoryRewardFloatingText";
 import { StoryMapZoomControls } from "./internal/map/components/StoryMapZoomControls";
 import { useStoryMapZoom } from "./internal/map/hooks/use-story-map-zoom";
 import { resolveStoryNodeSideOffsetPx, STORY_NODE_TOKEN_SIZE } from "./internal/map/constants/story-map-geometry";
@@ -22,17 +23,23 @@ interface StoryCircuitMapProps {
   currentNodeId: string | null;
   selectedNodeId: string | null;
   avatarVisualTarget?: { nodeId: string; stance: "CENTER" | "SIDE" } | null;
+  duelFocusNodeId?: string | null;
+  floatingReward?: { label: string; tone: "NEXUS" | "CARD" } | null;
   collectingRewardNodeId?: string | null;
   isInteractionLocked?: boolean;
   onSelectNode: (nodeId: string | null) => void;
   onRewardCollectAnimationComplete?: () => void;
 }
 
+const MAP_CANVAS_SIZE = { width: 3400, height: 2200 };
+
 export function StoryCircuitMap({
   nodes,
   currentNodeId,
   selectedNodeId,
   avatarVisualTarget,
+  duelFocusNodeId,
+  floatingReward,
   collectingRewardNodeId,
   isInteractionLocked,
   onSelectNode,
@@ -41,23 +48,18 @@ export function StoryCircuitMap({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const hasCenteredCamera = useRef(false);
   const avatarAnimRef = useRef<{ x: AnimationPlaybackControls | null; y: AnimationPlaybackControls | null }>({ x: null, y: null });
-  const cameraX = useMotionValue(0);
-  const cameraY = useMotionValue(0);
-  const avatarX = useMotionValue(1000);
-  const avatarY = useMotionValue(1000);
+  const cameraX = useMotionValue(0); const cameraY = useMotionValue(0); const cinematicScale = useMotionValue(1);
+  const avatarX = useMotionValue(1000); const avatarY = useMotionValue(1000);
   const positionMap = useMemo(() => buildStoryNodePositionMap(nodes), [nodes]);
   const { zoom, zoomIn, zoomOut, resetZoom, handleWheel } = useStoryMapZoom();
+  const mapScale = useTransform(() => zoom.get() * cinematicScale.get());
   const segments = useMemo(() => resolveStoryPathSegments(nodes, positionMap), [nodes, positionMap]);
   const avatarTargetNodeId = avatarVisualTarget?.nodeId ?? currentNodeId;
   const avatarNode = nodes.find((node) => node.id === avatarTargetNodeId) ?? nodes.find((node) => node.id === "story-ch1-player-start") ?? nodes[0];
   const visualStance = avatarVisualTarget?.stance ?? "CENTER";
-  const avatarPos = avatarNode
-    ? resolveStoryNodeTokenAnchor(avatarNode.id, positionMap)
-    : { x: 1000, y: 1000 };
+  const avatarPos = avatarNode ? resolveStoryNodeTokenAnchor(avatarNode.id, positionMap) : { x: 1000, y: 1000 };
   const avatarSideOffsetX = visualStance === "SIDE" ? -resolveStoryNodeSideOffsetPx() : 0;
-  const collectingAnchor = collectingRewardNodeId
-    ? resolveStoryNodeTokenAnchor(collectingRewardNodeId, positionMap)
-    : null;
+  const collectingAnchor = collectingRewardNodeId ? resolveStoryNodeTokenAnchor(collectingRewardNodeId, positionMap) : null;
 
   useEffect(() => {
     const fromX = avatarX.get();
@@ -69,6 +71,21 @@ export function StoryCircuitMap({
     avatarAnimRef.current.x = animate(avatarX, avatarPos.x, { duration, ease: "easeInOut" });
     avatarAnimRef.current.y = animate(avatarY, avatarPos.y, { duration, ease: "easeInOut" });
   }, [avatarPos.x, avatarPos.y, avatarX, avatarY]);
+
+  useEffect(() => {
+    if (!duelFocusNodeId || !mapContainerRef.current) return;
+    const containerWidth = mapContainerRef.current.clientWidth;
+    const containerHeight = mapContainerRef.current.clientHeight;
+    const focus = resolveStoryNodeTokenAnchor(duelFocusNodeId, positionMap);
+    const targetX = containerWidth / 2 - focus.x;
+    const targetY = containerHeight / 2 - focus.y + 100;
+    const xControls = animate(cameraX, targetX, { duration: 0.38, ease: "easeInOut" }); const yControls = animate(cameraY, targetY, { duration: 0.38, ease: "easeInOut" }); const scaleControls = animate(cinematicScale, 1.2, { duration: 0.35, ease: "easeOut" });
+    return () => {
+      xControls.stop();
+      yControls.stop();
+      scaleControls.stop();
+    };
+  }, [duelFocusNodeId, positionMap, cameraX, cameraY, cinematicScale]);
 
   useEffect(() => {
     if (hasCenteredCamera.current) return;
@@ -91,13 +108,7 @@ export function StoryCircuitMap({
         if (!isInteractionLocked) onSelectNode(null);
       }}
     >
-      <motion.div
-        drag
-        dragConstraints={mapContainerRef}
-        dragElastic={0.1}
-        style={{ x: cameraX, y: cameraY, scale: zoom }}
-        className="absolute left-0 top-0 h-[2200px] w-[3400px]"
-      >
+      <motion.div drag dragConstraints={mapContainerRef} dragElastic={0.1} style={{ x: cameraX, y: cameraY, scale: mapScale, width: MAP_CANVAS_SIZE.width, height: MAP_CANVAS_SIZE.height }} className="absolute left-0 top-0">
         <svg className="pointer-events-none absolute inset-0 h-full w-full">
           {segments.map((segment, index) => <motion.line key={`path-${index}`} x1={segment.from.x} y1={segment.from.y} x2={segment.to.x} y2={segment.to.y} stroke="rgba(6, 182, 212, 0.26)" strokeWidth="4" strokeDasharray="12 14" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.2, delay: index * 0.08 }} />)}
         </svg>
@@ -110,18 +121,12 @@ export function StoryCircuitMap({
                 isSelected={selectedNodeId === node.id}
                 isCurrentNode={currentNodeId === node.id}
                 isCollecting={collectingRewardNodeId === node.id}
-                onClick={() => {
-                  if (!isInteractionLocked) onSelectNode(node.id);
-                }}
+                onClick={() => { if (!isInteractionLocked) onSelectNode(node.id); }}
               />
             </div>
           );
         })}
-        <motion.div
-          className="pointer-events-none absolute z-40 -translate-x-1/2 -translate-y-1/2"
-          initial={false}
-          style={{ top: avatarY, left: avatarX, x: avatarSideOffsetX, width: STORY_NODE_TOKEN_SIZE, height: STORY_NODE_TOKEN_SIZE }}
-        >
+        <motion.div className="pointer-events-none absolute z-40 -translate-x-1/2 -translate-y-1/2" initial={false} style={{ top: avatarY, left: avatarX, x: avatarSideOffsetX, width: STORY_NODE_TOKEN_SIZE, height: STORY_NODE_TOKEN_SIZE }}>
           <Image
             src="/assets/story/player/bob.png"
             alt="Avatar del jugador"
@@ -131,12 +136,8 @@ export function StoryCircuitMap({
             className="rounded-full border-2 border-emerald-400 object-cover shadow-[0_0_22px_rgba(16,185,129,0.6)]"
           />
         </motion.div>
-        <StoryRewardCollectEffect
-          isVisible={Boolean(collectingAnchor && onRewardCollectAnimationComplete)}
-          from={collectingAnchor ?? { x: 0, y: 0 }}
-          to={{ x: avatarX.get() + avatarSideOffsetX, y: avatarY.get() }}
-          onComplete={() => onRewardCollectAnimationComplete?.()}
-        />
+        <StoryRewardCollectEffect isVisible={Boolean(collectingAnchor && onRewardCollectAnimationComplete)} from={collectingAnchor ?? { x: 0, y: 0 }} to={{ x: avatarX.get() + avatarSideOffsetX, y: avatarY.get() }} onComplete={() => onRewardCollectAnimationComplete?.()} />
+        <StoryRewardFloatingText isVisible={Boolean(floatingReward)} label={floatingReward?.label ?? ""} tone={floatingReward?.tone} at={{ x: avatarX.get() + avatarSideOffsetX, y: avatarY.get() }} />
         {isInteractionLocked ? (
           <div className="pointer-events-none absolute left-1/2 top-8 z-40 -translate-x-1/2 rounded border border-emerald-400/50 bg-black/80 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-200">
             Acción en curso...

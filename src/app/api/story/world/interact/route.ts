@@ -69,6 +69,9 @@ export async function POST(request: NextRequest) {
     if (virtualNode.nodeType === "REWARD_NEXUS" && virtualNode.rewardNexus > 0) {
       await repositories.walletRepository.creditNexus(playerId, virtualNode.rewardNexus);
     }
+    if (virtualNode.nodeType === "REWARD_CARD" && virtualNode.rewardCardId) {
+      await repositories.collectionRepository.addCards(playerId, [virtualNode.rewardCardId]);
+    }
     await worldRepository.saveCompactStateByPlayerId(playerId, nextState);
     const interactionCountForNode = nextState.interactedNodeIds.includes(virtualNode.id) ? 1 : 0;
 
