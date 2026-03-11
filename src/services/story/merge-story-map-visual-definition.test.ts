@@ -91,4 +91,12 @@ describe("mergeStoryMapVisualDefinition", () => {
     expect(moveNode?.nodeType).toBe("MOVE");
     expect(moveNode?.isUnlocked).toBe(true);
   });
+
+  it("mantiene bloqueado el duelo si no se ha alcanzado la plataforma previa", () => {
+    const nodes = [createRuntimeNode({ id: "story-ch1-duel-1", isCompleted: false, isUnlocked: true })];
+    const merged = mergeStoryMapVisualDefinition(nodes, [], "story-ch1-player-start");
+    const duelNode = merged.find((node) => node.id === "story-ch1-duel-1");
+
+    expect(duelNode?.isUnlocked).toBe(false);
+  });
 });

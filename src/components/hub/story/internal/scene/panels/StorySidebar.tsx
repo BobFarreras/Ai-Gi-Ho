@@ -34,6 +34,11 @@ export function StorySidebar({
   onDeselect,
 }: StorySidebarProps) {
   // Este panel consume solo estado derivado para no acoplarse al motor de movimiento.
+  const isDuelNode = selectedNode?.nodeType === "DUEL" || selectedNode?.nodeType === "BOSS";
+  const nodeTitle = isDuelNode ? selectedNode?.title : "Plataforma táctica";
+  const nodeOpponent = isDuelNode ? selectedNode?.opponentName : null;
+  const nodeDifficulty = isDuelNode ? selectedNode?.difficulty : "N/A";
+  const nodeReward = isDuelNode ? selectedNode?.rewardNexus : 0;
   return (
     <aside className="relative flex h-full w-full flex-col overflow-x-hidden overflow-y-auto bg-slate-950/90 backdrop-blur-xl">
       <div className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(transparent_50%,rgba(6,182,212,0.03)_50%)] bg-[length:100%_4px]" />
@@ -68,17 +73,21 @@ export function StorySidebar({
                 </button>
               </div>
 
-              <h3 className="mb-1 text-xl font-bold uppercase tracking-widest text-white">{selectedNode.title}</h3>
-              <p className="mb-6 text-sm font-mono text-fuchsia-400">OPONENTE: {selectedNode.opponentName}</p>
+              <h3 className="mb-1 text-xl font-bold uppercase tracking-widest text-white">{nodeTitle}</h3>
+              {nodeOpponent ? (
+                <p className="mb-6 text-sm font-mono text-fuchsia-400">OPONENTE: {nodeOpponent}</p>
+              ) : (
+                <p className="mb-6 text-sm font-mono text-slate-500">PUNTO DE TRÁNSITO</p>
+              )}
 
               <div className="mb-auto space-y-3">
                 <div className="flex items-center justify-between rounded border border-slate-700 bg-slate-900/80 p-3">
                   <span className="text-xs text-slate-400">DIFICULTAD</span>
-                  <span className="text-xs font-bold text-amber-400">{selectedNode.difficulty}</span>
+                  <span className="text-xs font-bold text-amber-400">{nodeDifficulty}</span>
                 </div>
                 <div className="flex items-center justify-between rounded border border-slate-700 bg-slate-900/80 p-3">
                   <span className="text-xs text-slate-400">RECOMPENSA</span>
-                  <span className="text-xs font-bold text-emerald-400">{selectedNode.rewardNexus} NEXUS</span>
+                  <span className="text-xs font-bold text-emerald-400">{nodeReward} NEXUS</span>
                 </div>
               </div>
 

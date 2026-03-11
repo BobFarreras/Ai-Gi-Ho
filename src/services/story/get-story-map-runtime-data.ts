@@ -39,6 +39,10 @@ function resolveActiveActId(input: {
   return 1;
 }
 
+function resolveLatestHistoryNodeId(history: IStoryMapRuntimeData["history"]): string | null {
+  return history[0]?.nodeId ?? null;
+}
+
 export async function getStoryMapRuntimeData(): Promise<IStoryMapRuntimeData | null> {
   const session = await getCurrentUserSession();
   if (!session) return null;
@@ -91,11 +95,22 @@ export async function getStoryMapRuntimeData(): Promise<IStoryMapRuntimeData | n
     currentNodeId &&
       mergedNodes.some((node) => node.id === currentNodeId && node.isUnlocked),
   );
+  const latestHistoryNodeId = resolveLatestHistoryNodeId(history);
+  const hasValidHistoryCurrentNode = Boolean(
+    latestHistoryNodeId &&
+      mergedNodes.some((node) => node.id === latestHistoryNodeId && node.isUnlocked),
+  );
   const hasProgressSignal =
     completedNodeIds.length > 0 ||
     history.some((event) => event.kind === "MOVE" || event.kind === "INTERACTION");
   const effectiveCurrentNodeId =
-    hasValidCurrentNode && hasProgressSignal ? currentNodeId : defaultStartNodeId;
+    hasProgressSignal
+      ? hasValidCurrentNode
+        ? currentNodeId
+        : hasValidHistoryCurrentNode
+          ? latestHistoryNodeId
+          : defaultStartNodeId
+      : defaultStartNodeId;
   const activeChapter = resolveActiveChapter({
     nodes: mergedNodes,
     currentNodeId: effectiveCurrentNodeId,

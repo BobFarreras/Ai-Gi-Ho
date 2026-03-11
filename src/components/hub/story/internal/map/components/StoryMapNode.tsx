@@ -32,6 +32,7 @@ export function StoryMapNode({ node, isSelected, isCurrentNode, onClick }: Story
   const isStartNode = node.id === "story-ch1-player-start";
   const isPlatformOnly = node.nodeType === "MOVE" || node.isCompleted;
   const isSelectable = node.isUnlocked || node.isCompleted;
+  const shouldRenderNodeTitle = node.nodeType === "DUEL" || node.nodeType === "BOSS";
 
   return (
     <motion.button
@@ -97,7 +98,7 @@ export function StoryMapNode({ node, isSelected, isCurrentNode, onClick }: Story
         isCurrentNode={Boolean(isCurrentNode)}
       />
 
-      {isSelected ? (
+      {isSelected && shouldRenderNodeTitle ? (
         <span className="absolute -bottom-6 z-30 whitespace-nowrap rounded-md border border-cyan-500/50 bg-black/90 px-3 py-1 text-[10px] font-black tracking-widest text-cyan-300 shadow-xl backdrop-blur-md">
           {node.title}
         </span>

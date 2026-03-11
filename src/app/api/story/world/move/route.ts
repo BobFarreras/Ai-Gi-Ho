@@ -17,6 +17,10 @@ interface IStoryWorldMovePayload {
   nodeId: string;
 }
 
+function resolveLatestHistoryNodeId(history: IPlayerStoryHistoryEvent[]): string | null {
+  return history[0]?.nodeId ?? null;
+}
+
 function buildVirtualMoveEvent(input: { playerId: string; nodeId: string; title: string }): IPlayerStoryHistoryEvent {
   const nowIso = new Date().toISOString();
   return {
@@ -49,9 +53,10 @@ export async function POST(request: NextRequest) {
     const interactedNodeIds = currentHistory
       .filter((event) => event.kind === "INTERACTION")
       .map((event) => event.nodeId);
+    const effectiveCurrentNodeId = resolveLatestHistoryNodeId(currentHistory) ?? currentNodeId;
     const moveMode = resolveStoryWorldMoveMode({
       targetNodeId: payload.nodeId,
-      currentNodeId,
+      currentNodeId: effectiveCurrentNodeId,
       visitedNodeIds: currentHistory.map((event) => event.nodeId),
       completedNodeIds: worldState.progress.completedNodeIds,
       interactedNodeIds,
@@ -60,7 +65,10 @@ export async function POST(request: NextRequest) {
       throw new ValidationError(moveMode.validationMessage ?? "Movimiento Story inválido.");
     }
     if (moveMode.mode !== "GRAPH") {
-      await worldRepository.saveCurrentNodeId(playerId, payload.nodeId);
+      const targetVirtualNode = worldState.graph.nodes.find((node) => node.id === payload.nodeId);
+      if (targetVirtualNode) {
+        await worldRepository.saveCurrentNodeId(playerId, payload.nodeId);
+      }
       const targetNode = worldState.graph.nodes.find((node) => node.id === payload.nodeId);
       await worldRepository.appendHistoryEvents(playerId, [
         buildVirtualMoveEvent({

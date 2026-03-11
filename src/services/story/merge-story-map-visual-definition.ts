@@ -17,6 +17,31 @@ function resolveVirtualNodeUnlocked(input: {
   return dependencyNode.isCompleted;
 }
 
+function resolveNodeUnlocked(input: {
+  node: IStoryMapNodeRuntime;
+  nodesById: Map<string, IStoryMapNodeRuntime>;
+  currentNodeId: string | null;
+  visitedNodeIdSet: Set<string>;
+  interactedNodeIdSet: Set<string>;
+}): boolean {
+  if (input.node.id === input.currentNodeId) return true;
+  if (input.visitedNodeIdSet.has(input.node.id) || input.node.isCompleted) return true;
+  if (!input.node.unlockRequirementNodeId) return input.node.isUnlocked;
+  const dependencyNode = input.nodesById.get(input.node.unlockRequirementNodeId);
+  if (!dependencyNode) return false;
+  if (dependencyNode.nodeType === "MOVE") {
+    return (
+      dependencyNode.id === input.currentNodeId ||
+      dependencyNode.isCompleted ||
+      input.visitedNodeIdSet.has(dependencyNode.id)
+    );
+  }
+  return (
+    dependencyNode.isCompleted ||
+    input.interactedNodeIdSet.has(dependencyNode.id)
+  );
+}
+
 /**
  * Añade metadatos de layout visual y nodos virtuales al runtime sin tocar reglas de dominio.
  */
@@ -85,6 +110,16 @@ export function mergeStoryMapVisualDefinition(
     if (visitedNodeIdSet.has(node.id) || node.isCompleted) {
       node.isUnlocked = true;
     }
+  }
+  for (const node of nextNodes) {
+    // Recalcula desbloqueo usando dependencias visuales para imponer secuencia real nodo a nodo.
+    node.isUnlocked = resolveNodeUnlocked({
+      node,
+      nodesById: nodeById,
+      currentNodeId,
+      visitedNodeIdSet,
+      interactedNodeIdSet,
+    });
   }
 
   return nextNodes;

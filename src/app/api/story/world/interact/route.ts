@@ -65,8 +65,6 @@ export async function POST(request: NextRequest) {
       details: `Interacción narrativa completada: ${virtualNode.title}.`,
       nowIso: new Date().toISOString(),
     });
-    await worldRepository.saveCurrentNodeId(playerId, virtualNode.id);
-
     const history = await worldRepository.listHistoryByPlayerId(playerId, 60);
     const interactionCountForNode = history.filter(
       (event) => event.nodeId === virtualNode.id && event.kind === "INTERACTION",
