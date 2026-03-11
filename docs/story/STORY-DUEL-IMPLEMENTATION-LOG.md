@@ -127,3 +127,19 @@ Decidir de forma explícita y visible quién inicia el turno antes del combate, 
 - Test unitario de `resolveStoryCoinToss` para:
   - base 50/50
   - aplicación de bonus de probabilidad.
+
+## Fase 5 - Hardening de transiciones Story
+
+### Objetivo
+Blindar las animaciones de retorno Story con tests de comportamiento para evitar regresiones en victoria/derrota/salida.
+
+### Cambios aplicados
+1. Se añadió test del hook `useStoryPostDuelTransition` para:
+   - retirada de nodo rival (`WON`),
+   - desplazamiento visual de retorno (`LOST`).
+
+### Archivos creados
+- `src/components/hub/story/internal/scene/transitions/use-story-post-duel-transition.test.tsx`
+
+### Validación (TDD)
+- Pruebas con timers fake para validar secuencia temporal de animaciones.
