@@ -9,8 +9,15 @@ describe("RegisterStoryInteractionUseCase", () => {
     const repository: IPlayerStoryWorldRepository = {
       getCurrentNodeIdByPlayerId: async () => null,
       saveCurrentNodeId: async () => undefined,
+      getCompactStateByPlayerId: async () => ({
+        currentNodeId: null,
+        visitedNodeIds: [],
+        interactedNodeIds: [],
+      }),
+      saveCompactStateByPlayerId: async () => undefined,
       listHistoryByPlayerId: async () => [],
       appendHistoryEvents,
+      clearHistoryByPlayerId: async () => undefined,
     };
     const useCase = new RegisterStoryInteractionUseCase(repository);
 

@@ -66,7 +66,17 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
       const response = await fetch("/api/story/world/move", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ nodeId: selectedNodeId }) });
       if (!response.ok) throw new Error("Movimiento inválido.");
       const payload = (await response.json()) as { currentNodeId: string | null; history: IStoryMapRuntimeData["history"] };
-      if (payload.currentNodeId) { setAvatarVisualTarget({ nodeId: payload.currentNodeId, stance: "SIDE" }); await new Promise((resolve) => setTimeout(resolve, 420)); await centerAvatarOnNode(payload.currentNodeId); }
+      if (payload.currentNodeId) {
+        const targetNode = nodesById[payload.currentNodeId] ?? null;
+        const shouldStaySide =
+          Boolean(targetNode) &&
+          targetNode.nodeType !== "MOVE" &&
+          !targetNode.isCompleted;
+        setCurrentNodeId(payload.currentNodeId);
+        setAvatarVisualTarget({ nodeId: payload.currentNodeId, stance: shouldStaySide ? "SIDE" : "CENTER" });
+        await new Promise((resolve) => setTimeout(resolve, shouldStaySide ? 360 : 420));
+        if (!shouldStaySide) await centerAvatarOnNode(payload.currentNodeId);
+      }
       setHistory(payload.history); await new Promise((resolve) => setTimeout(resolve, 420));
       if (triggerActionAfterMove && selectedNode && selectedNode.nodeType !== "MOVE") await handlePrimaryAction(selectedNode);
     } catch { setMovementError("No se pudo mover al nodo seleccionado."); } finally { setIsMoving(false); }

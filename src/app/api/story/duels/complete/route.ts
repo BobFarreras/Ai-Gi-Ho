@@ -12,6 +12,7 @@ import { SupabasePlayerStoryDuelProgressRepository } from "@/infrastructure/pers
 import { SupabasePlayerStoryWorldRepository } from "@/infrastructure/persistence/supabase/SupabasePlayerStoryWorldRepository";
 import { loadCardsByIds } from "@/infrastructure/persistence/supabase/internal/load-cards-by-ids";
 import { resolveStoryRewardCards } from "@/services/story/resolve-story-reward-cards";
+import { applyStoryMoveToCompactState } from "@/services/story/story-compact-state";
 import { getAuthenticatedUserId } from "@/services/auth/api/internal/get-authenticated-user-id";
 import { createPlayerRouteRepositories } from "@/services/player-persistence/create-player-route-repositories";
 
@@ -46,6 +47,13 @@ async function commitStoryNodeResolution(input: {
   });
   const commitUseCase = new CommitStoryProgressUseCase(input.storyWorldRepository);
   await commitUseCase.execute({ playerId: input.playerId, progress: resolved.progress });
+  const compactState = await input.storyWorldRepository.getCompactStateByPlayerId(input.playerId);
+  const nextState = applyStoryMoveToCompactState({
+    state: compactState,
+    fromNodeId: compactState.currentNodeId ?? "story-ch1-player-start",
+    targetNodeId: input.nodeId,
+  });
+  await input.storyWorldRepository.saveCompactStateByPlayerId(input.playerId, nextState);
 }
 
 async function moveBackOnStoryDefeat(input: {
@@ -59,7 +67,13 @@ async function moveBackOnStoryDefeat(input: {
   const worldState = await worldStateUseCase.execute({ playerId: input.playerId });
   const node = worldState.graph.nodes.find((entry) => entry.id === input.nodeId);
   const fallbackNodeId = node?.unlockRequirementNodeId ?? "story-ch1-player-start";
-  await input.storyWorldRepository.saveCurrentNodeId(input.playerId, fallbackNodeId);
+  const compactState = await input.storyWorldRepository.getCompactStateByPlayerId(input.playerId);
+  const nextState = applyStoryMoveToCompactState({
+    state: compactState,
+    fromNodeId: compactState.currentNodeId ?? input.nodeId,
+    targetNodeId: fallbackNodeId,
+  });
+  await input.storyWorldRepository.saveCompactStateByPlayerId(input.playerId, nextState);
 }
 
 export async function POST(request: NextRequest) {

@@ -11,10 +11,17 @@ describe("CommitStoryProgressUseCase", () => {
       saveCurrentNodeId: async (_playerId, currentNodeId) => {
         calls.currentNodeId = currentNodeId;
       },
+      getCompactStateByPlayerId: async () => ({
+        currentNodeId: null,
+        visitedNodeIds: [],
+        interactedNodeIds: [],
+      }),
+      saveCompactStateByPlayerId: async () => undefined,
       listHistoryByPlayerId: async () => [],
       appendHistoryEvents: async (_playerId, events) => {
         calls.events = events;
       },
+      clearHistoryByPlayerId: async () => undefined,
     };
     const useCase = new CommitStoryProgressUseCase(repository);
     await useCase.execute({

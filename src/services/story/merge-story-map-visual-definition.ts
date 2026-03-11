@@ -1,7 +1,12 @@
 // src/services/story/merge-story-map-visual-definition.ts - Mezcla runtime Story real con layout editable y nodos virtuales locales.
 import { IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
 import { listStoryActMapDefinitions } from "@/services/story/map-definitions/story-map-definition-registry";
-import { IPlayerStoryHistoryEvent } from "@/core/entities/story/IPlayerStoryHistoryEvent";
+
+interface IMergeStoryMapVisualDefinitionInput {
+  currentNodeId?: string | null;
+  visitedNodeIds?: string[];
+  interactedNodeIds?: string[];
+}
 
 function resolveVirtualNodeUnlocked(input: {
   dependencyNodeId: string | null;
@@ -47,18 +52,13 @@ function resolveNodeUnlocked(input: {
  */
 export function mergeStoryMapVisualDefinition(
   nodes: IStoryMapNodeRuntime[],
-  history: IPlayerStoryHistoryEvent[] = [],
-  currentNodeId: string | null = null,
+  input: IMergeStoryMapVisualDefinitionInput = {},
 ): IStoryMapNodeRuntime[] {
   const nextNodes = nodes.map((node) => ({ ...node }));
   const nodeById = new Map(nextNodes.map((node) => [node.id, node]));
-  const interactedNodeIdSet = new Set(
-    history.filter((event) => event.kind === "INTERACTION").map((event) => event.nodeId),
-  );
-  const movedNodeIdSet = new Set(
-    history.filter((event) => event.kind === "MOVE").map((event) => event.nodeId),
-  );
-  const visitedNodeIdSet = new Set(history.map((event) => event.nodeId));
+  const currentNodeId = input.currentNodeId ?? null;
+  const interactedNodeIdSet = new Set(input.interactedNodeIds ?? []);
+  const visitedNodeIdSet = new Set(input.visitedNodeIds ?? []);
 
   for (const actDefinition of listStoryActMapDefinitions()) {
     for (const visualNode of actDefinition.nodes) {
@@ -87,7 +87,7 @@ export function mergeStoryMapVisualDefinition(
         isBossDuel: virtualNode.isBossDuel,
         isCompleted:
           virtualNode.nodeType === "MOVE"
-            ? movedNodeIdSet.has(virtualNode.id)
+            ? visitedNodeIdSet.has(virtualNode.id)
             : interactedNodeIdSet.has(virtualNode.id),
         isUnlocked: resolveVirtualNodeUnlocked({
           dependencyNodeId: virtualNode.unlockRequirementNodeId,

@@ -56,10 +56,10 @@
    - bloque de 2 slots dedicado a cartas de tipo `FUSION`.
    - separado del deck principal de 20 slots.
 23. `public.player_story_world_state`:
-   - cursor de navegación Story del jugador (`current_node_id`).
+   - estado compacto Story por jugador (`current_node_id`, `visited_node_ids`, `interacted_node_ids`).
    - 1 fila por usuario.
 24. `public.player_story_history_events`:
-   - historial de eventos Story (`MOVE`, `NODE_RESOLVED`, `REWARD_GRANTED`, `INTERACTION`).
+   - historial legacy de eventos Story (`MOVE`, `NODE_RESOLVED`, `REWARD_GRANTED`, `INTERACTION`).
    - múltiples filas por usuario ordenadas por `created_at`.
 
 ## Fase 2 (Perfil y Progreso)
@@ -213,6 +213,16 @@
 2. Ajustes principales:
    - `player_story_history_events.kind` acepta `INTERACTION`.
    - `player_story_history_events.node_id` ya no requiere FK a `story_duels` para permitir nodos virtuales.
+
+## Fase F (Estado compacto Story)
+
+1. Ejecuta `docs/supabase/sql/015_phase_f_story_compact_state.sql`.
+2. Ajustes principales:
+   - `player_story_world_state.current_node_id` deja de depender de FK a `story_duels`.
+   - se añaden `visited_node_ids` e `interacted_node_ids` en la misma tabla.
+3. Uso previsto:
+   - la navegación Story usa solo estado compacto (`current + visited + interacted`).
+   - `player_story_history_events` queda como soporte legacy, no crítico para runtime.
 
 ## Notas
 

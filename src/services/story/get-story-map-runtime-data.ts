@@ -39,10 +39,6 @@ function resolveActiveActId(input: {
   return 1;
 }
 
-function resolveLatestHistoryNodeId(history: IStoryMapRuntimeData["history"]): string | null {
-  return history[0]?.nodeId ?? null;
-}
-
 export async function getStoryMapRuntimeData(): Promise<IStoryMapRuntimeData | null> {
   const session = await getCurrentUserSession();
   if (!session) return null;
@@ -53,10 +49,12 @@ export async function getStoryMapRuntimeData(): Promise<IStoryMapRuntimeData | n
     opponentRepository.listStoryDuels(),
     progressRepository.listByPlayerId(session.user.id),
   ]);
-  const [currentNodeId, history] = await Promise.all([
-    worldRepository.getCurrentNodeIdByPlayerId(session.user.id).catch(() => null),
-    worldRepository.listHistoryByPlayerId(session.user.id, 20).catch(() => []),
-  ]);
+  const compactState = await worldRepository.getCompactStateByPlayerId(session.user.id).catch(() => ({
+    currentNodeId: null,
+    visitedNodeIds: [],
+    interactedNodeIds: [],
+  }));
+  const currentNodeId = compactState.currentNodeId;
   const progressByDuelId = new Map(progress.map((entry) => [entry.duelId, entry]));
   const completedNodeIds = progress
     .filter((entry) => entry.bestResult === "WON")
@@ -84,8 +82,11 @@ export async function getStoryMapRuntimeData(): Promise<IStoryMapRuntimeData | n
   });
   const mergedNodes = mergeStoryMapVisualDefinition(
     runtimeNodes,
-    history,
-    currentNodeId ?? "story-ch1-player-start",
+    {
+      currentNodeId: currentNodeId ?? "story-ch1-player-start",
+      visitedNodeIds: compactState.visitedNodeIds,
+      interactedNodeIds: compactState.interactedNodeIds,
+    },
   );
   const defaultStartNodeId =
     mergedNodes.find((node) => node.id === "story-ch1-player-start")?.id ??
@@ -95,20 +96,22 @@ export async function getStoryMapRuntimeData(): Promise<IStoryMapRuntimeData | n
     currentNodeId &&
       mergedNodes.some((node) => node.id === currentNodeId && node.isUnlocked),
   );
-  const latestHistoryNodeId = resolveLatestHistoryNodeId(history);
-  const hasValidHistoryCurrentNode = Boolean(
-    latestHistoryNodeId &&
-      mergedNodes.some((node) => node.id === latestHistoryNodeId && node.isUnlocked),
+  const latestVisitedNodeId =
+    compactState.visitedNodeIds[compactState.visitedNodeIds.length - 1] ?? null;
+  const hasValidVisitedCurrentNode = Boolean(
+    latestVisitedNodeId &&
+      mergedNodes.some((node) => node.id === latestVisitedNodeId && node.isUnlocked),
   );
   const hasProgressSignal =
     completedNodeIds.length > 0 ||
-    history.some((event) => event.kind === "MOVE" || event.kind === "INTERACTION");
+    compactState.visitedNodeIds.length > 0 ||
+    compactState.interactedNodeIds.length > 0;
   const effectiveCurrentNodeId =
     hasProgressSignal
       ? hasValidCurrentNode
         ? currentNodeId
-        : hasValidHistoryCurrentNode
-          ? latestHistoryNodeId
+        : hasValidVisitedCurrentNode
+          ? latestVisitedNodeId
           : defaultStartNodeId
       : defaultStartNodeId;
   const activeChapter = resolveActiveChapter({
@@ -135,6 +138,6 @@ export async function getStoryMapRuntimeData(): Promise<IStoryMapRuntimeData | n
     playerId: session.user.id,
     nodes: chapterNodes,
     currentNodeId: chapterCurrentNodeId,
-    history,
+    history: [],
   };
 }

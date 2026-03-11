@@ -66,8 +66,9 @@ story/
 1. El jugador selecciona un nodo en el mapa.
 2. `StorySidebar` habilita `Moverse` o `Interactuar` según contexto.
 3. `POST /api/story/world/move` valida y persiste movimiento.
-4. Si aplica, `POST /api/story/world/interact` registra evento narrativo.
+4. Si aplica, `POST /api/story/world/interact` registra interacción narrativa.
 5. En duelos, la ruta de resultado (`/api/story/duels/complete`) actualiza progreso.
+6. Persistencia Story usa estado compacto: `currentNodeId + visitedNodeIds + interactedNodeIds`.
 
 ## Herramientas de depuración
-- `POST /api/story/world/reset`: reinicia cursor Story al nodo inicial y limpia historial de movimiento/interacción para reproducir pruebas del mapa.
+- `POST /api/story/world/reset`: reinicia cursor Story al nodo inicial y limpia estado compacto (visitados/interacciones) para reproducir pruebas del mapa.

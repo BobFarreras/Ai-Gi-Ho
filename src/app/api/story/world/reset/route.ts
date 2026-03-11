@@ -1,4 +1,4 @@
-// src/app/api/story/world/reset/route.ts - Reinicia estado navegable Story (posición e historial) para pruebas reproducibles.
+// src/app/api/story/world/reset/route.ts - Reinicia estado navegable Story compacto (posición, visitados e interacciones).
 import { NextRequest, NextResponse } from "next/server";
 import { ValidationError } from "@/core/errors/ValidationError";
 import { SupabasePlayerStoryWorldRepository } from "@/infrastructure/persistence/supabase/SupabasePlayerStoryWorldRepository";
@@ -13,8 +13,11 @@ export async function POST(request: NextRequest) {
     const repositories = await createPlayerRouteRepositories(request, response);
     const playerId = await getAuthenticatedUserId(repositories.client);
     const worldRepository = new SupabasePlayerStoryWorldRepository(repositories.client);
-    await worldRepository.clearHistoryByPlayerId(playerId);
-    await worldRepository.saveCurrentNodeId(playerId, STORY_DEFAULT_START_NODE_ID);
+    await worldRepository.saveCompactStateByPlayerId(playerId, {
+      currentNodeId: STORY_DEFAULT_START_NODE_ID,
+      visitedNodeIds: [STORY_DEFAULT_START_NODE_ID],
+      interactedNodeIds: [],
+    });
     return NextResponse.json(
       {
         currentNodeId: STORY_DEFAULT_START_NODE_ID,
