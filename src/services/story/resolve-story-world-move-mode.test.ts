@@ -36,4 +36,39 @@ describe("resolveStoryWorldMoveMode", () => {
     });
     expect(result).toEqual({ mode: "VISUAL", isAllowed: true, validationMessage: null });
   });
+
+  it("bloquea salto a moneda sin resolver duelo y permite retroceso tras visitado", () => {
+    const blockedJump = resolveStoryWorldMoveMode({
+      targetNodeId: "story-ch1-reward-nexus-beta",
+      currentNodeId: "story-ch1-path-blank-1",
+      visitedNodeIds: ["story-ch1-player-start", "story-ch1-path-blank-1"],
+      completedNodeIds: [],
+      interactedNodeIds: [],
+    });
+    expect(blockedJump.mode).toBe("VIRTUAL");
+    expect(blockedJump.isAllowed).toBe(false);
+
+    const forwardAfterDuel = resolveStoryWorldMoveMode({
+      targetNodeId: "story-ch1-reward-nexus-beta",
+      currentNodeId: "story-ch1-duel-1",
+      visitedNodeIds: ["story-ch1-player-start", "story-ch1-path-blank-1", "story-ch1-duel-1"],
+      completedNodeIds: ["story-ch1-duel-1"],
+      interactedNodeIds: [],
+    });
+    expect(forwardAfterDuel.isAllowed).toBe(true);
+
+    const backToStep = resolveStoryWorldMoveMode({
+      targetNodeId: "story-ch1-path-blank-1",
+      currentNodeId: "story-ch1-reward-nexus-beta",
+      visitedNodeIds: [
+        "story-ch1-player-start",
+        "story-ch1-path-blank-1",
+        "story-ch1-duel-1",
+        "story-ch1-reward-nexus-beta",
+      ],
+      completedNodeIds: ["story-ch1-duel-1"],
+      interactedNodeIds: ["story-ch1-reward-nexus-beta"],
+    });
+    expect(backToStep).toEqual({ mode: "VISITED", isAllowed: true, validationMessage: null });
+  });
 });
