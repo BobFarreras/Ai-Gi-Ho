@@ -40,6 +40,8 @@ story/
         StoryBriefingPanel.tsx
         StoryHistoryPanel.tsx
       state/
+        resolve-story-scene-can-move.ts
+        resolve-story-scene-can-move.test.ts
         story-scene-store.ts
 ```
 
@@ -50,6 +52,7 @@ story/
 - `internal/map/components/*`: piezas visuales puras del mapa.
 - `internal/map/hooks/*`: comportamiento de zoom y travel del avatar.
 - `internal/scene/state/*`: estado local (Zustand) de la escena Story.
+  `resolve-story-scene-can-move.ts` centraliza la política del botón de movimiento.
 - `internal/scene/dialog/*`: flujo de diálogo narrativo.
 - `internal/scene/panels/*`: panel lateral e información contextual.
 

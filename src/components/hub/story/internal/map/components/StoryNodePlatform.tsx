@@ -23,13 +23,6 @@ export function StoryNodePlatform({
             : "border-slate-700 bg-slate-900",
         isCurrentNode && "border-emerald-300 bg-emerald-900/70",
       )}
-    >
-      <div
-        className={cn(
-          "absolute inset-2 rounded-[50%] border-2 blur-[1px]",
-          isSelected ? "animate-pulse border-cyan-300" : "border-slate-800",
-        )}
-      />
-    </div>
+    />
   );
 }

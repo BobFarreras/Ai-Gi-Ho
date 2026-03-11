@@ -8,6 +8,7 @@ import { StoryCircuitMap } from "./StoryCircuitMap";
 import { StoryNodeInteractionDialog } from "./internal/scene/dialog/StoryNodeInteractionDialog";
 import { StorySidebar } from "./internal/scene/panels/StorySidebar";
 import { createStorySceneStore, StorySceneStore } from "./internal/scene/state/story-scene-store";
+import { resolveStorySceneCanMove } from "./internal/scene/state/resolve-story-scene-can-move";
 import { useStoryNodeInteractionDialog } from "./internal/scene/dialog/use-story-node-interaction-dialog";
 import { IStoryMapRuntimeData } from "@/services/story/story-map-runtime-data";
 import { IStoryChapterBriefing } from "@/services/story/build-story-chapter-briefing";
@@ -44,6 +45,12 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
     [nodesById],
   );
   const primaryAction = resolveStoryPrimaryAction(selectedNode);
+  const canMoveSelectedNode = resolveStorySceneCanMove({
+    selectedNode,
+    currentNodeId,
+    isInteracting,
+    isDialogOpen: interactionDialog.isOpen,
+  });
   const isBusy = isMoving || isInteracting || interactionDialog.isOpen;
 
   // Separa la animación visual del guardado real para mantener feedback inmediato en UI.
@@ -93,14 +100,7 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
         <StorySidebar
           briefing={briefing}
           selectedNode={selectedNode}
-          canMove={Boolean(
-            selectedNode &&
-              selectedNode.isUnlocked &&
-              (selectedNode.nodeType === "MOVE" || !selectedNode.isVirtualNode) &&
-              selectedNode.id !== currentNodeId &&
-              !isInteracting &&
-              !interactionDialog.isOpen,
-          )}
+          canMove={canMoveSelectedNode}
           isMoving={isBusy}
           movementError={movementError}
           interactionFeedback={interactionFeedback}
