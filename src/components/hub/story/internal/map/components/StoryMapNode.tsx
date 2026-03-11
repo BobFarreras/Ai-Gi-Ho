@@ -28,7 +28,8 @@ function resolveHologramAsset(node: IStoryMapNodeRuntime): { src: string; alt: s
 export function StoryMapNode({ node, isSelected, isCurrentNode, isCollecting = false, onClick }: StoryMapNodeProps) {
   const hologram = resolveHologramAsset(node);
   const isDefeatedDuel = node.isCompleted && (node.nodeType === "DUEL" || node.nodeType === "BOSS");
-  const isStartNode = node.id === "story-ch1-player-start";
+  const shouldShowTitle = node.nodeType === "DUEL" || node.nodeType === "BOSS";
+  const shouldRenderToken = Boolean(hologram) && !isCollecting;
 
   return (
     <motion.button
@@ -49,7 +50,7 @@ export function StoryMapNode({ node, isSelected, isCurrentNode, isCollecting = f
         transition={isSelected ? { type: "spring" } : { repeat: Infinity, duration: 3, ease: "easeInOut" }}
         className={cn(
           "absolute bottom-8 z-20 flex h-20 w-20 items-center justify-center transition-all duration-300",
-          isCollecting && "opacity-0",
+          !shouldRenderToken && "opacity-0",
           isSelected && "scale-125 drop-shadow-[0_0_20px_rgba(6,182,212,0.8)]",
           isCurrentNode && "scale-110 drop-shadow-[0_0_24px_rgba(16,185,129,0.85)]",
         )}
@@ -79,12 +80,7 @@ export function StoryMapNode({ node, isSelected, isCurrentNode, isCollecting = f
                 )}
               />
             </div>
-          ) : (
-            <div className={cn(
-              "rounded-full border border-emerald-300/60 bg-emerald-500/15",
-              isStartNode ? "h-10 w-10" : "h-5 w-5",
-            )} />
-          )}
+          ) : null}
         </div>
       </motion.div>
 
@@ -106,13 +102,7 @@ export function StoryMapNode({ node, isSelected, isCurrentNode, isCollecting = f
           )}
         />
       </div>
-      {isCurrentNode ? (
-        <span className="absolute -top-5 z-30 rounded border border-emerald-300/70 bg-black/80 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-emerald-200 shadow-[0_0_12px_rgba(16,185,129,0.45)]">
-          Jugador
-        </span>
-      ) : null}
-
-      {isSelected ? (
+      {isSelected && shouldShowTitle ? (
         <span className="absolute -bottom-6 z-30 whitespace-nowrap rounded-md border border-cyan-500/50 bg-black/90 px-3 py-1 text-[10px] font-black tracking-widest text-cyan-300 shadow-xl backdrop-blur-md">
           {node.title}
         </span>

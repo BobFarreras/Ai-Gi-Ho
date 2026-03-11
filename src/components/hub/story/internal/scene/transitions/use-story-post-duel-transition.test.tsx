@@ -43,7 +43,7 @@ describe("useStoryPostDuelTransition", () => {
       }),
     );
     expect(setAvatarVisualTarget).toHaveBeenCalledWith({ nodeId: "story-ch1-duel-1", stance: "SIDE" });
-    vi.advanceTimersByTime(180);
+    vi.advanceTimersByTime(260);
     expect(setAvatarVisualTarget).toHaveBeenCalledWith({ nodeId: "story-ch1-path-blank-1", stance: "CENTER" });
     expect(setRetreatingNodeId).not.toHaveBeenCalled();
     vi.useRealTimers();

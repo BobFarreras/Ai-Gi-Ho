@@ -64,4 +64,21 @@ describe("resolveStorySceneCanMove", () => {
     });
     expect(canMove).toBe(false);
   });
+
+  it("bloquea movimiento para nodos de duelo y boss", () => {
+    const duelMove = resolveStorySceneCanMove({
+      selectedNode: createNode({ id: "story-ch1-duel-1", nodeType: "DUEL", isUnlocked: true }),
+      currentNodeId: "story-ch1-path-blank-1",
+      isInteracting: false,
+      isDialogOpen: false,
+    });
+    const bossMove = resolveStorySceneCanMove({
+      selectedNode: createNode({ id: "story-ch1-boss-1", nodeType: "BOSS", isUnlocked: true }),
+      currentNodeId: "story-ch1-event-1",
+      isInteracting: false,
+      isDialogOpen: false,
+    });
+    expect(duelMove).toBe(false);
+    expect(bossMove).toBe(false);
+  });
 });

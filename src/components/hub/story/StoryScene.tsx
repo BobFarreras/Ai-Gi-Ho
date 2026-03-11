@@ -79,14 +79,20 @@ export function StoryScene({ runtime, briefing, postDuelTransition = null }: ISt
         if (!shouldStaySide) await centerAvatarOnNode(payload.currentNodeId);
       }
       await new Promise((resolve) => setTimeout(resolve, 420));
-      if (triggerActionAfterMove && selectedNode && selectedNode.nodeType !== "MOVE") await handlePrimaryAction(selectedNode);
+      if (triggerActionAfterMove && selectedNode && selectedNode.nodeType !== "MOVE") {
+        await handlePrimaryAction(selectedNode, true);
+      }
     } catch { setMovementError("No se pudo mover al nodo seleccionado."); } finally { setIsMoving(false); }
   };
-  const handlePrimaryAction = async (targetNode = selectedNode) => {
+  const handlePrimaryAction = async (targetNode = selectedNode, skipRouteMoveCheck = false) => {
     if (!targetNode) return;
     setInteractionFeedback(null);
     const targetMode = resolveStoryPrimaryAction(targetNode);
     if (targetMode.mode === "DISABLED") return;
+    if (targetMode.mode === "ROUTE" && targetNode.id !== currentNodeId && !skipRouteMoveCheck) {
+      await handleMove(true);
+      return;
+    }
     setAvatarVisualTarget({ nodeId: targetNode.id, stance: "SIDE" }); await new Promise((resolve) => setTimeout(resolve, 420));
     if (targetMode.mode === "ROUTE") {
       setDuelFocusNodeId(targetNode.id);
@@ -133,7 +139,7 @@ export function StoryScene({ runtime, briefing, postDuelTransition = null }: ISt
           movementError={movementError}
           interactionFeedback={interactionFeedback}
           primaryActionLabel={primaryAction.label}
-          canRunPrimaryAction={primaryAction.isEnabled && !isBusy && selectedNode?.id === currentNodeId}
+          canRunPrimaryAction={primaryAction.isEnabled && !isBusy}
           onMove={() => { sceneSfx.playButtonClick(); void handleMove(false); }}
           onPrimaryAction={() => { sceneSfx.playButtonClick(); void handlePrimaryAction(); }}
           onDeselect={() => { sceneSfx.playButtonClick(); setSelectedNodeId(null); }}

@@ -23,11 +23,12 @@ export function useStoryPostDuelTransition(input: IUseStoryPostDuelTransitionInp
       window.setTimeout(() => input.setRetreatingNodeId(null), 720);
       return;
     }
-    if (!input.currentNodeId || input.currentNodeId === input.transition.duelNodeId) return;
+    const fallbackNodeId = input.transition.returnNodeId || input.currentNodeId;
+    if (!fallbackNodeId) return;
     input.setAvatarVisualTarget({ nodeId: input.transition.duelNodeId, stance: "SIDE" });
     const travelTimeout = window.setTimeout(() => {
-      input.setAvatarVisualTarget({ nodeId: input.currentNodeId as string, stance: "CENTER" });
-    }, 180);
+      input.setAvatarVisualTarget({ nodeId: fallbackNodeId, stance: "CENTER" });
+    }, 260);
     return () => window.clearTimeout(travelTimeout);
   }, [input]);
 }
