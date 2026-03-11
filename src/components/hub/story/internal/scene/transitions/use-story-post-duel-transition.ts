@@ -20,7 +20,6 @@ export function useStoryPostDuelTransition(input: IUseStoryPostDuelTransitionInp
     consumedRef.current = true;
     if (input.transition.outcome === "WON") {
       input.setRetreatingNodeId(input.transition.duelNodeId);
-      window.setTimeout(() => input.setRetreatingNodeId(null), 720);
       return;
     }
     const fallbackNodeId = input.transition.returnNodeId || input.currentNodeId;

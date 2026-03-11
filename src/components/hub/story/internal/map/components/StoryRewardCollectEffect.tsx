@@ -8,6 +8,9 @@ interface IStoryRewardCollectEffectProps {
   isVisible: boolean;
   from: { x: number; y: number };
   to: { x: number; y: number };
+  assetSrc: string;
+  assetAlt: string;
+  tone: "NEXUS" | "CARD";
   onComplete: () => void;
 }
 
@@ -18,6 +21,9 @@ export function StoryRewardCollectEffect({
   isVisible,
   from,
   to,
+  assetSrc,
+  assetAlt,
+  tone,
   onComplete,
 }: IStoryRewardCollectEffectProps) {
   if (!isVisible) return null;
@@ -31,12 +37,16 @@ export function StoryRewardCollectEffect({
       style={{ width: 80, height: 80 }}
     >
       <Image
-        src="/assets/renders/nexus.png"
-        alt="Recolección de nexus"
+        src={assetSrc}
+        alt={assetAlt}
         fill
         sizes="80px"
         quality={55}
-        className="object-contain drop-shadow-[0_0_16px_rgba(16,185,129,0.7)]"
+        className={
+          tone === "NEXUS"
+            ? "object-contain drop-shadow-[0_0_16px_rgba(16,185,129,0.7)]"
+            : "object-contain drop-shadow-[0_0_16px_rgba(56,189,248,0.7)]"
+        }
       />
     </motion.div>
   );

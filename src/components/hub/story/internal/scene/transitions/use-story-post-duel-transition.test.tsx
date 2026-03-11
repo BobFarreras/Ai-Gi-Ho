@@ -5,7 +5,6 @@ import { useStoryPostDuelTransition } from "./use-story-post-duel-transition";
 
 describe("useStoryPostDuelTransition", () => {
   it("dispara retirada del rival cuando el outcome es WON", () => {
-    vi.useFakeTimers();
     const setAvatarVisualTarget = vi.fn();
     const setRetreatingNodeId = vi.fn();
     renderHook(() =>
@@ -21,9 +20,7 @@ describe("useStoryPostDuelTransition", () => {
       }),
     );
     expect(setRetreatingNodeId).toHaveBeenCalledWith("story-ch1-duel-1");
-    vi.runAllTimers();
-    expect(setRetreatingNodeId).toHaveBeenCalledWith(null);
-    vi.useRealTimers();
+    expect(setRetreatingNodeId).not.toHaveBeenCalledWith(null);
   });
 
   it("mueve avatar de duelo a nodo retorno cuando outcome no es WON", () => {

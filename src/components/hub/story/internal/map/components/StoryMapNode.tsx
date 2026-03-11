@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
+import { resolveStoryRewardCardVisual } from "@/services/story/resolve-story-reward-card-visual";
 
 interface StoryMapNodeProps {
   node: IStoryMapNodeRuntime;
@@ -20,7 +21,7 @@ function resolveHologramAsset(node: IStoryMapNodeRuntime): { src: string; alt: s
     return { src: "/assets/story/opponents/opp-ch1-apprentice/avatar-GenNvim.png", alt: "Oponente" };
   }
   if (node.nodeType === "REWARD_NEXUS") return { src: "/assets/renders/nexus.png", alt: "Nexus" };
-  if (node.nodeType === "REWARD_CARD") return { src: "/assets/renders/wrap.png", alt: "Carta recompensa" };
+  if (node.nodeType === "REWARD_CARD") return resolveStoryRewardCardVisual(node.rewardCardId);
   if (node.nodeType === "EVENT") return { src: "/assets/renders/chatgpt.png", alt: "Evento" };
   return { src: "/assets/renders/react.png", alt: "Nodo de movimiento" };
 }
@@ -29,7 +30,9 @@ export function StoryMapNode({ node, isSelected, isCurrentNode, isCollecting = f
   const hologram = resolveHologramAsset(node);
   const isDefeatedDuel = node.isCompleted && (node.nodeType === "DUEL" || node.nodeType === "BOSS");
   const shouldShowTitle = node.nodeType === "DUEL" || node.nodeType === "BOSS";
-  const shouldRenderToken = Boolean(hologram) && !isCollecting;
+  // Un nodo resuelto debe quedar como plataforma vacía para que solo permanezca la ficha del jugador.
+  const shouldHideCompletedToken = node.isCompleted && node.nodeType !== "MOVE";
+  const shouldRenderToken = Boolean(hologram) && !isCollecting && !shouldHideCompletedToken;
 
   return (
     <motion.button

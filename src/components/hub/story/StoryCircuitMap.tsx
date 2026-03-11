@@ -18,6 +18,7 @@ import { StoryNodeRetreatEffect } from "./internal/map/components/StoryNodeRetre
 import { StoryMapZoomControls } from "./internal/map/components/StoryMapZoomControls";
 import { useStoryMapZoom } from "./internal/map/hooks/use-story-map-zoom";
 import { resolveStoryNodeSideOffsetPx, STORY_NODE_TOKEN_SIZE } from "./internal/map/constants/story-map-geometry";
+import { resolveStoryRetreatTrail } from "./internal/map/layout/resolve-story-retreat-trail";
 
 interface StoryCircuitMapProps {
   nodes: IStoryMapNodeRuntime[];
@@ -27,10 +28,12 @@ interface StoryCircuitMapProps {
   duelFocusNodeId?: string | null;
   floatingReward?: { label: string; tone: "NEXUS" | "CARD" } | null;
   collectingRewardNodeId?: string | null;
+  collectingRewardVisual?: { assetSrc: string; assetAlt: string; tone: "NEXUS" | "CARD" } | null;
   retreatingNodeId?: string | null;
   isInteractionLocked?: boolean;
   onSelectNode: (nodeId: string | null) => void;
   onRewardCollectAnimationComplete?: () => void;
+  onRetreatAnimationComplete?: () => void;
 }
 
 const MAP_CANVAS_SIZE = { width: 3400, height: 2200 };
@@ -43,10 +46,12 @@ export function StoryCircuitMap({
   duelFocusNodeId,
   floatingReward,
   collectingRewardNodeId,
+  collectingRewardVisual,
   retreatingNodeId,
   isInteractionLocked,
   onSelectNode,
   onRewardCollectAnimationComplete,
+  onRetreatAnimationComplete,
 }: StoryCircuitMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const hasCenteredCamera = useRef(false);
@@ -63,7 +68,10 @@ export function StoryCircuitMap({
   const avatarPos = avatarNode ? resolveStoryNodeTokenAnchor(avatarNode.id, positionMap) : { x: 1000, y: 1000 };
   const avatarSideOffsetX = visualStance === "SIDE" ? -resolveStoryNodeSideOffsetPx() : 0;
   const collectingAnchor = collectingRewardNodeId ? resolveStoryNodeTokenAnchor(collectingRewardNodeId, positionMap) : null;
-  const retreatingAnchor = retreatingNodeId ? resolveStoryNodeTokenAnchor(retreatingNodeId, positionMap) : null;
+  const retreatTrail = useMemo(
+    () => resolveStoryRetreatTrail({ retreatingNodeId: retreatingNodeId ?? null, nodes, positionMap }),
+    [retreatingNodeId, nodes, positionMap],
+  );
 
   useEffect(() => {
     const fromX = avatarX.get();
@@ -140,9 +148,21 @@ export function StoryCircuitMap({
             className="rounded-full border-2 border-emerald-400 object-cover shadow-[0_0_22px_rgba(16,185,129,0.6)]"
           />
         </motion.div>
-        <StoryRewardCollectEffect isVisible={Boolean(collectingAnchor && onRewardCollectAnimationComplete)} from={collectingAnchor ?? { x: 0, y: 0 }} to={{ x: avatarX.get() + avatarSideOffsetX, y: avatarY.get() }} onComplete={() => onRewardCollectAnimationComplete?.()} />
+        <StoryRewardCollectEffect
+          isVisible={Boolean(collectingAnchor && collectingRewardVisual && onRewardCollectAnimationComplete)}
+          from={collectingAnchor ?? { x: 0, y: 0 }}
+          to={{ x: avatarX.get() + avatarSideOffsetX, y: avatarY.get() }}
+          assetSrc={collectingRewardVisual?.assetSrc ?? "/assets/renders/nexus.png"}
+          assetAlt={collectingRewardVisual?.assetAlt ?? "Recolección"}
+          tone={collectingRewardVisual?.tone ?? "NEXUS"}
+          onComplete={() => onRewardCollectAnimationComplete?.()}
+        />
         <StoryRewardFloatingText isVisible={Boolean(floatingReward)} label={floatingReward?.label ?? ""} tone={floatingReward?.tone} at={{ x: avatarX.get() + avatarSideOffsetX, y: avatarY.get() }} />
-        <StoryNodeRetreatEffect isVisible={Boolean(retreatingAnchor)} at={retreatingAnchor ?? { x: 0, y: 0 }} />
+        <StoryNodeRetreatEffect
+          isVisible={Boolean(retreatingNodeId)}
+          trail={retreatTrail}
+          onComplete={onRetreatAnimationComplete}
+        />
         {isInteractionLocked ? (
           <div className="pointer-events-none absolute left-1/2 top-8 z-40 -translate-x-1/2 rounded border border-emerald-400/50 bg-black/80 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-200">
             Acción en curso...

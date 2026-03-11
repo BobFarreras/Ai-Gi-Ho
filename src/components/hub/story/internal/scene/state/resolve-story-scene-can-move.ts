@@ -12,7 +12,9 @@ export function resolveStorySceneCanMove(input: {
 }): boolean {
   const { selectedNode, currentNodeId, isInteracting, isDialogOpen } = input;
   if (!selectedNode || !selectedNode.isUnlocked) return false;
-  if (selectedNode.nodeType === "DUEL" || selectedNode.nodeType === "BOSS") return false;
+  const isUnresolvedDuelNode =
+    (selectedNode.nodeType === "DUEL" || selectedNode.nodeType === "BOSS") && !selectedNode.isCompleted;
+  if (isUnresolvedDuelNode) return false;
   if (selectedNode.id === currentNodeId) return false;
   if (isInteracting || isDialogOpen) return false;
   return true;

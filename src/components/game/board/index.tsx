@@ -57,25 +57,29 @@ export function Board({ initialPlayerDeck, mode = "TRAINING", initialConfig, due
     <div className={`board-space-bg relative w-full h-screen overflow-hidden font-sans cursor-crosshair ${shouldReduceCombatEffects ? "reduced-combat-effects" : ""}`} onClick={board.clearSelection}>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(34,211,238,0.12),transparent_52%)] pointer-events-none" />
       <div className="absolute inset-0 shadow-[inset_0_0_200px_rgba(1,4,12,0.58)] pointer-events-none" />
-      <BoardStatusAndTopBarSection
-        board={board}
-        screen={screen}
-        isMobile={isMobile}
-        player={player}
-        opponent={opponent}
-        playerAvatarUrl={playerAvatarUrl}
-        opponentAvatarUrl={opponentAvatarUrl}
-        onExitMatch={onExitMatch}
-      />
-      <BoardPlayersSection
-        board={board}
-        screen={screen}
-        isMobile={isMobile}
-        player={player}
-        opponent={opponent}
-        playerAvatarUrl={playerAvatarUrl}
-        opponentAvatarUrl={opponentAvatarUrl}
-      />
+      {!isMatchStartLocked ? (
+        <>
+          <BoardStatusAndTopBarSection
+            board={board}
+            screen={screen}
+            isMobile={isMobile}
+            player={player}
+            opponent={opponent}
+            playerAvatarUrl={playerAvatarUrl}
+            opponentAvatarUrl={opponentAvatarUrl}
+            onExitMatch={onExitMatch}
+          />
+          <BoardPlayersSection
+            board={board}
+            screen={screen}
+            isMobile={isMobile}
+            player={player}
+            opponent={opponent}
+            playerAvatarUrl={playerAvatarUrl}
+            opponentAvatarUrl={opponentAvatarUrl}
+          />
+        </>
+      ) : null}
       {!screen.isResultVisible && (
         <BoardInteractiveLayer
           gameState={board.gameState}
@@ -119,15 +123,17 @@ export function Board({ initialPlayerDeck, mode = "TRAINING", initialConfig, due
           isMobileLayout={isMobile}
         />
       )}
-      <BoardActionControlsSection
-        board={board}
-        screen={screen}
-        isMobile={isMobile}
-        player={player}
-        opponent={opponent}
-        playerAvatarUrl={playerAvatarUrl}
-        opponentAvatarUrl={opponentAvatarUrl}
-      />
+      {!isMatchStartLocked ? (
+        <BoardActionControlsSection
+          board={board}
+          screen={screen}
+          isMobile={isMobile}
+          player={player}
+          opponent={opponent}
+          playerAvatarUrl={playerAvatarUrl}
+          opponentAvatarUrl={opponentAvatarUrl}
+        />
+      ) : null}
       <DuelResultOverlay
         winnerPlayerId={board.winnerPlayerId}
         playerA={player}

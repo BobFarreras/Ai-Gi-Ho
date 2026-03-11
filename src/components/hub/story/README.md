@@ -30,6 +30,8 @@ story/
         use-story-map-zoom.ts
         use-story-avatar-travel.test.tsx
       layout/
+        resolve-story-retreat-trail.ts
+        resolve-story-retreat-trail.test.ts
         story-circuit-layout.ts
         story-circuit-layout.test.ts
       constants/
@@ -54,8 +56,10 @@ story/
 
 ## Responsabilidades por capa
 - `StoryScene.tsx`: composición de escena, acciones de UI y coordinación con API.
+  Implementa CTA único inteligente (`smart action`) para mover/interactuar con un solo botón.
 - `StoryCircuitMap.tsx`: render del canvas de mapa, nodos, caminos, plataformas y avatar.
 - `internal/map/layout/*`: cálculo de posiciones/segmentos del circuito.
+  `resolve-story-retreat-trail.ts` calcula la ruta de retirada rival siguiendo el grafo.
 - `internal/map/components/*`: piezas visuales puras del mapa.
   `StoryRewardCollectEffect.tsx` anima la absorción visual de recompensas.
 - `internal/map/hooks/*`: comportamiento de zoom y travel del avatar.
@@ -63,7 +67,7 @@ story/
   `resolve-story-scene-can-move.ts` centraliza la política del botón de movimiento.
 - `internal/scene/audio/*`: reproducción de SFX del mapa Story.
 - `internal/scene/dialog/*`: flujo de diálogo narrativo.
-- `internal/scene/panels/*`: panel lateral e información contextual.
+- `internal/scene/panels/*`: panel lateral e información contextual con acción única (sin doble botón).
 - `internal/scene/transitions/*`: transición visual post-duelo al volver desde combate.
 
 ## Reglas de mantenimiento
@@ -74,13 +78,15 @@ story/
 
 ## Flujo de interacción actual
 1. El jugador selecciona un nodo en el mapa.
-2. `StorySidebar` habilita `Moverse` o `Interactuar` según contexto.
+2. `StorySidebar` resuelve un único botón inteligente (`mover`, `interactuar` o `mover + interactuar`).
 3. `POST /api/story/world/move` valida y persiste movimiento.
 4. Si aplica, `POST /api/story/world/interact` registra interacción narrativa.
 5. En duelos, la ruta de resultado (`/api/story/duels/complete`) actualiza progreso.
 6. Al volver de duelo, `StoryScene` consume query de transición (`duelOutcome`, `duelNodeId`, `returnNodeId`).
-7. Persistencia Story usa estado compacto: `currentNodeId + visitedNodeIds + interactedNodeIds`.
-8. Antes de iniciar combate Story se ejecuta coin toss y su resultado define `starterPlayerId`.
+7. Si el duelo se gana, el nodo rival se retira visualmente recorriendo nodos/plataformas del flujo.
+8. En recompensas de carta, nodo + animación usan visual real según `rewardCardId` (servicio `resolve-story-reward-card-visual`).
+9. Persistencia Story usa estado compacto: `currentNodeId + visitedNodeIds + interactedNodeIds`.
+10. Antes de iniciar combate Story se ejecuta coin toss y su resultado define `starterPlayerId`.
 
 ## Herramientas de depuración
 - `POST /api/story/world/reset`: reinicia cursor Story al nodo inicial y limpia estado compacto (visitados/interacciones) para reproducir pruebas del mapa.

@@ -9,36 +9,32 @@ import { IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
 interface StorySidebarProps {
   briefing: IStoryChapterBriefing;
   selectedNode: IStoryMapNodeRuntime | null;
-  canMove: boolean;
   isMoving: boolean;
   movementError: string | null;
   interactionFeedback: string | null;
-  primaryActionLabel: string;
-  canRunPrimaryAction: boolean;
-  onMove: () => void;
-  onPrimaryAction: () => void;
+  smartActionLabel: string;
+  canRunSmartAction: boolean;
+  onSmartAction: () => void;
   onDeselect: () => void;
 }
 
 export function StorySidebar({
   briefing,
   selectedNode,
-  canMove,
   isMoving,
   movementError,
   interactionFeedback,
-  primaryActionLabel,
-  canRunPrimaryAction,
-  onMove,
-  onPrimaryAction,
+  smartActionLabel,
+  canRunSmartAction,
+  onSmartAction,
   onDeselect,
 }: StorySidebarProps) {
   // Este panel consume solo estado derivado para no acoplarse al motor de movimiento.
-  const isDuelNode = selectedNode?.nodeType === "DUEL" || selectedNode?.nodeType === "BOSS";
-  const nodeTitle = isDuelNode ? selectedNode?.title : "Plataforma táctica";
-  const nodeOpponent = isDuelNode ? selectedNode?.opponentName : null;
-  const nodeDifficulty = isDuelNode ? selectedNode?.difficulty : "N/A";
-  const nodeReward = isDuelNode ? selectedNode?.rewardNexus : 0;
+  const isActiveDuelNode = (selectedNode?.nodeType === "DUEL" || selectedNode?.nodeType === "BOSS") && !selectedNode?.isCompleted;
+  const nodeTitle = isActiveDuelNode ? selectedNode?.title : "Plataforma táctica";
+  const nodeOpponent = isActiveDuelNode ? selectedNode?.opponentName : null;
+  const nodeDifficulty = isActiveDuelNode ? selectedNode?.difficulty : "N/A";
+  const nodeReward = isActiveDuelNode ? selectedNode?.rewardNexus : 0;
   return (
     <aside className="relative flex h-full w-full flex-col overflow-x-hidden overflow-y-auto bg-slate-950/90 backdrop-blur-xl">
       <div className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(transparent_50%,rgba(6,182,212,0.03)_50%)] bg-[length:100%_4px]" />
@@ -94,25 +90,17 @@ export function StorySidebar({
               <div className="mt-6 space-y-2">
                 <button
                   type="button"
-                  onClick={onMove}
-                  disabled={!canMove || isMoving}
-                  className="w-full rounded border border-cyan-500/50 bg-cyan-950/60 py-3 text-xs font-black tracking-widest text-cyan-100 disabled:cursor-not-allowed disabled:opacity-45"
-                >
-                  {isMoving ? "MOVIENDO..." : "MOVERSE A NODO"}
-                </button>
-                <button
-                  type="button"
-                  onClick={onPrimaryAction}
-                  disabled={!canRunPrimaryAction}
+                  onClick={onSmartAction}
+                  disabled={!canRunSmartAction || isMoving}
                   className={cn(
                     "w-full rounded py-4 font-black tracking-widest transition-all active:scale-95",
                     selectedNode.nodeType === "BOSS"
                       ? "bg-fuchsia-700 text-white shadow-[0_0_20px_rgba(192,38,211,0.4)] hover:bg-fuchsia-600"
                       : "bg-cyan-600 text-white shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:bg-cyan-500",
-                    !canRunPrimaryAction && "cursor-not-allowed opacity-45",
+                    (!canRunSmartAction || isMoving) && "cursor-not-allowed opacity-45",
                   )}
                 >
-                  {primaryActionLabel}
+                  {isMoving ? "EJECUTANDO..." : smartActionLabel}
                 </button>
                 {movementError ? <p className="text-xs text-rose-300">{movementError}</p> : null}
                 {interactionFeedback ? <p className="text-xs text-emerald-300">{interactionFeedback}</p> : null}

@@ -81,4 +81,14 @@ describe("resolveStorySceneCanMove", () => {
     expect(duelMove).toBe(false);
     expect(bossMove).toBe(false);
   });
+
+  it("permite movimiento cuando un nodo de duelo ya fue completado", () => {
+    const canMove = resolveStorySceneCanMove({
+      selectedNode: createNode({ id: "story-ch1-duel-1", nodeType: "DUEL", isCompleted: true, isUnlocked: true }),
+      currentNodeId: "story-ch1-path-blank-1",
+      isInteracting: false,
+      isDialogOpen: false,
+    });
+    expect(canMove).toBe(true);
+  });
 });

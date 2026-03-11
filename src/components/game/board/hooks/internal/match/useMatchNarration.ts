@@ -111,12 +111,19 @@ export function useMatchNarration({ combatLog, winnerPlayerId, playerId, opponen
     const activeAction = state.activeAction;
     const audioDelay = activeAction.line.channel === "CINEMATIC" ? CINEMATIC_ENTRY_DELAY_MS : 0;
     let audioTimeout: number | null = null;
+    let retryTimeout: number | null = null;
     if (!isMuted && activeAction.line.audioUrl) {
       audioTimeout = window.setTimeout(() => {
         audioRef.current?.pause();
         audioRef.current = new Audio(activeAction.line.audioUrl!);
         audioRef.current.volume = 0.7;
-        void audioRef.current.play().catch(() => undefined);
+        void audioRef.current.play().catch(() => {
+          // Reintento breve para navegadores que bloquean el primer intento tras transición visual.
+          retryTimeout = window.setTimeout(() => {
+            if (!audioRef.current) return;
+            void audioRef.current.play().catch(() => undefined);
+          }, 220);
+        });
       }, audioDelay);
     }
     const clearDelay = activeAction.line.channel === "CINEMATIC" ? CINEMATIC_ENTRY_DELAY_MS : 0;
@@ -125,6 +132,7 @@ export function useMatchNarration({ combatLog, winnerPlayerId, playerId, opponen
     }, (activeAction.line.durationMs ?? (activeAction.line.channel === "HUD" ? 1800 : 3200)) + clearDelay);
     return () => {
       if (audioTimeout) window.clearTimeout(audioTimeout);
+      if (retryTimeout) window.clearTimeout(retryTimeout);
       window.clearTimeout(timeout);
     };
   }, [isMuted, state.activeAction]);
