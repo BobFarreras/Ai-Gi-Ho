@@ -84,3 +84,20 @@ Mostrar retorno visual coherente al salir del duelo:
 ### Validación (TDD)
 - Test de parser de transición (`story-post-duel-transition.test.ts`).
 - Re-ejecución de test de escena Story para validar compatibilidad.
+
+## Fase 3 - Cobertura de tipos de nodo faltantes
+
+### Objetivo
+Disponer de un circuito de prueba que cubra tipos Story aún no ejercitados en el acto activo.
+
+### Cambios aplicados
+1. Acto 1 ahora incluye nodos de prueba secuenciales para `EVENT` y `BOSS` virtual.
+2. Se añadieron plataformas de soporte para la nueva secuencia lineal.
+3. Se agregó test de intención primaria para `BOSS` virtual (sin navegación directa).
+
+### Archivos modificados
+- `src/services/story/map-definitions/act-1-map-definition.ts`
+- `src/services/story/resolve-story-primary-action.test.ts`
+
+### Validación (TDD)
+- Test actualizado de `resolveStoryPrimaryAction` para `BOSS` virtual.

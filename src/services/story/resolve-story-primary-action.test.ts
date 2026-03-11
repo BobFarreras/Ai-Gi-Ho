@@ -38,6 +38,15 @@ describe("resolveStoryPrimaryAction", () => {
     expect(action.label).toBe("Activar evento");
   });
 
+  it("mantiene acción de duelo en boss virtual sin navegación directa", () => {
+    const action = resolveStoryPrimaryAction(
+      createNode({ nodeType: "BOSS", href: "#", isVirtualNode: true, isBossDuel: true }),
+    );
+
+    expect(action.mode).toBe("VIRTUAL_INTERACTION");
+    expect(action.label).toBe("Entrar al duelo");
+  });
+
   it("deshabilita acción cuando el nodo está bloqueado", () => {
     const action = resolveStoryPrimaryAction(createNode({ isUnlocked: false }));
 
