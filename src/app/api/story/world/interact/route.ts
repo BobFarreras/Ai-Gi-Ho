@@ -54,10 +54,21 @@ export async function POST(request: NextRequest) {
     if (!unlocked) {
       throw new ValidationError("El nodo virtual todavía está bloqueado.");
     }
+    if (compactState.interactedNodeIds.includes(virtualNode.id)) {
+      return NextResponse.json(
+        {
+          interactionCountForNode: 1,
+        },
+        { status: 200, headers: response.headers },
+      );
+    }
     const nextState = applyStoryInteractionToCompactState({
       state: compactState,
       nodeId: virtualNode.id,
     });
+    if (virtualNode.nodeType === "REWARD_NEXUS" && virtualNode.rewardNexus > 0) {
+      await repositories.walletRepository.creditNexus(playerId, virtualNode.rewardNexus);
+    }
     await worldRepository.saveCompactStateByPlayerId(playerId, nextState);
     const interactionCountForNode = nextState.interactedNodeIds.includes(virtualNode.id) ? 1 : 0;
 

@@ -39,6 +39,22 @@ describe("resolveStorySceneCanMove", () => {
     expect(canMove).toBe(true);
   });
 
+  it("permite moverse a nodo virtual de recompensa desbloqueado", () => {
+    const canMove = resolveStorySceneCanMove({
+      selectedNode: createNode({
+        id: "story-ch1-reward-nexus-beta",
+        nodeType: "REWARD_NEXUS",
+        isVirtualNode: true,
+        isCompleted: false,
+        isUnlocked: true,
+      }),
+      currentNodeId: "story-ch1-duel-1",
+      isInteracting: false,
+      isDialogOpen: false,
+    });
+    expect(canMove).toBe(true);
+  });
+
   it("bloquea movimiento si el nodo seleccionado es el actual", () => {
     const canMove = resolveStorySceneCanMove({
       selectedNode: createNode({ id: "story-ch1-path-blank-1", nodeType: "MOVE" }),

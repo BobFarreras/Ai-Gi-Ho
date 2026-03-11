@@ -28,7 +28,7 @@ export const storyAct1MapDefinition: IStoryActMapDefinition = {
   virtualNodes: [
     v({ id: "story-ch1-player-start", duelIndex: 90, nodeType: "MOVE", title: "Plataforma Inicial", unlockRequirementNodeId: null, position: { x: 260, y: 980 } }),
     v({ id: "story-ch1-path-blank-1", duelIndex: 91, nodeType: "MOVE", title: "Paso", unlockRequirementNodeId: "story-ch1-player-start", position: { x: 520, y: 980 } }),
-    v({ id: "story-ch1-reward-nexus-beta", duelIndex: 109, nodeType: "REWARD_NEXUS", title: "Moneda", rewardNexus: 150, unlockRequirementNodeId: "story-ch1-duel-1", position: { x: 1040, y: 980 } }),
+    v({ id: "story-ch1-reward-nexus-beta", duelIndex: 109, nodeType: "REWARD_NEXUS", title: "Moneda", rewardNexus: 200, unlockRequirementNodeId: "story-ch1-duel-1", position: { x: 1040, y: 980 } }),
   ],
   platforms: [
     { id: "act1-p-1", position: { x: 260, y: 980 }, size: 170, style: "METAL" },

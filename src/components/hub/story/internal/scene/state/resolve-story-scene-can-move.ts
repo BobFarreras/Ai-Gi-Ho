@@ -14,6 +14,5 @@ export function resolveStorySceneCanMove(input: {
   if (!selectedNode || !selectedNode.isUnlocked) return false;
   if (selectedNode.id === currentNodeId) return false;
   if (isInteracting || isDialogOpen) return false;
-  if (selectedNode.isCompleted) return true;
-  return selectedNode.nodeType === "MOVE" || !selectedNode.isVirtualNode;
+  return true;
 }
