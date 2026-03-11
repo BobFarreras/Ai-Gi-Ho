@@ -1,6 +1,6 @@
 // src/app/hub/story/chapter/[chapter]/duel/[duelIndex]/StoryDuelClient.tsx - Orquesta duelo Story en cliente y registra resultado/recompensas al finalizar.
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Board } from "@/components/game/board";
 import { IDuelResultRewardSummary } from "@/components/game/board/ui/internal/duel-result/duel-result-reward-summary";
@@ -45,10 +45,6 @@ export function StoryDuelClient(props: StoryDuelClientProps) {
     () => buildStoryOpponentNarrationPack({ opponentId: props.opponentId, opponentName: props.opponentName, duelDescription: props.duelDescription }),
     [props.duelDescription, props.opponentId, props.opponentName],
   );
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => setIsCoinTossVisible(false), 1450);
-    return () => window.clearTimeout(timeoutId);
-  }, []);
   const pushBackToStory = (input: { outcome: StoryDuelOutcome; duelNodeId: string; returnNodeId: string }) => {
     const query = new URLSearchParams({
       duelOutcome: input.outcome,
@@ -135,6 +131,7 @@ export function StoryDuelClient(props: StoryDuelClientProps) {
         opponentName={props.opponentName}
         playerAvatarUrl={playerAvatarUrl}
         opponentAvatarUrl={resolvedOpponentAvatarUrl}
+        onComplete={() => setIsCoinTossVisible(false)}
       />
     </main>
   );
