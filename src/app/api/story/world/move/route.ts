@@ -10,31 +10,11 @@ import { SupabaseOpponentRepository } from "@/infrastructure/persistence/supabas
 import { SupabasePlayerStoryDuelProgressRepository } from "@/infrastructure/persistence/supabase/SupabasePlayerStoryDuelProgressRepository";
 import { SupabasePlayerStoryWorldRepository } from "@/infrastructure/persistence/supabase/SupabasePlayerStoryWorldRepository";
 import { getAuthenticatedUserId } from "@/services/auth/api/internal/get-authenticated-user-id";
-import {
-  findStoryVirtualNodeDefinition,
-  findStoryVisualNodeDefinition,
-} from "@/services/story/map-definitions/story-map-definition-registry";
 import { createPlayerRouteRepositories } from "@/services/player-persistence/create-player-route-repositories";
+import { resolveStoryWorldMoveMode } from "@/services/story/resolve-story-world-move-mode";
 
 interface IStoryWorldMovePayload {
   nodeId: string;
-}
-
-function hasVisitedNode(history: IPlayerStoryHistoryEvent[], nodeId: string): boolean {
-  return history.some((event) => event.nodeId === nodeId);
-}
-
-function canMoveToVirtualNode(input: {
-  currentNodeId: string | null;
-  requiredNodeId: string | null;
-  completedNodeIds: string[];
-  interactedNodeIds: string[];
-}): boolean {
-  if (!input.requiredNodeId) return true;
-  if (input.currentNodeId !== input.requiredNodeId) return false;
-  const requiredVirtualNode = findStoryVirtualNodeDefinition(input.requiredNodeId);
-  if (requiredVirtualNode?.nodeType === "MOVE") return true;
-  return input.completedNodeIds.includes(input.requiredNodeId) || input.interactedNodeIds.includes(input.requiredNodeId);
 }
 
 function buildVirtualMoveEvent(input: { playerId: string; nodeId: string; title: string }): IPlayerStoryHistoryEvent {
@@ -66,7 +46,20 @@ export async function POST(request: NextRequest) {
     const worldState = await worldStateUseCase.execute({ playerId });
     const currentNodeId = await worldRepository.getCurrentNodeIdByPlayerId(playerId).catch(() => null);
     const currentHistory = await worldRepository.listHistoryByPlayerId(playerId, 500);
-    if (hasVisitedNode(currentHistory, payload.nodeId)) {
+    const interactedNodeIds = currentHistory
+      .filter((event) => event.kind === "INTERACTION")
+      .map((event) => event.nodeId);
+    const moveMode = resolveStoryWorldMoveMode({
+      targetNodeId: payload.nodeId,
+      currentNodeId,
+      visitedNodeIds: currentHistory.map((event) => event.nodeId),
+      completedNodeIds: worldState.progress.completedNodeIds,
+      interactedNodeIds,
+    });
+    if (!moveMode.isAllowed) {
+      throw new ValidationError(moveMode.validationMessage ?? "Movimiento Story inválido.");
+    }
+    if (moveMode.mode !== "GRAPH") {
       await worldRepository.saveCurrentNodeId(playerId, payload.nodeId);
       const targetNode = worldState.graph.nodes.find((node) => node.id === payload.nodeId);
       await worldRepository.appendHistoryEvents(playerId, [
@@ -84,56 +77,6 @@ export async function POST(request: NextRequest) {
         },
         { status: 200, headers: response.headers },
       );
-    }
-    const virtualNode = findStoryVirtualNodeDefinition(payload.nodeId);
-    if (virtualNode) {
-      const interactedNodeIds = currentHistory
-        .filter((event) => event.kind === "INTERACTION")
-        .map((event) => event.nodeId);
-      const canMove = canMoveToVirtualNode({
-        currentNodeId,
-        requiredNodeId: virtualNode.unlockRequirementNodeId,
-        completedNodeIds: worldState.progress.completedNodeIds,
-        interactedNodeIds,
-      });
-      if (!canMove) {
-        throw new ValidationError("El nodo virtual todavía está bloqueado.");
-      }
-      await worldRepository.saveCurrentNodeId(playerId, virtualNode.id);
-      await worldRepository.appendHistoryEvents(playerId, [
-        buildVirtualMoveEvent({ playerId, nodeId: virtualNode.id, title: virtualNode.title }),
-      ]);
-      const history = await worldRepository.listHistoryByPlayerId(playerId, 60);
-      return NextResponse.json(
-        {
-          currentNodeId: virtualNode.id,
-          history,
-        },
-        { status: 200, headers: response.headers },
-      );
-    }
-    const visualNode = findStoryVisualNodeDefinition(payload.nodeId);
-    if (visualNode && currentNodeId && visualNode.unlockRequirementNodeId === currentNodeId) {
-      const targetNode = worldState.graph.nodes.find((node) => node.id === payload.nodeId);
-      await worldRepository.saveCurrentNodeId(playerId, payload.nodeId);
-      await worldRepository.appendHistoryEvents(playerId, [
-        buildVirtualMoveEvent({
-          playerId,
-          nodeId: payload.nodeId,
-          title: targetNode?.title ?? payload.nodeId,
-        }),
-      ]);
-      const history = await worldRepository.listHistoryByPlayerId(playerId, 60);
-      return NextResponse.json(
-        {
-          currentNodeId: payload.nodeId,
-          history,
-        },
-        { status: 200, headers: response.headers },
-      );
-    }
-    if (visualNode && visualNode.unlockRequirementNodeId && visualNode.unlockRequirementNodeId !== currentNodeId) {
-      throw new ValidationError("Debes resolver el nodo anterior antes de avanzar.");
     }
     const moveUseCase = new MoveToStoryNodeUseCase();
     const moved = moveUseCase.execute({

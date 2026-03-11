@@ -65,3 +65,6 @@ story/
 3. `POST /api/story/world/move` valida y persiste movimiento.
 4. Si aplica, `POST /api/story/world/interact` registra evento narrativo.
 5. En duelos, la ruta de resultado (`/api/story/duels/complete`) actualiza progreso.
+
+## Herramientas de depuración
+- `POST /api/story/world/reset`: reinicia cursor Story al nodo inicial y limpia historial de movimiento/interacción para reproducir pruebas del mapa.

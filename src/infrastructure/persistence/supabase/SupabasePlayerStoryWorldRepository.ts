@@ -75,4 +75,12 @@ export class SupabasePlayerStoryWorldRepository implements IPlayerStoryWorldRepo
       .upsert(rows, { onConflict: "event_id" });
     if (error) throw new ValidationError("No se pudo guardar eventos de historial Story.");
   }
+
+  async clearHistoryByPlayerId(playerId: string): Promise<void> {
+    const { error } = await this.client
+      .from("player_story_history_events")
+      .delete()
+      .eq("player_id", playerId);
+    if (error) throw new ValidationError("No se pudo limpiar historial Story.");
+  }
 }

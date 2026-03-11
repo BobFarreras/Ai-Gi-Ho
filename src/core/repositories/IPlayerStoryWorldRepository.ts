@@ -6,4 +6,5 @@ export interface IPlayerStoryWorldRepository {
   saveCurrentNodeId: (playerId: string, currentNodeId: string | null) => Promise<void>;
   listHistoryByPlayerId: (playerId: string, limit?: number) => Promise<IPlayerStoryHistoryEvent[]>;
   appendHistoryEvents: (playerId: string, events: IPlayerStoryHistoryEvent[]) => Promise<void>;
+  clearHistoryByPlayerId: (playerId: string) => Promise<void>;
 }

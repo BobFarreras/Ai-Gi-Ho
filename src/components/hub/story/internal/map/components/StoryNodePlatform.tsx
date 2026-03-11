@@ -5,16 +5,12 @@ interface IStoryNodePlatformProps {
   isCompleted: boolean;
   isSelected: boolean;
   isCurrentNode: boolean;
-  isMovePlatform: boolean;
-  isStartNode: boolean;
 }
 
 export function StoryNodePlatform({
   isCompleted,
   isSelected,
   isCurrentNode,
-  isMovePlatform,
-  isStartNode,
 }: IStoryNodePlatformProps) {
   return (
     <div
@@ -34,15 +30,6 @@ export function StoryNodePlatform({
           isSelected ? "animate-pulse border-cyan-300" : "border-slate-800",
         )}
       />
-      {isMovePlatform ? (
-        <div
-          className={cn(
-            "absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-300/60 bg-cyan-400/25",
-            isStartNode && "h-4 w-4 border-emerald-300/80 bg-emerald-400/35",
-            isCurrentNode && "border-emerald-200 bg-emerald-400/45",
-          )}
-        />
-      ) : null}
     </div>
   );
 }

@@ -44,4 +44,11 @@ describe("resolveStoryPrimaryAction", () => {
     expect(action.mode).toBe("DISABLED");
     expect(action.isEnabled).toBe(false);
   });
+
+  it("deshabilita acción cuando el nodo ya está resuelto", () => {
+    const action = resolveStoryPrimaryAction(createNode({ isCompleted: true }));
+
+    expect(action.mode).toBe("DISABLED");
+    expect(action.label).toBe("Nodo resuelto");
+  });
 });

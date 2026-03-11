@@ -6,6 +6,10 @@ import { createSupabasePlayerStoryWorldRepository } from "@/infrastructure/persi
 import { IStoryMapRuntimeData, IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
 import { mergeStoryMapVisualDefinition } from "@/services/story/merge-story-map-visual-definition";
 import {
+  listStoryActNodeIds,
+  resolveStoryActByNodeId,
+} from "@/services/story/map-definitions/story-map-definition-registry";
+import {
   buildStoryWorldGraph,
   resolveStoryUnlockedNodeIds,
 } from "@/core/services/story/world/build-story-world-graph";
@@ -20,6 +24,19 @@ function resolveActiveChapter(input: {
   const completedNodes = input.nodes.filter((node) => input.completedNodeIds.includes(node.id));
   if (completedNodes.length === 0) return 1;
   return Math.max(...completedNodes.map((node) => node.chapter));
+}
+
+function resolveActiveActId(input: {
+  currentNodeId: string | null;
+  completedNodeIds: string[];
+}): number {
+  const byCurrentNode = input.currentNodeId ? resolveStoryActByNodeId(input.currentNodeId) : null;
+  if (byCurrentNode) return byCurrentNode;
+  for (const completedNodeId of input.completedNodeIds) {
+    const byCompletedNode = resolveStoryActByNodeId(completedNodeId);
+    if (byCompletedNode) return byCompletedNode;
+  }
+  return 1;
 }
 
 export async function getStoryMapRuntimeData(): Promise<IStoryMapRuntimeData | null> {
@@ -80,7 +97,14 @@ export async function getStoryMapRuntimeData(): Promise<IStoryMapRuntimeData | n
     currentNodeId: effectiveCurrentNodeId,
     completedNodeIds,
   });
-  const chapterNodes = mergedNodes.filter((node) => node.chapter === activeChapter);
+  const activeActId = resolveActiveActId({
+    currentNodeId: effectiveCurrentNodeId,
+    completedNodeIds,
+  });
+  const actNodeIds = new Set(listStoryActNodeIds(activeActId));
+  const chapterNodes = mergedNodes.filter(
+    (node) => node.chapter === activeChapter && actNodeIds.has(node.id),
+  );
   const chapterStartNodeId =
     chapterNodes.find((node) => node.id === `story-ch${activeChapter}-player-start`)?.id ??
     chapterNodes[0]?.id ??

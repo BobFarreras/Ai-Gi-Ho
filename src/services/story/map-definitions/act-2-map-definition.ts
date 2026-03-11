@@ -23,7 +23,7 @@ function v(input: Omit<IStoryMapVirtualNodeDefinition, "chapter" | "difficulty" 
 export const storyAct2MapDefinition: IStoryActMapDefinition = {
   act: 2,
   nodes: [
-    { id: "story-ch2-duel-1", unlockRequirementNodeId: "story-ch1-hub-rejoin-alpha", position: { x: 2860, y: 980 } },
+    { id: "story-ch2-duel-1", unlockRequirementNodeId: "story-ch1-reward-nexus-beta", position: { x: 2860, y: 980 } },
     { id: "story-ch2-duel-2", unlockRequirementNodeId: "story-ch2-event-signal", position: { x: 3380, y: 980 } },
   ],
   virtualNodes: [

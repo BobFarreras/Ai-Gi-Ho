@@ -37,3 +37,27 @@ export function findStoryVirtualNodeDefinition(nodeId: string): IStoryMapVirtual
   }
   return null;
 }
+
+/**
+ * Resuelve el acto al que pertenece un nodo visual o virtual.
+ */
+export function resolveStoryActByNodeId(nodeId: string): number | null {
+  for (const actDefinition of storyActDefinitions) {
+    const hasVisualNode = actDefinition.nodes.some((node) => node.id === nodeId);
+    if (hasVisualNode) return actDefinition.act;
+    const hasVirtualNode = (actDefinition.virtualNodes ?? []).some((node) => node.id === nodeId);
+    if (hasVirtualNode) return actDefinition.act;
+  }
+  return null;
+}
+
+/**
+ * Lista ids de nodos configurados para un acto (visuales + virtuales).
+ */
+export function listStoryActNodeIds(act: number): string[] {
+  const definition = storyActDefinitions.find((entry) => entry.act === act);
+  if (!definition) return [];
+  const visualNodeIds = definition.nodes.map((node) => node.id);
+  const virtualNodeIds = (definition.virtualNodes ?? []).map((node) => node.id);
+  return [...visualNodeIds, ...virtualNodeIds];
+}

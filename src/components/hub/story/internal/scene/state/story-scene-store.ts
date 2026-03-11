@@ -11,6 +11,7 @@ interface IStorySceneState {
   setSelectedNodeId: (nodeId: string | null) => void;
   setCurrentNodeId: (nodeId: string | null) => void;
   setHistory: (history: IPlayerStoryHistoryEvent[]) => void;
+  markNodeCompleted: (nodeId: string) => void;
 }
 
 function createNodesById(nodes: IStoryMapNodeRuntime[]): Record<string, IStoryMapNodeRuntime> {
@@ -39,6 +40,17 @@ export function createStorySceneStore(input: {
     setSelectedNodeId: (selectedNodeId) => set({ selectedNodeId }),
     setCurrentNodeId: (currentNodeId) => set({ currentNodeId }),
     setHistory: (history) => set({ history }),
+    markNodeCompleted: (nodeId) =>
+      set((state) => {
+        const targetNode = state.nodesById[nodeId];
+        if (!targetNode) return state;
+        return {
+          nodesById: {
+            ...state.nodesById,
+            [nodeId]: { ...targetNode, isCompleted: true },
+          },
+        };
+      }),
   }));
 }
 

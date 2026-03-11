@@ -1,7 +1,7 @@
 // src/components/hub/story/StoryScene.tsx - Escena principal Story con mapa vivo y panel lateral conectado a estado persistible.
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "zustand";
 import { StoryCircuitMap } from "./StoryCircuitMap";
@@ -26,6 +26,7 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
   const setSelectedNodeId = useStore(store, (state) => state.setSelectedNodeId);
   const setCurrentNodeId = useStore(store, (state) => state.setCurrentNodeId);
   const setHistory = useStore(store, (state) => state.setHistory);
+  const markNodeCompleted = useStore(store, (state) => state.markNodeCompleted);
   const [isMoving, setIsMoving] = useState(false);
   const [isInteracting, setIsInteracting] = useState(false);
   const [avatarVisualTarget, setAvatarVisualTarget] = useState<{ nodeId: string; stance: "CENTER" | "SIDE" } | null>(null);
@@ -34,6 +35,14 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
   const [interactionFeedback, setInteractionFeedback] = useState<string | null>(null);
   const interactionDialog = useStoryNodeInteractionDialog();
   const selectedNode = selectedNodeId ? nodesById[selectedNodeId] ?? null : null;
+  const sceneNodes = useMemo(
+    () =>
+      Object.values(nodesById).sort((left, right) => {
+        if (left.chapter !== right.chapter) return left.chapter - right.chapter;
+        return left.duelIndex - right.duelIndex;
+      }),
+    [nodesById],
+  );
   const primaryAction = resolveStoryPrimaryAction(selectedNode);
   const isBusy = isMoving || isInteracting || interactionDialog.isOpen;
 
@@ -71,6 +80,7 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
       if (!response.ok) throw new Error("Interacción inválida.");
       const payload = (await response.json()) as IStoryInteractResponse;
       setHistory(payload.history);
+      markNodeCompleted(targetNode.id);
       const opened = interactionDialog.start(targetNode, payload.interactionCountForNode);
       setPendingCenterNodeId(targetNode.id);
       setInteractionFeedback(opened ? `Interacción iniciada: ${targetNode.title}.` : `Interacción completada: ${targetNode.title}.`);
@@ -102,7 +112,7 @@ export function StoryScene({ runtime, briefing }: IStorySceneProps) {
         />
       </div>
       <div className="relative z-0 flex-1 overflow-hidden bg-[#050810]">
-        <StoryCircuitMap nodes={runtime.nodes} currentNodeId={currentNodeId} selectedNodeId={selectedNodeId} avatarVisualTarget={avatarVisualTarget} isInteractionLocked={isBusy} onSelectNode={setSelectedNodeId} />
+        <StoryCircuitMap nodes={sceneNodes} currentNodeId={currentNodeId} selectedNodeId={selectedNodeId} avatarVisualTarget={avatarVisualTarget} isInteractionLocked={isBusy} onSelectNode={setSelectedNodeId} />
         <StoryNodeInteractionDialog
           isOpen={interactionDialog.isOpen}
           title={interactionDialog.dialogueTitle}
