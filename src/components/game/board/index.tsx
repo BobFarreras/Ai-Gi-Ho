@@ -26,11 +26,12 @@ interface IBoardProps {
   resultActionLabel?: string;
   onResultAction?: () => void;
   onExitMatch?: () => void;
+  isMatchStartLocked?: boolean;
   onMatchResolved?: (result: { winnerPlayerId: string | "DRAW"; playerId: string; mode: IMatchMode; matchSeed: string }) => void;
 }
-export function Board({ initialPlayerDeck, mode = "TRAINING", initialConfig, duelResultRewardSummary, narrationPack, playerAvatarUrl = null, opponentAvatarUrl = null, resultActionLabel, onResultAction, onExitMatch, onMatchResolved }: IBoardProps) {
+export function Board({ initialPlayerDeck, mode = "TRAINING", initialConfig, duelResultRewardSummary, narrationPack, playerAvatarUrl = null, opponentAvatarUrl = null, resultActionLabel, onResultAction, onExitMatch, isMatchStartLocked = false, onMatchResolved }: IBoardProps) {
   countRender("Board");
-  const board = useBoard(initialPlayerDeck ?? undefined, mode, initialConfig);
+  const board = useBoard(initialPlayerDeck ?? undefined, mode, initialConfig, isMatchStartLocked);
   const player = board.gameState.playerA; const opponent = board.gameState.playerB;
   const { isMobile } = useBoardViewportMode();
   const { shouldReduceCombatEffects } = useBoardPerformanceProfile();
@@ -49,6 +50,7 @@ export function Board({ initialPlayerDeck, mode = "TRAINING", initialConfig, due
     playerActiveExecutions: player.activeExecutions,
     duelResultRewardSummary,
     narrationPack,
+    isNarrationLocked: isMatchStartLocked,
     onMatchResolved,
   });
   return (

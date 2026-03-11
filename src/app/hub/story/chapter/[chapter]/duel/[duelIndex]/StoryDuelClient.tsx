@@ -112,6 +112,7 @@ export function StoryDuelClient(props: StoryDuelClientProps) {
         opponentAvatarUrl={resolvedOpponentAvatarUrl}
         playerAvatarUrl={playerAvatarUrl}
         narrationPack={narrationPack}
+        isMatchStartLocked={isCoinTossVisible}
         duelResultRewardSummary={rewardSummary}
         resultActionLabel="Volver al mapa Story"
         onResultAction={() => {
