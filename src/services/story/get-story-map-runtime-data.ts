@@ -78,7 +78,11 @@ export async function getStoryMapRuntimeData(): Promise<IStoryMapRuntimeData | n
       href: node.href,
     };
   });
-  const mergedNodes = mergeStoryMapVisualDefinition(runtimeNodes, history);
+  const mergedNodes = mergeStoryMapVisualDefinition(
+    runtimeNodes,
+    history,
+    currentNodeId ?? "story-ch1-player-start",
+  );
   const defaultStartNodeId =
     mergedNodes.find((node) => node.id === "story-ch1-player-start")?.id ??
     mergedNodes[0]?.id ??

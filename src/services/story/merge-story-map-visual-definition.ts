@@ -6,11 +6,14 @@ import { IPlayerStoryHistoryEvent } from "@/core/entities/story/IPlayerStoryHist
 function resolveVirtualNodeUnlocked(input: {
   dependencyNodeId: string | null;
   nodesById: Map<string, IStoryMapNodeRuntime>;
+  currentNodeId: string | null;
 }): boolean {
   if (!input.dependencyNodeId) return true;
   const dependencyNode = input.nodesById.get(input.dependencyNodeId);
   if (!dependencyNode) return false;
-  if (dependencyNode.nodeType === "MOVE") return dependencyNode.isCompleted;
+  if (dependencyNode.nodeType === "MOVE") {
+    return dependencyNode.isCompleted || dependencyNode.id === input.currentNodeId;
+  }
   return dependencyNode.isCompleted;
 }
 
@@ -20,6 +23,7 @@ function resolveVirtualNodeUnlocked(input: {
 export function mergeStoryMapVisualDefinition(
   nodes: IStoryMapNodeRuntime[],
   history: IPlayerStoryHistoryEvent[] = [],
+  currentNodeId: string | null = null,
 ): IStoryMapNodeRuntime[] {
   const nextNodes = nodes.map((node) => ({ ...node }));
   const nodeById = new Map(nextNodes.map((node) => [node.id, node]));
@@ -63,6 +67,7 @@ export function mergeStoryMapVisualDefinition(
         isUnlocked: resolveVirtualNodeUnlocked({
           dependencyNodeId: virtualNode.unlockRequirementNodeId,
           nodesById: nodeById,
+          currentNodeId,
         }),
         unlockRequirementNodeId: virtualNode.unlockRequirementNodeId,
         pathLinkFromNodeIds: virtualNode.pathLinkFromNodeIds,
