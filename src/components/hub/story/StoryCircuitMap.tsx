@@ -1,23 +1,18 @@
 // src/components/hub/story/StoryCircuitMap.tsx - Renderiza el mapa Story con cámara arrastrable, nodos y segmentos dinámicos.
 "use client";
 
-import Image from "next/image";
 import { useEffect, useMemo, useRef } from "react";
-import { animate, motion, useMotionValue, AnimationPlaybackControls, useTransform } from "framer-motion";
+import { animate, useMotionValue, AnimationPlaybackControls, useTransform } from "framer-motion";
 import { IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
 import {
   buildStoryNodePositionMap,
-  resolveStoryNodePosition,
   resolveStoryPathSegments,
   resolveStoryNodeTokenAnchor,
 } from "@/components/hub/story/internal/map/layout/story-circuit-layout";
-import { StoryMapNode } from "./internal/map/components/StoryMapNode";
-import { StoryRewardCollectEffect } from "./internal/map/components/StoryRewardCollectEffect";
-import { StoryRewardFloatingText } from "./internal/map/components/StoryRewardFloatingText";
-import { StoryNodeRetreatEffect } from "./internal/map/components/StoryNodeRetreatEffect";
 import { StoryMapZoomControls } from "./internal/map/components/StoryMapZoomControls";
+import { StoryCircuitCanvas } from "./internal/map/components/StoryCircuitCanvas";
 import { useStoryMapZoom } from "./internal/map/hooks/use-story-map-zoom";
-import { resolveStoryNodeSideOffsetPx, STORY_NODE_TOKEN_SIZE } from "./internal/map/constants/story-map-geometry";
+import { resolveStoryNodeSideOffsetPx } from "./internal/map/constants/story-map-geometry";
 import { resolveStoryRetreatTrail } from "./internal/map/layout/resolve-story-retreat-trail";
 
 interface StoryCircuitMapProps {
@@ -120,55 +115,32 @@ export function StoryCircuitMap({
         if (!isInteractionLocked) onSelectNode(null);
       }}
     >
-      <motion.div drag dragConstraints={mapContainerRef} dragElastic={0.1} style={{ x: cameraX, y: cameraY, scale: mapScale, width: MAP_CANVAS_SIZE.width, height: MAP_CANVAS_SIZE.height }} className="absolute left-0 top-0">
-        <svg className="pointer-events-none absolute inset-0 h-full w-full">
-          {segments.map((segment, index) => <motion.line key={`path-${index}`} x1={segment.from.x} y1={segment.from.y} x2={segment.to.x} y2={segment.to.y} stroke="rgba(6, 182, 212, 0.26)" strokeWidth="4" strokeDasharray="12 14" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.2, delay: index * 0.08 }} />)}
-        </svg>
-        {nodes.map((node) => {
-          const position = resolveStoryNodePosition(node.id, positionMap);
-          return (
-            <div key={node.id} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ top: position.y, left: position.x }}>
-              <StoryMapNode
-                node={node}
-                isSelected={selectedNodeId === node.id}
-                isCurrentNode={currentNodeId === node.id}
-                isCollecting={collectingRewardNodeId === node.id}
-                onClick={() => { if (!isInteractionLocked) onSelectNode(node.id); }}
-              />
-            </div>
-          );
-        })}
-        <motion.div className="pointer-events-none absolute z-40 -translate-x-1/2 -translate-y-1/2" initial={false} style={{ top: avatarY, left: avatarX, x: avatarSideOffsetX, width: STORY_NODE_TOKEN_SIZE, height: STORY_NODE_TOKEN_SIZE }}>
-          <Image
-            src="/assets/story/player/bob.png"
-            alt="Avatar del jugador"
-            fill
-            sizes="80px"
-            quality={55}
-            className="rounded-full border-2 border-emerald-400 object-cover shadow-[0_0_22px_rgba(16,185,129,0.6)]"
-          />
-        </motion.div>
-        <StoryRewardCollectEffect
-          isVisible={Boolean(collectingAnchor && collectingRewardVisual && onRewardCollectAnimationComplete)}
-          from={collectingAnchor ?? { x: 0, y: 0 }}
-          to={{ x: avatarX.get() + avatarSideOffsetX, y: avatarY.get() }}
-          assetSrc={collectingRewardVisual?.assetSrc ?? "/assets/renders/nexus.png"}
-          assetAlt={collectingRewardVisual?.assetAlt ?? "Recolección"}
-          tone={collectingRewardVisual?.tone ?? "NEXUS"}
-          onComplete={() => onRewardCollectAnimationComplete?.()}
-        />
-        <StoryRewardFloatingText isVisible={Boolean(floatingReward)} label={floatingReward?.label ?? ""} tone={floatingReward?.tone} at={{ x: avatarX.get() + avatarSideOffsetX, y: avatarY.get() }} />
-        <StoryNodeRetreatEffect
-          isVisible={Boolean(retreatingNodeId)}
-          trail={retreatTrail}
-          onComplete={onRetreatAnimationComplete}
-        />
-        {isInteractionLocked ? (
-          <div className="pointer-events-none absolute left-1/2 top-8 z-40 -translate-x-1/2 rounded border border-emerald-400/50 bg-black/80 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-200">
-            Acción en curso...
-          </div>
-        ) : null}
-      </motion.div>
+      <StoryCircuitCanvas
+        width={MAP_CANVAS_SIZE.width}
+        height={MAP_CANVAS_SIZE.height}
+        dragConstraintsRef={mapContainerRef}
+        cameraX={cameraX}
+        cameraY={cameraY}
+        mapScale={mapScale}
+        nodes={nodes}
+        segments={segments}
+        positionMap={positionMap}
+        selectedNodeId={selectedNodeId}
+        currentNodeId={currentNodeId}
+        collectingRewardNodeId={collectingRewardNodeId}
+        isInteractionLocked={isInteractionLocked}
+        onSelectNode={onSelectNode}
+        avatarX={avatarX}
+        avatarY={avatarY}
+        avatarSideOffsetX={avatarSideOffsetX}
+        collectingAnchor={collectingAnchor}
+        collectingRewardVisual={collectingRewardVisual}
+        onRewardCollectAnimationComplete={onRewardCollectAnimationComplete}
+        floatingReward={floatingReward}
+        retreatingNodeId={retreatingNodeId}
+        retreatTrail={retreatTrail}
+        onRetreatAnimationComplete={onRetreatAnimationComplete}
+      />
       <StoryMapZoomControls onZoomIn={zoomIn} onZoomOut={zoomOut} onReset={resetZoom} />
     </div>
   );
