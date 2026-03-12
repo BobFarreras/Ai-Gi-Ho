@@ -24,12 +24,14 @@
 - Se extrajeron handlers internos de acciones especiales en `resolve-execution` para reducir branching y centralizar la orquestación.
 - Se consolidaron fixtures base de `IPlayer`/`GameState` en `test-support/state-fixtures.ts` y se reutilizaron en suites de `combat`, `fusion`, `effects`, `phases` y `logging`.
 - Se extendió `test-support/state-fixtures.ts` con fábrica de `IBoardEntity` y se migraron suites con estado inline residual (`mastery-passives`, `next-phase.mastery-energy`, `trap-triggers.*`, `resolve-execution.fusion-waiting`, `play-card-with-zone-replacement`).
+- Se cerró la migración pendiente en `fusion/*` con `fusion/fusion-test-fixtures.ts`, eliminando estados inline residuales del subdominio.
+- Se extrajeron utilidades de buff de ejecución a `actions/internal/execution-effect-buffs.ts` para bajar complejidad de `execution-effects.ts` y reforzar SRP.
 
 ## 3. Hallazgos priorizados
 
 ### Medio
-- Persiste duplicación puntual en suites aisladas de `fusion` y `state` que aún no usan completamente `test-support`.
+- Quedan casos de uso productivos cercanos al umbral de tamaño (ej. `play-card.ts`, `fuse-cards-from-execution.ts`) que pueden beneficiarse de extracción incremental adicional.
 
 ## 4. Plan incremental recomendado (sin big-bang)
-1. Migrar las suites aisladas restantes de `fusion`/`state` para cerrar la homogeneización de fixtures.
+1. Aplicar una extracción SRP incremental en `play-card.ts` o `fuse-cards-from-execution.ts` para reducir branching y mantener legibilidad.
 2. Ejecutar `pnpm lint`, `pnpm test`, `pnpm build` al cerrar cada subfase.
