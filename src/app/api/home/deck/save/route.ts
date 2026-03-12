@@ -3,8 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { ValidationError } from "@/core/errors/ValidationError";
 import { GameRuleError } from "@/core/errors/GameRuleError";
 import { createHomeRouteContext } from "@/app/api/home/internal/create-home-route-context";
+import { requireTrustedMutationOrigin } from "@/services/security/api/require-trusted-mutation-origin";
 
 export async function POST(request: NextRequest) {
+  const originGuard = requireTrustedMutationOrigin(request);
+  if (originGuard) return originGuard;
   try {
     const context = await createHomeRouteContext(request);
     const deck = await context.saveDeckUseCase.execute(context.playerId);

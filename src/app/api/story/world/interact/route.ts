@@ -10,6 +10,7 @@ import { getAuthenticatedUserId } from "@/services/auth/api/internal/get-authent
 import { findStoryVirtualNodeDefinition } from "@/services/story/map-definitions/story-map-definition-registry";
 import { applyStoryInteractionToCompactState } from "@/services/story/story-compact-state";
 import { createPlayerRouteRepositories } from "@/services/player-persistence/create-player-route-repositories";
+import { requireTrustedMutationOrigin } from "@/services/security/api/require-trusted-mutation-origin";
 
 interface IStoryWorldInteractPayload {
   nodeId: string;
@@ -27,6 +28,8 @@ function canInteractVirtualNode(input: {
 }
 
 export async function POST(request: NextRequest) {
+  const originGuard = requireTrustedMutationOrigin(request);
+  if (originGuard) return originGuard;
   try {
     const response = NextResponse.json({ ok: true }, { status: 200 });
     const repositories = await createPlayerRouteRepositories(request, response);

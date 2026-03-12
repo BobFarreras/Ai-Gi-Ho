@@ -10,6 +10,7 @@ import { getAuthenticatedUserId } from "@/services/auth/api/internal/get-authent
 import { createPlayerRouteRepositories } from "@/services/player-persistence/create-player-route-repositories";
 import { resolveStoryWorldMoveMode } from "@/services/story/resolve-story-world-move-mode";
 import { applyStoryMoveToCompactState } from "@/services/story/story-compact-state";
+import { requireTrustedMutationOrigin } from "@/services/security/api/require-trusted-mutation-origin";
 
 interface IStoryWorldMovePayload {
   nodeId: string;
@@ -20,6 +21,8 @@ function resolveEffectiveCurrentNodeId(currentNodeId: string | null): string {
 }
 
 export async function POST(request: NextRequest) {
+  const originGuard = requireTrustedMutationOrigin(request);
+  if (originGuard) return originGuard;
   try {
     const response = NextResponse.json({ ok: true }, { status: 200 });
     const repositories = await createPlayerRouteRepositories(request, response);

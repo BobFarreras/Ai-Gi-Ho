@@ -4,10 +4,13 @@ import { ValidationError } from "@/core/errors/ValidationError";
 import { SupabasePlayerStoryWorldRepository } from "@/infrastructure/persistence/supabase/SupabasePlayerStoryWorldRepository";
 import { getAuthenticatedUserId } from "@/services/auth/api/internal/get-authenticated-user-id";
 import { createPlayerRouteRepositories } from "@/services/player-persistence/create-player-route-repositories";
+import { requireTrustedMutationOrigin } from "@/services/security/api/require-trusted-mutation-origin";
 
 const STORY_DEFAULT_START_NODE_ID = "story-ch1-player-start";
 
 export async function POST(request: NextRequest) {
+  const originGuard = requireTrustedMutationOrigin(request);
+  if (originGuard) return originGuard;
   try {
     const response = NextResponse.json({ ok: true }, { status: 200 });
     const repositories = await createPlayerRouteRepositories(request, response);

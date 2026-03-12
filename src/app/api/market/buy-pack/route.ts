@@ -4,12 +4,15 @@ import { ValidationError } from "@/core/errors/ValidationError";
 import { GameRuleError } from "@/core/errors/GameRuleError";
 import { createMarketRouteContext } from "@/app/api/market/internal/create-market-route-context";
 import { IMarketRuntimeSnapshot } from "@/services/market/market-runtime-snapshot";
+import { requireTrustedMutationOrigin } from "@/services/security/api/require-trusted-mutation-origin";
 
 interface IBuyPackPayload {
   packId: string;
 }
 
 export async function POST(request: NextRequest) {
+  const originGuard = requireTrustedMutationOrigin(request);
+  if (originGuard) return originGuard;
   try {
     const payload = (await request.json()) as IBuyPackPayload;
     const context = await createMarketRouteContext(request);

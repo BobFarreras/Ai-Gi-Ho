@@ -3,12 +3,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { GameRuleError } from "@/core/errors/GameRuleError";
 import { ValidationError } from "@/core/errors/ValidationError";
 import { createHomeRouteContext } from "@/app/api/home/internal/create-home-route-context";
+import { requireTrustedMutationOrigin } from "@/services/security/api/require-trusted-mutation-origin";
 
 interface IRemoveFusionCardPayload {
   slotIndex: number;
 }
 
 export async function POST(request: NextRequest) {
+  const originGuard = requireTrustedMutationOrigin(request);
+  if (originGuard) return originGuard;
   try {
     const payload = (await request.json()) as IRemoveFusionCardPayload;
     const context = await createHomeRouteContext(request);

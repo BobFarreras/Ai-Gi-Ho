@@ -5,6 +5,7 @@ import { ApplyBattleCardExperienceUseCase } from "@/core/use-cases/progression/A
 import { ICardExperienceEvent } from "@/core/services/progression/card-experience-rules";
 import { getAuthenticatedUserId } from "@/services/auth/api/internal/get-authenticated-user-id";
 import { createPlayerRouteRepositories } from "@/services/player-persistence/create-player-route-repositories";
+import { requireTrustedMutationOrigin } from "@/services/security/api/require-trusted-mutation-origin";
 
 interface IApplyBattleCardExperiencePayload {
   battleId: string;
@@ -12,6 +13,8 @@ interface IApplyBattleCardExperiencePayload {
 }
 
 export async function POST(request: NextRequest) {
+  const originGuard = requireTrustedMutationOrigin(request);
+  if (originGuard) return originGuard;
   try {
     const response = NextResponse.json({ ok: true }, { status: 200 });
     const repositories = await createPlayerRouteRepositories(request, response);
