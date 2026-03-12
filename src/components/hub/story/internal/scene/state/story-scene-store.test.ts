@@ -11,7 +11,7 @@ function createNode(input: Partial<IStoryMapNodeRuntime> & { id: string }): ISto
     title: input.title ?? input.id,
     opponentName: input.opponentName ?? "CPU",
     nodeType: input.nodeType ?? "MOVE",
-    difficulty: input.difficulty ?? "NORMAL",
+    difficulty: input.difficulty ?? "STANDARD",
     rewardNexus: input.rewardNexus ?? 0,
     rewardPlayerExperience: input.rewardPlayerExperience ?? 0,
     isBossDuel: input.isBossDuel ?? false,
