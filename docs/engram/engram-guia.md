@@ -113,6 +113,7 @@ Skills disponibles para reforzar ejecución consistente:
 - `file-size-srp-enforcer`
 - `error-handling-contracts`
 - `combat-log-invariants`
+- `commenting-intent-enforcer`
 
 ## 11. Matriz de activación por intención
 Usar esta tabla como criterio operativo para elegir skills sin ambigüedad:
