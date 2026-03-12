@@ -14,20 +14,17 @@
 - Se extrajo guard reutilizable `assertMainPhaseActionAllowed` para centralizar precondiciones de `play-card*`.
 - Se dividió `effects/trap-triggers.integration.test.ts` en suites separadas de ataque y ejecución con fixtures compartidas.
 - Se introdujo `idFactory` opcional en `GameState` para generar IDs/timestamps deterministas en `play-card`, `combat-log`, fusión y revive.
+- Se dividió `combat/combat-and-phase.integration.test.ts` en suites de combate y transición de fase con fixtures compartidas.
+- Se reemplazaron cabeceras genéricas por descripciones específicas en módulos de `game-engine`.
 
 ## 3. Hallazgos priorizados
 
 ### Medio
 - Archivos de test de integración con alta densidad de escenarios:
   - `actions/play-and-execution.integration.test.ts` (~182 líneas).
-  - `combat/combat-and-phase.integration.test.ts` (~184 líneas).
   - Riesgo: mantenimiento costoso y diagnóstico lento cuando falla un bloque grande.
 
-### Bajo
-- Cabeceras con descripción genérica en algunos módulos (`Descripción breve del módulo`) reducen contexto rápido de PR.
-
 ## 4. Plan incremental recomendado (sin big-bang)
-1. Introducir fábrica de IDs inyectable para `instanceId` y `combatLog` (por defecto aleatoria, en tests determinista).
-2. Dividir tests de integración largos restantes en suites por comportamiento (turno, combate, transición de fase).
-3. Reemplazar cabeceras genéricas por descripciones de responsabilidad real en módulos de `state/` y `combat/internal`.
-4. Ejecutar `pnpm lint`, `pnpm test`, `pnpm build` al cerrar cada subfase.
+1. Dividir `actions/play-and-execution.integration.test.ts` en suites por intención (play, execution, mode change).
+2. Evaluar extracción de fixtures reutilizables para tests de `actions` y `effects` evitando duplicación de estado base.
+3. Ejecutar `pnpm lint`, `pnpm test`, `pnpm build` al cerrar cada subfase.

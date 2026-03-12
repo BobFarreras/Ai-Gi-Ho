@@ -1,4 +1,4 @@
-// src/core/use-cases/game-engine/fusion/fuse-cards.ts - Descripción breve del módulo.
+// src/core/use-cases/game-engine/fusion/fuse-cards.ts - Caso de uso principal para fusionar cartas desde mano con validaciones y logs.
 import { BattleMode } from "@/core/entities/IPlayer";
 import { applyFusionResult } from "@/core/use-cases/game-engine/fusion/internal/apply-fusion-result";
 import { appendFusionLogs } from "@/core/use-cases/game-engine/fusion/internal/append-fusion-logs";

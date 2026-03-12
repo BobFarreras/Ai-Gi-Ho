@@ -1,4 +1,4 @@
-// src/core/use-cases/game-engine/logging/combat-log.integration.test.ts - Descripción breve del módulo.
+// src/core/use-cases/game-engine/logging/combat-log.integration.test.ts - Verifica registro e integridad de eventos en combatLog durante acciones de juego.
 import { describe, expect, it } from "vitest";
 import { ICard } from "@/core/entities/ICard";
 import { GameEngine, GameState } from "@/core/use-cases/GameEngine";

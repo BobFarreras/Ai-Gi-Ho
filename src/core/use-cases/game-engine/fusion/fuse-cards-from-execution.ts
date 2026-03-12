@@ -1,4 +1,4 @@
-// src/core/use-cases/game-engine/fusion/fuse-cards-from-execution.ts - Descripción breve del módulo.
+// src/core/use-cases/game-engine/fusion/fuse-cards-from-execution.ts - Resuelve invocación de fusión disparada por una ejecución activa.
 import { IPlayer } from "@/core/entities/IPlayer";
 import { GameRuleError } from "@/core/errors/GameRuleError";
 import { NotFoundError } from "@/core/errors/NotFoundError";

@@ -1,4 +1,4 @@
-// src/core/use-cases/game-engine/fusion/fusion-selection-flow.integration.test.ts - Descripción breve del módulo.
+// src/core/use-cases/game-engine/fusion/fusion-selection-flow.integration.test.ts - Valida la selección de materiales de fusión como acción pendiente de turno.
 import { describe, expect, it } from "vitest";
 import { ICard } from "@/core/entities/ICard";
 import { IBoardEntity } from "@/core/entities/IPlayer";

@@ -1,4 +1,4 @@
-// src/core/use-cases/game-engine/fusion/fusion-from-execution.integration.test.ts - Descripción breve del módulo.
+// src/core/use-cases/game-engine/fusion/fusion-from-execution.integration.test.ts - Verifica el flujo de fusión activada desde ejecución y sus efectos en tablero/log.
 import { describe, expect, it } from "vitest";
 import { ICard } from "@/core/entities/ICard";
 import { GameEngine, GameState } from "@/core/use-cases/GameEngine";

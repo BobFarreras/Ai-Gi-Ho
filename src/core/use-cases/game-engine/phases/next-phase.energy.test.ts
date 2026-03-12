@@ -1,4 +1,4 @@
-// src/core/use-cases/game-engine/phases/next-phase.energy.test.ts - Descripción breve del módulo.
+// src/core/use-cases/game-engine/phases/next-phase.energy.test.ts - Pruebas de ganancia de energía y cambio de jugador al avanzar de fase.
 import { describe, expect, it } from "vitest";
 import { GameEngine, GameState } from "@/core/use-cases/GameEngine";
 
