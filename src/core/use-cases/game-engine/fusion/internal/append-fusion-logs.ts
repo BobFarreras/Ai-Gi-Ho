@@ -1,3 +1,4 @@
+// src/core/use-cases/game-engine/fusion/internal/append-fusion-logs.ts - Agrega eventos de combatLog asociados a materiales y resultado de fusión.
 import { appendCombatLogEvent } from "@/core/use-cases/game-engine/logging/combat-log";
 import { GameState } from "@/core/use-cases/game-engine/state/types";
 
@@ -25,3 +26,4 @@ export function appendFusionLogs(params: IAppendFusionLogsParams): GameState {
     mode: params.mode,
   });
 }
+

@@ -15,7 +15,6 @@ import { IMarketTransaction } from "@/core/entities/market/IMarketTransaction";
 interface MarketDesktopGridProps {
   selectedCard: ICard | null;
   selectedListing: IMarketCardListing | null;
-  isBuyingCard: boolean;
   listings: IMarketCardListing[];
   packs: IMarketPackDefinition[];
   selectedPackId: string | null;
@@ -39,7 +38,6 @@ export function MarketDesktopGrid(props: MarketDesktopGridProps) {
         <MarketCardInspector
           selectedCard={props.selectedCard}
           selectedListing={props.selectedListing}
-          isBuyingCard={props.isBuyingCard}
           onBuyCard={props.onBuyCard}
         />
       </div>
@@ -47,6 +45,7 @@ export function MarketDesktopGrid(props: MarketDesktopGridProps) {
       <div className="min-h-0 min-w-0 overflow-hidden rounded-xl border border-cyan-900/30 bg-black/40 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
         <MarketListingsPanel
           listings={props.listings}
+          isPerformanceMode={false}
           onSelectCard={(listing) => {
             play("DETAIL_OPEN");
             props.onSelectListing(listing);
@@ -69,6 +68,7 @@ export function MarketDesktopGrid(props: MarketDesktopGridProps) {
             collection={props.collection}
             transactions={props.transactions}
             catalogListings={props.catalogListings}
+            isPerformanceMode={false}
             onSelectCard={(card) => {
               play("DETAIL_OPEN");
               props.onSelectVaultCard(card);

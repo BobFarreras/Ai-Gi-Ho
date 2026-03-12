@@ -35,6 +35,7 @@
 * **Límite de líneas por archivo:** Máximo **150 líneas** para componentes, hooks, servicios y casos de uso.
 * **Excepciones permitidas (justificadas):** Archivos de tipos/entidades, archivos de configuración, y migraciones pueden superar el límite si existe justificación explícita en PR.
 * **Regla de extracción:** Si un archivo supera 150 líneas, se debe dividir en submódulos cohesivos en el mismo commit.
+* **Regla de subcomponentes/subhooks:** Si un componente crece en complejidad visual o de estado, se deben extraer subcomponentes, hooks y utilidades en subcarpetas (`internal/actions`, `internal/hooks`, `internal/view`, `internal/types`) para mantener lectura rápida y trazabilidad.
 * **Una responsabilidad por módulo:** Cada archivo debe tener un único motivo de cambio (SRP estricto).
 
 ## 9. Separación de Responsabilidades (UI, Application, Domain, Infra)
@@ -84,3 +85,27 @@
   * `css`: `/* src/ruta/archivo.css - Descripción breve. */`
 * **Objetivo:** Mejorar trazabilidad, lectura rápida en PR y contexto inmediato al abrir archivos.
 * **Gate de calidad:** Un archivo sin cabecera de ruta y descripción se considera incumplimiento de documentación y no debe mergearse.
+
+## 15. Comentarios y JSDoc de intención (Mandatory)
+* **Comentarios de intención obligatorios:** Toda función, hook o variable no trivial debe tener comentario breve en español explicando el propósito (no describir línea por línea).
+* **JSDoc en contratos clave:** Funciones públicas, utilidades compartidas y hooks reutilizables deben incluir JSDoc corto con entrada/salida o efecto.
+* **Prohibido comentario redundante:** No se aceptan comentarios obvios (ej. "incrementa contador"); el comentario debe aportar contexto de diseño o decisión.
+* **Objetivo:** Facilitar mantenimiento, onboarding y auditoría técnica sin abrir múltiples archivos para entender el flujo.
+
+## 16. Memoria Persistente con Engram (Mandatory)
+* **Uso obligatorio en tareas con historial:** Antes de refactors, bugfixes o cambios de arquitectura, consultar memoria con `mem_search` o `engram search`.
+* **Guardado obligatorio de hitos:** Tras decisiones técnicas, descubrimientos o fixes validados, registrar memoria con `mem_save` (o `engram save`).
+* **Cierre de sesión obligatorio:** Antes de terminar una sesión, guardar resumen estructurado con `mem_session_summary` (objetivo, hallazgos, cambios, archivos).
+* **Recuperación tras compaction:** Después de pérdida de contexto o compaction, ejecutar `mem_context` (o `engram context`) antes de continuar.
+* **Convención de topic_key:** Usar claves estables por dominio (`architecture/*`, `bug/*`, `decision/*`, `pattern/*`, `config/*`, `discovery/*`).
+
+## 17. Skills del Proyecto y Activación (Mandatory)
+* **Ubicación oficial:** Todas las skills del proyecto viven en `skills/<skill-name>/SKILL.md`.
+* **Formato obligatorio:** Cada skill debe incluir frontmatter YAML con `name` y `description`, además de instrucciones en español.
+* **Activación por intención:** Si la tarea implica memoria, arquitectura, testing o mejora de mantenibilidad documental/comentarios, activar respectivamente:
+  * `skills/engram-memory-protocol/SKILL.md`
+  * `skills/architecture-decision/SKILL.md`
+  * `skills/testing-enforcement/SKILL.md`
+  * `skills/commenting-intent-enforcer/SKILL.md`
+* **Sin bypass de quality gates:** Las skills no pueden relajar normas de SRP, TDD, tipado estricto ni checks de `lint`, `test`, `build`.
+* **Evidencia en PR:** Cualquier cambio relevante debe reflejar qué skill fue aplicada y qué decisión técnica resultó.

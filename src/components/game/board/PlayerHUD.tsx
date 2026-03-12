@@ -25,6 +25,10 @@ interface PlayerHUDProps {
   dialogueMessage?: string | null;
   phase?: string;
   onAdvancePhase?: () => void;
+  containerClassName?: string;
+  containerStyle?: React.CSSProperties;
+  showPhaseControls?: boolean;
+  showEnergy?: boolean;
 }
 
 export function PlayerHUD({
@@ -42,6 +46,10 @@ export function PlayerHUD({
   dialogueMessage = null,
   phase = "MAIN_1",
   onAdvancePhase,
+  containerClassName,
+  containerStyle,
+  showPhaseControls = true,
+  showEnergy = true,
 }: PlayerHUDProps) {
   const { damageTaken, healGained, isShaking } = useHudFeedback(
     wasDamagedThisAction,
@@ -66,16 +74,25 @@ export function PlayerHUD({
         y: 0 
       }}
       transition={{ type: "spring", stiffness: 200, damping: 20 }}
+      style={containerStyle}
       className={cn(
-        "absolute z-[100] flex w-[420px] h-[140px] transition-all duration-300 pointer-events-none",
-        isOpponent ? "top-0 right-0 justify-start" : "bottom-0 left-0 justify-end"
+        "absolute z-[100] flex w-[clamp(18rem,30vw,26.25rem)] h-[clamp(6.9rem,12vh,9.5rem)] transition-all duration-300 pointer-events-none",
+        isOpponent ? "top-0 right-0 justify-start" : "bottom-0 left-0 justify-end",
+        containerClassName,
       )}
     >
       <HudFloatingDelta value={damageTaken} sign="-" isOpponent={isOpponent} color="red" />
       <HudFloatingDelta value={healGained} sign="+" isOpponent={isOpponent} color="blue" />
       <HudDialogueBubble isOpponent={isOpponent} message={dialogueMessage} />
-      <HudPortraitCard isOpponent={isOpponent} player={player} isActiveTurn={isActiveTurn} avatarUrl={avatarUrl} badgeText={badgeText} />
-      <HudPhaseControls phase={phase} isVisible={!isOpponent && isActiveTurn} onAdvancePhase={onAdvancePhase} />
+      <HudPortraitCard
+        isOpponent={isOpponent}
+        player={player}
+        isActiveTurn={isActiveTurn}
+        avatarUrl={avatarUrl}
+        badgeText={badgeText}
+        showEnergy={showEnergy}
+      />
+      <HudPhaseControls phase={phase} isVisible={showPhaseControls && !isOpponent && isActiveTurn} onAdvancePhase={onAdvancePhase} />
     </motion.div>
   );
 }

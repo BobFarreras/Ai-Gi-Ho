@@ -27,7 +27,7 @@ export function CinematicNarrationOverlay({ action, playerId, playerAvatarUrl, o
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 96, transition: { duration: 0.58 } }}
             transition={{ type: "spring", stiffness: 200, damping: 22 }}
-            className={`pointer-events-none absolute z-[176] ${isPlayerActor ? "bottom-24 left-6" : "top-14 right-6"}`}
+            className={`pointer-events-none absolute z-[650] ${isPlayerActor ? "bottom-24 left-6" : "top-14 right-6"}`}
           >
             <div className={`flex max-w-[min(88vw,620px)] items-center gap-3 ${isPlayerActor ? "flex-row" : "flex-row-reverse"}`}>
               <motion.div
@@ -38,7 +38,7 @@ export function CinematicNarrationOverlay({ action, playerId, playerAvatarUrl, o
                 className="relative h-[170px] w-[170px] shrink-0 overflow-visible bg-transparent"
               >
                 {avatarUrl ? (
-                  <Image src={avatarUrl} alt="Retrato de duelista" fill sizes="170px" className="object-contain drop-shadow-[0_0_24px_rgba(34,211,238,0.45)]" />
+                  <Image src={avatarUrl} alt="Retrato de duelista" fill sizes="170px" priority className="object-contain drop-shadow-[0_0_24px_rgba(34,211,238,0.45)]" />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-sm font-black uppercase tracking-[0.15em] text-cyan-100">{isPlayerActor ? "YOU" : "CPU"}</div>
                 )}

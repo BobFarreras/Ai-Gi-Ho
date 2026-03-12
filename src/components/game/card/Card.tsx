@@ -15,6 +15,10 @@ interface CardProps {
   disableHoverEffects?: boolean;
   clipToFrameShape?: boolean;
   disableDefaultShadow?: boolean;
+  disableHologram?: boolean;
+  hologramMode?: "full" | "lite";
+  isPerformanceMode?: boolean;
+  showBackgroundInPerformanceMode?: boolean;
   versionTier?: number;
   level?: number;
   xp?: number;
@@ -33,6 +37,10 @@ export function Card({
   disableHoverEffects = false,
   clipToFrameShape = false,
   disableDefaultShadow = false,
+  disableHologram = false,
+  hologramMode = "full",
+  isPerformanceMode = false,
+  showBackgroundInPerformanceMode = false,
   versionTier,
   level,
   xp,
@@ -40,7 +48,7 @@ export function Card({
 }: CardProps) {
   const isOnBoard = isBoardMode(boardMode);
   const isDefense = boardMode === "DEFENSE";
-  const shouldRenderHologram = isOnBoard && boardMode !== "SET";
+  const shouldRenderHologram = isOnBoard && boardMode !== "SET" && !disableHologram;
   const resolvedVersionTier = versionTier ?? card.versionTier ?? 0;
   const resolvedLevel = level ?? card.level ?? 0;
   const resolvedXp = xp ?? card.xp ?? 0;
@@ -56,13 +64,15 @@ export function Card({
         isOnBoard={isOnBoard}
         disableHoverEffects={disableHoverEffects}
         disableDefaultShadow={disableDefaultShadow}
+        isPerformanceMode={isPerformanceMode}
+        showBackgroundInPerformanceMode={showBackgroundInPerformanceMode}
         onClick={onClick}
         versionTier={resolvedVersionTier}
         level={resolvedLevel}
         xp={resolvedXp}
         masteryPassiveLabel={resolvedMasteryPassiveLabel}
       />
-      {shouldRenderHologram && <CardHologram card={card} isDefense={isDefense} />}
+      {shouldRenderHologram && <CardHologram card={card} isDefense={isDefense} mode={hologramMode} />}
     </div>
   );
 }

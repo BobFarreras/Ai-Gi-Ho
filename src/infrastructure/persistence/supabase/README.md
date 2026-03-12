@@ -20,9 +20,12 @@ Esta carpeta contendrá implementaciones concretas de repositorios de `core/repo
    - `create-supabase-opponent-repository.ts`
    - `SupabasePlayerStoryDuelProgressRepository`
    - `create-supabase-player-story-duel-progress-repository.ts`
+   - `SupabasePlayerStoryWorldRepository`
+   - `create-supabase-player-story-world-repository.ts`
 
 ## Reglas
 
 1. No exportar objetos de SDK al dominio.
 2. Mapear DTO de Supabase a entidades de `core/entities`.
 3. Gestionar errores de proveedor y traducirlos a errores de aplicación.
+

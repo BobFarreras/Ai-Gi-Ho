@@ -1,5 +1,6 @@
 // src/components/game/board/hooks/useBoard.turn-guard.integration.test.ts - Valida avisos de ayuda de fase y opción persistente para no volver a mostrar.
 import { act, renderHook } from "@testing-library/react";
+import { beforeEach, describe, expect, it } from "vitest";
 import { ICard } from "@/core/entities/ICard";
 import { useBoard } from "./useBoard";
 

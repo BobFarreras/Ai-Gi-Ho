@@ -1,7 +1,7 @@
 // src/components/hub/market/layout/MarketMobileStack.tsx - Layout móvil del mercado con paneles conmutables por pestañas.
 "use client";
 
-import { useMemo, useState, type PointerEvent } from "react";
+import { startTransition, useMemo, useState } from "react";
 import { MarketCardInspector } from "@/components/hub/market/MarketCardInspector";
 import { MobileInspectorDialogShell } from "@/components/hub/internal/MobileInspectorDialogShell";
 import { MarketListingsPanel } from "@/components/hub/market/listings/MarketListingsPanel";
@@ -20,7 +20,6 @@ type MobilePanel = "LISTINGS" | "PACKS" | "VAULT";
 interface MarketMobileStackProps {
   selectedCard: ICard | null;
   selectedListing: IMarketCardListing | null;
-  isBuyingCard: boolean;
   listings: IMarketCardListing[];
   packs: IMarketPackDefinition[];
   selectedPackId: string | null;
@@ -44,8 +43,13 @@ const PANEL_TABS: Array<{ id: MobilePanel; label: string }> = [
 
 export function MarketMobileStack(props: MarketMobileStackProps) {
   const [activePanel, setActivePanel] = useState<MobilePanel>("LISTINGS");
+  const [visitedPanels, setVisitedPanels] = useState<Record<MobilePanel, boolean>>({
+    LISTINGS: true,
+    PACKS: false,
+    VAULT: false,
+  });
   const [isInspectorOpen, setIsInspectorOpen] = useState(false);
-  const [inspectorOrigin, setInspectorOrigin] = useState({ x: 0, y: 0 });
+  const inspectorOrigin = { x: 0, y: 0 };
   const { play } = useHubModuleSfx();
   const packListings = useMemo(() => {
     if (!props.selectedPackId) return [];
@@ -55,23 +59,23 @@ export function MarketMobileStack(props: MarketMobileStackProps) {
     return props.catalogListings.filter((listing) => packCardIds.has(listing.card.id));
   }, [props.catalogListings, props.packs, props.selectedPackId]);
 
-  const capturePointerOrigin = (event: PointerEvent<HTMLDivElement>) => {
-    setInspectorOrigin({ x: event.clientX, y: event.clientY });
-  };
-
   const handleSelectListing = (listing: IMarketCardListing) => {
-    play("DETAIL_OPEN");
     props.onSelectListing(listing);
     setIsInspectorOpen(true);
+    window.requestAnimationFrame(() => play("DETAIL_OPEN"));
   };
   const handleSelectVaultCard = (card: ICard) => {
-    play("DETAIL_OPEN");
     props.onSelectVaultCard(card);
     setIsInspectorOpen(true);
+    window.requestAnimationFrame(() => play("DETAIL_OPEN"));
+  };
+
+  const markPanelAsVisited = (panel: MobilePanel) => {
+    setVisitedPanels((previous) => (previous[panel] ? previous : { ...previous, [panel]: true }));
   };
 
   return (
-    <div className="mt-4 flex min-h-0 flex-1 flex-col gap-3 xl:hidden" onPointerDownCapture={capturePointerOrigin}>
+    <div className="mt-4 flex min-h-0 flex-1 flex-col gap-3 xl:hidden">
       <nav aria-label="Paneles del mercado" className="home-modern-scroll flex gap-2 overflow-x-auto pb-1">
         {PANEL_TABS.map((tab) => (
           <button
@@ -81,7 +85,12 @@ export function MarketMobileStack(props: MarketMobileStackProps) {
             onClick={() => {
               if (activePanel !== tab.id) play("SECTION_SWITCH");
               setActivePanel(tab.id);
-              if (tab.id === "LISTINGS") props.onShowFreeListings();
+              markPanelAsVisited(tab.id);
+              if (tab.id === "LISTINGS") {
+                startTransition(() => {
+                  props.onShowFreeListings();
+                });
+              }
             }}
             className={cn(
               "shrink-0 rounded-lg border px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] transition-all",
@@ -96,31 +105,41 @@ export function MarketMobileStack(props: MarketMobileStackProps) {
       </nav>
 
       <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-cyan-900/30 bg-black/40 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
-        {activePanel === "LISTINGS" ? <MarketListingsPanel listings={props.listings} onSelectCard={handleSelectListing} /> : null}
-        {activePanel === "PACKS" ? (
-          <MarketMobilePacksSection
-            packs={props.packs}
-            selectedPackId={props.selectedPackId}
-            packListings={packListings}
-            isBuyingPack={props.isBuyingPack}
-            onSelectPack={props.onSelectPack}
-            onBuyPack={props.onBuyPack}
-            onSelectPackCard={handleSelectListing}
-          />
+        {visitedPanels.LISTINGS ? (
+          <div className={activePanel === "LISTINGS" ? "h-full" : "hidden"}>
+            <MarketListingsPanel listings={props.listings} isPerformanceMode={true} onSelectCard={handleSelectListing} />
+          </div>
         ) : null}
-        {activePanel === "VAULT" ? (
-          <MarketVaultPanel
-            collection={props.collection}
-            transactions={props.transactions}
-            catalogListings={props.catalogListings}
-            onSelectCard={handleSelectVaultCard}
-          />
+        {visitedPanels.PACKS ? (
+          <div className={activePanel === "PACKS" ? "h-full" : "hidden"}>
+            <MarketMobilePacksSection
+              packs={props.packs}
+              selectedPackId={props.selectedPackId}
+              packListings={packListings}
+              isBuyingPack={props.isBuyingPack}
+              onSelectPack={props.onSelectPack}
+              onBuyPack={props.onBuyPack}
+              onSelectPackCard={handleSelectListing}
+            />
+          </div>
+        ) : null}
+        {visitedPanels.VAULT ? (
+          <div className={activePanel === "VAULT" ? "h-full" : "hidden"}>
+            <MarketVaultPanel
+              collection={props.collection}
+              transactions={props.transactions}
+              catalogListings={props.catalogListings}
+              isPerformanceMode={true}
+              onSelectCard={handleSelectVaultCard}
+            />
+          </div>
         ) : null}
       </div>
 
       <MobileInspectorDialogShell
         isOpen={isInspectorOpen}
         origin={inspectorOrigin}
+        disableMotion
         onClose={() => setIsInspectorOpen(false)}
         onRequestClose={(source) => {
           if (source === "button") play("DIALOG_CLOSE");
@@ -132,7 +151,7 @@ export function MarketMobileStack(props: MarketMobileStackProps) {
         <MarketCardInspector
           selectedCard={props.selectedCard}
           selectedListing={props.selectedListing}
-          isBuyingCard={props.isBuyingCard}
+          isCompactMode
           onBuyCard={props.onBuyCard}
         />
       </MobileInspectorDialogShell>

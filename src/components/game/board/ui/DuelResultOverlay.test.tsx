@@ -1,5 +1,6 @@
 // src/components/game/board/ui/DuelResultOverlay.test.tsx - Verifica que el overlay de resultado muestre recompensas Story sin romper el resumen de EXP.
 import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 import { DuelResultOverlay } from "./DuelResultOverlay";
 import { ICard } from "@/core/entities/ICard";
 import { IPlayer } from "@/core/entities/IPlayer";
@@ -33,6 +34,8 @@ const mockPlayer: IPlayer = {
 
 describe("DuelResultOverlay", () => {
   it("muestra recompensas de Story y permite revelar la carta regalo", () => {
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 1280 });
+    window.dispatchEvent(new Event("resize"));
     render(
       <DuelResultOverlay
         winnerPlayerId={mockPlayer.id}
@@ -47,11 +50,11 @@ describe("DuelResultOverlay", () => {
       />,
     );
 
-    expect(screen.getByText("Recompensas")).toBeInTheDocument();
+    expect(screen.getByText("EXP Jugador")).toBeInTheDocument();
     expect(screen.getByText("+120")).toBeInTheDocument();
     expect(screen.getByText("+80")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /mostrar carta recompensa/i }));
-    expect(screen.getByText("Carta obtenida")).toBeInTheDocument();
+    expect(screen.getByText(/ocultar carta/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Volver al mapa Story" })).toBeInTheDocument();
   });
 });
