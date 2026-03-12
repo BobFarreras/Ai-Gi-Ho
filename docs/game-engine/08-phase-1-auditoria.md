@@ -21,13 +21,13 @@
 - Se consolidaron validaciones repetidas de turno/fase para flujos de fusión y se simplificó `resolve-pending-turn-action` mediante resolvers internos por tipo.
 - Se unificó la construcción de `pendingTurnAction` con fábrica dedicada para descartar, seleccionar materiales y selección de cementerio.
 - Se añadieron pruebas negativas de límites de fase/turno para `start-fusion-summon` y `start-fusion-summon-from-execution`.
+- Se extrajeron handlers internos de acciones especiales en `resolve-execution` para reducir branching y centralizar la orquestación.
 
 ## 3. Hallazgos priorizados
 
 ### Medio
-- Aún hay oportunidad de aplicar la misma estrategia de extracción por resolvers en otros casos de uso largos (`resolve-execution`).
+- Existe duplicación residual de fixtures entre suites de `combat`, `fusion` y `effects`.
 
 ## 4. Plan incremental recomendado (sin big-bang)
-1. Evaluar extracción por estrategia en `resolve-execution` para reducir branching y orquestación en un único módulo.
-2. Consolidar factories de test entre `combat`, `fusion` y `effects` para evitar duplicación residual.
-3. Ejecutar `pnpm lint`, `pnpm test`, `pnpm build` al cerrar cada subfase.
+1. Consolidar factories de test entre `combat`, `fusion` y `effects` para evitar duplicación residual.
+2. Ejecutar `pnpm lint`, `pnpm test`, `pnpm build` al cerrar cada subfase.
