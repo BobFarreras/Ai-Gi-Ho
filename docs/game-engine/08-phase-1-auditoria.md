@@ -26,12 +26,14 @@
 - Se extendió `test-support/state-fixtures.ts` con fábrica de `IBoardEntity` y se migraron suites con estado inline residual (`mastery-passives`, `next-phase.mastery-energy`, `trap-triggers.*`, `resolve-execution.fusion-waiting`, `play-card-with-zone-replacement`).
 - Se cerró la migración pendiente en `fusion/*` con `fusion/fusion-test-fixtures.ts`, eliminando estados inline residuales del subdominio.
 - Se extrajeron utilidades de buff de ejecución a `actions/internal/execution-effect-buffs.ts` para bajar complejidad de `execution-effects.ts` y reforzar SRP.
+- Se refactorizó `fusion/fuse-cards-from-execution.ts` delegando validación de materiales, aplicación de resultado y logging en módulos internos (`validate-materials-against-recipe`, `apply-fusion-from-execution-result`, `append-fusion-from-execution-logs`).
+- Se refactorizó `actions/play-card.ts` extrayendo resolución de modo/validaciones y actualización de estado a `actions/internal/play-card-resolution.ts`.
 
 ## 3. Hallazgos priorizados
 
 ### Medio
-- Quedan casos de uso productivos cercanos al umbral de tamaño (ej. `play-card.ts`, `fuse-cards-from-execution.ts`) que pueden beneficiarse de extracción incremental adicional.
+- Quedan oportunidades menores de homogeneización entre flujos de fusión manual y desde ejecución para compartir aún más helpers internos.
 
 ## 4. Plan incremental recomendado (sin big-bang)
-1. Aplicar una extracción SRP incremental en `play-card.ts` o `fuse-cards-from-execution.ts` para reducir branching y mantener legibilidad.
+1. Evaluar convergencia parcial entre `fuse-cards.ts` y `fuse-cards-from-execution.ts` para reutilizar pipeline interno sin mezclar contextos de negocio.
 2. Ejecutar `pnpm lint`, `pnpm test`, `pnpm build` al cerrar cada subfase.
