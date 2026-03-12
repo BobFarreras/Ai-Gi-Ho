@@ -18,13 +18,7 @@ import { applyStoryMoveToCompactState } from "@/services/story/story-compact-sta
 import { getAuthenticatedUserId } from "@/services/auth/api/internal/get-authenticated-user-id";
 import { createPlayerRouteRepositories } from "@/services/player-persistence/create-player-route-repositories";
 import { requireTrustedMutationOrigin } from "@/services/security/api/require-trusted-mutation-origin";
-
-interface ICompleteStoryDuelPayload {
-  chapter?: unknown;
-  duelIndex?: unknown;
-  didWin?: unknown;
-  outcome?: unknown;
-}
+import { readJsonObjectBody } from "@/services/security/api/request-body-parser";
 
 function buildRewardCardsPayload(cardsById: Map<string, ICard>, rewardCardIds: string[]): ICard[] {
   return rewardCardIds.flatMap((cardId) => {
@@ -89,7 +83,7 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({ ok: true }, { status: 200 });
     const repositories = await createPlayerRouteRepositories(request, response);
     const playerId = await getAuthenticatedUserId(repositories.client);
-    const payload = (await request.json()) as ICompleteStoryDuelPayload;
+    const payload = await readJsonObjectBody(request, "Payload inválido para cierre de duelo Story.");
     const input = resolveStoryDuelCompletionInput(payload);
     if (!input) throw new ValidationError("El resultado del duelo Story es inválido.");
     const didWin = didWinFromStoryOutcome(input.outcome);

@@ -4,22 +4,24 @@ import { GameRuleError } from "@/core/errors/GameRuleError";
 import { ValidationError } from "@/core/errors/ValidationError";
 import { createHomeRouteContext } from "@/app/api/home/internal/create-home-route-context";
 import { requireTrustedMutationOrigin } from "@/services/security/api/require-trusted-mutation-origin";
-
-interface IAddFusionCardPayload {
-  cardId: string;
-  slotIndex: number;
-}
+import {
+  readJsonObjectBody,
+  readRequiredIntegerField,
+  readRequiredStringField,
+} from "@/services/security/api/request-body-parser";
 
 export async function POST(request: NextRequest) {
   const originGuard = requireTrustedMutationOrigin(request);
   if (originGuard) return originGuard;
   try {
-    const payload = (await request.json()) as IAddFusionCardPayload;
+    const payload = await readJsonObjectBody(request, "Payload inválido para añadir carta de fusión.");
+    const cardId = readRequiredStringField(payload, "cardId", "El identificador de carta es obligatorio.");
+    const slotIndex = readRequiredIntegerField(payload, "slotIndex", "El slotIndex debe ser un entero válido.");
     const context = await createHomeRouteContext(request);
     const deck = await context.addFusionCardUseCase.execute({
       playerId: context.playerId,
-      cardId: payload.cardId,
-      slotIndex: payload.slotIndex,
+      cardId,
+      slotIndex,
     });
     return NextResponse.json(deck, { status: 200, headers: context.response.headers });
   } catch (error) {

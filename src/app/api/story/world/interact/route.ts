@@ -11,10 +11,7 @@ import { findStoryVirtualNodeDefinition } from "@/services/story/map-definitions
 import { applyStoryInteractionToCompactState } from "@/services/story/story-compact-state";
 import { createPlayerRouteRepositories } from "@/services/player-persistence/create-player-route-repositories";
 import { requireTrustedMutationOrigin } from "@/services/security/api/require-trusted-mutation-origin";
-
-interface IStoryWorldInteractPayload {
-  nodeId: string;
-}
+import { readJsonObjectBody, readRequiredStringField } from "@/services/security/api/request-body-parser";
 
 function canInteractVirtualNode(input: {
   requiredNodeId: string | null;
@@ -34,12 +31,10 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({ ok: true }, { status: 200 });
     const repositories = await createPlayerRouteRepositories(request, response);
     const playerId = await getAuthenticatedUserId(repositories.client);
-    const payload = (await request.json()) as IStoryWorldInteractPayload;
-    if (!payload.nodeId || typeof payload.nodeId !== "string") {
-      throw new ValidationError("Nodo de interacción inválido.");
-    }
-    assertValidStoryNodeId(payload.nodeId);
-    const virtualNode = findStoryVirtualNodeDefinition(payload.nodeId);
+    const payload = await readJsonObjectBody(request, "Payload inválido para interacción Story.");
+    const nodeId = readRequiredStringField(payload, "nodeId", "Nodo de interacción inválido.");
+    assertValidStoryNodeId(nodeId);
+    const virtualNode = findStoryVirtualNodeDefinition(nodeId);
     if (!virtualNode) throw new ValidationError("Solo se permiten nodos virtuales de interacción Story.");
 
     const opponentRepository = new SupabaseOpponentRepository(repositories.client);

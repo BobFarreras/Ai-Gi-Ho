@@ -6,11 +6,11 @@ import { ICardExperienceEvent } from "@/core/services/progression/card-experienc
 import { getAuthenticatedUserId } from "@/services/auth/api/internal/get-authenticated-user-id";
 import { createPlayerRouteRepositories } from "@/services/player-persistence/create-player-route-repositories";
 import { requireTrustedMutationOrigin } from "@/services/security/api/require-trusted-mutation-origin";
-
-interface IApplyBattleCardExperiencePayload {
-  battleId: string;
-  events: ICardExperienceEvent[];
-}
+import {
+  readJsonObjectBody,
+  readRequiredArrayField,
+  readRequiredStringField,
+} from "@/services/security/api/request-body-parser";
 
 export async function POST(request: NextRequest) {
   const originGuard = requireTrustedMutationOrigin(request);
@@ -19,22 +19,26 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({ ok: true }, { status: 200 });
     const repositories = await createPlayerRouteRepositories(request, response);
     const playerId = await getAuthenticatedUserId(repositories.client);
-    const payload = (await request.json()) as IApplyBattleCardExperiencePayload;
-    if (!payload.battleId?.trim()) throw new ValidationError("El battleId es obligatorio para idempotencia de experiencia.");
-    if (!Array.isArray(payload.events)) throw new ValidationError("El listado de eventos de experiencia es obligatorio.");
+    const payload = await readJsonObjectBody(request, "Payload inválido para guardar experiencia de batalla.");
+    const battleId = readRequiredStringField(payload, "battleId", "El battleId es obligatorio para idempotencia de experiencia.");
+    const events = readRequiredArrayField<ICardExperienceEvent>(
+      payload,
+      "events",
+      "El listado de eventos de experiencia es obligatorio.",
+    );
     let reservedBatch = true;
     try {
       reservedBatch = await repositories.playerBattleExperienceBatchRepository.tryReserveBatch(
         playerId,
-        payload.battleId,
-        payload.events.length,
+        battleId,
+        events.length,
       );
     } catch {
       reservedBatch = true;
     }
     if (!reservedBatch) return NextResponse.json([], { status: 200, headers: response.headers });
     const useCase = new ApplyBattleCardExperienceUseCase(repositories.playerCardProgressRepository);
-    const result = await useCase.execute({ playerId, events: payload.events });
+    const result = await useCase.execute({ playerId, events });
     return NextResponse.json(result, { status: 200, headers: response.headers });
   } catch (error) {
     if (error instanceof ValidationError) {

@@ -11,10 +11,7 @@ import { createPlayerRouteRepositories } from "@/services/player-persistence/cre
 import { resolveStoryWorldMoveMode } from "@/services/story/resolve-story-world-move-mode";
 import { applyStoryMoveToCompactState } from "@/services/story/story-compact-state";
 import { requireTrustedMutationOrigin } from "@/services/security/api/require-trusted-mutation-origin";
-
-interface IStoryWorldMovePayload {
-  nodeId: string;
-}
+import { readJsonObjectBody, readRequiredStringField } from "@/services/security/api/request-body-parser";
 
 function resolveEffectiveCurrentNodeId(currentNodeId: string | null): string {
   return currentNodeId ?? "story-ch1-player-start";
@@ -27,11 +24,9 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({ ok: true }, { status: 200 });
     const repositories = await createPlayerRouteRepositories(request, response);
     const playerId = await getAuthenticatedUserId(repositories.client);
-    const payload = (await request.json()) as IStoryWorldMovePayload;
-    if (!payload.nodeId || typeof payload.nodeId !== "string") {
-      throw new ValidationError("Nodo destino inválido.");
-    }
-    assertValidStoryNodeId(payload.nodeId);
+    const payload = await readJsonObjectBody(request, "Payload inválido para movimiento Story.");
+    const nodeId = readRequiredStringField(payload, "nodeId", "Nodo destino inválido.");
+    assertValidStoryNodeId(nodeId);
     const opponentRepository = new SupabaseOpponentRepository(repositories.client);
     const duelProgressRepository = new SupabasePlayerStoryDuelProgressRepository(repositories.client);
     const worldRepository = new SupabasePlayerStoryWorldRepository(repositories.client);
@@ -39,7 +34,7 @@ export async function POST(request: NextRequest) {
     const worldState = await worldStateUseCase.execute({ playerId });
     const compactState = await worldRepository.getCompactStateByPlayerId(playerId);
     const effectiveCurrentNodeId = resolveEffectiveCurrentNodeId(compactState.currentNodeId);
-    if (payload.nodeId === effectiveCurrentNodeId) {
+    if (nodeId === effectiveCurrentNodeId) {
       return NextResponse.json(
         {
           currentNodeId: effectiveCurrentNodeId,
@@ -48,7 +43,7 @@ export async function POST(request: NextRequest) {
       );
     }
     const moveMode = resolveStoryWorldMoveMode({
-      targetNodeId: payload.nodeId,
+      targetNodeId: nodeId,
       currentNodeId: effectiveCurrentNodeId,
       visitedNodeIds: compactState.visitedNodeIds,
       completedNodeIds: worldState.progress.completedNodeIds,
@@ -60,7 +55,7 @@ export async function POST(request: NextRequest) {
     const nextCompactState = applyStoryMoveToCompactState({
       state: compactState,
       fromNodeId: effectiveCurrentNodeId,
-      targetNodeId: payload.nodeId,
+      targetNodeId: nodeId,
     });
     await worldRepository.saveCompactStateByPlayerId(playerId, nextCompactState);
     return NextResponse.json(

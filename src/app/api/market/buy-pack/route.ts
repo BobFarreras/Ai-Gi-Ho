@@ -5,18 +5,16 @@ import { GameRuleError } from "@/core/errors/GameRuleError";
 import { createMarketRouteContext } from "@/app/api/market/internal/create-market-route-context";
 import { IMarketRuntimeSnapshot } from "@/services/market/market-runtime-snapshot";
 import { requireTrustedMutationOrigin } from "@/services/security/api/require-trusted-mutation-origin";
-
-interface IBuyPackPayload {
-  packId: string;
-}
+import { readJsonObjectBody, readRequiredStringField } from "@/services/security/api/request-body-parser";
 
 export async function POST(request: NextRequest) {
   const originGuard = requireTrustedMutationOrigin(request);
   if (originGuard) return originGuard;
   try {
-    const payload = (await request.json()) as IBuyPackPayload;
+    const payload = await readJsonObjectBody(request, "Payload inválido para compra de sobre.");
+    const packId = readRequiredStringField(payload, "packId", "El packId es obligatorio.");
     const context = await createMarketRouteContext(request);
-    const openedCardIds = await context.buyPackUseCase.execute({ playerId: context.playerId, packId: payload.packId });
+    const openedCardIds = await context.buyPackUseCase.execute({ playerId: context.playerId, packId });
     const [catalog, transactions, collection] = await Promise.all([
       context.getCatalogUseCase.execute(context.playerId),
       context.getTransactionsUseCase.execute(context.playerId),
