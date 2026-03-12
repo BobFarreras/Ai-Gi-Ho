@@ -1,6 +1,7 @@
 // src/core/use-cases/game-engine/effects/trap-triggers.attack.integration.test.ts - Pruebas de trampas disparadas por ataques y su resolución final.
 import { describe, expect, it } from "vitest";
 import { GameEngine, GameState } from "@/core/use-cases/GameEngine";
+import { createTestBoardEntity } from "@/core/use-cases/game-engine/test-support/state-fixtures";
 import {
   attackerCard,
   createTrapBaseState,
@@ -17,7 +18,7 @@ describe("Trap triggers on attack", () => {
       ...base,
       playerA: {
         ...base.playerA,
-        activeEntities: [{ instanceId: "a1", card: attackerCard, mode: "ATTACK", hasAttackedThisTurn: false, isNewlySummoned: false }],
+        activeEntities: [createTestBoardEntity("a1", attackerCard, "ATTACK")],
       },
       playerB: {
         ...base.playerB,
@@ -38,7 +39,7 @@ describe("Trap triggers on attack", () => {
       ...base,
       playerA: {
         ...base.playerA,
-        activeEntities: [{ instanceId: "a-neg", card: attackerCard, mode: "ATTACK", hasAttackedThisTurn: false, isNewlySummoned: false }],
+        activeEntities: [createTestBoardEntity("a-neg", attackerCard, "ATTACK")],
       },
       playerB: {
         ...base.playerB,
@@ -60,7 +61,7 @@ describe("Trap triggers on attack", () => {
       ...base,
       playerA: {
         ...base.playerA,
-        activeEntities: [{ instanceId: "a-counter", card: attackerCard, mode: "ATTACK", hasAttackedThisTurn: false, isNewlySummoned: false }],
+        activeEntities: [createTestBoardEntity("a-counter", attackerCard, "ATTACK")],
         activeExecutions: [createTrapEntity("counter", trapCounterTrap)],
       },
       playerB: {

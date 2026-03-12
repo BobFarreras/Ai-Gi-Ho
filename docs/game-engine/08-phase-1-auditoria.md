@@ -23,12 +23,13 @@
 - Se añadieron pruebas negativas de límites de fase/turno para `start-fusion-summon` y `start-fusion-summon-from-execution`.
 - Se extrajeron handlers internos de acciones especiales en `resolve-execution` para reducir branching y centralizar la orquestación.
 - Se consolidaron fixtures base de `IPlayer`/`GameState` en `test-support/state-fixtures.ts` y se reutilizaron en suites de `combat`, `fusion`, `effects`, `phases` y `logging`.
+- Se extendió `test-support/state-fixtures.ts` con fábrica de `IBoardEntity` y se migraron suites con estado inline residual (`mastery-passives`, `next-phase.mastery-energy`, `trap-triggers.*`, `resolve-execution.fusion-waiting`, `play-card-with-zone-replacement`).
 
 ## 3. Hallazgos priorizados
 
 ### Medio
-- Persisten algunos estados inline en pruebas puntuales fuera de los dominios ya consolidados.
+- Persiste duplicación puntual en suites aisladas de `fusion` y `state` que aún no usan completamente `test-support`.
 
 ## 4. Plan incremental recomendado (sin big-bang)
-1. Extender `test-support/state-fixtures.ts` a suites aisladas con estado inline restante para terminar de homogeneizar pruebas.
+1. Migrar las suites aisladas restantes de `fusion`/`state` para cerrar la homogeneización de fixtures.
 2. Ejecutar `pnpm lint`, `pnpm test`, `pnpm build` al cerrar cada subfase.

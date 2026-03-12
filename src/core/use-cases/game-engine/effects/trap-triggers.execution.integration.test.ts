@@ -1,6 +1,7 @@
 // src/core/use-cases/game-engine/effects/trap-triggers.execution.integration.test.ts - Pruebas de trampas disparadas al activar ejecuciones y efectos derivados.
 import { describe, expect, it } from "vitest";
 import { GameEngine, GameState } from "@/core/use-cases/GameEngine";
+import { createTestBoardEntity } from "@/core/use-cases/game-engine/test-support/state-fixtures";
 import {
   createTrapBaseState,
   createTrapEntity,
@@ -44,9 +45,9 @@ describe("Trap triggers on execution", () => {
         ...base.playerA,
         hand: [executionCard],
         activeEntities: [
-          {
-            instanceId: "p1-defender",
-            card: {
+          createTestBoardEntity(
+            "p1-defender",
+            {
               id: "p1-defender-card",
               name: "Defender",
               description: "",
@@ -56,10 +57,8 @@ describe("Trap triggers on execution", () => {
               attack: 1000,
               defense: 1400,
             },
-            mode: "DEFENSE",
-            hasAttackedThisTurn: false,
-            isNewlySummoned: false,
-          },
+            "DEFENSE",
+          ),
         ],
       },
       playerB: {

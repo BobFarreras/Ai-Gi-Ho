@@ -1,6 +1,6 @@
 // src/core/use-cases/game-engine/test-support/state-fixtures.ts - Helpers compartidos para construir jugadores y estados base en tests del game-engine.
 import { ICard } from "@/core/entities/ICard";
-import { IPlayer } from "@/core/entities/IPlayer";
+import { BattleMode, IBoardEntity, IPlayer } from "@/core/entities/IPlayer";
 import { GameState } from "@/core/use-cases/GameEngine";
 
 interface ICreateTestStateConfig {
@@ -68,5 +68,24 @@ export function createDeckCard(id: string): ICard {
     cost: 1,
     attack: 1000,
     defense: 1000,
+  };
+}
+
+/**
+ * Fabrica una entidad de tablero de test con configuración mínima y sobrescrituras opcionales.
+ */
+export function createTestBoardEntity(
+  instanceId: string,
+  card: ICard,
+  mode: BattleMode,
+  overrides?: Partial<IBoardEntity>,
+): IBoardEntity {
+  return {
+    instanceId,
+    card,
+    mode,
+    hasAttackedThisTurn: false,
+    isNewlySummoned: false,
+    ...overrides,
   };
 }
