@@ -9,7 +9,7 @@ interface IStorySceneMapPaneProps {
   nodes: IStoryMapNodeRuntime[];
   currentNodeId: string | null;
   selectedNodeId: string | null;
-  avatarVisualTarget: { nodeId: string; stance: "CENTER" | "SIDE" } | null;
+  avatarVisualTarget: { nodeId: string; stance: "CENTER" | "SIDE" | "PORTAL" } | null;
   duelFocusNodeId: string | null;
   floatingReward: { label: string; tone: "NEXUS" | "CARD" } | null;
   collectingRewardNodeId: string | null;
@@ -18,6 +18,7 @@ interface IStorySceneMapPaneProps {
   isBusy: boolean;
   actSwitchLabel: string | null;
   actTransitionTargetId: number | null;
+  shouldPlayActEntryAnimation?: boolean;
   onSelectNode: (nodeId: string | null) => void;
   onSwitchAct: () => void;
   onRewardCollectAnimationComplete: () => void;
@@ -47,6 +48,7 @@ export function StorySceneMapPane(props: IStorySceneMapPaneProps) {
         retreatingNodeId={props.retreatingNodeId}
         isInteractionLocked={props.isBusy}
         actSwitchLabel={props.actSwitchLabel}
+        shouldPlayActEntryAnimation={props.shouldPlayActEntryAnimation ?? false}
         onSelectNode={props.onSelectNode}
         onSwitchAct={props.onSwitchAct}
         onRewardCollectAnimationComplete={props.onRewardCollectAnimationComplete}

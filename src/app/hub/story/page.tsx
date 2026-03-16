@@ -18,6 +18,7 @@ export default async function StoryPage({ searchParams }: IStoryPageProps) {
   const rawActParam = resolvedSearchParams.act;
   const preferredActValue = Array.isArray(rawActParam) ? rawActParam[0] : rawActParam;
   const preferredActId = preferredActValue ? Number.parseInt(preferredActValue, 10) : null;
+  const shouldPlayActEntryAnimation = Boolean(preferredActValue && Number.isFinite(preferredActId));
   const runtime = await getStoryMapRuntimeData({
     preferredActId: Number.isFinite(preferredActId) ? preferredActId : null,
   });
@@ -45,7 +46,12 @@ export default async function StoryPage({ searchParams }: IStoryPageProps) {
 
   return (
     <main className="flex h-[100dvh] w-full flex-col overflow-hidden bg-black">
-      <StoryScene runtime={runtime} briefing={briefing} postDuelTransition={postDuelTransition} />
+      <StoryScene
+        runtime={runtime}
+        briefing={briefing}
+        postDuelTransition={postDuelTransition}
+        shouldPlayActEntryAnimation={shouldPlayActEntryAnimation}
+      />
     </main>
   );
 }

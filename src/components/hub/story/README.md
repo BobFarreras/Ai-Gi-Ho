@@ -51,6 +51,7 @@ story/
         resolve-story-scene-can-move.test.ts
         story-scene-store.ts
       transitions/
+        use-story-act-entry-sequence.ts
         use-story-post-duel-transition.ts
         use-story-post-duel-transition.test.tsx
 ```
@@ -71,6 +72,7 @@ story/
   Incluye autoavance temporal por línea, avance manual por botón flotante y cierre explícito de interacción.
 - `internal/scene/panels/*`: panel lateral e información contextual con acción única (sin doble botón).
 - `internal/scene/transitions/*`: transición visual post-duelo al volver desde combate.
+  Incluye entrada por portal al cambiar de acto (spawn pequeño -> crecer -> desplazamiento al nodo destino del acto).
 
 ## Reglas de mantenimiento
 - Mantener SRP: un archivo = un motivo de cambio.
@@ -90,6 +92,7 @@ story/
 9. Persistencia Story usa estado compacto: `currentNodeId + visitedNodeIds + interactedNodeIds`.
 10. Antes de iniciar combate Story se ejecuta coin toss y su resultado define `starterPlayerId`.
 11. En nodos `EVENT`, la escena reproduce `soundtrack` del evento durante el diálogo y, al cerrar, dispara SFX de finalización (`finish-event`).
+12. En transición entre actos, el avatar aparece en el nodo portal del acto, hace animación de escala y luego se mueve al nodo objetivo (inicio al avanzar, último progreso al retroceder).
 
 ## Herramientas de depuración
 - `POST /api/story/world/reset`: reinicia cursor Story al nodo inicial y limpia estado compacto (visitados/interacciones) para reproducir pruebas del mapa.

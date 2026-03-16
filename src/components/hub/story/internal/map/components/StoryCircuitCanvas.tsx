@@ -39,6 +39,8 @@ interface IStoryCircuitCanvasProps {
   onSelectNode: (nodeId: string | null) => void;
   avatarX: MotionValue<number>;
   avatarY: MotionValue<number>;
+  avatarScale: MotionValue<number>;
+  avatarStance: "CENTER" | "SIDE" | "PORTAL";
   avatarSideOffsetX: number;
   collectingAnchor: IPathSegmentPoint | null;
   collectingRewardVisual?: { assetSrc: string; assetAlt: string; tone: "NEXUS" | "CARD" } | null;
@@ -99,7 +101,7 @@ export function StoryCircuitCanvas(props: IStoryCircuitCanvasProps) {
       <motion.div
         className="pointer-events-none absolute z-40 -translate-x-1/2 -translate-y-1/2"
         initial={false}
-        style={{ top: props.avatarY, left: props.avatarX, x: props.avatarSideOffsetX, width: STORY_NODE_TOKEN_SIZE, height: STORY_NODE_TOKEN_SIZE }}
+        style={{ top: props.avatarY, left: props.avatarX, x: props.avatarSideOffsetX, scale: props.avatarScale, width: STORY_NODE_TOKEN_SIZE, height: STORY_NODE_TOKEN_SIZE }}
       >
         <Image
           src="/assets/story/player/bob.png"
@@ -107,7 +109,9 @@ export function StoryCircuitCanvas(props: IStoryCircuitCanvasProps) {
           fill
           sizes="80px"
           quality={55}
-          className="rounded-full border-2 border-emerald-400 object-cover shadow-[0_0_22px_rgba(16,185,129,0.6)]"
+          className={props.avatarStance === "PORTAL"
+            ? "rounded-full border-2 border-violet-300 object-cover shadow-[0_0_30px_rgba(168,85,247,0.85)]"
+            : "rounded-full border-2 border-emerald-400 object-cover shadow-[0_0_22px_rgba(16,185,129,0.6)]"}
         />
       </motion.div>
       <StoryRewardCollectEffect

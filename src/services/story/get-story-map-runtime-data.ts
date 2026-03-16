@@ -5,11 +5,8 @@ import { createSupabasePlayerStoryDuelProgressRepository } from "@/infrastructur
 import { createSupabasePlayerStoryWorldRepository } from "@/infrastructure/persistence/supabase/create-supabase-player-story-world-repository";
 import { IStoryMapRuntimeData, IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
 import { mergeStoryMapVisualDefinition } from "@/services/story/merge-story-map-visual-definition";
-import { resolveStoryActProgressNode } from "@/services/story/resolve-story-act-progress-node";
-import {
-  listStoryActNodeIds,
-  resolveStoryActByNodeId,
-} from "@/services/story/map-definitions/story-map-definition-registry";
+import { resolveStoryActEntryNode } from "@/services/story/resolve-story-act-entry-node";
+import { listStoryActNodeIds, resolveStoryActByNodeId } from "@/services/story/map-definitions/story-map-definition-registry";
 import {
   buildStoryWorldGraph,
   resolveStoryUnlockedNodeIds,
@@ -132,14 +129,15 @@ export async function getStoryMapRuntimeData(input?: { preferredActId?: number |
     actNodes.find((node) => node.isUnlocked)?.id ??
     actNodes[0]?.id ??
     null;
-  const actCurrentNodeId = (input?.preferredActId ?? null) === activeActId
-    ? resolveStoryActProgressNode({
-        actNodes,
-        visitedNodeIds: compactState.visitedNodeIds,
-      }) ?? actStartNodeId
-    : actNodes.some((node) => node.id === effectiveCurrentNodeId)
-      ? effectiveCurrentNodeId
-      : actStartNodeId;
+  const actCurrentNodeId = resolveStoryActEntryNode({
+    preferredActId: input?.preferredActId ?? null,
+    activeActId,
+    currentActId: effectiveCurrentNodeId ? resolveStoryActByNodeId(effectiveCurrentNodeId) : null,
+    actStartNodeId,
+    actNodes,
+    visitedNodeIds: compactState.visitedNodeIds,
+    effectiveCurrentNodeId,
+  });
   return {
     playerId: session.user.id,
     nodes: actNodes,

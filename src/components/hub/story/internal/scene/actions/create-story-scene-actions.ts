@@ -22,7 +22,7 @@ interface ICreateStorySceneActionsParams {
   setMovementError: (value: string | null) => void;
   setInteractionFeedback: (value: string | null) => void;
   setCurrentNodeId: (nodeId: string) => void;
-  setAvatarVisualTarget: (value: { nodeId: string; stance: "CENTER" | "SIDE" } | null) => void;
+  setAvatarVisualTarget: (value: { nodeId: string; stance: "CENTER" | "SIDE" | "PORTAL" } | null) => void;
   setDuelFocusNodeId: (value: string | null) => void;
   setFloatingReward: (value: { label: string; tone: StoryRewardTone } | null) => void;
   setCollectingRewardNodeId: (value: string | null) => void;
@@ -48,7 +48,16 @@ export function createStorySceneActions(params: ICreateStorySceneActionsParams) 
     window.setTimeout(() => params.setFloatingReward(null), 620);
   };
   const runRewardCollectAnimation = async (targetNode: IStoryMapNodeRuntime): Promise<void> => { params.setCollectingRewardNodeId(targetNode.id); params.setCollectingRewardVisual(resolveCollectVisual(targetNode)); await wait(620); };
-  const centerAvatarOnNode = async (nodeId: string): Promise<void> => { params.setCurrentNodeId(nodeId); params.setAvatarVisualTarget({ nodeId, stance: "CENTER" }); await wait(260); };
+  const centerAvatarOnNode = async (nodeId: string): Promise<void> => {
+    params.setCurrentNodeId(nodeId);
+    params.setAvatarVisualTarget({ nodeId, stance: "CENTER" });
+    await wait(220);
+  };
+  const portalAvatarOnNode = async (nodeId: string): Promise<void> => {
+    await centerAvatarOnNode(nodeId);
+    params.setAvatarVisualTarget({ nodeId, stance: "PORTAL" });
+    await wait(240);
+  };
   const handleMove = async (triggerActionAfterMove = false, targetNodeForAction: IStoryMapNodeRuntime | null = params.selectedNode): Promise<void> => {
     if (!params.selectedNodeId || params.isMoving) return;
     params.setIsMoving(true);
@@ -85,7 +94,7 @@ export function createStorySceneActions(params: ICreateStorySceneActionsParams) 
     const targetMode = resolveStoryPrimaryAction(targetNode);
     if (targetMode.mode === "DISABLED") return;
     if (targetMode.mode === "ROUTE" && targetNode.id !== params.currentNodeId && !skipRouteMoveCheck) return handleMove(true, targetNode);
-    params.setAvatarVisualTarget({ nodeId: targetNode.id, stance: "SIDE" });
+    params.setAvatarVisualTarget({ nodeId: targetNode.id, stance: targetMode.mode === "VIRTUAL_INTERACTION" ? "CENTER" : "SIDE" });
     await wait(420);
     if (targetMode.mode === "ROUTE") {
       params.setDuelFocusNodeId(targetNode.id);
@@ -113,10 +122,13 @@ export function createStorySceneActions(params: ICreateStorySceneActionsParams) 
       params.markNodeCompleted(targetNode.id);
       const actTransitionTarget = resolveStoryActTransitionTarget(targetNode.id);
       if (actTransitionTarget) {
-        await centerAvatarOnNode(targetNode.id);
+        await portalAvatarOnNode(targetNode.id);
         params.requestActTransition(actTransitionTarget);
         params.setInteractionFeedback(`Transición iniciada hacia Acto ${actTransitionTarget}.`);
         return;
+      }
+      if (targetNode.nodeType === "EVENT" || targetNode.nodeType === "REWARD_CARD" || targetNode.nodeType === "REWARD_NEXUS") {
+        await portalAvatarOnNode(targetNode.id);
       }
       if (targetNode.nodeType === "REWARD_NEXUS" || targetNode.nodeType === "REWARD_CARD") {
         await centerAvatarOnNode(targetNode.id);

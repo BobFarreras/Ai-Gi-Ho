@@ -6,7 +6,7 @@ import { IStoryPostDuelTransition } from "@/services/story/duel-flow/story-post-
 interface IUseStoryPostDuelTransitionInput {
   transition: IStoryPostDuelTransition | null;
   currentNodeId: string | null;
-  setAvatarVisualTarget: (value: { nodeId: string; stance: "CENTER" | "SIDE" } | null) => void;
+  setAvatarVisualTarget: (value: { nodeId: string; stance: "CENTER" | "SIDE" | "PORTAL" } | null) => void;
   setRetreatingNodeId: (nodeId: string | null) => void;
 }
 

@@ -5,7 +5,7 @@ interface IAnimateStoryAvatarPathInput {
   pathNodeIds: string[];
   nodesById: Record<string, IStoryMapNodeRuntime>;
   setCurrentNodeId: (nodeId: string) => void;
-  setAvatarVisualTarget: (value: { nodeId: string; stance: "CENTER" | "SIDE" } | null) => void;
+  setAvatarVisualTarget: (value: { nodeId: string; stance: "CENTER" | "SIDE" | "PORTAL" } | null) => void;
   wait: (ms: number) => Promise<void>;
 }
 
@@ -27,4 +27,3 @@ export async function animateStoryAvatarPath(input: IAnimateStoryAvatarPathInput
     await input.wait(pose.waitMs);
   }
 }
-

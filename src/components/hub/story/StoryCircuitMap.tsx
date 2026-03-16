@@ -1,7 +1,7 @@
 // src/components/hub/story/StoryCircuitMap.tsx - Renderiza el mapa Story con cámara arrastrable, nodos y segmentos dinámicos.
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { animate, useMotionValue, AnimationPlaybackControls, useTransform } from "framer-motion";
 import { IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
 import {
@@ -20,7 +20,8 @@ interface StoryCircuitMapProps {
   nodes: IStoryMapNodeRuntime[];
   currentNodeId: string | null;
   selectedNodeId: string | null;
-  avatarVisualTarget?: { nodeId: string; stance: "CENTER" | "SIDE" } | null;
+  avatarVisualTarget?: { nodeId: string; stance: "CENTER" | "SIDE" | "PORTAL" } | null;
+  shouldPlayActEntryAnimation?: boolean;
   duelFocusNodeId?: string | null;
   floatingReward?: { label: string; tone: "NEXUS" | "CARD" } | null;
   collectingRewardNodeId?: string | null;
@@ -56,6 +57,7 @@ export function StoryCircuitMap({
   currentNodeId,
   selectedNodeId,
   avatarVisualTarget,
+  shouldPlayActEntryAnimation = false,
   duelFocusNodeId,
   floatingReward,
   collectingRewardNodeId,
@@ -72,7 +74,7 @@ export function StoryCircuitMap({
   const hasCenteredCamera = useRef(false);
   const avatarAnimRef = useRef<{ x: AnimationPlaybackControls | null; y: AnimationPlaybackControls | null }>({ x: null, y: null });
   const cameraX = useMotionValue(0); const cameraY = useMotionValue(0); const cinematicScale = useMotionValue(1);
-  const avatarX = useMotionValue(1000); const avatarY = useMotionValue(1000);
+  const avatarX = useMotionValue(1000); const avatarY = useMotionValue(1000); const avatarScale = useMotionValue(1);
   const positionMap = useMemo(() => buildStoryNodePositionMap(nodes), [nodes]);
   const canvasSize = useMemo(() => resolveStoryCanvasSize(positionMap), [positionMap]);
   const { zoom, setZoom, handleWheel } = useStoryMapZoom();
@@ -83,6 +85,8 @@ export function StoryCircuitMap({
   const visualStance = avatarVisualTarget?.stance ?? "CENTER";
   const avatarPos = avatarNode ? resolveStoryNodeTokenAnchor(avatarNode.id, positionMap) : { x: 1000, y: 1000 };
   const avatarSideOffsetX = visualStance === "SIDE" ? -resolveStoryNodeSideOffsetPx() : 0;
+  const hasInitializedAvatarRef = useRef(false);
+  const hasPlayedActSpawnRef = useRef(false);
   const collectingAnchor = collectingRewardNodeId ? resolveStoryNodeTokenAnchor(collectingRewardNodeId, positionMap) : null;
   const retreatTrail = useMemo(
     () => resolveStoryRetreatTrail({ retreatingNodeId: retreatingNodeId ?? null, nodes, positionMap }),
@@ -95,7 +99,15 @@ export function StoryCircuitMap({
   const retreatingAvatarUrl = resolveStoryOpponentAvatarUrl(retreatingNode);
   const retreatingAvatarAlt = retreatingNode?.opponentName ? `Retirada de ${retreatingNode.opponentName}` : "Retirada de oponente";
 
+  useLayoutEffect(() => {
+    if (hasInitializedAvatarRef.current) return;
+    avatarX.set(avatarPos.x);
+    avatarY.set(avatarPos.y);
+    hasInitializedAvatarRef.current = true;
+  }, [avatarPos.x, avatarPos.y, avatarX, avatarY]);
+
   useEffect(() => {
+    if (!hasInitializedAvatarRef.current) return;
     const fromX = avatarX.get();
     const fromY = avatarY.get();
     avatarAnimRef.current.x?.stop();
@@ -105,6 +117,20 @@ export function StoryCircuitMap({
     avatarAnimRef.current.x = animate(avatarX, avatarPos.x, { duration, ease: "easeInOut" });
     avatarAnimRef.current.y = animate(avatarY, avatarPos.y, { duration, ease: "easeInOut" });
   }, [avatarPos.x, avatarPos.y, avatarX, avatarY]);
+
+  useEffect(() => {
+    const targetScale = visualStance === "PORTAL" ? 0.5 : 1;
+    const controls = animate(avatarScale, targetScale, { duration: 0.22, ease: "easeInOut" });
+    return () => controls.stop();
+  }, [avatarScale, visualStance]);
+
+  useEffect(() => {
+    if (!shouldPlayActEntryAnimation || hasPlayedActSpawnRef.current) return;
+    hasPlayedActSpawnRef.current = true;
+    avatarScale.set(0.4);
+    const controls = animate(avatarScale, 1, { duration: 0.34, ease: "easeOut" });
+    return () => controls.stop();
+  }, [avatarScale, shouldPlayActEntryAnimation]);
 
   useEffect(() => {
     if (!duelFocusNodeId || !mapContainerRef.current) return;
@@ -171,6 +197,8 @@ export function StoryCircuitMap({
         onSelectNode={onSelectNode}
         avatarX={avatarX}
         avatarY={avatarY}
+        avatarScale={avatarScale}
+        avatarStance={visualStance}
         avatarSideOffsetX={avatarSideOffsetX}
         collectingAnchor={collectingAnchor}
         collectingRewardVisual={collectingRewardVisual}

@@ -10,20 +10,20 @@ import { createStorySceneStore, StorySceneStore } from "./internal/scene/state/s
 import { resolveStorySceneCanMove } from "./internal/scene/state/resolve-story-scene-can-move";
 import { useStoryNodeInteractionDialog } from "./internal/scene/dialog/use-story-node-interaction-dialog";
 import { useStorySceneSfx } from "./internal/scene/audio/use-story-scene-sfx";
+import { useStoryActEntrySequence } from "./internal/scene/transitions/use-story-act-entry-sequence";
 import { useStoryPostDuelTransition } from "./internal/scene/transitions/use-story-post-duel-transition";
 import { IStoryMapRuntimeData } from "@/services/story/story-map-runtime-data";
 import { IStoryChapterBriefing } from "@/services/story/build-story-chapter-briefing";
 import { IStoryPostDuelTransition } from "@/services/story/duel-flow/story-post-duel-transition";
 import { resolveStoryPrimaryAction } from "@/services/story/resolve-story-primary-action";
 import { resolveStorySmartAction } from "@/services/story/resolve-story-smart-action";
-interface IStorySceneProps { runtime: IStoryMapRuntimeData; briefing: IStoryChapterBriefing; postDuelTransition?: IStoryPostDuelTransition | null; }
+interface IStorySceneProps { runtime: IStoryMapRuntimeData; briefing: IStoryChapterBriefing; postDuelTransition?: IStoryPostDuelTransition | null; shouldPlayActEntryAnimation?: boolean; }
 interface IStoryCollectVisual { assetSrc: string; assetAlt: string; tone: "NEXUS" | "CARD"; }
 function resolveNextActId(activeActId: number, availableActIds: number[]): number | null {
   const sorted = [...availableActIds].sort((left, right) => left - right); const currentIndex = sorted.indexOf(activeActId);
   if (currentIndex < 0 || sorted.length <= 1) return null; return sorted[(currentIndex + 1) % sorted.length] ?? null;
 }
-
-export function StoryScene({ runtime, briefing, postDuelTransition = null }: IStorySceneProps) {
+export function StoryScene({ runtime, briefing, postDuelTransition = null, shouldPlayActEntryAnimation = false }: IStorySceneProps) {
   const router = useRouter();
   const [store] = useState<StorySceneStore>(() => createStorySceneStore({ nodes: runtime.nodes, currentNodeId: runtime.currentNodeId }));
   const selectedNodeId = useStore(store, (state) => state.selectedNodeId);
@@ -34,7 +34,7 @@ export function StoryScene({ runtime, briefing, postDuelTransition = null }: ISt
   const markNodeCompleted = useStore(store, (state) => state.markNodeCompleted);
   const [isMoving, setIsMoving] = useState(false);
   const [isInteracting, setIsInteracting] = useState(false);
-  const [avatarVisualTarget, setAvatarVisualTarget] = useState<{ nodeId: string; stance: "CENTER" | "SIDE" } | null>(null);
+  const [avatarVisualTarget, setAvatarVisualTarget] = useState<{ nodeId: string; stance: "CENTER" | "SIDE" | "PORTAL" } | null>(null);
   const [duelFocusNodeId, setDuelFocusNodeId] = useState<string | null>(null);
   const [floatingReward, setFloatingReward] = useState<{ label: string; tone: "NEXUS" | "CARD" } | null>(null);
   const [collectingRewardNodeId, setCollectingRewardNodeId] = useState<string | null>(null);
@@ -46,6 +46,7 @@ export function StoryScene({ runtime, briefing, postDuelTransition = null }: ISt
   const [interactionFeedback, setInteractionFeedback] = useState<string | null>(null);
   const interactionDialog = useStoryNodeInteractionDialog();
   const sceneSfx = useStorySceneSfx();
+  const { entryAvatarVisualTarget, isActEntrySequenceRunning } = useStoryActEntrySequence({ nodes: runtime.nodes, activeActId: runtime.activeActId, currentNodeId: runtime.currentNodeId, shouldPlayActEntryAnimation });
   const selectedNode = selectedNodeId ? nodesById[selectedNodeId] ?? null : null;
   const sceneNodes = useMemo(() => Object.values(nodesById).sort((left, right) => (left.chapter !== right.chapter ? left.chapter - right.chapter : left.duelIndex - right.duelIndex)), [nodesById]);
   const nextActId = resolveNextActId(runtime.activeActId, runtime.availableActIds);
@@ -58,7 +59,7 @@ export function StoryScene({ runtime, briefing, postDuelTransition = null }: ISt
     isDialogOpen: interactionDialog.isOpen,
   });
   const smartAction = resolveStorySmartAction({ selectedNode, canMove: canMoveSelectedNode, primaryAction });
-  const isBusy = isMoving || isInteracting || interactionDialog.isOpen || Boolean(actTransitionTargetId);
+  const isBusy = isMoving || isInteracting || isActEntrySequenceRunning || interactionDialog.isOpen || Boolean(actTransitionTargetId);
   useStoryPostDuelTransition({ transition: postDuelTransition, currentNodeId, setAvatarVisualTarget, setRetreatingNodeId });
   const { centerAvatarOnNode, handleSmartAction } = createStorySceneActions({
     selectedNodeId,
@@ -116,7 +117,7 @@ export function StoryScene({ runtime, briefing, postDuelTransition = null }: ISt
         nodes={sceneNodes}
         currentNodeId={currentNodeId}
         selectedNodeId={selectedNodeId}
-        avatarVisualTarget={avatarVisualTarget}
+        avatarVisualTarget={entryAvatarVisualTarget ?? avatarVisualTarget}
         duelFocusNodeId={duelFocusNodeId}
         floatingReward={floatingReward}
         collectingRewardNodeId={collectingRewardNodeId}
@@ -125,10 +126,8 @@ export function StoryScene({ runtime, briefing, postDuelTransition = null }: ISt
         isBusy={isBusy}
         actSwitchLabel={actSwitchLabel}
         actTransitionTargetId={actTransitionTargetId}
-        onSelectNode={(nodeId) => {
-          if (nodeId) sceneSfx.playNodeSelect();
-          setSelectedNodeId(nodeId);
-        }}
+        shouldPlayActEntryAnimation={shouldPlayActEntryAnimation}
+        onSelectNode={(nodeId) => { if (nodeId) sceneSfx.playNodeSelect(); setSelectedNodeId(nodeId); }}
         onSwitchAct={() => { if (!nextActId) return; sceneSfx.playButtonClick(); router.push(`/hub/story?act=${nextActId}`); }}
         onRewardCollectAnimationComplete={() => { setCollectingRewardNodeId(null); setCollectingRewardVisual(null); }}
         onRetreatAnimationComplete={() => setRetreatingNodeId(null)}
