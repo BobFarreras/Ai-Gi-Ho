@@ -1,27 +1,29 @@
 // src/components/hub/story/StoryScene.tsx - Escena principal Story con mapa vivo y panel lateral conectado a estado persistible.
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "zustand";
-import { StoryCircuitMap } from "./StoryCircuitMap";
-import { StoryNodeInteractionDialog } from "./internal/scene/dialog/StoryNodeInteractionDialog";
-import { StorySidebar } from "./internal/scene/panels/StorySidebar";
+import { StorySceneDesktopLayout } from "./internal/scene/view/StorySceneDesktopLayout";
+import { StorySceneMobileLayout } from "./internal/scene/view/StorySceneMobileLayout";
+import { createStorySceneActions } from "./internal/scene/actions/create-story-scene-actions";
 import { createStorySceneStore, StorySceneStore } from "./internal/scene/state/story-scene-store";
 import { resolveStorySceneCanMove } from "./internal/scene/state/resolve-story-scene-can-move";
 import { useStoryNodeInteractionDialog } from "./internal/scene/dialog/use-story-node-interaction-dialog";
 import { useStorySceneSfx } from "./internal/scene/audio/use-story-scene-sfx";
+import { useStoryActEntrySequence } from "./internal/scene/transitions/use-story-act-entry-sequence";
 import { useStoryPostDuelTransition } from "./internal/scene/transitions/use-story-post-duel-transition";
+import { useStorySceneMobileMode } from "./internal/scene/view/use-story-scene-mobile-mode";
 import { IStoryMapRuntimeData } from "@/services/story/story-map-runtime-data";
 import { IStoryChapterBriefing } from "@/services/story/build-story-chapter-briefing";
 import { IStoryPostDuelTransition } from "@/services/story/duel-flow/story-post-duel-transition";
 import { resolveStoryPrimaryAction } from "@/services/story/resolve-story-primary-action";
 import { resolveStorySmartAction } from "@/services/story/resolve-story-smart-action";
-import { resolveStoryRewardCardVisual } from "@/services/story/resolve-story-reward-card-visual";
-interface IStorySceneProps { runtime: IStoryMapRuntimeData; briefing: IStoryChapterBriefing; postDuelTransition?: IStoryPostDuelTransition | null; }
-interface IStoryInteractResponse { interactionCountForNode: number; }
+import { IStorySceneMapViewProps, IStorySceneSidebarViewProps } from "./internal/scene/view/story-scene-view-props";
+interface IStorySceneProps { runtime: IStoryMapRuntimeData; briefing: IStoryChapterBriefing; postDuelTransition?: IStoryPostDuelTransition | null; shouldPlayActEntryAnimation?: boolean; }
 interface IStoryCollectVisual { assetSrc: string; assetAlt: string; tone: "NEXUS" | "CARD"; }
-export function StoryScene({ runtime, briefing, postDuelTransition = null }: IStorySceneProps) {
+export function StoryScene({ runtime, briefing, postDuelTransition = null, shouldPlayActEntryAnimation = false }: IStorySceneProps) {
   const router = useRouter();
+  const isMobileLayout = useStorySceneMobileMode();
   const [store] = useState<StorySceneStore>(() => createStorySceneStore({ nodes: runtime.nodes, currentNodeId: runtime.currentNodeId }));
   const selectedNodeId = useStore(store, (state) => state.selectedNodeId);
   const currentNodeId = useStore(store, (state) => state.currentNodeId);
@@ -31,17 +33,20 @@ export function StoryScene({ runtime, briefing, postDuelTransition = null }: ISt
   const markNodeCompleted = useStore(store, (state) => state.markNodeCompleted);
   const [isMoving, setIsMoving] = useState(false);
   const [isInteracting, setIsInteracting] = useState(false);
-  const [avatarVisualTarget, setAvatarVisualTarget] = useState<{ nodeId: string; stance: "CENTER" | "SIDE" } | null>(null);
+  const [avatarVisualTarget, setAvatarVisualTarget] = useState<{ nodeId: string; stance: "CENTER" | "SIDE" | "PORTAL" } | null>(null);
   const [duelFocusNodeId, setDuelFocusNodeId] = useState<string | null>(null);
   const [floatingReward, setFloatingReward] = useState<{ label: string; tone: "NEXUS" | "CARD" } | null>(null);
   const [collectingRewardNodeId, setCollectingRewardNodeId] = useState<string | null>(null);
   const [collectingRewardVisual, setCollectingRewardVisual] = useState<IStoryCollectVisual | null>(null);
   const [retreatingNodeId, setRetreatingNodeId] = useState<string | null>(null);
+  const [actTransitionTargetId, setActTransitionTargetId] = useState<number | null>(null);
+  const [centerRequestKey, setCenterRequestKey] = useState(0);
   const [pendingCenterNodeId, setPendingCenterNodeId] = useState<string | null>(null);
   const [movementError, setMovementError] = useState<string | null>(null);
   const [interactionFeedback, setInteractionFeedback] = useState<string | null>(null);
   const interactionDialog = useStoryNodeInteractionDialog();
   const sceneSfx = useStorySceneSfx();
+  const { entryAvatarVisualTarget, isActEntrySequenceRunning } = useStoryActEntrySequence({ nodes: runtime.nodes, activeActId: runtime.activeActId, currentNodeId: runtime.currentNodeId, shouldPlayActEntryAnimation });
   const selectedNode = selectedNodeId ? nodesById[selectedNodeId] ?? null : null;
   const sceneNodes = useMemo(() => Object.values(nodesById).sort((left, right) => (left.chapter !== right.chapter ? left.chapter - right.chapter : left.duelIndex - right.duelIndex)), [nodesById]);
   const primaryAction = resolveStoryPrimaryAction(selectedNode);
@@ -52,129 +57,99 @@ export function StoryScene({ runtime, briefing, postDuelTransition = null }: ISt
     isDialogOpen: interactionDialog.isOpen,
   });
   const smartAction = resolveStorySmartAction({ selectedNode, canMove: canMoveSelectedNode, primaryAction });
-  const isBusy = isMoving || isInteracting || interactionDialog.isOpen;
-  useStoryPostDuelTransition({
-    transition: postDuelTransition,
+  const isBusy = isMoving || isInteracting || isActEntrySequenceRunning || interactionDialog.isOpen || Boolean(actTransitionTargetId);
+  useStoryPostDuelTransition({ transition: postDuelTransition, currentNodeId, setAvatarVisualTarget, setRetreatingNodeId });
+  const { centerAvatarOnNode, handleSmartAction } = createStorySceneActions({
+    selectedNodeId,
+    selectedNode,
     currentNodeId,
+    nodesById,
+    isMoving,
+    smartActionMode: smartAction.mode,
+    setIsMoving,
+    setIsInteracting,
+    setMovementError,
+    setInteractionFeedback,
+    setCurrentNodeId,
     setAvatarVisualTarget,
-    setRetreatingNodeId,
+    setDuelFocusNodeId,
+    setFloatingReward,
+    setCollectingRewardNodeId,
+    setCollectingRewardVisual,
+    setPendingCenterNodeId,
+    markNodeCompleted,
+    sceneSfx,
+    navigateTo: router.push,
+    requestActTransition: (actId) => setActTransitionTargetId(actId),
+    startInteractionDialog: interactionDialog.start,
   });
-  const resolveCollectVisual = (targetNode: NonNullable<typeof selectedNode>): IStoryCollectVisual => {
-    if (targetNode.nodeType !== "REWARD_CARD") return { assetSrc: "/assets/renders/nexus.png", assetAlt: "Nexus obtenido", tone: "NEXUS" };
-    const cardVisual = resolveStoryRewardCardVisual(targetNode.rewardCardId);
-    return { assetSrc: cardVisual.src, assetAlt: cardVisual.alt, tone: "CARD" };
+  useEffect(() => { if (!actTransitionTargetId) return; const timeoutId = window.setTimeout(() => router.push(`/hub/story?act=${actTransitionTargetId}`), 900); return () => window.clearTimeout(timeoutId); }, [actTransitionTargetId, router]);
+  const finalizeInteractionDialog = async () => {
+    interactionDialog.close();
+    if (!pendingCenterNodeId) return;
+    sceneSfx.playEventFinish();
+    setSelectedNodeId(pendingCenterNodeId);
+    await centerAvatarOnNode(pendingCenterNodeId);
+    setPendingCenterNodeId(null);
+    setAvatarVisualTarget(null);
   };
-  const runRewardCollectAnimation = (targetNode: NonNullable<typeof selectedNode>): Promise<void> =>
-    new Promise((resolve) => {
-      setCollectingRewardNodeId(targetNode.id);
-      setCollectingRewardVisual(resolveCollectVisual(targetNode));
-      window.setTimeout(resolve, 620);
-    });
-  const showFloatingReward = (label: string, tone: "NEXUS" | "CARD"): void => {
-    setFloatingReward({ label, tone });
-    window.setTimeout(() => setFloatingReward(null), 620);
+  const advanceInteractionDialog = async () => {
+    const shouldFinalize = interactionDialog.isLastLine;
+    interactionDialog.next();
+    if (shouldFinalize) await finalizeInteractionDialog();
   };
-  const centerAvatarOnNode = async (nodeId: string) => {
-    setCurrentNodeId(nodeId); setAvatarVisualTarget({ nodeId, stance: "CENTER" }); await new Promise((resolve) => setTimeout(resolve, 260));
+  const sidebarProps: IStorySceneSidebarViewProps = {
+    briefing,
+    selectedNode,
+    isBusy,
+    movementError,
+    interactionFeedback,
+    smartActionLabel: smartAction.label,
+    canRunSmartAction: smartAction.isEnabled && !isBusy,
+    onSmartAction: () => { sceneSfx.playButtonClick(); void handleSmartAction(); },
+    onDeselect: () => { sceneSfx.playButtonClick(); setSelectedNodeId(null); },
   };
-  const handleMove = async (triggerActionAfterMove = false) => {
-    if (!selectedNodeId || isMoving) return;
-    setIsMoving(true); setMovementError(null); setInteractionFeedback(null);
-    try {
-      const response = await fetch("/api/story/world/move", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ nodeId: selectedNodeId }) });
-      if (!response.ok) throw new Error("Movimiento inválido.");
-      const payload = (await response.json()) as { currentNodeId: string | null };
-      if (payload.currentNodeId) {
-        sceneSfx.playMove();
-        const targetNode = nodesById[payload.currentNodeId] ?? null;
-        const shouldStaySide = Boolean(targetNode) && targetNode.nodeType !== "MOVE" && !targetNode.isCompleted;
-        setCurrentNodeId(payload.currentNodeId);
-        setAvatarVisualTarget({ nodeId: payload.currentNodeId, stance: shouldStaySide ? "SIDE" : "CENTER" });
-        await new Promise((resolve) => setTimeout(resolve, shouldStaySide ? 360 : 420));
-        if (!shouldStaySide) await centerAvatarOnNode(payload.currentNodeId);
-      }
-      await new Promise((resolve) => setTimeout(resolve, 420));
-      if (triggerActionAfterMove && selectedNode && selectedNode.nodeType !== "MOVE") {
-        await handlePrimaryAction(selectedNode, true);
-      }
-    } catch { setMovementError("No se pudo mover al nodo seleccionado."); } finally { setIsMoving(false); }
+  const mapProps: IStorySceneMapViewProps = {
+    nodes: sceneNodes,
+    currentNodeId,
+    selectedNodeId,
+    avatarVisualTarget: entryAvatarVisualTarget ?? avatarVisualTarget,
+    duelFocusNodeId,
+    floatingReward,
+    collectingRewardNodeId,
+    collectingRewardVisual,
+    retreatingNodeId,
+    isBusy,
+    canMoveSelectedNode,
+    actTransitionTargetId,
+    shouldPlayActEntryAnimation,
+    onSelectNode: (nodeId) => { if (nodeId) sceneSfx.playNodeSelect(); setSelectedNodeId(nodeId); },
+    onMoveSelectedNode: () => {
+      if (!canMoveSelectedNode || isBusy) return;
+      sceneSfx.playButtonClick();
+      void handleSmartAction();
+    },
+    onRequestCenterPlayer: () => {
+      sceneSfx.playButtonClick();
+      setCenterRequestKey((value) => value + 1);
+    },
+    onExitToHub: () => {
+      sceneSfx.playButtonClick();
+      router.push("/hub");
+    },
+    onRewardCollectAnimationComplete: () => { setCollectingRewardNodeId(null); setCollectingRewardVisual(null); },
+    onRetreatAnimationComplete: () => setRetreatingNodeId(null),
+    dialog: {
+      isOpen: interactionDialog.isOpen,
+      title: interactionDialog.dialogueTitle,
+      soundtrackUrl: interactionDialog.soundtrackUrl,
+      line: interactionDialog.currentLine,
+      onNext: advanceInteractionDialog,
+      onClose: finalizeInteractionDialog,
+    },
   };
-  const handlePrimaryAction = async (targetNode = selectedNode, skipRouteMoveCheck = false) => {
-    if (!targetNode) return;
-    setInteractionFeedback(null);
-    const targetMode = resolveStoryPrimaryAction(targetNode);
-    if (targetMode.mode === "DISABLED") return;
-    if (targetMode.mode === "ROUTE" && targetNode.id !== currentNodeId && !skipRouteMoveCheck) {
-      await handleMove(true);
-      return;
-    }
-    setAvatarVisualTarget({ nodeId: targetNode.id, stance: "SIDE" }); await new Promise((resolve) => setTimeout(resolve, 420));
-    if (targetMode.mode === "ROUTE") {
-      setDuelFocusNodeId(targetNode.id);
-      sceneSfx.playDuelStart();
-      await new Promise((resolve) => setTimeout(resolve, 520));
-      router.push(targetNode.href);
-      return;
-    }
-    if (targetMode.mode !== "VIRTUAL_INTERACTION") return;
-    try {
-      setIsInteracting(true);
-      const response = await fetch("/api/story/world/interact", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ nodeId: targetNode.id }) });
-      if (!response.ok) throw new Error("Interacción inválida.");
-      const payload = (await response.json()) as IStoryInteractResponse;
-      if (targetNode.nodeType === "REWARD_NEXUS") {
-        sceneSfx.playRewardNexus();
-        showFloatingReward(`+${targetNode.rewardNexus} NEXUS`, "NEXUS");
-        await runRewardCollectAnimation(targetNode);
-      }
-      if (targetNode.nodeType === "REWARD_CARD") {
-        sceneSfx.playRewardCard();
-        showFloatingReward("+WINDOWS92", "CARD");
-        await runRewardCollectAnimation(targetNode);
-      }
-      markNodeCompleted(targetNode.id);
-      if (targetNode.nodeType === "REWARD_NEXUS" || targetNode.nodeType === "REWARD_CARD") {
-        await centerAvatarOnNode(targetNode.id);
-        setInteractionFeedback(targetNode.nodeType === "REWARD_NEXUS" ? `NEXUS obtenido: +${targetNode.rewardNexus}.` : "Carta obtenida: Windows92.");
-        return;
-      }
-      const opened = interactionDialog.start(targetNode, payload.interactionCountForNode);
-      setPendingCenterNodeId(targetNode.id);
-      setInteractionFeedback(opened ? `Interacción iniciada: ${targetNode.title}.` : `Interacción completada: ${targetNode.title}.`);
-    } catch { setInteractionFeedback("No se pudo registrar la interacción narrativa."); } finally { setIsInteracting(false); }
-  };
-  const handleSmartAction = async () => {
-    if (smartAction.mode === "MOVE") {
-      await handleMove(false);
-      return;
-    }
-    if (smartAction.mode === "PRIMARY") {
-      await handlePrimaryAction();
-      return;
-    }
-    if (smartAction.mode === "MOVE_AND_PRIMARY") {
-      await handleMove(true);
-    }
-  };
-  return (
-    <div className="flex h-full w-full flex-1 overflow-hidden border-t border-cyan-900/50 bg-black font-sans">
-      <div className="z-20 w-80 flex-shrink-0 border-r border-cyan-500/30 shadow-[10px_0_30px_rgba(0,0,0,0.8)] md:w-96">
-        <StorySidebar
-          briefing={briefing}
-          selectedNode={selectedNode}
-          isMoving={isBusy}
-          movementError={movementError}
-          interactionFeedback={interactionFeedback}
-          smartActionLabel={smartAction.label}
-          canRunSmartAction={smartAction.isEnabled && !isBusy}
-          onSmartAction={() => { sceneSfx.playButtonClick(); void handleSmartAction(); }}
-          onDeselect={() => { sceneSfx.playButtonClick(); setSelectedNodeId(null); }}
-        />
-      </div>
-      <div className="relative z-0 flex-1 overflow-hidden bg-[#050810]">
-        <StoryCircuitMap nodes={sceneNodes} currentNodeId={currentNodeId} selectedNodeId={selectedNodeId} avatarVisualTarget={avatarVisualTarget} duelFocusNodeId={duelFocusNodeId} floatingReward={floatingReward} collectingRewardNodeId={collectingRewardNodeId} collectingRewardVisual={collectingRewardVisual} retreatingNodeId={retreatingNodeId} isInteractionLocked={isBusy} onSelectNode={(nodeId) => { if (nodeId) sceneSfx.playNodeSelect(); setSelectedNodeId(nodeId); }} onRewardCollectAnimationComplete={() => { setCollectingRewardNodeId(null); setCollectingRewardVisual(null); }} onRetreatAnimationComplete={() => setRetreatingNodeId(null)} />
-        <StoryNodeInteractionDialog isOpen={interactionDialog.isOpen} title={interactionDialog.dialogueTitle} line={interactionDialog.currentLine} onNext={interactionDialog.next} onClose={async () => { interactionDialog.close(); if (pendingCenterNodeId) { await centerAvatarOnNode(pendingCenterNodeId); setPendingCenterNodeId(null); setAvatarVisualTarget(null); } }} />
-      </div>
-    </div>
-  );
+  const mapPropsWithCenter = { ...mapProps, centerRequestKey };
+  return isMobileLayout
+    ? <StorySceneMobileLayout sidebar={sidebarProps} map={mapPropsWithCenter} />
+    : <StorySceneDesktopLayout sidebar={sidebarProps} map={mapPropsWithCenter} />;
 }

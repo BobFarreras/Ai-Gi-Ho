@@ -25,6 +25,26 @@ export function applyStoryMoveToCompactState(input: {
 }
 
 /**
+ * Registra una travesía completa nodo a nodo para evitar desincronización en ramas.
+ */
+export function applyStoryTraversalToCompactState(input: {
+  state: IPlayerStoryWorldCompactState;
+  fromNodeId: string | null;
+  traversedNodeIds: string[];
+}): IPlayerStoryWorldCompactState {
+  const lastTraversedNodeId = input.traversedNodeIds[input.traversedNodeIds.length - 1] ?? input.fromNodeId;
+  return {
+    currentNodeId: lastTraversedNodeId,
+    visitedNodeIds: uniq([
+      ...input.state.visitedNodeIds,
+      ...(input.fromNodeId ? [input.fromNodeId] : []),
+      ...input.traversedNodeIds,
+    ]),
+    interactedNodeIds: uniq(input.state.interactedNodeIds),
+  };
+}
+
+/**
  * Marca un nodo como interactuado sin alterar visitados previos.
  */
 export function applyStoryInteractionToCompactState(input: {

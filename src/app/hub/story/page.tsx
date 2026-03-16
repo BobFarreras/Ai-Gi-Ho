@@ -5,13 +5,23 @@ import { buildStoryChapterBriefing } from "@/services/story/build-story-chapter-
 import { resolveStoryPostDuelTransitionFromSearchParams } from "@/services/story/duel-flow/story-post-duel-transition";
 import { getStoryMapRuntimeData } from "@/services/story/get-story-map-runtime-data";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
 interface IStoryPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export default async function StoryPage({ searchParams }: IStoryPageProps) {
   const resolvedSearchParams = await searchParams;
-  const runtime = await getStoryMapRuntimeData();
+  const rawActParam = resolvedSearchParams.act;
+  const preferredActValue = Array.isArray(rawActParam) ? rawActParam[0] : rawActParam;
+  const preferredActId = preferredActValue ? Number.parseInt(preferredActValue, 10) : null;
+  const shouldPlayActEntryAnimation = Boolean(preferredActValue && Number.isFinite(preferredActId));
+  const runtime = await getStoryMapRuntimeData({
+    preferredActId: Number.isFinite(preferredActId) ? preferredActId : null,
+  });
   if (!runtime) {
     return (
       <main className="hub-control-room-bg flex min-h-dvh items-center justify-center px-4 py-8">
@@ -36,7 +46,12 @@ export default async function StoryPage({ searchParams }: IStoryPageProps) {
 
   return (
     <main className="flex h-[100dvh] w-full flex-col overflow-hidden bg-black">
-      <StoryScene runtime={runtime} briefing={briefing} postDuelTransition={postDuelTransition} />
+      <StoryScene
+        runtime={runtime}
+        briefing={briefing}
+        postDuelTransition={postDuelTransition}
+        shouldPlayActEntryAnimation={shouldPlayActEntryAnimation}
+      />
     </main>
   );
 }

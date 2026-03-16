@@ -9,26 +9,26 @@ import { SupabasePlayerStoryWorldRepository } from "@/infrastructure/persistence
 import { getAuthenticatedUserId } from "@/services/auth/api/internal/get-authenticated-user-id";
 import { createPlayerRouteRepositories } from "@/services/player-persistence/create-player-route-repositories";
 import { resolveStoryWorldMoveMode } from "@/services/story/resolve-story-world-move-mode";
-import { applyStoryMoveToCompactState } from "@/services/story/story-compact-state";
-
-interface IStoryWorldMovePayload {
-  nodeId: string;
-}
+import { resolveStoryWorldTraversalPath } from "@/services/story/resolve-story-world-traversal-path";
+import { applyStoryTraversalToCompactState } from "@/services/story/story-compact-state";
+import { createApiErrorResponse } from "@/services/security/api/create-api-error-response";
+import { requireTrustedMutationOrigin } from "@/services/security/api/require-trusted-mutation-origin";
+import { readJsonObjectBody, readRequiredStringField } from "@/services/security/api/request-body-parser";
 
 function resolveEffectiveCurrentNodeId(currentNodeId: string | null): string {
   return currentNodeId ?? "story-ch1-player-start";
 }
 
 export async function POST(request: NextRequest) {
+  const originGuard = requireTrustedMutationOrigin(request);
+  if (originGuard) return originGuard;
   try {
     const response = NextResponse.json({ ok: true }, { status: 200 });
     const repositories = await createPlayerRouteRepositories(request, response);
     const playerId = await getAuthenticatedUserId(repositories.client);
-    const payload = (await request.json()) as IStoryWorldMovePayload;
-    if (!payload.nodeId || typeof payload.nodeId !== "string") {
-      throw new ValidationError("Nodo destino inválido.");
-    }
-    assertValidStoryNodeId(payload.nodeId);
+    const payload = await readJsonObjectBody(request, "Payload inválido para movimiento Story.");
+    const nodeId = readRequiredStringField(payload, "nodeId", "Nodo destino inválido.");
+    assertValidStoryNodeId(nodeId);
     const opponentRepository = new SupabaseOpponentRepository(repositories.client);
     const duelProgressRepository = new SupabasePlayerStoryDuelProgressRepository(repositories.client);
     const worldRepository = new SupabasePlayerStoryWorldRepository(repositories.client);
@@ -36,16 +36,17 @@ export async function POST(request: NextRequest) {
     const worldState = await worldStateUseCase.execute({ playerId });
     const compactState = await worldRepository.getCompactStateByPlayerId(playerId);
     const effectiveCurrentNodeId = resolveEffectiveCurrentNodeId(compactState.currentNodeId);
-    if (payload.nodeId === effectiveCurrentNodeId) {
+    if (nodeId === effectiveCurrentNodeId) {
       return NextResponse.json(
         {
           currentNodeId: effectiveCurrentNodeId,
+          pathNodeIds: [],
         },
         { status: 200, headers: response.headers },
       );
     }
     const moveMode = resolveStoryWorldMoveMode({
-      targetNodeId: payload.nodeId,
+      targetNodeId: nodeId,
       currentNodeId: effectiveCurrentNodeId,
       visitedNodeIds: compactState.visitedNodeIds,
       completedNodeIds: worldState.progress.completedNodeIds,
@@ -54,22 +55,31 @@ export async function POST(request: NextRequest) {
     if (!moveMode.isAllowed) {
       throw new ValidationError(moveMode.validationMessage ?? "Movimiento Story inválido.");
     }
-    const nextCompactState = applyStoryMoveToCompactState({
+    const traversalPath = resolveStoryWorldTraversalPath({
+      currentNodeId: effectiveCurrentNodeId,
+      targetNodeId: nodeId,
+      visitedNodeIds: compactState.visitedNodeIds,
+      completedNodeIds: worldState.progress.completedNodeIds,
+      interactedNodeIds: compactState.interactedNodeIds,
+    });
+    if (!traversalPath || traversalPath.length === 0) {
+      throw new ValidationError("No se pudo resolver una ruta de movimiento válida.");
+    }
+    const traversedNodeIds = traversalPath.slice(1);
+    const nextCompactState = applyStoryTraversalToCompactState({
       state: compactState,
       fromNodeId: effectiveCurrentNodeId,
-      targetNodeId: payload.nodeId,
+      traversedNodeIds,
     });
     await worldRepository.saveCompactStateByPlayerId(playerId, nextCompactState);
     return NextResponse.json(
       {
         currentNodeId: nextCompactState.currentNodeId,
+        pathNodeIds: traversedNodeIds,
       },
       { status: 200, headers: response.headers },
     );
   } catch (error) {
-    if (error instanceof ValidationError) {
-      return NextResponse.json({ message: error.message }, { status: 400 });
-    }
-    return NextResponse.json({ message: "No se pudo mover el cursor Story." }, { status: 400 });
+    return createApiErrorResponse(error, "No se pudo mover el cursor Story.");
   }
 }

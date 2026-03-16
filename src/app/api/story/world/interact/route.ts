@@ -10,10 +10,9 @@ import { getAuthenticatedUserId } from "@/services/auth/api/internal/get-authent
 import { findStoryVirtualNodeDefinition } from "@/services/story/map-definitions/story-map-definition-registry";
 import { applyStoryInteractionToCompactState } from "@/services/story/story-compact-state";
 import { createPlayerRouteRepositories } from "@/services/player-persistence/create-player-route-repositories";
-
-interface IStoryWorldInteractPayload {
-  nodeId: string;
-}
+import { createApiErrorResponse } from "@/services/security/api/create-api-error-response";
+import { requireTrustedMutationOrigin } from "@/services/security/api/require-trusted-mutation-origin";
+import { readJsonObjectBody, readRequiredStringField } from "@/services/security/api/request-body-parser";
 
 function canInteractVirtualNode(input: {
   requiredNodeId: string | null;
@@ -27,16 +26,16 @@ function canInteractVirtualNode(input: {
 }
 
 export async function POST(request: NextRequest) {
+  const originGuard = requireTrustedMutationOrigin(request);
+  if (originGuard) return originGuard;
   try {
     const response = NextResponse.json({ ok: true }, { status: 200 });
     const repositories = await createPlayerRouteRepositories(request, response);
     const playerId = await getAuthenticatedUserId(repositories.client);
-    const payload = (await request.json()) as IStoryWorldInteractPayload;
-    if (!payload.nodeId || typeof payload.nodeId !== "string") {
-      throw new ValidationError("Nodo de interacción inválido.");
-    }
-    assertValidStoryNodeId(payload.nodeId);
-    const virtualNode = findStoryVirtualNodeDefinition(payload.nodeId);
+    const payload = await readJsonObjectBody(request, "Payload inválido para interacción Story.");
+    const nodeId = readRequiredStringField(payload, "nodeId", "Nodo de interacción inválido.");
+    assertValidStoryNodeId(nodeId);
+    const virtualNode = findStoryVirtualNodeDefinition(nodeId);
     if (!virtualNode) throw new ValidationError("Solo se permiten nodos virtuales de interacción Story.");
 
     const opponentRepository = new SupabaseOpponentRepository(repositories.client);
@@ -82,9 +81,6 @@ export async function POST(request: NextRequest) {
       { status: 200, headers: response.headers },
     );
   } catch (error) {
-    if (error instanceof ValidationError) {
-      return NextResponse.json({ message: error.message }, { status: 400 });
-    }
-    return NextResponse.json({ message: "No se pudo registrar la interacción Story." }, { status: 400 });
+    return createApiErrorResponse(error, "No se pudo registrar la interacción Story.");
   }
 }
