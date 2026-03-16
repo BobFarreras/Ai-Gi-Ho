@@ -9,7 +9,8 @@ import { SupabasePlayerStoryWorldRepository } from "@/infrastructure/persistence
 import { getAuthenticatedUserId } from "@/services/auth/api/internal/get-authenticated-user-id";
 import { createPlayerRouteRepositories } from "@/services/player-persistence/create-player-route-repositories";
 import { resolveStoryWorldMoveMode } from "@/services/story/resolve-story-world-move-mode";
-import { applyStoryMoveToCompactState } from "@/services/story/story-compact-state";
+import { resolveStoryWorldTraversalPath } from "@/services/story/resolve-story-world-traversal-path";
+import { applyStoryTraversalToCompactState } from "@/services/story/story-compact-state";
 import { createApiErrorResponse } from "@/services/security/api/create-api-error-response";
 import { requireTrustedMutationOrigin } from "@/services/security/api/require-trusted-mutation-origin";
 import { readJsonObjectBody, readRequiredStringField } from "@/services/security/api/request-body-parser";
@@ -39,6 +40,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           currentNodeId: effectiveCurrentNodeId,
+          pathNodeIds: [],
         },
         { status: 200, headers: response.headers },
       );
@@ -53,15 +55,27 @@ export async function POST(request: NextRequest) {
     if (!moveMode.isAllowed) {
       throw new ValidationError(moveMode.validationMessage ?? "Movimiento Story inválido.");
     }
-    const nextCompactState = applyStoryMoveToCompactState({
+    const traversalPath = resolveStoryWorldTraversalPath({
+      currentNodeId: effectiveCurrentNodeId,
+      targetNodeId: nodeId,
+      visitedNodeIds: compactState.visitedNodeIds,
+      completedNodeIds: worldState.progress.completedNodeIds,
+      interactedNodeIds: compactState.interactedNodeIds,
+    });
+    if (!traversalPath || traversalPath.length === 0) {
+      throw new ValidationError("No se pudo resolver una ruta de movimiento válida.");
+    }
+    const traversedNodeIds = traversalPath.slice(1);
+    const nextCompactState = applyStoryTraversalToCompactState({
       state: compactState,
       fromNodeId: effectiveCurrentNodeId,
-      targetNodeId: nodeId,
+      traversedNodeIds,
     });
     await worldRepository.saveCompactStateByPlayerId(playerId, nextCompactState);
     return NextResponse.json(
       {
         currentNodeId: nextCompactState.currentNodeId,
+        pathNodeIds: traversedNodeIds,
       },
       { status: 200, headers: response.headers },
     );

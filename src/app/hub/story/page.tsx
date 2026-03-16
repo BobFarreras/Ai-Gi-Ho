@@ -5,6 +5,8 @@ import { buildStoryChapterBriefing } from "@/services/story/build-story-chapter-
 import { resolveStoryPostDuelTransitionFromSearchParams } from "@/services/story/duel-flow/story-post-duel-transition";
 import { getStoryMapRuntimeData } from "@/services/story/get-story-map-runtime-data";
 
+export const dynamic = "force-dynamic";
+
 interface IStoryPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }

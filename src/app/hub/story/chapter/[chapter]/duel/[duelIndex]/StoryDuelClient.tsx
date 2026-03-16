@@ -1,7 +1,6 @@
 // src/app/hub/story/chapter/[chapter]/duel/[duelIndex]/StoryDuelClient.tsx - Orquesta duelo Story en cliente y registra resultado/recompensas al finalizar.
 "use client";
 import { useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Board, BoardBossThemeVariant } from "@/components/game/board";
 import { IDuelResultRewardSummary } from "@/components/game/board/ui/internal/duel-result/duel-result-reward-summary";
 import { ICard } from "@/core/entities/ICard";
@@ -27,7 +26,6 @@ interface StoryDuelClientProps {
   opponentDeck: ICard[];
 }
 export function StoryDuelClient(props: StoryDuelClientProps) {
-  const router = useRouter();
   const [status, setStatus] = useState<string | null>(null);
   const [rewardSummary, setRewardSummary] = useState<IDuelResultRewardSummary | null>(null);
   const [resultTransition, setResultTransition] = useState<{ outcome: StoryDuelOutcome; duelNodeId: string; returnNodeId: string } | null>(null);
@@ -64,8 +62,7 @@ export function StoryDuelClient(props: StoryDuelClientProps) {
       duelNodeId: input.duelNodeId,
       returnNodeId: input.returnNodeId,
     });
-    router.push(`/hub/story?${query.toString()}`);
-    router.refresh();
+    window.location.assign(`/hub/story?${query.toString()}`);
   };
   const handleResultAction = () => pushBackToStory(
     resultTransition ?? { outcome: "LOST", duelNodeId: `story-ch${props.chapter}-duel-${props.duelIndex}`, returnNodeId: "story-ch1-player-start" },

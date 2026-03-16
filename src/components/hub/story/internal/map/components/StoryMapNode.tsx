@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
 import { resolveStoryRewardCardVisual } from "@/services/story/resolve-story-reward-card-visual";
+import { resolveStoryOpponentAvatarUrl } from "@/components/hub/story/internal/map/story-opponent-avatar";
 
 interface StoryMapNodeProps {
   node: IStoryMapNodeRuntime;
@@ -19,7 +20,7 @@ function resolveHologramAsset(node: IStoryMapNodeRuntime): { src: string; alt: s
   if (node.nodeType === "MOVE") return null;
   if (node.nodeType === "BOSS" || node.nodeType === "DUEL") {
     return {
-      src: node.opponentAvatarUrl ?? "/assets/story/opponents/opp-ch1-apprentice/avatar-GenNvim.png",
+      src: resolveStoryOpponentAvatarUrl(node),
       alt: node.opponentName || "Oponente",
     };
   }

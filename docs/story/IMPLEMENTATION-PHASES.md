@@ -292,6 +292,23 @@ Dar identidad de jefe a los duelos `isBossDuel` sin alterar reglas de combate ni
 5. Flujo en `StoryDuelClient`:
    - se elimina diálogo de intro BOSS,
    - coin toss y combate siguen el flujo estándar con identidad visual/sonora BOSS.
+
+## Fase 6 (nueva) - Acto 1 real (grafo productivo)
+
+### Objetivo
+
+Sustituir el acto 1 de pruebas por un grafo real con bifurcaciones e interacciones completas antes del BOSS final.
+
+### Implementado
+
+1. `act-1-map-definition.ts` se reestructura con:
+   - ruta principal,
+   - bifurcación superior/inferior,
+   - múltiples nodos `MOVE`, `REWARD_CARD`, `REWARD_NEXUS`, `EVENT`,
+   - duelos reales conectados a `story_duels`.
+2. `merge-story-map-visual-definition.test.ts` se actualiza a los nuevos IDs virtuales del acto 1.
+3. Se documenta migración de BD asociada:
+   - `docs/supabase/sql/020_phase_6_act1_real_flow.sql`.
 2. Resolver narrativo enriquece líneas con `portraitUrl` y `audioUrl`.
 3. Modal de interacción renderiza retrato y reproductor de audio cuando existen assets.
 

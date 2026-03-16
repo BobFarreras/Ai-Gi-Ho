@@ -14,6 +14,7 @@ import { StoryCircuitCanvas } from "./internal/map/components/StoryCircuitCanvas
 import { useStoryMapZoom } from "./internal/map/hooks/use-story-map-zoom";
 import { resolveStoryNodeSideOffsetPx } from "./internal/map/constants/story-map-geometry";
 import { resolveStoryRetreatTrail } from "./internal/map/layout/resolve-story-retreat-trail";
+import { resolveStoryOpponentAvatarUrl } from "./internal/map/story-opponent-avatar";
 
 interface StoryCircuitMapProps {
   nodes: IStoryMapNodeRuntime[];
@@ -67,6 +68,12 @@ export function StoryCircuitMap({
     () => resolveStoryRetreatTrail({ retreatingNodeId: retreatingNodeId ?? null, nodes, positionMap }),
     [retreatingNodeId, nodes, positionMap],
   );
+  const retreatingNode = useMemo(
+    () => (retreatingNodeId ? nodes.find((node) => node.id === retreatingNodeId) ?? null : null),
+    [retreatingNodeId, nodes],
+  );
+  const retreatingAvatarUrl = resolveStoryOpponentAvatarUrl(retreatingNode);
+  const retreatingAvatarAlt = retreatingNode?.opponentName ? `Retirada de ${retreatingNode.opponentName}` : "Retirada de oponente";
 
   useEffect(() => {
     const fromX = avatarX.get();
@@ -139,6 +146,8 @@ export function StoryCircuitMap({
         floatingReward={floatingReward}
         retreatingNodeId={retreatingNodeId}
         retreatTrail={retreatTrail}
+        retreatingAvatarUrl={retreatingAvatarUrl}
+        retreatingAvatarAlt={retreatingAvatarAlt}
         onRetreatAnimationComplete={onRetreatAnimationComplete}
       />
       <StoryMapZoomControls onZoomIn={zoomIn} onZoomOut={zoomOut} onReset={resetZoom} />

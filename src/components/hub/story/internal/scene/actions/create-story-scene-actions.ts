@@ -2,14 +2,13 @@
 import { IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
 import { resolveStoryPrimaryAction } from "@/services/story/resolve-story-primary-action";
 import { resolveStoryRewardCardVisual } from "@/services/story/resolve-story-reward-card-visual";
+import { animateStoryAvatarPath } from "@/components/hub/story/internal/scene/actions/animate-story-avatar-path";
 
 interface IStoryInteractResponse {
   interactionCountForNode: number;
 }
-
 type StoryRewardTone = "NEXUS" | "CARD";
 type StorySmartActionMode = "MOVE" | "PRIMARY" | "MOVE_AND_PRIMARY" | "DISABLED";
-
 interface IStoryCollectVisual {
   assetSrc: string;
   assetAlt: string;
@@ -51,10 +50,7 @@ function resolveCollectVisual(targetNode: IStoryMapNodeRuntime): IStoryCollectVi
   return { assetSrc: cardVisual.src, assetAlt: cardVisual.alt, tone: "CARD" };
 }
 
-function wait(ms: number): Promise<void> {
-  return new Promise((resolve) => window.setTimeout(resolve, ms));
-}
-
+function wait(ms: number): Promise<void> { return new Promise((resolve) => window.setTimeout(resolve, ms)); }
 /**
  * Crea handlers de escena para mantener StoryScene como componente de composición.
  */
@@ -81,15 +77,17 @@ export function createStorySceneActions(params: ICreateStorySceneActionsParams) 
     try {
       const response = await fetch("/api/story/world/move", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ nodeId: params.selectedNodeId }) });
       if (!response.ok) throw new Error("Movimiento inválido.");
-      const payload = (await response.json()) as { currentNodeId: string | null };
-      if (payload.currentNodeId) {
+      const payload = (await response.json()) as { currentNodeId: string | null; pathNodeIds?: string[] };
+      const travelPathNodeIds = payload.pathNodeIds ?? (payload.currentNodeId ? [payload.currentNodeId] : []);
+      if (travelPathNodeIds.length > 0) {
         params.sceneSfx.playMove();
-        const targetNode = params.nodesById[payload.currentNodeId] ?? null;
-        const shouldStaySide = Boolean(targetNode) && targetNode.nodeType !== "MOVE" && !targetNode.isCompleted;
-        params.setCurrentNodeId(payload.currentNodeId);
-        params.setAvatarVisualTarget({ nodeId: payload.currentNodeId, stance: shouldStaySide ? "SIDE" : "CENTER" });
-        await wait(shouldStaySide ? 360 : 420);
-        if (!shouldStaySide) await centerAvatarOnNode(payload.currentNodeId);
+        await animateStoryAvatarPath({
+          pathNodeIds: travelPathNodeIds,
+          nodesById: params.nodesById,
+          setCurrentNodeId: params.setCurrentNodeId,
+          setAvatarVisualTarget: params.setAvatarVisualTarget,
+          wait,
+        });
       }
       await wait(420);
       if (triggerActionAfterMove && targetNodeForAction && targetNodeForAction.nodeType !== "MOVE") {

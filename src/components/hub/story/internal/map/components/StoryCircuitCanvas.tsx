@@ -46,6 +46,8 @@ interface IStoryCircuitCanvasProps {
   floatingReward?: { label: string; tone: "NEXUS" | "CARD" } | null;
   retreatingNodeId?: string | null;
   retreatTrail: IPathSegmentPoint[];
+  retreatingAvatarUrl: string;
+  retreatingAvatarAlt: string;
   onRetreatAnimationComplete?: () => void;
 }
 
@@ -126,6 +128,8 @@ export function StoryCircuitCanvas(props: IStoryCircuitCanvasProps) {
       <StoryNodeRetreatEffect
         isVisible={Boolean(props.retreatingNodeId)}
         trail={props.retreatTrail}
+        avatarUrl={props.retreatingAvatarUrl}
+        avatarAlt={props.retreatingAvatarAlt}
         onComplete={props.onRetreatAnimationComplete}
       />
       {props.isInteractionLocked ? (

@@ -206,6 +206,16 @@
 3. Nota:
    - esta fase pisa configuración funcional de `018` para dejar el orden final de playtesting.
 
+## Fase 6 (Acto 1 real con cierre BOSS)
+
+1. Ejecuta `docs/supabase/sql/020_phase_6_act1_real_flow.sql`.
+2. Ajustes principales:
+   - define flujo real de acto 1 con Soldado repetido + GenNvim difícil + BOSS GenNvim,
+   - crea `deck-opp-ch1-apprentice-v2` para el tramo difícil de GenNvim,
+   - mantiene desbloqueo de acto 2 al ganar el BOSS del acto 1.
+3. Dependencias:
+   - requiere esquema Story previo (`008`) y roster ampliado (`017`).
+
 ## Fase 5.1 (Experiencia global del jugador)
 
 1. Ejecuta `docs/supabase/sql/009_phase_5_player_progress_experience.sql`.
