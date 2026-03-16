@@ -1,4 +1,5 @@
 // src/components/hub/story/internal/resolve-story-performance-profile.test.ts - Verifica umbrales de perfil de rendimiento Story por viewport.
+import { describe, expect, it } from "vitest";
 import { resolveStoryPerformanceProfile } from "@/components/hub/story/internal/resolve-story-performance-profile";
 
 describe("resolveStoryPerformanceProfile", () => {

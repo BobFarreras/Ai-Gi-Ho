@@ -5,33 +5,34 @@ import { createSupabasePlayerStoryDuelProgressRepository } from "@/infrastructur
 import { createSupabasePlayerStoryWorldRepository } from "@/infrastructure/persistence/supabase/create-supabase-player-story-world-repository";
 import { IStoryMapRuntimeData, IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
 import { mergeStoryMapVisualDefinition } from "@/services/story/merge-story-map-visual-definition";
-import {
-  listStoryActNodeIds,
-  resolveStoryActByNodeId,
-} from "@/services/story/map-definitions/story-map-definition-registry";
+import { resolveStoryActEntryNode } from "@/services/story/resolve-story-act-entry-node";
+import { listStoryActNodeIds, resolveStoryActByNodeId } from "@/services/story/map-definitions/story-map-definition-registry";
 import {
   buildStoryWorldGraph,
   resolveStoryUnlockedNodeIds,
 } from "@/core/services/story/world/build-story-world-graph";
 
-function resolveActiveChapter(input: {
-  nodes: IStoryMapNodeRuntime[];
-  currentNodeId: string | null;
-  completedNodeIds: string[];
-}): number {
-  const currentNode = input.nodes.find((node) => node.id === input.currentNodeId);
-  if (currentNode) return currentNode.chapter;
-  const completedNodes = input.nodes.filter((node) => input.completedNodeIds.includes(node.id));
-  if (completedNodes.length === 0) return 1;
-  return Math.max(...completedNodes.map((node) => node.chapter));
+function resolveUnlockedActIds(nodes: IStoryMapNodeRuntime[]): number[] {
+  return Array.from(
+    new Set(
+      nodes
+        .filter((node) => node.isUnlocked)
+        .map((node) => resolveStoryActByNodeId(node.id))
+        .filter((actId): actId is number => Boolean(actId)),
+    ),
+  ).sort((left, right) => left - right);
 }
 
 function resolveActiveActId(input: {
+  preferredActId: number | null;
   currentNodeId: string | null;
   completedNodeIds: string[];
+  unlockedActIds: number[];
 }): number {
+  if (input.preferredActId && input.unlockedActIds.includes(input.preferredActId)) return input.preferredActId;
   const byCurrentNode = input.currentNodeId ? resolveStoryActByNodeId(input.currentNodeId) : null;
   if (byCurrentNode) return byCurrentNode;
+  if (input.unlockedActIds.length > 0) return input.unlockedActIds[input.unlockedActIds.length - 1] ?? 1;
   for (const completedNodeId of input.completedNodeIds) {
     const byCompletedNode = resolveStoryActByNodeId(completedNodeId);
     if (byCompletedNode) return byCompletedNode;
@@ -39,7 +40,7 @@ function resolveActiveActId(input: {
   return 1;
 }
 
-export async function getStoryMapRuntimeData(): Promise<IStoryMapRuntimeData | null> {
+export async function getStoryMapRuntimeData(input?: { preferredActId?: number | null }): Promise<IStoryMapRuntimeData | null> {
   const session = await getCurrentUserSession();
   if (!session) return null;
   const opponentRepository = await createSupabaseOpponentRepository();
@@ -69,6 +70,7 @@ export async function getStoryMapRuntimeData(): Promise<IStoryMapRuntimeData | n
       duelIndex: node.duelIndex,
       title: node.title,
       opponentName: node.opponentName,
+      opponentAvatarUrl: node.opponentAvatarUrl ?? null,
       nodeType: node.nodeType,
       difficulty: node.difficulty,
       rewardNexus: node.rewardNexus,
@@ -114,29 +116,33 @@ export async function getStoryMapRuntimeData(): Promise<IStoryMapRuntimeData | n
           ? latestVisitedNodeId
           : defaultStartNodeId
       : defaultStartNodeId;
-  const activeChapter = resolveActiveChapter({
-    nodes: mergedNodes,
-    currentNodeId: effectiveCurrentNodeId,
-    completedNodeIds,
-  });
   const activeActId = resolveActiveActId({
+    preferredActId: input?.preferredActId ?? null,
     currentNodeId: effectiveCurrentNodeId,
     completedNodeIds,
+    unlockedActIds: resolveUnlockedActIds(mergedNodes),
   });
   const actNodeIds = new Set(listStoryActNodeIds(activeActId));
-  const chapterNodes = mergedNodes.filter(
-    (node) => node.chapter === activeChapter && actNodeIds.has(node.id),
-  );
-  const chapterStartNodeId =
-    chapterNodes.find((node) => node.id === `story-ch${activeChapter}-player-start`)?.id ??
-    chapterNodes[0]?.id ??
+  const actNodes = mergedNodes.filter((node) => actNodeIds.has(node.id));
+  const actStartNodeId =
+    actNodes.find((node) => node.id === `story-ch${activeActId}-player-start`)?.id ??
+    actNodes.find((node) => node.isUnlocked)?.id ??
+    actNodes[0]?.id ??
     null;
-  const chapterCurrentNodeId = chapterNodes.some((node) => node.id === effectiveCurrentNodeId)
-    ? effectiveCurrentNodeId
-    : chapterStartNodeId;
+  const actCurrentNodeId = resolveStoryActEntryNode({
+    preferredActId: input?.preferredActId ?? null,
+    activeActId,
+    currentActId: effectiveCurrentNodeId ? resolveStoryActByNodeId(effectiveCurrentNodeId) : null,
+    actStartNodeId,
+    actNodes,
+    visitedNodeIds: compactState.visitedNodeIds,
+    effectiveCurrentNodeId,
+  });
   return {
     playerId: session.user.id,
-    nodes: chapterNodes,
-    currentNodeId: chapterCurrentNodeId,
+    nodes: actNodes,
+    currentNodeId: actCurrentNodeId,
+    activeActId,
+    availableActIds: resolveUnlockedActIds(mergedNodes),
   };
 }

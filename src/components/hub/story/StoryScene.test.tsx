@@ -32,6 +32,8 @@ function createMockNode(overrides: Partial<IStoryMapNodeRuntime>): IStoryMapNode
 const mockRuntime: IStoryMapRuntimeData = {
   playerId: "player-1",
   currentNodeId: "story-ch1-duel-1",
+  activeActId: 1,
+  availableActIds: [1],
   nodes: [
     createMockNode({ id: "story-ch1-duel-1", nodeType: "MOVE", isCompleted: true }),
     createMockNode({ id: "story-ch1-duel-2", title: "Nodo Objetivo", unlockRequirementNodeId: "story-ch1-duel-1" }),
@@ -50,6 +52,6 @@ describe("StoryScene", () => {
     render(<StoryScene runtime={mockRuntime} briefing={mockBriefing} />);
     const targetNode = screen.getByRole("button", { name: "Seleccionar nodo story-ch1-duel-2" });
     fireEvent.click(targetNode);
-    expect(screen.getByText("Nodo Objetivo")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Nodo Objetivo" })).toBeInTheDocument();
   });
 });

@@ -174,6 +174,58 @@
 5. Contrato de aplicación preparado:
    - `IOpponentRepository` + `IStoryDuelDefinition` para eliminar hardcode de Story en UI.
 
+## Fase 5.2 (Ampliación de roster Story)
+
+1. Ejecuta `docs/supabase/sql/017_phase_5_2_story_opponent_roster_expansion.sql`.
+2. Ajustes principales:
+   - normaliza nombre visible de `opp-ch1-apprentice` a `GenNvim`,
+   - crea 4 oponentes adicionales (`BigLog`, `Jaku`, `Helena`, `Soldado Acto 01`),
+   - crea mazos dedicados por oponente con perfil alineado a dificultad.
+3. Alcance de esta fase:
+   - solo catálogo de oponentes + deck lists.
+   - la activación visual en mapa/nodos se hace en fase de layout Story.
+
+## Fase 5.3 (Expansión de rotación de duelos Story)
+
+1. Ejecuta `docs/supabase/sql/018_phase_5_3_story_duel_rotation_expansion.sql`.
+2. Ajustes principales:
+   - añade `story-ch2-duel-3` a `story-ch2-duel-6`,
+   - conecta los nuevos oponentes (`Soldado Acto 01`, `Jaku`, `BigLog`, `Helena`) al flujo de capítulo 2,
+   - asigna recompensas de carta garantizadas por duelo nuevo.
+3. Dependencias:
+   - requiere haber ejecutado `017_phase_5_2_story_opponent_roster_expansion.sql`.
+
+## Fase 5.4 (Rebalanceo de capítulos Story)
+
+1. Ejecuta `docs/supabase/sql/019_phase_5_4_story_chapter_rebalance.sql`.
+2. Ajustes principales:
+   - mueve la rotación nueva (`Soldado`, `Jaku`, `BigLog`, `Helena`) a capítulo 1,
+   - simplifica capítulo 2 a flujo corto (duelo, economía/evento, boss),
+   - actualiza `avatar_url` de oponentes con assets locales cargados,
+   - desactiva `opp-ch1-architect` y `opp-ch1-sysadmin` en el roster activo.
+3. Nota:
+   - esta fase pisa configuración funcional de `018` para dejar el orden final de playtesting.
+
+## Fase 6 (Acto 1 real con cierre BOSS)
+
+1. Ejecuta `docs/supabase/sql/020_phase_6_act1_real_flow.sql`.
+2. Ajustes principales:
+   - define flujo real de acto 1 con Soldado repetido + GenNvim difícil + BOSS GenNvim,
+   - crea `deck-opp-ch1-apprentice-v2` para el tramo difícil de GenNvim,
+   - mantiene desbloqueo de acto 2 al ganar el BOSS del acto 1.
+3. Dependencias:
+   - requiere esquema Story previo (`008`) y roster ampliado (`017`).
+
+## Fase 7 (Acto 2 ramificado con puente de BOSS)
+
+1. Ejecuta `docs/supabase/sql/021_phase_7_act2_branching_flow.sql`.
+2. Ajustes principales:
+   - define Acto 2 con tres ramas (superior, central e inferior),
+   - introduce doble nodo de Helena para condicionar el acceso final,
+   - configura `story-ch2-duel-9` como BOSS Jaku tras activar el puente.
+3. Dependencias:
+   - requiere haber aplicado `020_phase_6_act1_real_flow.sql`.
+
 ## Fase 5.1 (Experiencia global del jugador)
 
 1. Ejecuta `docs/supabase/sql/009_phase_5_player_progress_experience.sql`.

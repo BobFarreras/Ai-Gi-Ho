@@ -115,6 +115,7 @@ export function resolveStoryPathSegments(
   positionMap: Record<string, IStoryCircuitPosition>,
 ): IStoryCircuitSegment[] {
   const segments: IStoryCircuitSegment[] = [];
+  const nodeIdSet = new Set(nodes.map((node) => node.id));
   const resolveEdgeAnchor = (
     sourceNodeId: string,
     targetNodeId: string,
@@ -138,8 +139,12 @@ export function resolveStoryPathSegments(
     segments.push({ from, to });
   };
   for (const node of nodes) {
-    if (node.unlockRequirementNodeId) pushSegment(node.unlockRequirementNodeId, node.id);
-    for (const linkedNodeId of node.pathLinkFromNodeIds ?? []) pushSegment(linkedNodeId, node.id);
+    if (node.unlockRequirementNodeId && nodeIdSet.has(node.unlockRequirementNodeId)) {
+      pushSegment(node.unlockRequirementNodeId, node.id);
+    }
+    for (const linkedNodeId of node.pathLinkFromNodeIds ?? []) {
+      if (nodeIdSet.has(linkedNodeId)) pushSegment(linkedNodeId, node.id);
+    }
   }
   return segments;
 }

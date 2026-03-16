@@ -3,6 +3,7 @@ import {
   findStoryVirtualNodeDefinition,
   findStoryVisualNodeDefinition,
 } from "@/services/story/map-definitions/story-map-definition-registry";
+import { resolveStoryWorldTraversalPath } from "@/services/story/resolve-story-world-traversal-path";
 
 type StoryWorldMoveMode = "VISITED" | "VIRTUAL" | "VISUAL" | "GRAPH";
 
@@ -20,22 +21,6 @@ interface IResolveStoryWorldMoveModeOutput {
   validationMessage: string | null;
 }
 
-function canMoveToVirtualNode(input: {
-  currentNodeId: string | null;
-  requiredNodeId: string | null;
-  completedNodeIds: string[];
-  interactedNodeIds: string[];
-}): boolean {
-  if (!input.requiredNodeId) return true;
-  if (input.currentNodeId !== input.requiredNodeId) return false;
-  const requiredVirtualNode = findStoryVirtualNodeDefinition(input.requiredNodeId);
-  if (requiredVirtualNode?.nodeType === "MOVE") return true;
-  return (
-    input.completedNodeIds.includes(input.requiredNodeId) ||
-    input.interactedNodeIds.includes(input.requiredNodeId)
-  );
-}
-
 /**
  * Determina cómo debe resolverse un movimiento Story y si está permitido.
  */
@@ -48,30 +33,43 @@ export function resolveStoryWorldMoveMode(
 
   const virtualNode = findStoryVirtualNodeDefinition(input.targetNodeId);
   if (virtualNode) {
-    const canMove = canMoveToVirtualNode({
+    if (!input.currentNodeId) {
+      return { mode: "VIRTUAL", isAllowed: false, validationMessage: "No hay nodo de origen para el movimiento." };
+    }
+    const path = resolveStoryWorldTraversalPath({
       currentNodeId: input.currentNodeId,
-      requiredNodeId: virtualNode.unlockRequirementNodeId,
+      targetNodeId: input.targetNodeId,
+      visitedNodeIds: input.visitedNodeIds,
       completedNodeIds: input.completedNodeIds,
       interactedNodeIds: input.interactedNodeIds,
     });
+    const canMove = Boolean(path);
     return {
       mode: "VIRTUAL",
       isAllowed: canMove,
-      validationMessage: canMove ? null : "El nodo virtual todavía está bloqueado.",
+      validationMessage: canMove ? null : "No existe una ruta válida hasta el nodo virtual.",
     };
   }
 
   const visualNode = findStoryVisualNodeDefinition(input.targetNodeId);
   if (visualNode) {
-    const isSequentialMove =
-      !visualNode.unlockRequirementNodeId ||
-      visualNode.unlockRequirementNodeId === input.currentNodeId;
+    if (!input.currentNodeId) {
+      return { mode: "VISUAL", isAllowed: false, validationMessage: "No hay nodo de origen para el movimiento." };
+    }
+    const path = resolveStoryWorldTraversalPath({
+      currentNodeId: input.currentNodeId,
+      targetNodeId: input.targetNodeId,
+      visitedNodeIds: input.visitedNodeIds,
+      completedNodeIds: input.completedNodeIds,
+      interactedNodeIds: input.interactedNodeIds,
+    });
+    const isSequentialMove = Boolean(path);
     return {
       mode: "VISUAL",
       isAllowed: isSequentialMove,
       validationMessage: isSequentialMove
         ? null
-        : "Debes resolver el nodo anterior antes de avanzar.",
+        : "No existe ruta desbloqueada hasta ese nodo.",
     };
   }
 
