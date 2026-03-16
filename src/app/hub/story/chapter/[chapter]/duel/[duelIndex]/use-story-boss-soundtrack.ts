@@ -13,6 +13,7 @@ const BOSS_SOUNDTRACK_CANDIDATES = [
 export function useStoryBossSoundtrack(input: {
   isBossDuel: boolean;
   isBlockedByOverlay: boolean;
+  isStopped: boolean;
 }): void {
   const [isMuted, setIsMuted] = useState<boolean>(() => (
     typeof window !== "undefined" ? window.localStorage.getItem("board-muted") === "1" : false
@@ -30,7 +31,7 @@ export function useStoryBossSoundtrack(input: {
   }, []);
 
   useEffect(() => {
-    if (!input.isBossDuel || input.isBlockedByOverlay || isMuted) {
+    if (!input.isBossDuel || input.isBlockedByOverlay || input.isStopped || isMuted) {
       return;
     }
     const audio = new Audio(BOSS_SOUNDTRACK_CANDIDATES[0]);
@@ -46,5 +47,5 @@ export function useStoryBossSoundtrack(input: {
       audio.pause();
       audio.currentTime = 0;
     };
-  }, [input.isBlockedByOverlay, input.isBossDuel, isMuted]);
+  }, [input.isBlockedByOverlay, input.isBossDuel, input.isStopped, isMuted]);
 }

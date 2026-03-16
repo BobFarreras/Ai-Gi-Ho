@@ -2,7 +2,7 @@
 "use client";
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Board } from "@/components/game/board";
+import { Board, BoardBossThemeVariant } from "@/components/game/board";
 import { IDuelResultRewardSummary } from "@/components/game/board/ui/internal/duel-result/duel-result-reward-summary";
 import { ICard } from "@/core/entities/ICard";
 import { StoryDuelOutcome } from "@/services/story/duel-flow/story-duel-outcome";
@@ -32,6 +32,7 @@ export function StoryDuelClient(props: StoryDuelClientProps) {
   const [rewardSummary, setRewardSummary] = useState<IDuelResultRewardSummary | null>(null);
   const [resultTransition, setResultTransition] = useState<{ outcome: StoryDuelOutcome; duelNodeId: string; returnNodeId: string } | null>(null);
   const [isCoinTossVisible, setIsCoinTossVisible] = useState(true);
+  const [isBossSoundtrackStopped, setIsBossSoundtrackStopped] = useState(false);
   const hasPostedResultRef = useRef(false);
   const playerAvatarUrl = "/assets/story/player/bob.png";
   const resolvedOpponentAvatarUrl = props.opponentAvatarUrl ?? "/assets/story/opponents/opp-ch1-apprentice/avatar-GenNvim.png";
@@ -45,9 +46,17 @@ export function StoryDuelClient(props: StoryDuelClientProps) {
     () => buildStoryOpponentNarrationPack({ opponentId: props.opponentId, opponentName: props.opponentName, duelDescription: props.duelDescription }),
     [props.duelDescription, props.opponentId, props.opponentName],
   );
+  const bossThemeVariant = useMemo<BoardBossThemeVariant>(() => {
+    const byOpponentId: Record<string, BoardBossThemeVariant> = {
+      "opp-ch1-helena": "CRIMSON",
+      "opp-ch2-omega": "VIOLET",
+    };
+    return byOpponentId[props.opponentId] ?? "CRIMSON";
+  }, [props.opponentId]);
   useStoryBossSoundtrack({
     isBossDuel: props.isBossDuel,
     isBlockedByOverlay: isCoinTossVisible,
+    isStopped: isBossSoundtrackStopped,
   });
   const pushBackToStory = (input: { outcome: StoryDuelOutcome; duelNodeId: string; returnNodeId: string }) => {
     const query = new URLSearchParams({
@@ -64,6 +73,7 @@ export function StoryDuelClient(props: StoryDuelClientProps) {
   async function handleMatchResolved(result: { winnerPlayerId: string | "DRAW"; playerId: string }) {
     if (hasPostedResultRef.current) return;
     hasPostedResultRef.current = true;
+    setIsBossSoundtrackStopped(true);
     const outcome: StoryDuelOutcome = result.winnerPlayerId === result.playerId ? "WON" : "LOST";
     setStatus(outcome === "WON" ? "Registrando victoria y recompensas..." : "Registrando derrota...");
     try {
@@ -84,6 +94,7 @@ export function StoryDuelClient(props: StoryDuelClientProps) {
   async function handleAbortMatch() {
     if (hasPostedResultRef.current) return;
     hasPostedResultRef.current = true;
+    setIsBossSoundtrackStopped(true);
     setStatus("Sincronizando abandono y retorno al mapa Story...");
     try {
       const payload = await postStoryDuelCompletion({
@@ -116,6 +127,7 @@ export function StoryDuelClient(props: StoryDuelClientProps) {
         opponentAvatarUrl={resolvedOpponentAvatarUrl}
         playerAvatarUrl={playerAvatarUrl}
         isBossTheme={props.isBossDuel}
+        bossThemeVariant={bossThemeVariant}
         narrationPack={narrationPack}
         isMatchStartLocked={isCoinTossVisible}
         duelResultRewardSummary={rewardSummary}
