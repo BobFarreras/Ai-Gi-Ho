@@ -39,6 +39,8 @@ interface IStoryCircuitCanvasProps {
   onSelectNode: (nodeId: string | null) => void;
   avatarX: MotionValue<number>;
   avatarY: MotionValue<number>;
+  avatarScale: MotionValue<number>;
+  avatarStance: "CENTER" | "SIDE" | "PORTAL";
   avatarSideOffsetX: number;
   collectingAnchor: IPathSegmentPoint | null;
   collectingRewardVisual?: { assetSrc: string; assetAlt: string; tone: "NEXUS" | "CARD" } | null;
@@ -46,6 +48,9 @@ interface IStoryCircuitCanvasProps {
   floatingReward?: { label: string; tone: "NEXUS" | "CARD" } | null;
   retreatingNodeId?: string | null;
   retreatTrail: IPathSegmentPoint[];
+  retreatingAvatarUrl: string;
+  retreatingAvatarAlt: string;
+  isCameraDragEnabled: boolean;
   onRetreatAnimationComplete?: () => void;
 }
 
@@ -55,13 +60,14 @@ interface IStoryCircuitCanvasProps {
 export function StoryCircuitCanvas(props: IStoryCircuitCanvasProps) {
   return (
     <motion.div
-      drag
+      drag={props.isCameraDragEnabled}
+      dragMomentum={false}
       dragConstraints={props.dragConstraintsRef}
       dragElastic={0.1}
       style={{ x: props.cameraX, y: props.cameraY, scale: props.mapScale, width: props.width, height: props.height }}
-      className="absolute left-0 top-0"
+      className="absolute left-0 top-0 isolate"
     >
-      <svg className="pointer-events-none absolute inset-0 h-full w-full">
+      <svg className="pointer-events-none absolute inset-0 z-0 h-full w-full">
         {props.segments.map((segment, index) => (
           <motion.line
             key={`path-${index}`}
@@ -81,7 +87,7 @@ export function StoryCircuitCanvas(props: IStoryCircuitCanvasProps) {
       {props.nodes.map((node) => {
         const position = resolveStoryNodePosition(node.id, props.positionMap);
         return (
-          <div key={node.id} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ top: position.y, left: position.x }}>
+          <div key={node.id} className="absolute z-30 -translate-x-1/2 -translate-y-1/2" style={{ top: position.y, left: position.x }}>
             <StoryMapNode
               node={node}
               isSelected={props.selectedNodeId === node.id}
@@ -97,7 +103,7 @@ export function StoryCircuitCanvas(props: IStoryCircuitCanvasProps) {
       <motion.div
         className="pointer-events-none absolute z-40 -translate-x-1/2 -translate-y-1/2"
         initial={false}
-        style={{ top: props.avatarY, left: props.avatarX, x: props.avatarSideOffsetX, width: STORY_NODE_TOKEN_SIZE, height: STORY_NODE_TOKEN_SIZE }}
+        style={{ top: props.avatarY, left: props.avatarX, x: props.avatarSideOffsetX, scale: props.avatarScale, width: STORY_NODE_TOKEN_SIZE, height: STORY_NODE_TOKEN_SIZE }}
       >
         <Image
           src="/assets/story/player/bob.png"
@@ -105,7 +111,9 @@ export function StoryCircuitCanvas(props: IStoryCircuitCanvasProps) {
           fill
           sizes="80px"
           quality={55}
-          className="rounded-full border-2 border-emerald-400 object-cover shadow-[0_0_22px_rgba(16,185,129,0.6)]"
+          className={props.avatarStance === "PORTAL"
+            ? "rounded-full border-2 border-violet-300 object-cover shadow-[0_0_30px_rgba(168,85,247,0.85)]"
+            : "rounded-full border-2 border-emerald-400 object-cover shadow-[0_0_22px_rgba(16,185,129,0.6)]"}
         />
       </motion.div>
       <StoryRewardCollectEffect
@@ -126,6 +134,8 @@ export function StoryCircuitCanvas(props: IStoryCircuitCanvasProps) {
       <StoryNodeRetreatEffect
         isVisible={Boolean(props.retreatingNodeId)}
         trail={props.retreatTrail}
+        avatarUrl={props.retreatingAvatarUrl}
+        avatarAlt={props.retreatingAvatarAlt}
         onComplete={props.onRetreatAnimationComplete}
       />
       {props.isInteractionLocked ? (

@@ -258,6 +258,57 @@ Permitir que el equipo de contenido gestione imágenes y audios de diálogos Sto
 
 1. Catálogo local de multimedia por nodo/línea:
    - `src/services/story/story-node-dialogue-media.ts`.
+
+## Fase 4 (nueva) - Expansión de roster jugable en Story
+
+### Objetivo
+
+Conectar los nuevos oponentes al flujo real de mapa/duelo para validar progresión end-to-end sin hardcodes de avatar únicos.
+
+### Implementado (inicio)
+
+1. `IStoryDuelSummary`, grafo world y runtime Story ahora transportan `opponentAvatarUrl`.
+2. `StoryMapNode` deja de usar un único avatar fijo y consume avatar por nodo cuando existe.
+3. Migración de duelos ampliada:
+   - `docs/supabase/sql/018_phase_5_3_story_duel_rotation_expansion.sql`.
+4. Layout visual de acto 2 extendido con nodos de `story-ch2-duel-3` a `story-ch2-duel-6` y nodos virtuales intermedios.
+
+## Fase 5 (nueva) - Identidad BOSS en duelo (audio + tema visual)
+
+### Objetivo
+
+Dar identidad de jefe a los duelos `isBossDuel` sin alterar reglas de combate ni rendimiento.
+
+### Implementado
+
+1. `get-story-duel-runtime-data.ts` expone `isBossDuel` en el runtime de duelo.
+2. Soundtrack BOSS dedicado en cliente:
+   - `src/app/hub/story/chapter/[chapter]/duel/[duelIndex]/use-story-boss-soundtrack.ts`.
+3. Sincronización con mute del board:
+   - usa `localStorage board-muted` + evento `board-muted-changed`.
+4. Tema visual BOSS en `Board`:
+   - acento cromático y viñeta distinta vía clase `board-boss-theme`,
+   - sin cambios de layout, tamaño de render ni mecánicas.
+5. Flujo en `StoryDuelClient`:
+   - se elimina diálogo de intro BOSS,
+   - coin toss y combate siguen el flujo estándar con identidad visual/sonora BOSS.
+
+## Fase 6 (nueva) - Acto 1 real (grafo productivo)
+
+### Objetivo
+
+Sustituir el acto 1 de pruebas por un grafo real con bifurcaciones e interacciones completas antes del BOSS final.
+
+### Implementado
+
+1. `act-1-map-definition.ts` se reestructura con:
+   - ruta principal,
+   - bifurcación superior/inferior,
+   - múltiples nodos `MOVE`, `REWARD_CARD`, `REWARD_NEXUS`, `EVENT`,
+   - duelos reales conectados a `story_duels`.
+2. `merge-story-map-visual-definition.test.ts` se actualiza a los nuevos IDs virtuales del acto 1.
+3. Se documenta migración de BD asociada:
+   - `docs/supabase/sql/020_phase_6_act1_real_flow.sql`.
 2. Resolver narrativo enriquece líneas con `portraitUrl` y `audioUrl`.
 3. Modal de interacción renderiza retrato y reproductor de audio cuando existen assets.
 

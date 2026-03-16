@@ -8,6 +8,7 @@ export interface IStoryMapNodeRuntime {
   duelIndex: number;
   title: string;
   opponentName: string;
+  opponentAvatarUrl?: string | null;
   nodeType: StoryWorldNodeType;
   difficulty: StoryOpponentDifficulty;
   rewardNexus: number;
@@ -30,4 +31,6 @@ export interface IStoryMapRuntimeData {
   playerId: string;
   nodes: IStoryMapNodeRuntime[];
   currentNodeId: string | null;
+  activeActId: number;
+  availableActIds: number[];
 }

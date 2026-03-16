@@ -8,13 +8,15 @@ import { IStoryCircuitPosition } from "@/components/hub/story/internal/map/layou
 interface IStoryNodeRetreatEffectProps {
   isVisible: boolean;
   trail?: IStoryCircuitPosition[];
+  avatarUrl: string;
+  avatarAlt: string;
   onComplete?: () => void;
 }
 
 /**
  * Mantiene el tamaño de ficha y retrocede por la ruta del mapa hasta desaparecer en el último nodo.
  */
-export function StoryNodeRetreatEffect({ isVisible, trail = [], onComplete }: IStoryNodeRetreatEffectProps) {
+export function StoryNodeRetreatEffect({ isVisible, trail = [], avatarUrl, avatarAlt, onComplete }: IStoryNodeRetreatEffectProps) {
   const hasTrail = trail.length > 0;
   const duration = Math.min(2.4, Math.max(0.92, (trail.length - 1) * 0.46));
   return (
@@ -35,8 +37,8 @@ export function StoryNodeRetreatEffect({ isVisible, trail = [], onComplete }: IS
           style={{ width: STORY_NODE_TOKEN_SIZE, height: STORY_NODE_TOKEN_SIZE }}
         >
           <Image
-            src="/assets/story/opponents/opp-ch1-apprentice/avatar-GenNvim.png"
-            alt="Retirada de oponente"
+            src={avatarUrl}
+            alt={avatarAlt}
             fill
             sizes="80px"
             quality={55}
