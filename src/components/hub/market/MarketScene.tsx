@@ -12,6 +12,7 @@ import { ICard } from "@/core/entities/ICard";
 import { ICollectionCard } from "@/core/entities/home/ICollectionCard";
 import { IMarketTransaction } from "@/core/entities/market/IMarketTransaction";
 import { IMarketCatalog } from "@/core/use-cases/market/GetMarketCatalogUseCase";
+import { isDesktopLayoutViewport } from "@/components/internal/layout-breakpoints";
 import { startTransition, useCallback } from "react";
 
 interface MarketSceneProps {
@@ -24,7 +25,7 @@ interface MarketSceneProps {
 export function MarketScene(props: MarketSceneProps) {
   const state = useMarketSceneState(props);
   const viewportWidth = useViewportWidth();
-  const isDesktopLayout = viewportWidth >= 1280;
+  const isDesktopLayout = isDesktopLayoutViewport(viewportWidth);
   /**
    * Selección inmediata para evitar parpadeo del inspector móvil:
    * el contenido de la carta debe estar listo antes de abrir el diálogo.

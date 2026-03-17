@@ -75,7 +75,7 @@ export function MarketMobileStack(props: MarketMobileStackProps) {
   };
 
   return (
-    <div className="mt-4 flex min-h-0 flex-1 flex-col gap-3 xl:hidden">
+    <div className="mt-4 flex min-h-0 flex-1 flex-col gap-3">
       <nav aria-label="Paneles del mercado" className="home-modern-scroll flex gap-2 overflow-x-auto pb-1">
         {PANEL_TABS.map((tab) => (
           <button

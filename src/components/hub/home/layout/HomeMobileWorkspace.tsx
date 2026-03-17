@@ -63,7 +63,7 @@ export function HomeMobileWorkspace(props: IHomeWorkspaceProps) {
   };
 
   return (
-    <div className="mt-4 flex min-h-0 flex-1 flex-col gap-3 xl:hidden" onPointerDownCapture={capturePointerOrigin}>
+    <div className="mt-4 flex min-h-0 flex-1 flex-col gap-3" onPointerDownCapture={capturePointerOrigin}>
       <HomeMobileSectionTabs activeSection={activeSection} onChangeSection={setActiveSection} />
       <section className="min-h-0 flex-1 rounded-xl border border-cyan-900/40 bg-[#020b16]/75 p-3 shadow-[0_0_20px_rgba(6,78,100,0.2)]">
         <div className="mb-3 flex items-center justify-between border-b border-cyan-900/45 pb-2">

@@ -33,7 +33,7 @@ export function MarketDesktopGrid(props: MarketDesktopGridProps) {
   const { play } = useHubModuleSfx();
 
   return (
-    <div className="mt-4 hidden min-h-0 flex-1 gap-4 xl:grid xl:grid-cols-[1fr_1.8fr_1.2fr]">
+    <div className="mt-4 grid min-h-0 flex-1 gap-4 grid-cols-[1fr_1.8fr_1.2fr]">
       <div className="min-h-0 min-w-0 overflow-hidden rounded-xl border border-cyan-900/30 bg-black/40 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
         <MarketCardInspector
           selectedCard={props.selectedCard}

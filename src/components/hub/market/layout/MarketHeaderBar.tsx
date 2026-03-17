@@ -33,8 +33,8 @@ export function MarketHeaderBar(props: MarketHeaderBarProps) {
   return (
     <header className="relative w-full bg-[#041120]/90 border border-cyan-800/50 p-2 sm:px-4 sm:py-2.5 rounded-xl shadow-[0_0_20px_rgba(8,145,178,0.15),inset_0_0_20px_rgba(0,0,0,0.6)] backdrop-blur-xl z-[100] overflow-visible">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(34,211,238,0.05),transparent_45%,rgba(59,130,246,0.05))] rounded-xl" />
-      <div className="relative grid gap-4 xl:grid-cols-[1fr_1.8fr_1.2fr] items-center overflow-visible">
-        <div className="flex items-center gap-3 xl:border-r border-cyan-900/60 xl:pr-4 min-w-0">
+      <div className="relative grid gap-4 min-[900px]:grid-cols-[1fr_1.8fr_1.2fr] items-center overflow-visible">
+        <div className="flex items-center gap-3 min-[900px]:border-r border-cyan-900/60 min-[900px]:pr-4 min-w-0">
           <BackButton href="/hub" label="" className="flex shrink-0 px-2 py-1.5" />
           <h1 className="text-lg font-black uppercase tracking-widest text-cyan-100 drop-shadow-[0_0_10px_rgba(34,211,238,0.6)] truncate hidden sm:block">
             Mercado
@@ -60,12 +60,12 @@ export function MarketHeaderBar(props: MarketHeaderBarProps) {
             type="button"
             aria-label="Mostrar filtros del mercado"
             onClick={() => setIsMobileFiltersOpen((previous) => !previous)}
-            className="flex h-[38px] items-center justify-center rounded-lg border border-cyan-500/40 bg-[#021426]/85 px-3 text-[10px] font-black uppercase tracking-[0.16em] text-cyan-200 xl:hidden"
+            className="flex h-[38px] items-center justify-center rounded-lg border border-cyan-500/40 bg-[#021426]/85 px-3 text-[10px] font-black uppercase tracking-[0.16em] text-cyan-200 min-[900px]:hidden"
           >
             Filtros
           </button>
         </div>
-        <div className="hidden flex-wrap items-center justify-start gap-x-2 gap-y-3 min-w-0 overflow-visible xl:flex xl:justify-end">
+        <div className="hidden flex-wrap items-center justify-start gap-x-2 gap-y-3 min-w-0 overflow-visible min-[900px]:flex min-[900px]:justify-end">
           <div className="w-[110px] sm:w-[120px] shrink-0 relative z-50">
             <GameSelect
               label="TIPO"
@@ -104,7 +104,7 @@ export function MarketHeaderBar(props: MarketHeaderBarProps) {
         </div>
       </div>
       {isMobileFiltersOpen ? (
-        <div className="relative mt-3 grid grid-cols-[1fr_1fr_auto] gap-2 xl:hidden">
+        <div className="relative mt-3 grid grid-cols-[1fr_1fr_auto] gap-2 min-[900px]:hidden">
           <GameSelect
             label="TIPO"
             value={props.typeFilter}
