@@ -9,7 +9,6 @@ interface BoardPlayersLayerProps {
   player: IPlayer;
   opponent: IPlayer;
   isPlayerTurn: boolean;
-  opponentDifficulty: string;
   lastDamageTargetPlayerId: string | null;
   lastDamageAmount: number | null;
   lastDamageEventId: string | null;
@@ -28,7 +27,6 @@ export function BoardPlayersLayer({
   player,
   opponent,
   isPlayerTurn,
-  opponentDifficulty,
   lastDamageTargetPlayerId,
   lastDamageAmount,
   lastDamageEventId,
@@ -49,7 +47,6 @@ export function BoardPlayersLayer({
         isOpponent={true}
         player={opponent}
         isActiveTurn={!isPlayerTurn}
-        badgeText={`Dificultad ${opponentDifficulty}`}
         wasDamagedThisAction={lastDamageTargetPlayerId === opponent.id}
         damageAmount={lastDamageAmount}
         damagePulseKey={lastDamageEventId}
