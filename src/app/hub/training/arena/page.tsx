@@ -1,12 +1,19 @@
-// src/app/hub/training/arena/page.tsx - Ejecuta combates del modo entrenamiento progresivo con mazo del jugador.
-import { Board } from "@/components/game/board";
+// src/app/hub/training/arena/page.tsx - Entry server-side de arena training con tier validado y runtime listo para UI cliente.
 import { HubSectionEntryBurst } from "@/components/hub/sections/HubSectionEntryBurst";
 import { TrainingDeckReadyGate } from "@/components/hub/training/TrainingDeckReadyGate";
+import { TrainingArenaClient } from "@/app/hub/training/arena/TrainingArenaClient";
 import { HOME_DECK_SIZE } from "@/core/services/home/deck-rules";
-import { getPlayerBoardLoadout } from "@/services/game/get-player-board-deck";
+import { getTrainingArenaRuntimeData } from "@/services/training/get-training-arena-runtime-data";
 
-export default async function TrainingArenaPage() {
-  const loadout = await getPlayerBoardLoadout();
+interface TrainingArenaPageProps {
+  searchParams?: Promise<{ tier?: string }>;
+}
+
+export default async function TrainingArenaPage({ searchParams }: TrainingArenaPageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const selectedTier = Number.parseInt(resolvedSearchParams?.tier ?? "1", 10);
+  const runtime = await getTrainingArenaRuntimeData(selectedTier);
+  const loadout = runtime.loadout;
   const isDeckReady = Boolean(loadout.deck && loadout.deck.length === HOME_DECK_SIZE);
   if (!isDeckReady) {
     return (
@@ -19,7 +26,13 @@ export default async function TrainingArenaPage() {
   return (
     <main className="min-h-screen bg-zinc-950">
       <HubSectionEntryBurst />
-      <Board mode="TRAINING" initialPlayerDeck={loadout.deck} initialConfig={{ playerFusionDeck: loadout.fusionDeck }} />
+      <TrainingArenaClient
+        deck={loadout.deck}
+        fusionDeck={loadout.fusionDeck ?? []}
+        selectedTier={runtime.effectiveTier}
+        highestUnlockedTier={runtime.highestUnlockedTier}
+        tiers={runtime.tiers.map((tier) => ({ tier: tier.tier, isUnlocked: tier.isUnlocked, missingWins: tier.missingWins }))}
+      />
     </main>
   );
 }
