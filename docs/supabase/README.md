@@ -58,6 +58,10 @@
 23. `public.player_story_world_state`:
    - estado compacto Story por jugador (`current_node_id`, `visited_node_ids`, `interacted_node_ids`).
    - 1 fila por usuario.
+24. `public.player_training_progress`:
+   - progreso acumulado de entrenamiento por tier y desbloqueo más alto.
+25. `public.player_training_match_claims`:
+   - idempotencia por batalla para impedir doble recompensa en entrenamiento.
 
 ## Fase 2 (Perfil y Progreso)
 
@@ -278,6 +282,17 @@
 2. Resultado:
    - se elimina `public.player_story_history_events` y sus políticas/índice asociados.
    - runtime Story sigue operativo al usar solo `player_story_world_state`.
+
+## Fase T (Progresión e idempotencia de Training)
+
+1. Ejecuta `docs/supabase/sql/022_phase_training_progression.sql`.
+2. Verifica tablas:
+   - `public.player_training_progress`
+   - `public.player_training_match_claims`
+3. Verifica RLS:
+   - ambas tablas solo accesibles por propietario (`auth.uid() = player_id`).
+4. Uso previsto:
+   - endpoint `POST /api/training/matches/complete` aplica recompensa una sola vez por `battle_id`.
 
 ## Notas
 
