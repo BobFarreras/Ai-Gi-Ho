@@ -45,14 +45,14 @@ export function HomeMiniCard({
 }: HomeMiniCardProps) {
   const filledContainerClass = showSlotContainer
     ? isSelected
-      ? "relative w-full aspect-[3/4] rounded-md sm:rounded-lg border-2 border-amber-400 bg-[#0a1320] shadow-[0_0_15px_rgba(251,191,36,0.3)] overflow-hidden transition-all"
-      : "relative w-full aspect-[3/4] rounded-md sm:rounded-lg border border-cyan-900/55 bg-[#081220] overflow-hidden hover:border-cyan-500/50 transition-all cursor-pointer"
+      ? "relative w-full aspect-[3/4] rounded-md sm:rounded-lg border-2 border-amber-400 bg-[#0a1320] shadow-[0_0_15px_rgba(251,191,36,0.3)] overflow-visible transition-all"
+      : "relative w-full aspect-[3/4] rounded-md sm:rounded-lg border border-cyan-900/55 bg-[#081220] overflow-visible hover:border-cyan-500/50 transition-all cursor-pointer"
     : isSelected
       ? "relative w-full aspect-[3/4] overflow-visible transition-all ring-2 ring-amber-400/90 shadow-[0_0_16px_rgba(251,191,36,0.35)]"
       : "relative w-full aspect-[3/4] overflow-visible transition-all cursor-pointer";
   const emptyContainerClass = isSelected
-    ? "relative w-full aspect-[3/4] rounded-md sm:rounded-lg border-2 border-amber-400 bg-[#0a1320] shadow-[0_0_15px_rgba(251,191,36,0.3)] overflow-hidden transition-all"
-    : "relative w-full aspect-[3/4] rounded-md sm:rounded-lg border border-cyan-900/55 bg-[#081220] overflow-hidden hover:border-cyan-500/50 transition-all cursor-pointer";
+    ? "relative w-full aspect-[3/4] rounded-md sm:rounded-lg border-2 border-amber-400 bg-[#0a1320] shadow-[0_0_15px_rgba(251,191,36,0.3)] overflow-visible transition-all"
+    : "relative w-full aspect-[3/4] rounded-md sm:rounded-lg border border-cyan-900/55 bg-[#081220] overflow-visible hover:border-cyan-500/50 transition-all cursor-pointer";
 
   const Wrapper = onClick ? "button" : "div";
   const wrapperProps = onClick

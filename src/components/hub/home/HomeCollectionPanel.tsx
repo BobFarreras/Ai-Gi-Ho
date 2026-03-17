@@ -74,6 +74,7 @@ export function HomeCollectionPanel({
             const isSelected = selectedCardId === entry.card.id;
             const canEvolve = evolvableCardIds.has(entry.card.id);
             const progress = cardProgressById.get(entry.card.id);
+            const isMasteryTier = (progress?.versionTier ?? 0) >= 5;
             
             return (
               <motion.button
@@ -89,7 +90,11 @@ export function HomeCollectionPanel({
                 className={`relative flex flex-col items-center w-[84px] transition-opacity ${
                   canAdd ? "cursor-pointer" : "cursor-not-allowed opacity-40 grayscale-[50%]"
                 }`}
-                style={{ contentVisibility: "auto", containIntrinsicSize: "145px 84px" }}
+                style={
+                  isMasteryTier
+                    ? undefined
+                    : { contentVisibility: "auto", containIntrinsicSize: "145px 84px" }
+                }
               >
                 <HomeMiniCard
                   card={entry.card}
