@@ -56,6 +56,15 @@
 4. Se añadieron tests de la máquina de pasos para validación TDD del avance automático/manual.
 5. Commit: pendiente en esta sesión.
 
+## Fase 7 - Rediseño V2: mapa tutorial por nodos (base)
+
+1. Se define el plan V2 en `docs/training/TUTORIAL-REDESIGN-V2.md` con migración, Market y recompensa final.
+2. Se crea dominio agnóstico para catálogo y estado de nodos tutorial.
+3. Se añade `GetTutorialMapStateUseCase` y runtime server-side para `/hub/tutorial`.
+4. Training pasa a enlazar al nuevo mapa tutorial como entrada principal.
+5. Se crean páginas de nodo (`arsenal`, `market`, `reward`) como base de migración progresiva.
+6. Commit: pendiente en esta sesión.
+
 ## Validación global aplicada por fase
 
 1. `pnpm lint`

@@ -11,10 +11,10 @@ interface ITrainingModeCard {
 
 const TRAINING_MODE_CARDS: ITrainingModeCard[] = [
   {
-    title: "Tutorial de Combate",
-    description: "Repasa las reglas base del duelo, fases y acciones clave antes de farmear progreso.",
-    href: "/hub/training/tutorial",
-    actionLabel: "Empezar Tutorial",
+    title: "Mapa de Tutorial",
+    description: "Aprende Arsenal, Combate y Market con nodos guiados por BigLog y avance por objetivos.",
+    href: "/hub/tutorial",
+    actionLabel: "Abrir Mapa Tutorial",
     toneClassName: "border-cyan-400/40 bg-cyan-500/10",
   },
   {
