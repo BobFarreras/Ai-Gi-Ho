@@ -48,6 +48,8 @@
 4. Test del procesador interno de tutorial completado.
 5. Commit: `99b7e5a`.
 
+> Estado actual: flujo retirado en hardening posterior para evitar duplicidad con progreso por nodo.
+
 ## Fase 6 - Tutorial guiado dinámico sobre combate real
 
 1. Se añadió secuencia guiada de pasos del tutorial (`moneda inicial`, `primer turno`, `selección`, `ataque/defensa`, `mágica`, `fusión`, `cementerio/revive`, `combatLog`, `victoria`).
@@ -104,6 +106,22 @@
 4. Se activa UI de claim en `/hub/tutorial/reward` y runtime del mapa con progreso real persistido.
 5. Se añade SQL `023_phase_tutorial_node_progress_and_reward.sql` + documentación Supabase.
 6. Commit: pendiente en esta sesión.
+
+## Fase 12 - Limpieza legacy y unificación del flujo tutorial
+
+1. Se elimina endpoint legacy `POST /api/training/tutorial/complete` y su cliente asociado.
+2. Se elimina compatibilidad legacy del mapa tutorial basada en `hasCompletedLegacyTutorial`.
+3. El mapa pasa a depender únicamente de `player_tutorial_node_progress`.
+4. Se actualiza documentación para retirar referencias obsoletas.
+5. Commit: pendiente en esta sesión.
+
+## Fase 13 - Preparar Deck sobre UI real + mejora BigLog
+
+1. El nodo `Preparar Deck` deja de ser simulación y usa `HomeDeckBuilderScene` real.
+2. Se añaden puntos guiados reales (`colección`, `añadir`, `evolucionar`, `inspector`) con `data-tutorial-id`.
+3. Se mejora el diálogo inferior de BigLog con avatar persistente y tipografía de lectura más grande.
+4. Se añade intro de BigLog al inicio de nodos tutorial (Arsenal, Market y Combate).
+5. Commit: pendiente en esta sesión.
 
 ## Validación global aplicada por fase
 

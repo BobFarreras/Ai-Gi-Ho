@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import { Board } from "@/components/game/board";
 import { ICard } from "@/core/entities/ICard";
 import { postTutorialNodeCompletion } from "@/app/hub/tutorial/internal/tutorial-node-progress-client";
-import { postTrainingTutorialCompletion } from "./training-tutorial-completion-client";
 import { TrainingCoinTossOverlay } from "./TrainingCoinTossOverlay";
 
 interface ITrainingTutorialClientProps {
@@ -24,13 +23,12 @@ export function TrainingTutorialClient(props: ITrainingTutorialClientProps) {
       return;
     }
     hasPostedRef.current = true;
-    setStatus("Registrando tutorial completado...");
+    setStatus("Registrando progreso del nodo de combate...");
     try {
-      await postTrainingTutorialCompletion();
       await postTutorialNodeCompletion("tutorial-combat-basics");
-      setStatus("Tutorial completado y sincronizado.");
+      setStatus("Nodo de combate completado y sincronizado.");
     } catch {
-      setStatus("No se pudo sincronizar el tutorial completado.");
+      setStatus("No se pudo sincronizar el nodo de combate.");
       hasPostedRef.current = false;
     }
   }

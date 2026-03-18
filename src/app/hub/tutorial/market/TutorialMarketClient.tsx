@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TutorialBigLogDialog } from "@/components/tutorial/flow/TutorialBigLogDialog";
+import { TutorialBigLogIntroOverlay } from "@/components/tutorial/flow/TutorialBigLogIntroOverlay";
 import { TutorialInteractionGuard } from "@/components/tutorial/flow/TutorialInteractionGuard";
 import { TutorialSpotlightOverlay } from "@/components/tutorial/flow/TutorialSpotlightOverlay";
 import { useTutorialFlowController } from "@/components/tutorial/flow/useTutorialFlowController";
@@ -17,6 +18,7 @@ function isAllowedTarget(activeTargetIds: string[], targetId: string): boolean {
 export function TutorialMarketClient() {
   const steps = useMemo(() => resolveMarketTutorialSteps(), []);
   const tutorial = useTutorialFlowController(steps);
+  const [isIntroVisible, setIsIntroVisible] = useState(true);
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [orderFilter, setOrderFilter] = useState("PRICE");
   const [wallet, setWallet] = useState(700);
@@ -34,8 +36,14 @@ export function TutorialMarketClient() {
 
   return (
     <section className="relative mx-auto w-full max-w-5xl rounded-2xl border border-cyan-300/30 bg-slate-950/90 p-5 pb-40">
-      <TutorialInteractionGuard isEnabled={!tutorial.isFinished} allowedTargetIds={tutorial.allowedTargetIds} />
-      <TutorialSpotlightOverlay isVisible={!tutorial.isFinished} targetId={tutorial.currentStep?.targetId ?? null} />
+      <TutorialInteractionGuard isEnabled={isIntroVisible || !tutorial.isFinished} allowedTargetIds={isIntroVisible ? [] : tutorial.allowedTargetIds} />
+      <TutorialSpotlightOverlay isVisible={!isIntroVisible && !tutorial.isFinished} targetId={tutorial.currentStep?.targetId ?? null} />
+      <TutorialBigLogIntroOverlay
+        isVisible={isIntroVisible}
+        title="Market"
+        description="Aprenderás a filtrar cartas, ordenar resultados y registrar compras de forma segura para no gastar Nexus por error."
+        onStart={() => setIsIntroVisible(false)}
+      />
       <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300">Nodo 3 - Market</p>
       <h1 className="mt-1 text-2xl font-black uppercase text-cyan-100">Simulación de Market</h1>
       <p className="mt-2 text-sm text-slate-300">Práctica guiada para dominar búsqueda, orden y compra antes de usar el market real.</p>
@@ -109,13 +117,15 @@ export function TutorialMarketClient() {
         <Link href="/hub/tutorial" className="rounded-md border border-slate-600 px-3 py-2 text-xs font-black uppercase text-slate-200">Volver al mapa</Link>
         <Link href="/hub/market" className="rounded-md border border-cyan-300/45 px-3 py-2 text-xs font-black uppercase text-cyan-100">Abrir Market real</Link>
       </div>
-      <TutorialBigLogDialog
-        title={tutorial.currentStep?.title ?? "Práctica completada"}
-        description={tutorial.currentStep?.description ?? "Has completado el flujo base de Market. En la siguiente fase conectaremos este motor con interacciones de producción."}
-        canUseNext={tutorial.canUseNext}
-        isFinished={tutorial.isFinished}
-        onNext={tutorial.onNext}
-      />
+      {!isIntroVisible ? (
+        <TutorialBigLogDialog
+          title={tutorial.currentStep?.title ?? "Práctica completada"}
+          description={tutorial.currentStep?.description ?? "Has completado el flujo base de Market. Ya puedes volver al mapa del tutorial para continuar."}
+          canUseNext={tutorial.canUseNext}
+          isFinished={tutorial.isFinished}
+          onNext={tutorial.onNext}
+        />
+      ) : null}
     </section>
   );
 }

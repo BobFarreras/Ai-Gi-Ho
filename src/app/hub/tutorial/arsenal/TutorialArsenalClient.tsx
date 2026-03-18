@@ -1,95 +1,89 @@
-// src/app/hub/tutorial/arsenal/TutorialArsenalClient.tsx - Simulación guiada de Arsenal usando el motor reusable de tutorial.
+// src/app/hub/tutorial/arsenal/TutorialArsenalClient.tsx - Ejecuta el tutorial de Preparar Deck sobre la UI real de Arsenal con spotlight y guard.
 "use client";
-import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { HomeDeckBuilderScene } from "@/components/hub/home/HomeDeckBuilderScene";
 import { TutorialBigLogDialog } from "@/components/tutorial/flow/TutorialBigLogDialog";
+import { TutorialBigLogIntroOverlay } from "@/components/tutorial/flow/TutorialBigLogIntroOverlay";
 import { TutorialInteractionGuard } from "@/components/tutorial/flow/TutorialInteractionGuard";
 import { TutorialSpotlightOverlay } from "@/components/tutorial/flow/TutorialSpotlightOverlay";
 import { useTutorialFlowController } from "@/components/tutorial/flow/useTutorialFlowController";
+import { ICollectionCard } from "@/core/entities/home/ICollectionCard";
+import { IDeck } from "@/core/entities/home/IDeck";
+import { IPlayerCardProgress } from "@/core/entities/progression/IPlayerCardProgress";
 import { postTutorialNodeCompletion } from "@/app/hub/tutorial/internal/tutorial-node-progress-client";
 import { resolveArsenalTutorialSteps } from "@/services/tutorial/arsenal/resolve-arsenal-tutorial-steps";
 
-function isAllowedTarget(activeTargetIds: string[], targetId: string): boolean {
-  return activeTargetIds.includes(targetId);
+interface ITutorialArsenalClientProps {
+  playerId: string;
+  initialDeck: IDeck;
+  collection: ICollectionCard[];
+  initialCardProgress: IPlayerCardProgress[];
 }
 
-export function TutorialArsenalClient() {
+function resolveActionFromClick(target: HTMLElement, currentStepId: string | undefined): string | null {
+  if (currentStepId === "arsenal-select-card" && target.closest("[data-tutorial-id='tutorial-home-collection']")) return "SELECT_CARD_DETAIL";
+  if (currentStepId === "arsenal-add-deck" && target.closest("[data-tutorial-id='tutorial-home-add-button']")) return "ADD_CARD_TO_DECK";
+  if (currentStepId === "arsenal-open-evolve" && target.closest("[data-tutorial-id='tutorial-home-evolve-button']")) return "OPEN_EVOLVE_PANEL";
+  return null;
+}
+
+export function TutorialArsenalClient(props: ITutorialArsenalClientProps) {
   const steps = useMemo(() => resolveArsenalTutorialSteps(), []);
   const tutorial = useTutorialFlowController(steps);
-  const [statusMessage, setStatusMessage] = useState("Sigue las instrucciones de BigLog.");
+  const [isIntroVisible, setIsIntroVisible] = useState(true);
   const hasSyncedCompletionRef = useRef(false);
+
+  useEffect(() => {
+    if (isIntroVisible) return;
+    const onClick = (event: MouseEvent) => {
+      const target = event.target instanceof HTMLElement ? event.target : null;
+      if (!target) return;
+      const actionId = resolveActionFromClick(target, tutorial.currentStep?.id);
+      if (actionId) tutorial.onAction(actionId);
+    };
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, [isIntroVisible, tutorial]);
 
   useEffect(() => {
     if (!tutorial.isFinished || hasSyncedCompletionRef.current) return;
     hasSyncedCompletionRef.current = true;
-    postTutorialNodeCompletion("tutorial-arsenal-basics")
-      .then(() => setStatusMessage("Nodo completado y sincronizado en el mapa tutorial."))
-      .catch(() => {
-        hasSyncedCompletionRef.current = false;
-        setStatusMessage("Completaste la práctica, pero no se pudo sincronizar el nodo.");
-      });
+    postTutorialNodeCompletion("tutorial-arsenal-basics").catch(() => {
+      hasSyncedCompletionRef.current = false;
+    });
   }, [tutorial.isFinished]);
 
   return (
-    <section className="relative mx-auto w-full max-w-5xl rounded-2xl border border-cyan-300/30 bg-slate-950/90 p-5 pb-40">
-      <TutorialInteractionGuard isEnabled={!tutorial.isFinished} allowedTargetIds={tutorial.allowedTargetIds} />
-      <TutorialSpotlightOverlay isVisible={!tutorial.isFinished} targetId={tutorial.currentStep?.targetId ?? null} />
-      <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300">Nodo 1 - Preparar Deck</p>
-      <h1 className="mt-1 text-2xl font-black uppercase text-cyan-100">Simulación de Arsenal</h1>
-      <p className="mt-2 text-sm text-slate-300">Esta fase valida foco visual + bloqueo de interacción para el nuevo motor tutorial.</p>
-      <article data-tutorial-id="arsenal-card-slot" className="mt-5 rounded-xl border border-cyan-900/70 bg-cyan-500/10 p-4">
-        <p className="text-sm font-black uppercase text-cyan-100">Carta de práctica</p>
-        <p className="mt-1 text-xs text-slate-300">Kernel Sentinel V1</p>
-        <button
-          type="button"
-          onClick={() => {
-            tutorial.onAction("SELECT_CARD_DETAIL");
-            setStatusMessage("Detalle de carta abierto.");
-          }}
-          disabled={!isAllowedTarget(tutorial.allowedTargetIds, "arsenal-card-slot") && !tutorial.isFinished}
-          className="mt-3 rounded-md border border-cyan-300/45 px-3 py-2 text-xs font-black uppercase text-cyan-100 disabled:opacity-45"
-        >
-          Abrir detalle
-        </button>
-      </article>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <button
-          type="button"
-          data-tutorial-id="arsenal-add-button"
-          onClick={() => {
-            tutorial.onAction("ADD_CARD_TO_DECK");
-            setStatusMessage("Carta añadida al deck.");
-          }}
-          disabled={!isAllowedTarget(tutorial.allowedTargetIds, "arsenal-add-button") && !tutorial.isFinished}
-          className="rounded-md border border-cyan-300/45 px-3 py-3 text-xs font-black uppercase text-cyan-100 disabled:opacity-45"
-        >
-          Añadir al Deck
-        </button>
-        <button
-          type="button"
-          data-tutorial-id="arsenal-evolve-button"
-          onClick={() => {
-            tutorial.onAction("OPEN_EVOLVE_PANEL");
-            setStatusMessage("Panel de evolución abierto.");
-          }}
-          disabled={!isAllowedTarget(tutorial.allowedTargetIds, "arsenal-evolve-button") && !tutorial.isFinished}
-          className="rounded-md border border-fuchsia-300/45 px-3 py-3 text-xs font-black uppercase text-fuchsia-100 disabled:opacity-45"
-        >
-          Evolucionar
-        </button>
-      </div>
-      <p className="mt-4 text-xs font-bold uppercase tracking-[0.12em] text-emerald-300">{statusMessage}</p>
-      <div className="mt-6 flex gap-2">
-        <Link href="/hub/tutorial" className="rounded-md border border-slate-600 px-3 py-2 text-xs font-black uppercase text-slate-200">Volver al mapa</Link>
-        <Link href="/hub/home" className="rounded-md border border-cyan-300/45 px-3 py-2 text-xs font-black uppercase text-cyan-100">Abrir Arsenal real</Link>
-      </div>
-      <TutorialBigLogDialog
-        title={tutorial.currentStep?.title ?? "Práctica completada"}
-        description={tutorial.currentStep?.description ?? "Has completado la práctica base. En la siguiente fase conectaremos esta guía al Arsenal real."}
-        canUseNext={tutorial.canUseNext}
-        isFinished={tutorial.isFinished}
-        onNext={tutorial.onNext}
+    <>
+      <HomeDeckBuilderScene
+        playerId={props.playerId}
+        initialDeck={props.initialDeck}
+        collection={props.collection}
+        initialCardProgress={props.initialCardProgress}
       />
-    </section>
+      <TutorialInteractionGuard
+        isEnabled={isIntroVisible || !tutorial.isFinished}
+        allowedTargetIds={isIntroVisible ? [] : tutorial.allowedTargetIds}
+      />
+      <TutorialSpotlightOverlay
+        isVisible={!isIntroVisible && !tutorial.isFinished}
+        targetId={tutorial.currentStep?.targetId ?? null}
+      />
+      <TutorialBigLogIntroOverlay
+        isVisible={isIntroVisible}
+        title="Preparar Deck"
+        description="En este nodo aprenderás a leer detalle, añadir cartas al deck y entender cómo funciona la evolución dentro del Arsenal real."
+        onStart={() => setIsIntroVisible(false)}
+      />
+      {!isIntroVisible ? (
+        <TutorialBigLogDialog
+          title={tutorial.currentStep?.title ?? "Nodo completado"}
+          description={tutorial.currentStep?.description ?? "Has completado Preparar Deck. Ya puedes volver al mapa y continuar con el siguiente nodo."}
+          canUseNext={tutorial.canUseNext}
+          isFinished={tutorial.isFinished}
+          onNext={tutorial.onNext}
+        />
+      ) : null}
+    </>
   );
 }

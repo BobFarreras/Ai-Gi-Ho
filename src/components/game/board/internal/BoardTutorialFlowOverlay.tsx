@@ -1,8 +1,9 @@
 // src/components/game/board/internal/BoardTutorialFlowOverlay.tsx - Overlay narrativo de BigLog para tutorial de combate con avance por eventos reales.
 "use client";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ICombatLogEvent } from "@/core/entities/ICombatLog";
 import { TutorialBigLogDialog } from "@/components/tutorial/flow/TutorialBigLogDialog";
+import { TutorialBigLogIntroOverlay } from "@/components/tutorial/flow/TutorialBigLogIntroOverlay";
 import { TutorialInteractionGuard } from "@/components/tutorial/flow/TutorialInteractionGuard";
 import { TutorialSpotlightOverlay } from "@/components/tutorial/flow/TutorialSpotlightOverlay";
 import { useTutorialFlowController } from "@/components/tutorial/flow/useTutorialFlowController";
@@ -27,6 +28,7 @@ function hasCardPlayedType(events: ICombatLogEvent[], cardType: string): boolean
 export function BoardTutorialFlowOverlay(props: IBoardTutorialFlowOverlayProps) {
   const steps = useMemo(() => resolveCombatTutorialSteps(), []);
   const tutorial = useTutorialFlowController(steps);
+  const [isIntroVisible, setIsIntroVisible] = useState(true);
   const hasPlayedEntity = hasCardPlayedType(props.combatLog, "ENTITY");
   const hasPlayedExecution = hasCardPlayedType(props.combatLog, "EXECUTION");
   const hasBattleResolved = hasEvent(props.combatLog, "BATTLE_RESOLVED") || hasEvent(props.combatLog, "DIRECT_DAMAGE");
@@ -46,15 +48,23 @@ export function BoardTutorialFlowOverlay(props: IBoardTutorialFlowOverlayProps) 
 
   return (
     <>
-      <TutorialInteractionGuard isEnabled={!tutorial.isFinished} allowedTargetIds={tutorial.allowedTargetIds} />
-      <TutorialSpotlightOverlay isVisible={!tutorial.isFinished} targetId={tutorial.currentStep?.targetId ?? null} />
-      <TutorialBigLogDialog
-        title={tutorial.currentStep?.title ?? "Tutorial de combate completado"}
-        description={tutorial.currentStep?.description ?? "Has cubierto las mecánicas base del duelo. Puedes repetir el nodo cuando quieras."}
-        canUseNext={tutorial.canUseNext}
-        isFinished={tutorial.isFinished}
-        onNext={tutorial.onNext}
+      <TutorialInteractionGuard isEnabled={isIntroVisible || !tutorial.isFinished} allowedTargetIds={isIntroVisible ? [] : tutorial.allowedTargetIds} />
+      <TutorialSpotlightOverlay isVisible={!isIntroVisible && !tutorial.isFinished} targetId={tutorial.currentStep?.targetId ?? null} />
+      <TutorialBigLogIntroOverlay
+        isVisible={isIntroVisible}
+        title="Combate Base"
+        description="En este duelo aprenderás turnos, ataque y defensa, mágicas, fusión, cementerio y lectura del combat log."
+        onStart={() => setIsIntroVisible(false)}
       />
+      {!isIntroVisible ? (
+        <TutorialBigLogDialog
+          title={tutorial.currentStep?.title ?? "Tutorial de combate completado"}
+          description={tutorial.currentStep?.description ?? "Has cubierto las mecánicas base del duelo. Puedes repetir el nodo cuando quieras."}
+          canUseNext={tutorial.canUseNext}
+          isFinished={tutorial.isFinished}
+          onNext={tutorial.onNext}
+        />
+      ) : null}
     </>
   );
 }

@@ -4,7 +4,6 @@ import { resolveTutorialMapState } from "@/core/services/tutorial/resolve-tutori
 import { resolveTutorialNodeCatalog } from "@/core/services/tutorial/resolve-tutorial-node-catalog";
 
 interface IGetTutorialMapStateInput {
-  hasCompletedLegacyTutorial: boolean;
   completedNodeIds?: string[];
 }
 
@@ -15,7 +14,6 @@ export class GetTutorialMapStateUseCase {
   execute(input: IGetTutorialMapStateInput): ITutorialMapNodeRuntime[] {
     return resolveTutorialMapState({
       catalog: resolveTutorialNodeCatalog(),
-      hasCompletedLegacyTutorial: input.hasCompletedLegacyTutorial,
       completedNodeIds: input.completedNodeIds,
     });
   }

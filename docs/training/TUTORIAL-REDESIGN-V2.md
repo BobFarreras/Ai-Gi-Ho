@@ -10,12 +10,12 @@ Reemplazar el tutorial monolítico por un sistema de nodos guiados, con ritmo co
 1. Motor agnóstico de UI: reglas y flujo en `core/services/use-cases`.
 2. UI desacoplada: componentes solo renderizan estado y eventos.
 3. Progresión profesional: desbloqueo secuencial por nodos.
-4. Migración segura: compatibilidad temporal con `hasCompletedTutorial`.
+4. Fuente única de verdad: progreso por nodo + claim final idempotente.
 
 ## Nodos del mapa
 
 1. `Preparar Deck` (`/hub/tutorial/arsenal`).
-2. `Combate Base` (`/hub/training/tutorial`, legacy temporal).
+2. `Combate Base` (`/hub/training/tutorial`).
 3. `Market` (`/hub/tutorial/market`).
 4. `Recompensa Final` (`/hub/tutorial/reward`).
 
@@ -42,7 +42,7 @@ La decisión final se parametrizará por configuración para balanceo sin tocar 
 
 1. Fase 1: Dominio de mapa tutorial + runtime + página `/hub/tutorial`.
 2. Fase 2: Motor genérico de spotlight/bloqueo y botón `Siguiente`.
-3. Fase 3: Nodo `Preparar Deck` con simulación guiada de Arsenal.
+3. Fase 3: Nodo `Preparar Deck` con guía sobre la UI real de Arsenal.
 4. Fase 4: Nodo `Market` con flujo completo de filtros y compra.
 5. Fase 5: Refactor del tutorial de combate al motor por pasos.
 6. Fase 6: Persistencia por nodo + claim de recompensa final.

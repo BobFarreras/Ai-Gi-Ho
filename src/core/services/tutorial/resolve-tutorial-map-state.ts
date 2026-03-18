@@ -1,9 +1,8 @@
-// src/core/services/tutorial/resolve-tutorial-map-state.ts - Resuelve estado de nodos tutorial en modo migración y desbloqueo secuencial.
+// src/core/services/tutorial/resolve-tutorial-map-state.ts - Resuelve estado secuencial de nodos tutorial a partir del progreso por nodo persistido.
 import { ITutorialMapNodeDefinition, ITutorialMapNodeRuntime, TutorialNodeState } from "@/core/entities/tutorial/ITutorialMapNode";
 
 interface IResolveTutorialMapStateInput {
   catalog: ITutorialMapNodeDefinition[];
-  hasCompletedLegacyTutorial: boolean;
   completedNodeIds?: string[];
 }
 
@@ -12,13 +11,8 @@ function resolveNodeState(isCompleted: boolean, isFirstPending: boolean): Tutori
   return isFirstPending ? "AVAILABLE" : "LOCKED";
 }
 
-/**
- * Conserva compatibilidad con el flag legacy hasta migrar al progreso por nodo.
- */
 export function resolveTutorialMapState(input: IResolveTutorialMapStateInput): ITutorialMapNodeRuntime[] {
-  const completedNodeIds = new Set<string>(
-    input.hasCompletedLegacyTutorial ? input.catalog.map((node) => node.id) : (input.completedNodeIds ?? []),
-  );
+  const completedNodeIds = new Set<string>(input.completedNodeIds ?? []);
   let hasAssignedPendingNode = false;
   return [...input.catalog]
     .sort((a, b) => a.order - b.order)

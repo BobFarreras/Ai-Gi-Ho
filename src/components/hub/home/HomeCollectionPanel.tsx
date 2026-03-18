@@ -50,7 +50,7 @@ export function HomeCollectionPanel({
   }
 
   return (
-    <section className="flex h-full min-h-0 flex-col rounded-2xl border border-cyan-800/35 bg-[#031020]/50 p-3">
+    <section data-tutorial-id="tutorial-home-collection" className="flex h-full min-h-0 flex-col rounded-2xl border border-cyan-800/35 bg-[#031020]/50 p-3">
       <h2 className="mb-3 text-sm font-black uppercase tracking-[0.2em] text-cyan-200 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]">
         Almacén
       </h2>

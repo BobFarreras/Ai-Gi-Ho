@@ -6,6 +6,7 @@ import { TutorialMarketClient } from "@/app/hub/tutorial/market/TutorialMarketCl
 describe("TutorialMarketClient", () => {
   it("completa el flujo al interactuar con filtros, compra e historial", () => {
     render(<TutorialMarketClient />);
+    fireEvent.click(screen.getByRole("button", { name: "Empezar" }));
     expect(screen.getByText("Filtro por tipo")).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Tipo"), { target: { value: "ENTITY" } });
     expect(screen.getByText("Ordenar resultados")).toBeInTheDocument();
