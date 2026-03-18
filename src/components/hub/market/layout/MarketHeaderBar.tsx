@@ -26,10 +26,12 @@ interface MarketHeaderBarProps {
   onOrderFieldChange: (value: MarketOrderField) => void;
   onOrderDirectionToggle: () => void;
   tutorialActions?: IMarketTutorialActions;
+  tutorialForceMobileFiltersOpen?: boolean;
 }
 
 export function MarketHeaderBar(props: MarketHeaderBarProps) {
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const isMobileFiltersOpenEffective = isMobileFiltersOpen || Boolean(props.tutorialForceMobileFiltersOpen);
   const { play } = useHubModuleSfx();
 
   return (
@@ -60,8 +62,12 @@ export function MarketHeaderBar(props: MarketHeaderBarProps) {
           </label>
           <button
             type="button"
+            data-tutorial-id="market-mobile-open-filters"
             aria-label="Mostrar filtros del mercado"
-            onClick={() => setIsMobileFiltersOpen((previous) => !previous)}
+            onClick={() => {
+              setIsMobileFiltersOpen((previous) => !previous);
+              props.tutorialActions?.onOpenMobileFilters?.();
+            }}
             className="flex h-[38px] items-center justify-center rounded-lg border border-cyan-500/40 bg-[#021426]/85 px-3 text-[10px] font-black uppercase tracking-[0.16em] text-cyan-200 min-[900px]:hidden"
           >
             Filtros
@@ -116,7 +122,7 @@ export function MarketHeaderBar(props: MarketHeaderBarProps) {
           </motion.button>
         </div>
       </div>
-      {isMobileFiltersOpen ? (
+      {isMobileFiltersOpenEffective ? (
         <div className="relative mt-3 grid grid-cols-[1fr_1fr_auto] gap-2 min-[900px]:hidden">
           <div data-tutorial-id="market-type-filter">
             <GameSelect

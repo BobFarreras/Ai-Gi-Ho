@@ -2,6 +2,7 @@
 import { IMarketRuntimeSnapshot } from "@/services/market/market-runtime-snapshot";
 
 export interface IMarketTutorialActions {
+  onOpenMobileFilters?: () => void;
   onTypeFilterChange?: () => void;
   onOrderFieldChange?: () => void;
   onOrderDirectionToggle?: () => void;

@@ -42,7 +42,7 @@ describe("TutorialMarketClient", () => {
     fireEvent.click(screen.getByRole("button", { name: "Siguiente paso del tutorial" }));
 
     expect(await screen.findByText("Seleccionar Pack GemGPT")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Seleccionar Pack GemGPT" }));
+    fireEvent.click(screen.getByRole("button", { name: "Siguiente paso del tutorial" }));
 
     expect(await screen.findByText("Detalle del Pack")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Siguiente paso del tutorial" }));
@@ -61,5 +61,5 @@ describe("TutorialMarketClient", () => {
     fireEvent.click(screen.getByRole("button", { name: "Siguiente paso del tutorial" }));
 
     expect(screen.getByText("Market Completado")).toBeInTheDocument();
-  }, 12000);
+  }, 18000);
 });

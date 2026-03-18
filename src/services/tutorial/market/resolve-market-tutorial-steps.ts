@@ -1,7 +1,11 @@
 // src/services/tutorial/market/resolve-market-tutorial-steps.ts - Define pasos guiados del nodo Market para filtros, compra e historial.
 import { ITutorialFlowStep } from "@/core/entities/tutorial/ITutorialFlowStep";
 
-export function resolveMarketTutorialSteps(): ITutorialFlowStep[] {
+interface IResolveMarketTutorialStepsInput {
+  isMobileLayout: boolean;
+}
+
+function resolveBaseSteps(): ITutorialFlowStep[] {
   return [
     {
       id: "market-type-filter",
@@ -47,11 +51,11 @@ export function resolveMarketTutorialSteps(): ITutorialFlowStep[] {
     {
       id: "market-pack-selection",
       title: "Seleccionar Pack GemGPT",
-      description: "Selecciona el pack GemGPT para ver cómo cambia el contenido del panel de cartas.",
+      description: "En este bloque eliges un pack y se cargan sus cartas posibles para decidir compra.",
       targetId: "market-pack-tile-tutorial-market-pack-gemgpt",
-      allowedTargetIds: ["market-pack-tile-tutorial-market-pack-gemgpt", "market-pack-preview"],
-      completionType: "USER_ACTION",
-      expectedActionId: "SELECT_PACK_FOCUS",
+      allowedTargetIds: ["market-pack-selector", "market-pack-tile-tutorial-market-pack-gemgpt"],
+      completionType: "BOTH",
+      expectedActionId: "SELECT_GEMGPT_PACK",
     },
     {
       id: "market-pack-preview-cards",
@@ -67,7 +71,7 @@ export function resolveMarketTutorialSteps(): ITutorialFlowStep[] {
       description: "Ahora compra un sobre. Verás que sus cartas salen de forma aleatoria.",
       targetId: "market-buy-pack",
       allowedTargetIds: ["market-buy-pack", "market-pack-reveal"],
-      completionType: "USER_ACTION",
+      completionType: "BOTH",
       expectedActionId: "BUY_PACK",
     },
     {
@@ -94,5 +98,56 @@ export function resolveMarketTutorialSteps(): ITutorialFlowStep[] {
       allowedTargetIds: [],
       completionType: "MANUAL_NEXT",
     },
+  ];
+}
+
+function resolveMobileSectionSteps(): ITutorialFlowStep[] {
+  return [
+    {
+      id: "market-mobile-section-listings",
+      title: "Sección Mercado",
+      description: "Aquí exploras cartas sueltas, aplicas filtros y abres su detalle para comprar.",
+      targetId: "market-mobile-tab-listings",
+      allowedTargetIds: [],
+      completionType: "MANUAL_NEXT",
+    },
+    {
+      id: "market-mobile-section-packs",
+      title: "Sección Packs",
+      description: "En Packs eliges sobres, revisas cartas posibles y ejecutas compras aleatorias.",
+      targetId: "market-mobile-tab-packs",
+      allowedTargetIds: [],
+      completionType: "MANUAL_NEXT",
+    },
+    {
+      id: "market-mobile-section-vault",
+      title: "Sección Almacén",
+      description: "En Almacén/Historial revisas stock y transacciones para controlar tus recursos.",
+      targetId: "market-mobile-tab-vault",
+      allowedTargetIds: [],
+      completionType: "MANUAL_NEXT",
+    },
+  ];
+}
+
+export function resolveMarketTutorialSteps(input: IResolveMarketTutorialStepsInput): ITutorialFlowStep[] {
+  if (!input.isMobileLayout) return resolveBaseSteps();
+  const baseSteps = resolveBaseSteps();
+  const [typeStep, orderStep, directionStep, ...restBaseSteps] = baseSteps;
+  return [
+    ...resolveMobileSectionSteps(),
+    {
+      id: "market-mobile-open-filters",
+      title: "Botón de Filtros",
+      description: "Primero pulsa Filtros para desplegar el bloque de configuración en móvil.",
+      targetId: "market-mobile-open-filters",
+      allowedTargetIds: ["market-mobile-open-filters"],
+      completionType: "USER_ACTION",
+      expectedActionId: "OPEN_MOBILE_FILTERS",
+    },
+    typeStep,
+    orderStep,
+    directionStep,
+    ...restBaseSteps,
   ];
 }

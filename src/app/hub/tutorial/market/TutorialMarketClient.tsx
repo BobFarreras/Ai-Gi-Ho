@@ -9,29 +9,44 @@ import { TutorialInteractionGuard } from "@/components/tutorial/flow/TutorialInt
 import { TutorialSpotlightOverlay } from "@/components/tutorial/flow/TutorialSpotlightOverlay";
 import { useTutorialFlowController } from "@/components/tutorial/flow/useTutorialFlowController";
 import { useHubModuleSfx } from "@/components/hub/internal/use-hub-module-sfx";
+import { useViewportWidth } from "@/components/hub/internal/use-viewport-width";
+import { isMobileLayoutViewport } from "@/components/internal/layout-breakpoints";
 import { postTutorialNodeCompletion } from "@/app/hub/tutorial/internal/tutorial-node-progress-client";
 import { useTutorialMarketRuntime } from "@/app/hub/tutorial/market/internal/use-tutorial-market-runtime";
 import { resolveMarketTutorialSteps } from "@/services/tutorial/market/resolve-market-tutorial-steps";
 
 export function TutorialMarketClient() {
-  const tutorial = useTutorialFlowController(useMemo(() => resolveMarketTutorialSteps(), []));
+  const viewportWidth = useViewportWidth();
+  const isMobileLayout = isMobileLayoutViewport(viewportWidth);
+  const tutorial = useTutorialFlowController(
+    useMemo(() => resolveMarketTutorialSteps({ isMobileLayout }), [isMobileLayout]),
+  );
   const runtime = useTutorialMarketRuntime();
   const { play } = useHubModuleSfx();
   const [isIntroVisible, setIsIntroVisible] = useState(true);
   const [isPackRevealOpen, setIsPackRevealOpen] = useState(false);
+  const [autoBuyPackRequestId, setAutoBuyPackRequestId] = useState(0);
   const hasSyncedCompletionRef = useRef(false);
   const currentStepId = tutorial.currentStep?.id ?? null;
-  const isPinnedTopPurchaseStep =
-    currentStepId === "market-buy-card" || currentStepId === "market-buy-card-result-warehouse";
+  const isPinnedTopStep =
+    currentStepId === "market-buy-card" ||
+    currentStepId === "market-buy-card-result-warehouse" ||
+    currentStepId === "market-pack-selection" ||
+    currentStepId === "market-pack-preview-cards" ||
+    currentStepId === "market-buy-pack" ||
+    currentStepId === "market-pack-random-explanation";
   const isFilterGuideStep =
     currentStepId === "market-type-filter" ||
     currentStepId === "market-order-filter" ||
     currentStepId === "market-order-direction";
   const shouldHighlightNextButton =
     isFilterGuideStep ||
+    currentStepId === "market-mobile-section-listings" ||
+    currentStepId === "market-mobile-section-packs" ||
+    currentStepId === "market-mobile-section-vault" ||
     currentStepId === "market-buy-card-result-warehouse" ||
-    currentStepId === "market-pack-selection" ||
     currentStepId === "market-pack-preview-cards" ||
+    currentStepId === "market-buy-pack" ||
     currentStepId === "market-pack-random-explanation" ||
     currentStepId === "market-open-vault-collection" ||
     currentStepId === "market-open-history";
@@ -53,7 +68,7 @@ export function TutorialMarketClient() {
       <TutorialSpotlightOverlay
         isVisible={!isIntroVisible && !tutorial.isFinished}
         targetId={tutorial.currentStep?.targetId ?? null}
-        disableAutoScroll={isPinnedTopPurchaseStep}
+        disableAutoScroll={isPinnedTopStep}
       />
       <TutorialBigLogIntroOverlay
         isVisible={isIntroVisible}
@@ -67,7 +82,10 @@ export function TutorialMarketClient() {
         initialTransactions={runtime.initialTransactions}
         initialCollection={runtime.initialCollection}
         purchaseActionOverrides={runtime.purchaseActionOverrides}
+        tutorialCurrentStepId={currentStepId}
+        tutorialAutoBuyPackRequestId={autoBuyPackRequestId}
         tutorialActions={{
+          onOpenMobileFilters: () => tutorial.onAction("OPEN_MOBILE_FILTERS"),
           onTypeFilterChange: () => tutorial.onAction("CHANGE_TYPE_FILTER"),
           onOrderFieldChange: () => tutorial.onAction("CHANGE_ORDER_FILTER"),
           onOrderDirectionToggle: () => tutorial.onAction("TOGGLE_ORDER_DIRECTION"),
@@ -76,7 +94,8 @@ export function TutorialMarketClient() {
           onOpenVaultCollection: () => tutorial.onAction("OPEN_VAULT_COLLECTION"),
           onOpenVaultHistory: () => tutorial.onAction("OPEN_HISTORY"),
           onSelectPack: (packId) => {
-            if (packId === "tutorial-market-pack-gemgpt") tutorial.onAction("SELECT_PACK_FOCUS");
+            if (!packId) return;
+            if (packId === "tutorial-market-pack-gemgpt") tutorial.onAction("SELECT_GEMGPT_PACK");
           },
           onPackRevealOpen: () => setIsPackRevealOpen(true),
           onPackRevealClose: () => setIsPackRevealOpen(false),
@@ -93,12 +112,16 @@ export function TutorialMarketClient() {
           isFinished={tutorial.isFinished}
           onNext={() => {
             play("SECTION_SWITCH");
+            if (currentStepId === "market-buy-pack") {
+              setAutoBuyPackRequestId((previous) => previous + 1);
+              return;
+            }
             tutorial.onNext();
           }}
           targetId={tutorial.currentStep?.targetId ?? null}
-          preferTopPlacement={isPinnedTopPurchaseStep}
-          disableAutoScrollWhenPinnedTop={isPinnedTopPurchaseStep}
-          shouldHighlightNextButton={shouldHighlightNextButton}
+          preferTopPlacement={isPinnedTopStep}
+          disableAutoScrollWhenPinnedTop={isPinnedTopStep}
+          shouldHighlightNextButton={shouldHighlightNextButton && tutorial.canUseNext}
         />
       ) : null}
       <TutorialBigLogOutroOverlay
