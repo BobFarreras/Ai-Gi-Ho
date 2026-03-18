@@ -1,6 +1,6 @@
 // src/components/tutorial/flow/TutorialSpotlightOverlay.tsx - Overlay reusable que oscurece pantalla y resalta el objetivo activo del tutorial.
 "use client";
-import { CSSProperties, useEffect, useMemo, useState } from "react";
+import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 
 interface ITutorialSpotlightOverlayProps {
   isVisible: boolean;
@@ -17,17 +17,46 @@ interface IRect {
 function resolveRect(targetId: string | null): IRect | null {
   if (!targetId) return null;
   const element = document.querySelector<HTMLElement>(`[data-tutorial-id="${targetId}"]`);
-  if (!element) return null;
+  if (element) {
+    const rect = element.getBoundingClientRect();
+    return { top: rect.top, left: rect.left, width: rect.width, height: rect.height };
+  }
+  const groupedElements = Array.from(document.querySelectorAll<HTMLElement>(`[data-tutorial-group="${targetId}"]`));
+  if (groupedElements.length === 0) return null;
+  const rects = groupedElements.map((node) => node.getBoundingClientRect());
+  const top = Math.min(...rects.map((rect) => rect.top));
+  const left = Math.min(...rects.map((rect) => rect.left));
+  const right = Math.max(...rects.map((rect) => rect.right));
+  const bottom = Math.max(...rects.map((rect) => rect.bottom));
+  return { top, left, width: right - left, height: bottom - top };
+}
+
+function ensureTargetVisibility(targetId: string | null): void {
+  if (!targetId) return;
+  const element =
+    document.querySelector<HTMLElement>(`[data-tutorial-id="${targetId}"]`) ??
+    document.querySelector<HTMLElement>(`[data-tutorial-group="${targetId}"]`);
+  if (!element) return;
   const rect = element.getBoundingClientRect();
-  return { top: rect.top, left: rect.left, width: rect.width, height: rect.height };
+  const isVisibleVertically = rect.top >= 56 && rect.bottom <= window.innerHeight - 56;
+  if (isVisibleVertically) return;
+  if (typeof element.scrollIntoView !== "function") return;
+  element.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
 }
 
 export function TutorialSpotlightOverlay({ isVisible, targetId }: ITutorialSpotlightOverlayProps) {
   const [rect, setRect] = useState<IRect | null>(null);
+  const lastAutoScrollTargetRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!isVisible) return;
-    const update = () => setRect(resolveRect(targetId));
+    const update = () => {
+      setRect(resolveRect(targetId));
+      if (targetId && lastAutoScrollTargetRef.current !== targetId) {
+        ensureTargetVisibility(targetId);
+        lastAutoScrollTargetRef.current = targetId;
+      }
+    };
     update();
     window.addEventListener("resize", update);
     window.addEventListener("scroll", update, true);

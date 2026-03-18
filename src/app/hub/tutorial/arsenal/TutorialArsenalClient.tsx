@@ -1,39 +1,32 @@
 // src/app/hub/tutorial/arsenal/TutorialArsenalClient.tsx - Ejecuta Preparar Deck con sandbox mock sobre UI real de Arsenal y flujo guiado seguro.
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { HomeDeckActionBar } from "@/components/hub/home/HomeDeckActionBar";
 import { HomeEvolutionOverlay } from "@/components/hub/home/HomeEvolutionOverlay";
 import { HomeResponsiveWorkspace } from "@/components/hub/home/layout/HomeResponsiveWorkspace";
 import { HubErrorDialog } from "@/components/hub/internal/HubErrorDialog";
+import { useHubModuleSfx } from "@/components/hub/internal/use-hub-module-sfx";
 import { TutorialBigLogDialog } from "@/components/tutorial/flow/TutorialBigLogDialog";
 import { TutorialBigLogIntroOverlay } from "@/components/tutorial/flow/TutorialBigLogIntroOverlay";
 import { TutorialInteractionGuard } from "@/components/tutorial/flow/TutorialInteractionGuard";
 import { TutorialSpotlightOverlay } from "@/components/tutorial/flow/TutorialSpotlightOverlay";
 import { useTutorialFlowController } from "@/components/tutorial/flow/useTutorialFlowController";
 import { IHomeDeckBuilderSceneProps } from "@/components/hub/home/internal/types/home-deck-builder-types";
-import { postTutorialNodeCompletion } from "@/app/hub/tutorial/internal/tutorial-node-progress-client";
 import { useTutorialArsenalSandbox } from "@/app/hub/tutorial/arsenal/internal/use-tutorial-arsenal-sandbox";
+import { useTutorialArsenalProgressSync } from "@/app/hub/tutorial/arsenal/internal/use-tutorial-arsenal-progress-sync";
 import { resolveArsenalTutorialSteps } from "@/services/tutorial/arsenal/resolve-arsenal-tutorial-steps";
 
 export function TutorialArsenalClient(props: IHomeDeckBuilderSceneProps) {
   const tutorial = useTutorialFlowController(useMemo(() => resolveArsenalTutorialSteps(), []));
   const sandbox = useTutorialArsenalSandbox({ ...props, tutorial });
+  const { play } = useHubModuleSfx();
   const [isIntroVisible, setIsIntroVisible] = useState(true);
-  const hasSyncedCompletionRef = useRef(false);
   const evolutionCard = sandbox.state.selectedCard ?? null;
-
-  useEffect(() => {
-    if (tutorial.currentStep?.id === "arsenal-select-deck-card" && sandbox.state.selectedSlotIndex !== null) tutorial.onAction("SELECT_DECK_CARD");
-    if (tutorial.currentStep?.id === "arsenal-select-collection-card" && sandbox.state.selectedCollectionCardId) tutorial.onAction("SELECT_COLLECTION_CARD");
-  }, [sandbox.state.selectedCollectionCardId, sandbox.state.selectedSlotIndex, tutorial]);
-
-  useEffect(() => {
-    if (!tutorial.isFinished || hasSyncedCompletionRef.current) return;
-    hasSyncedCompletionRef.current = true;
-    postTutorialNodeCompletion("tutorial-arsenal-basics").catch(() => {
-      hasSyncedCompletionRef.current = false;
-    });
-  }, [tutorial.isFinished]);
+  useTutorialArsenalProgressSync({
+    selectedSlotIndex: sandbox.state.selectedSlotIndex,
+    selectedCollectionCardId: sandbox.state.selectedCollectionCardId,
+    tutorial,
+  });
 
   return (
     <>
@@ -83,9 +76,24 @@ export function TutorialArsenalClient(props: IHomeDeckBuilderSceneProps) {
             onInsertSelectedCard={sandbox.insertSelectedCard}
             onRemoveSelectedCard={sandbox.removeSelectedCard}
             onEvolveSelectedCard={sandbox.evolveSelectedCard}
-            onSelectSlot={(slotIndex) => { sandbox.state.setSelectedSlotIndex(slotIndex); sandbox.state.setSelectedFusionSlotIndex(null); sandbox.state.setSelectedCollectionCardId(null); }}
-            onSelectFusionSlot={(slotIndex) => { sandbox.state.setSelectedFusionSlotIndex(slotIndex); sandbox.state.setSelectedSlotIndex(null); sandbox.state.setSelectedCollectionCardId(null); }}
-            onSelectCollectionCard={(cardId) => { sandbox.state.setSelectedCollectionCardId(cardId); sandbox.state.setSelectedSlotIndex(null); sandbox.state.setSelectedFusionSlotIndex(null); }}
+            onSelectSlot={(slotIndex) => {
+              play("DETAIL_OPEN");
+              sandbox.state.setSelectedSlotIndex(slotIndex);
+              sandbox.state.setSelectedFusionSlotIndex(null);
+              sandbox.state.setSelectedCollectionCardId(null);
+            }}
+            onSelectFusionSlot={(slotIndex) => {
+              play("DETAIL_OPEN");
+              sandbox.state.setSelectedFusionSlotIndex(slotIndex);
+              sandbox.state.setSelectedSlotIndex(null);
+              sandbox.state.setSelectedCollectionCardId(null);
+            }}
+            onSelectCollectionCard={(cardId) => {
+              play("DETAIL_OPEN");
+              sandbox.state.setSelectedCollectionCardId(cardId);
+              sandbox.state.setSelectedSlotIndex(null);
+              sandbox.state.setSelectedFusionSlotIndex(null);
+            }}
             onStartDragCollectionCard={() => {}}
             onStartDragDeckSlot={() => {}}
             onStartDragFusionSlot={() => {}}
@@ -111,8 +119,11 @@ export function TutorialArsenalClient(props: IHomeDeckBuilderSceneProps) {
       <TutorialBigLogIntroOverlay
         isVisible={isIntroVisible}
         title="Preparar Deck"
-        description="Practicarás con un mazo sandbox: remover para abrir hueco, añadir cartas, revisar detalle, entender fusión y evolucionar en almacén."
-        onStart={() => setIsIntroVisible(false)}
+        description="Practicarás con un mazo sandbox visual: revisar detalle, gestionar cupo de 20 cartas, entender fusión y dominar evolución por copias."
+        onStart={() => {
+          play("EVOLUTION_BUTTON");
+          setIsIntroVisible(false);
+        }}
       />
       {!isIntroVisible ? (
         <TutorialBigLogDialog
@@ -120,7 +131,11 @@ export function TutorialArsenalClient(props: IHomeDeckBuilderSceneProps) {
           description={tutorial.currentStep?.description ?? "Has completado Preparar Deck. Vuelve al mapa para continuar."}
           canUseNext={tutorial.canUseNext}
           isFinished={tutorial.isFinished}
-          onNext={tutorial.onNext}
+          onNext={() => {
+            play("EVOLUTION_BUTTON");
+            tutorial.onNext();
+          }}
+          targetId={tutorial.currentStep?.targetId ?? null}
         />
       ) : null}
     </>

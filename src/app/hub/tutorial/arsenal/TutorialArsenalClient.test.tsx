@@ -39,8 +39,8 @@ describe("TutorialArsenalClient", () => {
     }];
     render(<TutorialArsenalClient playerId="p1" initialDeck={deck} collection={collection} initialCardProgress={[]} />);
     fireEvent.click(screen.getByRole("button", { name: "Empezar" }));
-    expect(screen.getByText("Selecciona carta del deck")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Deck slot" }));
-    expect(screen.getByText("Remover para abrir espacio")).toBeInTheDocument();
+    expect(screen.getByText("Selecciona carta del almacén")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Colección" }));
+    expect(screen.getByText("Lee el detalle antes de actuar")).toBeInTheDocument();
   });
 });

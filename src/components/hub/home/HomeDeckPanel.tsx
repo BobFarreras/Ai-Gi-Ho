@@ -37,6 +37,7 @@ export function HomeDeckPanel({
   selectedCardId,
 }: HomeDeckPanelProps) {
   const cardById = new Map(collection.map((entry) => [entry.card.id, entry.card]));
+  const fusionRecipeCardIds = new Set(["tutorial-chatgpt", "tutorial-gemini", "tutorial-gemgpt-magic"]);
 
   return (
     <section data-tutorial-id="tutorial-home-deck" className="flex h-full min-h-0 flex-col rounded-2xl border border-cyan-800/35 bg-[#030c16]/72 p-3 sm:p-4 shadow-[0_0_22px_rgba(8,145,178,0.12)]">
@@ -58,6 +59,8 @@ export function HomeDeckPanel({
             return (
           <motion.div
                 key={slot.index}
+                data-tutorial-id={card ? `tutorial-home-card-${card.id}` : undefined}
+                data-tutorial-group={card && fusionRecipeCardIds.has(card.id) ? "tutorial-home-fusion-recipe-cards" : undefined}
                 whileHover={{ scale: 1.05, y: -2, zIndex: 10 }}
                 whileTap={{ scale: 0.95 }}
                 className="relative w-[76px] flex justify-center"

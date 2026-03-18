@@ -50,7 +50,7 @@ export function HomeFusionDeckPanel({
           const isSelected = selectedFusionSlotIndex === slot.index || (slot.cardId !== null && selectedCardId === slot.cardId);
           
           return (
-            <div key={`fusion-slot-${slot.index}`} className="w-[76px]">
+            <div key={`fusion-slot-${slot.index}`} data-tutorial-id={card ? `tutorial-home-fusion-card-${card.id}` : undefined} className="w-[76px]">
               <HomeMiniCard
                 card={card}
                 isSelected={isSelected}
