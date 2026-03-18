@@ -76,6 +76,18 @@
 4. Se añaden tests de motor y flujo de cliente para validar avance guiado.
 5. Commit: pendiente en esta sesión.
 
+## Fase 9 - Nodo Market guiado con motor reusable
+
+1. Se implementa el flujo guiado de Market sobre `/hub/tutorial/market` con pasos de:
+   - filtro por tipo,
+   - orden,
+   - compra de sobre,
+   - apertura de historial.
+2. Se reutiliza el mismo stack de spotlight + guard + diálogo BigLog sin duplicar lógica.
+3. Se añade simulación funcional de Nexus e historial para aprendizaje práctico.
+4. Se añaden tests de UI para validar avance completo del nodo.
+5. Commit: pendiente en esta sesión.
+
 ## Validación global aplicada por fase
 
 1. `pnpm lint`
