@@ -1,6 +1,8 @@
 <!-- docs/training/IMPLEMENTATION_LOG.md - Bitácora de implementación por fases del módulo de entrenamiento. -->
 # Training Implementation Log
 
+> Estado canónico actual de rutas: `Tutorial` y `Training` viven exclusivamente bajo `/hub/academy/*`. Las referencias anteriores a `/hub/tutorial` o `/hub/training` se mantienen en este log solo como traza histórica de fases antiguas.
+
 ## Fase 1 - Dominio agnóstico y TDD
 
 1. Se creó el subdominio `core/services/training` con reglas puras:
