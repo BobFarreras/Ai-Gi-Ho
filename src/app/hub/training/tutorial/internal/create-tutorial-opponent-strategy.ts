@@ -8,7 +8,7 @@ function findHandCardRuntimeId(state: GameState, cardId: string): string | null 
 }
 
 function pickAttacker(state: GameState): string | null {
-  const attackables = state.playerB.activeEntities.filter((entity) => entity.mode === "ATTACK" && !entity.hasAttackedThisTurn && !entity.isNewlySummoned);
+  const attackables = state.playerB.activeEntities.filter((entity) => entity.mode === "ATTACK" && !entity.hasAttackedThisTurn);
   if (attackables.length === 0) return null;
   return [...attackables].sort((a, b) => b.card.attack - a.card.attack)[0]?.instanceId ?? null;
 }
@@ -29,12 +29,6 @@ export function createTutorialOpponentStrategy(): IOpponentStrategy {
         if (setTrap) return { cardId: setTrap, mode: "SET" };
       }
       if (turn === 6) {
-        const restoreEnergy = findHandCardRuntimeId(state, "tutorial-opp-exec-energy-restore");
-        if (restoreEnergy && state.playerB.currentEnergy < 4) return { cardId: restoreEnergy, mode: "ACTIVATE" };
-        const crusher = findHandCardRuntimeId(state, "tutorial-opp-crusher-beta");
-        if (crusher) return { cardId: crusher, mode: "ATTACK" };
-      }
-      if (turn === 8) {
         const defender = findHandCardRuntimeId(state, "tutorial-opp-guard-gamma");
         if (defender) return { cardId: defender, mode: "DEFENSE" };
       }

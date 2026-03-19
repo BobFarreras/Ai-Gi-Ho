@@ -57,7 +57,7 @@ export function BoardMobileTopBar({
 
   return (
     <>
-      <div className="absolute top-0 left-0 z-[245] w-[33vw] min-w-[118px] max-w-[146px] pointer-events-auto">
+      <div data-tutorial-id="tutorial-board-turn-timer-panel" className="absolute top-0 left-0 z-[245] w-[33vw] min-w-[118px] max-w-[146px] pointer-events-auto">
         <div className={cn("w-full bg-cyan-500/70 pb-[2px] pr-[2px]", "[clip-path:polygon(0_0,100%_0,calc(100%-16px)_100%,0_100%)]")}>
           <div
             className={cn(

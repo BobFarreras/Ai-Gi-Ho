@@ -43,7 +43,7 @@ export function BoardTopBar({
   const phaseInfo = getPhaseDisplay(phase);
 
   return (
-    <div className="absolute top-0 left-0 z-50 flex pointer-events-auto filter drop-shadow-[0_5px_15px_rgba(6,182,212,0.35)] w-full max-w-[420px]">
+    <div data-tutorial-id="tutorial-board-turn-timer-panel" className="absolute top-0 left-0 z-50 flex pointer-events-auto filter drop-shadow-[0_5px_15px_rgba(6,182,212,0.35)] w-full max-w-[420px]">
       
       {/* Contenedor Padre (Borde) */}
       <div 

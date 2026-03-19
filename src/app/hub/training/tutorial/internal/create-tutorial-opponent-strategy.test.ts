@@ -17,18 +17,6 @@ function createEntityCard(id: string, attack: number): ICard {
   };
 }
 
-function createExecutionCard(id: string): ICard {
-  return {
-    id,
-    name: id,
-    description: "Carta de test",
-    type: "EXECUTION",
-    faction: "NEUTRAL",
-    cost: 1,
-    effect: { action: "DRAW", cards: 1 },
-  };
-}
-
 describe("createTutorialOpponentStrategy", () => {
   it("no reutiliza una entidad que ya atacó en el mismo turno", () => {
     const strategy = createTutorialOpponentStrategy();
@@ -48,13 +36,12 @@ describe("createTutorialOpponentStrategy", () => {
     expect(decision?.attackerInstanceId).toBe("ready");
   });
 
-  it("en turno 6 activa recarga si no tiene energía suficiente para su entidad fuerte", () => {
+  it("en turno 6 prioriza carta defensiva en posición DEFENSE", () => {
     const strategy = createTutorialOpponentStrategy();
-    const restore = { ...createExecutionCard("tutorial-opp-exec-energy-restore"), runtimeId: "restore-runtime" };
-    const crusher = { ...createEntityCard("tutorial-opp-crusher-beta", 2600), runtimeId: "crusher-runtime", cost: 4 };
+    const defender = { ...createEntityCard("tutorial-opp-guard-gamma", 1900), runtimeId: "defender-runtime", defense: 2400 };
     const state = createTestGameState({
       playerA: { id: "player-local" },
-      playerB: { id: "opponent-local", currentEnergy: 2, hand: [restore, crusher] },
+      playerB: { id: "opponent-local", currentEnergy: 6, hand: [defender] },
       turn: 6,
       activePlayerId: "opponent-local",
       startingPlayerId: "player-local",
@@ -62,6 +49,6 @@ describe("createTutorialOpponentStrategy", () => {
     });
 
     const decision = strategy.choosePlay(state, "opponent-local");
-    expect(decision).toEqual({ cardId: "restore-runtime", mode: "ACTIVATE" });
+    expect(decision).toEqual({ cardId: "defender-runtime", mode: "DEFENSE" });
   });
 });

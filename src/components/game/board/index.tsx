@@ -107,7 +107,7 @@ export function Board({ initialPlayerDeck, mode = "TRAINING", initialConfig, due
         <BoardTutorialFlowOverlay
           combatLog={board.gameState.combatLog}
           selectedCardId={board.selectedCard?.id ?? null}
-          isMuted={board.isMuted}
+          phase={board.gameState.phase}
           hasWinner={Boolean(board.winnerPlayerId)}
         />
       ) : null}

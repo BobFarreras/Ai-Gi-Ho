@@ -7,6 +7,7 @@ interface ITutorialSpotlightOverlayProps {
   isVisible: boolean;
   targetId: string | null;
   disableAutoScroll?: boolean;
+  backdropOpacity?: number;
 }
 
 interface IRect {
@@ -60,7 +61,7 @@ function ensureTargetVisibility(targetId: string | null): void {
   element.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
 }
 
-export function TutorialSpotlightOverlay({ isVisible, targetId, disableAutoScroll = false }: ITutorialSpotlightOverlayProps) {
+export function TutorialSpotlightOverlay({ isVisible, targetId, disableAutoScroll = false, backdropOpacity = 0.78 }: ITutorialSpotlightOverlayProps) {
   const [rect, setRect] = useState<IRect | null>(null);
   const lastAutoScrollTargetRef = useRef<string | null>(null);
 
@@ -91,9 +92,9 @@ export function TutorialSpotlightOverlay({ isVisible, targetId, disableAutoScrol
       left: rect.left - 6,
       width: rect.width + 12,
       height: rect.height + 12,
-      boxShadow: "0 0 0 9999px rgba(1, 7, 20, 0.78)",
+      boxShadow: `0 0 0 9999px rgba(1, 7, 20, ${backdropOpacity})`,
     } satisfies CSSProperties;
-  }, [rect]);
+  }, [backdropOpacity, rect]);
 
   if (!isVisible || !rect) return null;
   return (
@@ -103,9 +104,9 @@ export function TutorialSpotlightOverlay({ isVisible, targetId, disableAutoScrol
         style={frameStyle}
         animate={{
           boxShadow: [
-            "0 0 0 9999px rgba(1, 7, 20, 0.78), 0 0 18px rgba(34,211,238,0.38)",
-            "0 0 0 9999px rgba(1, 7, 20, 0.78), 0 0 34px rgba(34,211,238,0.82)",
-            "0 0 0 9999px rgba(1, 7, 20, 0.78), 0 0 18px rgba(34,211,238,0.38)",
+            `0 0 0 9999px rgba(1, 7, 20, ${backdropOpacity}), 0 0 18px rgba(34,211,238,0.38)`,
+            `0 0 0 9999px rgba(1, 7, 20, ${backdropOpacity}), 0 0 34px rgba(34,211,238,0.82)`,
+            `0 0 0 9999px rgba(1, 7, 20, ${backdropOpacity}), 0 0 18px rgba(34,211,238,0.38)`,
           ],
           x: [0, -1.5, 1.5, -1.5, 0],
         }}

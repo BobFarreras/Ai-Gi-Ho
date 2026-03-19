@@ -48,6 +48,7 @@ export function TrainingTutorialClient(props: ITrainingTutorialClientProps) {
           playerFusionDeck: props.fusionDeck,
           opponentDeck: props.opponentDeck,
           opponentFusionDeck: props.opponentFusionDeck,
+          opponentName: "BigLog",
           starterPlayerId: starterSide === "PLAYER" ? "player-local" : "opponent-local",
           seed: props.seed,
           preserveDeckOrder: true,
