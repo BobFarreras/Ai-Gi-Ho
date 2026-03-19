@@ -1,6 +1,6 @@
 // src/app/hub/tutorial/page.tsx - Página server-side del mapa tutorial por nodos guiados.
 import { HubSectionEntryBurst } from "@/components/hub/sections/HubSectionEntryBurst";
-import { TutorialMapSelection } from "@/components/hub/tutorial/TutorialMapSelection";
+import { TutorialMapSelection } from "@/components/hub/academy/tutorial/TutorialMapSelection";
 import { getTutorialMapRuntimeData } from "@/services/tutorial/get-tutorial-map-runtime-data";
 
 export const dynamic = "force-dynamic";

@@ -1,4 +1,4 @@
-// src/components/hub/training/TrainingDeckReadyGate.tsx - Muestra aviso cuando el jugador no tiene deck 20/20 para entrar a training/tutorial.
+// src/components/hub/academy/training/TrainingDeckReadyGate.tsx - Muestra aviso cuando el jugador no tiene deck 20/20 para entrar a tutorial o arena.
 import Link from "next/link";
 
 export function TrainingDeckReadyGate() {

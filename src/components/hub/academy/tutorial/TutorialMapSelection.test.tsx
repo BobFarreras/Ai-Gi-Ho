@@ -1,7 +1,7 @@
-// src/components/hub/tutorial/TutorialMapSelection.test.tsx - Comprueba render y bloqueo de nodos del mapa tutorial.
+// src/components/hub/academy/tutorial/TutorialMapSelection.test.tsx - Comprueba render y bloqueo de nodos del mapa tutorial.
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { TutorialMapSelection } from "@/components/hub/tutorial/TutorialMapSelection";
+import { TutorialMapSelection } from "@/components/hub/academy/tutorial/TutorialMapSelection";
 
 describe("TutorialMapSelection", () => {
   it("renderiza estado bloqueado y acciones de inicio/revisión", () => {

@@ -1,6 +1,6 @@
 // src/app/hub/academy/page.tsx - Página canónica de Academia para acceder a tutorial guiado y arena de entrenamiento.
 import { HubSectionEntryBurst } from "@/components/hub/sections/HubSectionEntryBurst";
-import { TrainingModeSelection } from "@/components/hub/training/TrainingModeSelection";
+import { TrainingModeSelection } from "@/components/hub/academy/training/TrainingModeSelection";
 
 export default async function AcademyPage() {
   return (

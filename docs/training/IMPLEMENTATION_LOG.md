@@ -132,6 +132,14 @@
 5. Se actualizan retornos de flujo (Tutorial map y cierre de Arena/Combate) para volver a `Academia`.
 6. Commit: pendiente en esta sesión.
 
+## Fase 15 - Co-location de módulos Training/Tutorial bajo Academia
+
+1. Se reorganizan componentes de presentación en `src/components/hub/academy/{training,tutorial}`.
+2. Se actualizan imports desde páginas App Router para consumir el nuevo módulo `academy`.
+3. Se mantienen intactas las rutas funcionales (`/hub/tutorial`, `/hub/training`, `/hub/academy`) para no romper navegación.
+4. Se ajustan cabeceras de ruta y tests co-localizados tras el movimiento.
+5. Commit: pendiente en esta sesión.
+
 ## Validación global aplicada por fase
 
 1. `pnpm lint`

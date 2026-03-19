@@ -1,4 +1,4 @@
-// src/components/hub/tutorial/TutorialMapSelection.tsx - Renderiza mapa inicial de tutorial con nodos narrativos y estado de desbloqueo.
+// src/components/hub/academy/tutorial/TutorialMapSelection.tsx - Renderiza mapa inicial de tutorial con nodos narrativos y estado de desbloqueo.
 import Image from "next/image";
 import Link from "next/link";
 import { ITutorialMapNodeRuntime } from "@/core/entities/tutorial/ITutorialMapNode";

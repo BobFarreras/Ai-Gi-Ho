@@ -1,4 +1,4 @@
-// src/components/hub/training/TrainingModeSelection.test.tsx - Pruebas de accesibilidad y navegación del selector de modos training.
+// src/components/hub/academy/training/TrainingModeSelection.test.tsx - Pruebas de accesibilidad y navegación del selector de modos de Academia.
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { TrainingModeSelection } from "./TrainingModeSelection";

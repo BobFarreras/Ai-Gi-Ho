@@ -1,4 +1,4 @@
-// src/components/hub/training/TrainingModeSelection.tsx - Renderiza la portada de Academia con acceso a Tutorial guiado y Arena de entrenamiento.
+// src/components/hub/academy/training/TrainingModeSelection.tsx - Renderiza la portada de Academia con acceso a Tutorial guiado y Arena de entrenamiento.
 import Link from "next/link";
 
 interface ITrainingModeCard {
