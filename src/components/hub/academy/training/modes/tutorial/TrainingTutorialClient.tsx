@@ -1,4 +1,4 @@
-// src/app/hub/academy/training/tutorial/TrainingTutorialClient.tsx - Orquesta tutorial board y sincroniza su finalización cuando el jugador gana.
+// src/components/hub/academy/training/modes/tutorial/TrainingTutorialClient.tsx - Orquesta tutorial board y sincroniza su finalización cuando el jugador gana.
 "use client";
 import { useMemo, useRef, useState } from "react";
 import { Board } from "@/components/game/board";
@@ -9,7 +9,7 @@ import { EXECUTION_CARDS } from "@/core/data/mock-cards/executions";
 import { ENTITY_CARDS } from "@/core/data/mock-cards/entities";
 import { postTutorialCombatRewardClaim, postTutorialNodeCompletion } from "@/services/tutorial/tutorial-node-progress-client";
 import { TrainingCoinTossOverlay } from "./TrainingCoinTossOverlay";
-import { createTutorialOpponentStrategy } from "@/app/hub/academy/training/tutorial/internal/create-tutorial-opponent-strategy";
+import { createTutorialOpponentStrategy } from "@/components/hub/academy/training/modes/tutorial/internal/create-tutorial-opponent-strategy";
 import { CombatTutorialRewardOverlay } from "./CombatTutorialRewardOverlay";
 
 interface ITrainingTutorialClientProps {
@@ -40,6 +40,9 @@ export function TrainingTutorialClient(props: ITrainingTutorialClientProps) {
   const starterSide: "PLAYER" | "OPPONENT" = "PLAYER";
   const tutorialRewardCard = useMemo(() => EXECUTION_CARDS.find((card) => card.id === "exec-fusion-gemgpt") ?? props.deck[0], [props.deck]);
 
+  /**
+   * Marca el nodo de combate al ganar y evita duplicar escrituras durante re-renders.
+   */
   async function handleMatchResolved(result: { winnerPlayerId: string | "DRAW"; playerId: string }) {
     if (result.winnerPlayerId !== result.playerId || hasPostedRef.current) {
       if (result.winnerPlayerId !== result.playerId) setStatus("Tutorial no completado. Vuelve a intentarlo.");

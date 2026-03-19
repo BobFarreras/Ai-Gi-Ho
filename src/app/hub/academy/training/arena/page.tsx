@@ -1,7 +1,7 @@
 // src/app/hub/academy/training/arena/page.tsx - Entry server-side de arena training con tier validado y runtime listo para UI cliente.
 import { HubSectionEntryBurst } from "@/components/hub/sections/HubSectionEntryBurst";
 import { TrainingDeckReadyGate } from "@/components/hub/academy/training/TrainingDeckReadyGate";
-import { TrainingArenaClient } from "@/app/hub/academy/training/arena/TrainingArenaClient";
+import { TrainingArenaClient } from "@/components/hub/academy/training/modes/arena/TrainingArenaClient";
 import { HOME_DECK_SIZE } from "@/core/services/home/deck-rules";
 import { getTrainingArenaRuntimeData } from "@/services/training/get-training-arena-runtime-data";
 

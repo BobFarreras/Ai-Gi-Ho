@@ -1,4 +1,4 @@
-// src/app/hub/academy/training/tutorial/TrainingCoinTossOverlay.tsx - Intro de BigLog + animación de moneda para iniciar el tutorial de combate.
+// src/components/hub/academy/training/modes/tutorial/TrainingCoinTossOverlay.tsx - Intro de BigLog + animación de moneda para iniciar el tutorial de combate.
 "use client";
 import Image from "next/image";
 import { motion, useAnimationControls } from "framer-motion";

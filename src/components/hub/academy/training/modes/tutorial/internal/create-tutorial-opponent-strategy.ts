@@ -1,4 +1,4 @@
-// src/app/hub/academy/training/tutorial/internal/create-tutorial-opponent-strategy.ts - Estrategia rival determinista para guiar el flujo del tutorial de combate.
+// src/components/hub/academy/training/modes/tutorial/internal/create-tutorial-opponent-strategy.ts - Estrategia rival determinista para guiar el flujo del tutorial de combate.
 import { IOpponentAttackDecision, IOpponentPlayDecision, IOpponentStrategy } from "@/core/services/opponent/types";
 import { GameState } from "@/core/use-cases/GameEngine";
 

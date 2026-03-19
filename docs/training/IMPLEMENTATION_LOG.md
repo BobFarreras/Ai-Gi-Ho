@@ -159,6 +159,14 @@
 5. Se mantuvieron quality gates en verde tras la migración.
 6. Commit: pendiente en esta sesión.
 
+## Fase 18 - App Router puro para Training + co-location de tutorial de combate
+
+1. Se movió la lógica cliente de `training/arena` y `training/tutorial` desde `app/` a `components/hub/academy/training/modes/*`.
+2. `src/app/hub/academy/training/*/page.tsx` quedó como entrypoint server-side sin orquestación cliente embebida.
+3. Se reubicaron mocks y estrategia del tutorial de combate en el módulo `components` con tests co-localizados.
+4. Se actualizaron imports, cabeceras de ruta y comentarios/JSDoc de intención en handlers críticos.
+5. Commit: pendiente en esta sesión.
+
 ## Validación global aplicada por fase
 
 1. `pnpm lint`

@@ -1,4 +1,4 @@
-// src/app/hub/academy/training/arena/TrainingArenaClient.tsx - Orquesta UI de arena training con selección de tier y cierre de partida remoto.
+// src/components/hub/academy/training/modes/arena/TrainingArenaClient.tsx - Orquesta UI de arena training con selección de tier y cierre de partida remoto.
 "use client";
 import { useRef, useState } from "react";
 import Link from "next/link";
@@ -27,6 +27,9 @@ export function TrainingArenaClient(props: ITrainingArenaClientProps) {
   const [highestUnlockedTier, setHighestUnlockedTier] = useState(props.highestUnlockedTier);
   const hasPostedRef = useRef(false);
 
+  /**
+   * Sincroniza cierre de duelo una única vez para mantener idempotencia por `matchSeed`.
+   */
   async function handleMatchResolved(result: { winnerPlayerId: string | "DRAW"; playerId: string; matchSeed: string }) {
     if (hasPostedRef.current) return;
     hasPostedRef.current = true;
