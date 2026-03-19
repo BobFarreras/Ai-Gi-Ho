@@ -1,6 +1,6 @@
 // src/components/hub/academy/tutorial/nodes/market/TutorialMarketClient.tsx - Ejecuta nodo Market tutorial sobre la UI real del Market con datos mock controlados.
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { MarketScene } from "@/components/hub/market/MarketScene";
 import { TutorialBigLogDialog } from "@/components/tutorial/flow/TutorialBigLogDialog";
 import { TutorialBigLogIntroOverlay } from "@/components/tutorial/flow/TutorialBigLogIntroOverlay";
@@ -11,7 +11,9 @@ import { useTutorialFlowController } from "@/components/tutorial/flow/useTutoria
 import { useHubModuleSfx } from "@/components/hub/internal/use-hub-module-sfx";
 import { useViewportWidth } from "@/components/hub/internal/use-viewport-width";
 import { isMobileLayoutViewport } from "@/components/internal/layout-breakpoints";
-import { postTutorialNodeCompletion } from "@/services/tutorial/tutorial-node-progress-client";
+import { resolveStepIdMembership } from "@/components/hub/academy/tutorial/nodes/internal/resolve-step-id-membership";
+import { useTutorialNodeCompletionSync } from "@/components/hub/academy/tutorial/nodes/internal/use-tutorial-node-completion-sync";
+import { MARKET_FILTER_GUIDE_STEPS, MARKET_NEXT_BUTTON_HIGHLIGHT_STEPS, MARKET_PINNED_TOP_STEPS } from "@/components/hub/academy/tutorial/nodes/market/internal/market-tutorial-step-groups";
 import { useTutorialMarketRuntime } from "@/components/hub/academy/tutorial/nodes/market/internal/use-tutorial-market-runtime";
 import { resolveMarketTutorialSteps } from "@/services/tutorial/market/resolve-market-tutorial-steps";
 
@@ -26,40 +28,13 @@ export function TutorialMarketClient() {
   const [isIntroVisible, setIsIntroVisible] = useState(true);
   const [isPackRevealOpen, setIsPackRevealOpen] = useState(false);
   const [autoBuyPackRequestId, setAutoBuyPackRequestId] = useState(0);
-  const hasSyncedCompletionRef = useRef(false);
   const currentStepId = tutorial.currentStep?.id ?? null;
-  // Pasos donde fijamos el diálogo arriba para no tapar acciones críticas (comprar/pack/resultado).
-  const isPinnedTopStep =
-    currentStepId === "market-buy-card" ||
-    currentStepId === "market-buy-card-result-warehouse" ||
-    currentStepId === "market-pack-selection" ||
-    currentStepId === "market-pack-preview-cards" ||
-    currentStepId === "market-buy-pack" ||
-    currentStepId === "market-pack-random-explanation";
-  const isFilterGuideStep =
-    currentStepId === "market-type-filter" ||
-    currentStepId === "market-order-filter" ||
-    currentStepId === "market-order-direction";
-  const shouldHighlightNextButton =
-    isFilterGuideStep ||
-    currentStepId === "market-mobile-section-listings" ||
-    currentStepId === "market-mobile-section-packs" ||
-    currentStepId === "market-mobile-section-vault" ||
-    currentStepId === "market-buy-card-result-warehouse" ||
-    currentStepId === "market-pack-preview-cards" ||
-    currentStepId === "market-buy-pack" ||
-    currentStepId === "market-pack-random-explanation" ||
-    currentStepId === "market-open-vault-collection" ||
-    currentStepId === "market-open-history";
+  // Reglas de UI declarativas por grupo para evitar condicionales duplicadas en cliente.
+  const isPinnedTopStep = resolveStepIdMembership(currentStepId, MARKET_PINNED_TOP_STEPS);
+  const isFilterGuideStep = resolveStepIdMembership(currentStepId, MARKET_FILTER_GUIDE_STEPS);
+  const shouldHighlightNextButton = isFilterGuideStep || resolveStepIdMembership(currentStepId, MARKET_NEXT_BUTTON_HIGHLIGHT_STEPS);
 
-  useEffect(() => {
-    // Persistencia idempotente: solo marcamos completion cuando realmente se finaliza el flujo.
-    if (!tutorial.isFinished || hasSyncedCompletionRef.current) return;
-    hasSyncedCompletionRef.current = true;
-    postTutorialNodeCompletion("tutorial-market-basics").catch(() => {
-      hasSyncedCompletionRef.current = false;
-    });
-  }, [tutorial.isFinished]);
+  useTutorialNodeCompletionSync({ tutorial, nodeId: "tutorial-market-basics" });
 
   return (
     <>

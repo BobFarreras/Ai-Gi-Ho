@@ -13,6 +13,8 @@ import { useTutorialArsenalSandbox } from "@/components/hub/academy/tutorial/nod
 import { useTutorialArsenalProgressSync } from "@/components/hub/academy/tutorial/nodes/arsenal/internal/use-tutorial-arsenal-progress-sync";
 import { TutorialArsenalFlowOverlays } from "@/components/hub/academy/tutorial/nodes/arsenal/internal/TutorialArsenalFlowOverlays";
 import { resolveTutorialMobileSection } from "@/components/hub/academy/tutorial/nodes/arsenal/internal/resolve-tutorial-mobile-section";
+import { ARSENAL_ACTION_LAYOUT_STEPS, ARSENAL_FUSION_LAYOUT_STEPS } from "@/components/hub/academy/tutorial/nodes/arsenal/internal/arsenal-tutorial-step-groups";
+import { resolveStepIdMembership } from "@/components/hub/academy/tutorial/nodes/internal/resolve-step-id-membership";
 import { resolveArsenalTutorialSteps } from "@/services/tutorial/arsenal/resolve-arsenal-tutorial-steps";
 
 export function TutorialArsenalClient(props: IHomeDeckBuilderSceneProps) {
@@ -34,14 +36,9 @@ export function TutorialArsenalClient(props: IHomeDeckBuilderSceneProps) {
     window.addEventListener("resize", updateLayoutMode);
     return () => window.removeEventListener("resize", updateLayoutMode);
   }, []);
-  const isFusionStep =
-    tutorial.currentStep?.id === "arsenal-fusion-recipe-cards" ||
-    tutorial.currentStep?.id === "arsenal-fusion-result" ||
-    tutorial.currentStep?.id === "arsenal-fusion-explanation";
-  const isActionStep =
-    tutorial.currentStep?.id === "arsenal-add-deck" ||
-    tutorial.currentStep?.id === "arsenal-remove-deck" ||
-    tutorial.currentStep?.id === "arsenal-open-evolve";
+  const currentStepId = tutorial.currentStep?.id ?? null;
+  const isFusionStep = resolveStepIdMembership(currentStepId, ARSENAL_FUSION_LAYOUT_STEPS);
+  const isActionStep = resolveStepIdMembership(currentStepId, ARSENAL_ACTION_LAYOUT_STEPS);
   const shouldPreferTopTutorialDialog = isFusionStep || (isMobileLayout && isActionStep);
   useTutorialArsenalProgressSync({
     selectedSlotIndex: sandbox.state.selectedSlotIndex,

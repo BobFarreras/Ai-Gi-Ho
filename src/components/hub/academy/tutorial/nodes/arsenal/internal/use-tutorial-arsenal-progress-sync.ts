@@ -2,7 +2,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { useTutorialFlowController } from "@/components/tutorial/flow/useTutorialFlowController";
-import { postTutorialNodeCompletion } from "@/services/tutorial/tutorial-node-progress-client";
+import { useTutorialNodeCompletionSync } from "@/components/hub/academy/tutorial/nodes/internal/use-tutorial-node-completion-sync";
 
 interface IUseTutorialArsenalProgressSyncInput {
   selectedSlotIndex: number | null;
@@ -14,7 +14,6 @@ interface IUseTutorialArsenalProgressSyncInput {
  * Mantiene avance automático por selección y persistencia del nodo cuando el flujo termina.
  */
 export function useTutorialArsenalProgressSync(input: IUseTutorialArsenalProgressSyncInput): void {
-  const hasSyncedCompletionRef = useRef(false);
   const lastStepIdRef = useRef<string | null>(null);
   const selectionBaselineRef = useRef<{ collectionCardId: string | null; slotIndex: number | null }>({
     collectionCardId: null,
@@ -48,13 +47,5 @@ export function useTutorialArsenalProgressSync(input: IUseTutorialArsenalProgres
       input.tutorial.onAction("SELECT_COLLECTION_CARD");
     }
   }, [input.selectedCollectionCardId, input.selectedSlotIndex, input.tutorial]);
-
-  useEffect(() => {
-    // Persistimos completion una sola vez y reintentamos en caso de fallo de red.
-    if (!input.tutorial.isFinished || hasSyncedCompletionRef.current) return;
-    hasSyncedCompletionRef.current = true;
-    postTutorialNodeCompletion("tutorial-arsenal-basics").catch(() => {
-      hasSyncedCompletionRef.current = false;
-    });
-  }, [input.tutorial.isFinished]);
+  useTutorialNodeCompletionSync({ tutorial: input.tutorial, nodeId: "tutorial-arsenal-basics" });
 }
