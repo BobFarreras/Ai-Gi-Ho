@@ -170,8 +170,8 @@
 ## Fase 19 - Eliminación de duplicidad de rutas legacy en `app/hub`
 
 1. Se eliminaron las carpetas `src/app/hub/tutorial/*` y `src/app/hub/training/*` para evitar duplicidad estructural con `academy`.
-2. La compatibilidad de URLs legacy se movió a `next.config.ts` con redirects centralizados.
-3. La única jerarquía funcional para tutorial/training en App Router queda bajo `src/app/hub/academy/*`.
+2. Se retiró la capa de compatibilidad legacy y se eliminó también la redirección centralizada para evitar reglas de routing ocultas.
+3. La única jerarquía funcional para tutorial/training en App Router queda bajo `src/app/hub/academy/*` sin aliases legacy.
 4. Commit: pendiente en esta sesión.
 
 ## Validación global aplicada por fase
