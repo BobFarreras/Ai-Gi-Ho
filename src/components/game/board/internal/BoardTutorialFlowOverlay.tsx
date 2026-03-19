@@ -48,6 +48,20 @@ export function BoardTutorialFlowOverlay(props: IBoardTutorialFlowOverlayProps) 
     [],
   );
 
+  useEffect(() => {
+    const shouldLockScroll = isIntroVisible || !tutorial.isFinished;
+    if (!shouldLockScroll) return;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, [isIntroVisible, tutorial.isFinished]);
+
   const queueStepAction = useCallback(
     (stepId: string, actionId: string, delayMs = 0): void => {
       if (tutorial.currentStep?.id !== stepId) return;
@@ -87,11 +101,17 @@ export function BoardTutorialFlowOverlay(props: IBoardTutorialFlowOverlayProps) 
     if (currentStepId === "combat-pass-opponent-set" && hasOpponentSetCard) queueStepAction("combat-pass-opponent-set", "OPPONENT_SET_DONE", 800);
     if (currentStepId === "combat-select-fusion-magic" && hasFusionMagicSelected) queueStepAction("combat-select-fusion-magic", "SELECT_FUSION_MAGIC");
     if (currentStepId === "combat-activate-fusion-magic" && isFusionBrowserOpen) queueStepAction("combat-activate-fusion-magic", "FUSION_BROWSER_OPEN", 200);
-    if (currentStepId === "combat-fusion-material-1" && fusionSelectedCount >= 1) queueStepAction("combat-fusion-material-1", "FUSION_MATERIAL_1_SELECTED");
-    if (currentStepId === "combat-fusion-material-2" && fusionSelectedCount >= 2) queueStepAction("combat-fusion-material-2", "FUSION_MATERIAL_2_SELECTED");
+    if (currentStepId === "combat-fusion-material-1" && (fusionSelectedCount >= 1 || hasFusionSummon)) {
+      queueStepAction("combat-fusion-material-1", "FUSION_MATERIAL_1_SELECTED");
+    }
+    if (currentStepId === "combat-fusion-material-2" && (fusionSelectedCount >= 2 || hasFusionSummon || !isFusionBrowserOpen)) {
+      queueStepAction("combat-fusion-material-2", "FUSION_MATERIAL_2_SELECTED");
+    }
     if (currentStepId === "combat-fusion-summon-animation" && hasFusionSummon) queueStepAction("combat-fusion-summon-animation", "FUSION_SUMMON", 1000);
     if (currentStepId === "combat-fusion-battle-phase" && phase === "BATTLE") queueStepAction("combat-fusion-battle-phase", "TURN_TO_BATTLE_AFTER_FUSION");
-    if (currentStepId === "combat-fusion-direct-attack" && hasOpponentDefenseCard) queueStepAction("combat-fusion-direct-attack", "OPPONENT_DEFENSE_READY", 900);
+    if (currentStepId === "combat-fusion-select-card" && selectedCardId === "fusion-gemgpt") queueStepAction("combat-fusion-select-card", "SELECT_FUSION_ENTITY_FOR_ATTACK");
+    if (currentStepId === "combat-fusion-direct-attack" && playerDirectDamageCount >= 3) queueStepAction("combat-fusion-direct-attack", "PLAYER_FUSION_DIRECT_ATTACK_DONE");
+    if (currentStepId === "combat-fusion-pass-turn" && hasOpponentDefenseCard) queueStepAction("combat-fusion-pass-turn", "OPPONENT_DEFENSE_READY", 900);
     if (currentStepId === "combat-select-python" && selectedCardId === "entity-python") queueStepAction("combat-select-python", "SELECT_PYTHON");
     if (currentStepId === "combat-summon-python" && hasPythonAttackSummon) queueStepAction("combat-summon-python", "SUMMON_PYTHON_ATTACK");
     if (currentStepId === "combat-python-battle-phase" && phase === "BATTLE") queueStepAction("combat-python-battle-phase", "TURN_TO_BATTLE_PYTHON");
@@ -106,7 +126,9 @@ export function BoardTutorialFlowOverlay(props: IBoardTutorialFlowOverlayProps) 
     tutorial.currentStep?.id === "combat-direct-attack-guide" ||
     tutorial.currentStep?.id === "combat-direct-attack-chatgpt" ||
     tutorial.currentStep?.id === "combat-direct-attack-gemini-select" ||
-    tutorial.currentStep?.id === "combat-direct-attack-gemini";
+    tutorial.currentStep?.id === "combat-direct-attack-gemini" ||
+    tutorial.currentStep?.id === "combat-fusion-select-card" ||
+    tutorial.currentStep?.id === "combat-fusion-direct-attack";
 
   return (
     <>
@@ -115,6 +137,7 @@ export function BoardTutorialFlowOverlay(props: IBoardTutorialFlowOverlayProps) 
         isVisible={!isIntroVisible && !tutorial.isFinished && !isExecutionShowcaseStep}
         targetId={tutorial.currentStep?.targetId ?? null}
         backdropOpacity={isDirectAttackGuidedStep ? 0.06 : 0.78}
+        disableAutoScroll
       />
       <TutorialBigLogIntroOverlay
         isVisible={isIntroVisible}
@@ -126,8 +149,11 @@ export function BoardTutorialFlowOverlay(props: IBoardTutorialFlowOverlayProps) 
         <TutorialBigLogDialog
           title={tutorial.currentStep?.title ?? "Tutorial de combate completado"}
           description={tutorial.currentStep?.description ?? "Has cubierto las mecánicas base del duelo. Puedes repetir el nodo cuando quieras."}
+          targetId={tutorial.currentStep?.targetId ?? null}
           canUseNext={tutorial.canUseNext}
           isFinished={tutorial.isFinished}
+          preferTopPlacement
+          disableAutoScrollWhenPinnedTop
           shouldHighlightNextButton
           onNext={tutorial.onNext}
         />

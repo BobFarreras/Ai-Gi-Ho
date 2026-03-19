@@ -12,6 +12,8 @@ describe("resolveCombatTutorialSteps", () => {
     expect(steps.some((step) => step.id === "combat-rules-timer" && step.targetId === "tutorial-board-turn-timer-panel")).toBe(true);
     expect(steps.some((step) => step.id === "combat-direct-attack-enter-battle" && step.targetId === "tutorial-board-phase-battle-button")).toBe(true);
     expect(steps.some((step) => step.id === "combat-direct-attack-chatgpt" && step.targetId === "tutorial-board-opponent-zone-1")).toBe(true);
+    expect(steps.some((step) => step.id === "combat-fusion-select-card" && step.targetId === "tutorial-board-player-entity-card-fusion-gemgpt")).toBe(true);
+    expect(steps.some((step) => step.id === "combat-fusion-direct-attack" && step.targetId === "tutorial-board-opponent-zone-1")).toBe(true);
     expect(steps.some((step) => step.id === "combat-rules")).toBe(true);
     expect(steps.some((step) => step.id === "combat-activate-fusion-magic")).toBe(true);
     expect(steps.at(-1)?.id).toBe("combat-defense-attack-example");
