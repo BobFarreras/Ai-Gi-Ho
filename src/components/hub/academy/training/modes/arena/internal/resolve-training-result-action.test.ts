@@ -18,6 +18,6 @@ describe("resolveTrainingResultAction", () => {
   it("vuelve a selección cuando no hay tier nuevo", () => {
     const result = resolveTrainingResultAction({ selectedTier: 4, newlyUnlockedTiers: [] });
     expect(result.label).toBe("Volver a selección");
-    expect(result.href).toBe("/hub/academy");
+    expect(result.href).toBe("/hub/academy/training/arena?tier=4");
   });
 });

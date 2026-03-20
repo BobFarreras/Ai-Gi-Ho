@@ -14,5 +14,12 @@ function scaleReward(base: IMatchReward, multiplier: number): IMatchReward {
  * Devuelve la recompensa final de training para mantener consistencia entre backend y UI.
  */
 export function resolveTrainingTierReward(outcome: IMatchOutcome, rewardMultiplier: number): IMatchReward {
+  if (outcome === "LOSE") {
+    const winReward = scaleReward(resolveMatchReward({ mode: "TRAINING", outcome: "WIN" }), rewardMultiplier);
+    return {
+      nexus: Math.floor(winReward.nexus / 2),
+      playerExperience: Math.floor(winReward.playerExperience / 2),
+    };
+  }
   return scaleReward(resolveMatchReward({ mode: "TRAINING", outcome }), rewardMultiplier);
 }

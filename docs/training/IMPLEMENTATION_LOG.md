@@ -176,6 +176,34 @@
 3. La única jerarquía funcional para tutorial/training en App Router queda bajo `src/app/hub/academy/*` sin aliases legacy.
 4. Commit: pendiente en esta sesión.
 
+## Fase 20 - Arena progresiva con rival por tier y lobby VS
+
+1. Se implementó resolución de oponente por tier con mazo/fusión, identidad visual y dificultad base.
+2. Se añadió pantalla previa `VS` para iniciar combate desde Arena.
+3. Se conectó `HeuristicOpponentStrategy` con dificultad del tier efectivo.
+4. Se validó con tests de resolver de loadout por tier/template.
+5. Commit: `05dda82`.
+
+## Fase 21 - Rotación de rivales, arquetipos y balance de recompensas
+
+1. Se añadió rotación de rival por tier y dificultad adaptativa por `winrate` del jugador en ese tier.
+2. Se añadieron pools de mazos por arquetipo para evitar repetición de estilo de partida.
+3. Se unificó cálculo de recompensa de Training con `resolveTrainingTierReward` (backend + preview UI).
+4. Se añadió variante rival alterna en nivel inicial para evitar repeticiones consecutivas.
+5. Commits:
+   - `0af867c`
+   - `edb994a`
+   - `17865ad`
+
+## Fase 22 - Narración/audio por `opponentId` y retorno de resultado en Arena
+
+1. Se conectó Training al mismo sistema narrativo de Story (`buildStoryOpponentNarrationPack`) por `opponentId` canónico (`opp-ch1-*`).
+2. Se añadió `storyOpponentId` en presets/loadout de Training para resolver audios y diálogos correctos por carpeta.
+3. Se ajustó el CTA final de resultado para que `Volver a selección` retorne a `Arena` del nivel activo.
+4. Se aplicó regla de recompensa por derrota en Arena: 50% de Nexus/EXP respecto a victoria del mismo nivel.
+5. Tests ajustados y en verde para recompensa por nivel, loadout y acción final de resultado.
+6. Commit: pendiente en esta sesión (bloque listo para commit).
+
 ## Validación global aplicada por fase
 
 1. `pnpm lint`

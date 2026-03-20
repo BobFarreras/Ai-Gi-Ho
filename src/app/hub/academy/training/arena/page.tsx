@@ -5,6 +5,7 @@ import { TrainingArenaClient } from "@/components/hub/academy/training/modes/are
 import { HOME_DECK_SIZE } from "@/core/services/home/deck-rules";
 import { getTrainingArenaRuntimeData } from "@/services/training/get-training-arena-runtime-data";
 import { resolveTrainingOpponentLoadout } from "@/services/training/resolve-training-opponent-loadout";
+import { buildStoryOpponentNarrationPack } from "@/services/story/build-story-opponent-narration-pack";
 
 interface TrainingArenaPageProps {
   searchParams?: Promise<{ tier?: string }>;
@@ -22,6 +23,11 @@ export default async function TrainingArenaPage({ searchParams }: TrainingArenaP
     deckTemplateId: currentTier?.deckTemplateId ?? "training-tier-1",
     tierWins: currentTierStats?.wins ?? 0,
     tierMatches: currentTierStats?.matches ?? 0,
+  });
+  const narrationPack = buildStoryOpponentNarrationPack({
+    opponentId: opponentLoadout.storyOpponentId,
+    opponentName: opponentLoadout.displayName,
+    duelDescription: `Duelo de entrenamiento contra ${opponentLoadout.displayName}.`,
   });
   const loadout = runtime.loadout;
   const isDeckReady = Boolean(loadout.deck && loadout.deck.length === HOME_DECK_SIZE);
@@ -44,6 +50,7 @@ export default async function TrainingArenaPage({ searchParams }: TrainingArenaP
         opponentName={opponentLoadout.displayName}
         opponentAvatarUrl={opponentLoadout.avatarUrl}
         opponentDifficulty={opponentLoadout.difficulty}
+        narrationPack={narrationPack}
         selectedTier={runtime.effectiveTier}
         tiers={runtime.tiers.map((tier) => ({
           tier: tier.tier,

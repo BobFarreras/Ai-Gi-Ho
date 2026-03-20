@@ -8,6 +8,7 @@ import { IMatchOutcome } from "@/core/entities/match/IMatchOutcome";
 import { HeuristicOpponentStrategy } from "@/core/services/opponent/HeuristicOpponentStrategy";
 import { OpponentDifficulty } from "@/core/services/opponent/difficulty/types";
 import { ACADEMY_HOME_ROUTE } from "@/core/constants/routes/academy-routes";
+import { IMatchNarrationPack } from "@/components/game/board/narration/types";
 import { postTrainingMatchCompletion } from "./training-match-completion-client";
 import { TrainingArenaLobby } from "@/components/hub/academy/training/modes/arena/internal/TrainingArenaLobby";
 import { resolveTrainingResultAction } from "@/components/hub/academy/training/modes/arena/internal/resolve-training-result-action";
@@ -21,6 +22,7 @@ interface ITrainingArenaClientProps {
   opponentName: string;
   opponentAvatarUrl: string;
   opponentDifficulty: OpponentDifficulty;
+  narrationPack: IMatchNarrationPack;
   selectedTier: number;
   tiers: Array<{
     tier: number;
@@ -110,6 +112,7 @@ export function TrainingArenaClient(props: ITrainingArenaClientProps) {
           playerAvatarUrl="/assets/story/player/bob.png"
           opponentAvatarUrl={props.opponentAvatarUrl}
           opponentStrategyOverride={opponentStrategy}
+          narrationPack={props.narrationPack}
           duelResultRewardSummary={rewardSummary}
           resultActionLabel={resultAction.label}
           onResultAction={() => window.location.replace(resultAction.href)}

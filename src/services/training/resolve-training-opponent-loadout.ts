@@ -17,6 +17,7 @@ interface IResolveTrainingOpponentLoadoutInput {
 export interface ITrainingOpponentLoadout {
   tier: number;
   difficulty: OpponentDifficulty;
+  storyOpponentId: string;
   displayName: string;
   avatarUrl: string;
   introUrl: string;
@@ -90,6 +91,7 @@ export function resolveTrainingOpponentLoadout(input: IResolveTrainingOpponentLo
   return {
     tier: input.tier,
     difficulty: resolveAdaptiveDifficulty(input.aiDifficulty, input.tierWins, input.tierMatches),
+    storyOpponentId: preset.storyOpponentId,
     displayName: preset.displayName,
     avatarUrl: preset.avatarUrl,
     introUrl: preset.introUrl,

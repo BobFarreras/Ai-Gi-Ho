@@ -10,6 +10,11 @@ describe("resolveTrainingTierReward", () => {
 
   it("escala recompensa de derrota para mantener progresión", () => {
     const reward = resolveTrainingTierReward("LOSE", 1.2);
-    expect(reward).toEqual({ nexus: 9, playerExperience: 24 });
+    expect(reward).toEqual({ nexus: 18, playerExperience: 48 });
+  });
+
+  it("mantiene recompensa de empate según política base", () => {
+    const reward = resolveTrainingTierReward("DRAW", 1.2);
+    expect(reward).toEqual({ nexus: 19, playerExperience: 54 });
   });
 });
