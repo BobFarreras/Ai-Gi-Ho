@@ -23,7 +23,7 @@ export function resolveTrainingResultAction(input: IResolveTrainingResultActionI
   const nextTier = resolveNextTier(input.selectedTier, input.newlyUnlockedTiers);
   if (!nextTier) return { label: "Volver a selección", href: ACADEMY_HOME_ROUTE };
   return {
-    label: `Jugar Tier ${nextTier}`,
+    label: `Jugar Nivel ${nextTier}`,
     href: `${ACADEMY_TRAINING_ARENA_ROUTE}?tier=${nextTier}`,
   };
 }

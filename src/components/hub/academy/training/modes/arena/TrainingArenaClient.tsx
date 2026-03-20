@@ -21,7 +21,6 @@ interface ITrainingArenaClientProps {
   opponentFusionDeck: ICard[];
   opponentName: string;
   opponentAvatarUrl: string;
-  opponentIntroUrl: string;
   opponentDeckVariantLabel: string;
   opponentDifficulty: OpponentDifficulty;
   selectedTier: number;
@@ -61,8 +60,8 @@ export function TrainingArenaClient(props: ITrainingArenaClientProps) {
   const nextTierRequirementLabel = useMemo(() => {
     if (!selectedTierMeta) return "Sin datos de progreso";
     const nextTier = props.tiers.find((tier) => tier.tier === selectedTierMeta.tier + 1);
-    if (!nextTier) return "Último tier disponible";
-    return `Siguiente tier: ${nextTier.winsInPreviousTier}/${nextTier.requiredWinsInPreviousTier} victorias`;
+    if (!nextTier) return "Último nivel disponible";
+    return `Siguiente nivel: ${nextTier.winsInPreviousTier}/${nextTier.requiredWinsInPreviousTier} victorias`;
   }, [props.tiers, selectedTierMeta]);
 
   /**
@@ -85,7 +84,7 @@ export function TrainingArenaClient(props: ITrainingArenaClientProps) {
       });
       setResultAction(resolveTrainingResultAction({ selectedTier: props.selectedTier, newlyUnlockedTiers: payload.newlyUnlockedTiers }));
       setHighestUnlockedTier(payload.highestUnlockedTier);
-      setStatus(payload.newlyUnlockedTiers.length > 0 ? `Nuevo tier desbloqueado: ${payload.newlyUnlockedTiers.join(", ")}` : "Resultado sincronizado.");
+      setStatus(payload.newlyUnlockedTiers.length > 0 ? `Nuevo nivel desbloqueado: ${payload.newlyUnlockedTiers.join(", ")}` : "Resultado sincronizado.");
     } catch {
       setStatus("No se pudo sincronizar el resultado de entrenamiento.");
       hasPostedRef.current = false;
@@ -96,15 +95,15 @@ export function TrainingArenaClient(props: ITrainingArenaClientProps) {
     <div className="relative min-h-screen bg-zinc-950">
       {!isBattleStarted ? (
         <TrainingArenaLobby
-          tier={props.selectedTier}
-          tierCode={selectedTierMeta?.code ?? "TIER"}
+          level={props.selectedTier}
+          tierCode={selectedTierMeta?.code ?? "LVL"}
           tierDifficultyLabel={selectedTierMeta?.aiDifficulty ?? "EASY"}
           tierRewardPreview={tierRewardPreview}
           nextTierRequirementLabel={nextTierRequirementLabel}
           opponentName={props.opponentName}
           opponentDeckVariantLabel={props.opponentDeckVariantLabel}
-          playerIntroUrl="/assets/story/player/bob.png"
-          opponentIntroUrl={props.opponentIntroUrl}
+          playerAvatarUrl="/assets/story/player/bob.png"
+          opponentAvatarUrl={props.opponentAvatarUrl}
           onStart={() => setIsBattleStarted(true)}
         />
       ) : null}
@@ -116,17 +115,17 @@ export function TrainingArenaClient(props: ITrainingArenaClientProps) {
               href={`${ACADEMY_TRAINING_ARENA_ROUTE}?tier=${tier.tier}`}
               className={`pointer-events-auto rounded-md border px-2 py-1 text-[11px] font-black uppercase ${props.selectedTier === tier.tier ? "border-cyan-200 bg-cyan-500/25 text-cyan-100" : "border-cyan-300/45 bg-slate-900/70 text-cyan-200"}`}
             >
-              Tier {tier.tier}
+              Nivel {tier.tier}
             </Link>
           ) : (
             <span key={tier.tier} className="rounded-md border border-slate-600/60 bg-slate-900/70 px-2 py-1 text-[11px] font-black uppercase text-slate-400">
-              Tier {tier.tier} ({tier.missingWins})
+              Nivel {tier.tier} ({tier.missingWins})
             </span>
           ),
         )}
       </div>
       {isBattleStarted && status ? <p className="absolute left-3 top-12 z-[320] rounded-md bg-cyan-950/80 px-3 py-2 text-xs font-bold text-cyan-100">{status}</p> : null}
-      {isBattleStarted ? <p className="absolute right-3 top-3 z-[320] rounded-md bg-slate-950/80 px-3 py-2 text-xs font-bold text-cyan-100">Máximo desbloqueado: T{highestUnlockedTier}</p> : null}
+      {isBattleStarted ? <p className="absolute right-3 top-3 z-[320] rounded-md bg-slate-950/80 px-3 py-2 text-xs font-bold text-cyan-100">Máximo desbloqueado: Nivel {highestUnlockedTier}</p> : null}
       {isBattleStarted ? (
         <Board
           mode="TRAINING"

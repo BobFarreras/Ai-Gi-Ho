@@ -5,13 +5,13 @@ import { resolveTrainingResultAction } from "./resolve-training-result-action";
 describe("resolveTrainingResultAction", () => {
   it("sugiere jugar el siguiente tier cuando acaba de desbloquearse", () => {
     const result = resolveTrainingResultAction({ selectedTier: 2, newlyUnlockedTiers: [3] });
-    expect(result.label).toBe("Jugar Tier 3");
+    expect(result.label).toBe("Jugar Nivel 3");
     expect(result.href).toBe("/hub/academy/training/arena?tier=3");
   });
 
   it("elige el menor tier superior cuando llegan varios desbloqueos", () => {
     const result = resolveTrainingResultAction({ selectedTier: 2, newlyUnlockedTiers: [5, 4, 3] });
-    expect(result.label).toBe("Jugar Tier 3");
+    expect(result.label).toBe("Jugar Nivel 3");
     expect(result.href).toBe("/hub/academy/training/arena?tier=3");
   });
 
