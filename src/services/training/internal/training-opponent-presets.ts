@@ -27,6 +27,20 @@ export const TRAINING_OPPONENT_PRESETS: Record<string, ITrainingOpponentPreset> 
     ]),
     fusionDeckCardIds: ["fusion-pytgress", "fusion-gemgpt"],
   },
+  "training-tier-1-alt": {
+    codeName: "nano-ops",
+    displayName: "NanoOps",
+    avatarUrl: "/assets/story/opponents/opp-ch1-helena/avatar-Helena.png",
+    introUrl: "/assets/story/opponents/opp-ch1-helena/intro-Helena.png",
+    deckCardIds: toDeck([
+      "entity-vscode", "entity-git", "entity-react", "entity-astro", "entity-perplexity",
+      "entity-python", "entity-ollama", "entity-n8n", "entity-make", "entity-github",
+      "exec-draw-1", "exec-framework-atk-300", "exec-direct-damage-600", "exec-heal-700",
+      "trap-atk-drain", "trap-counter-intrusion", "trap-def-fragment", "entity-nextjs",
+      "entity-supabase", "entity-postgress",
+    ]),
+    fusionDeckCardIds: ["fusion-pytgress", "fusion-gemgpt"],
+  },
   "training-tier-2": {
     codeName: "helena",
     displayName: "Helena",

@@ -3,7 +3,12 @@ import Image from "next/image";
 
 interface ITrainingArenaLobbyProps {
   tier: number;
+  tierCode: string;
+  tierDifficultyLabel: string;
+  tierRewardPreview: { nexus: number; playerExperience: number };
+  nextTierRequirementLabel: string;
   opponentName: string;
+  opponentDeckVariantLabel: string;
   playerIntroUrl: string;
   opponentIntroUrl: string;
   onStart: () => void;
@@ -16,7 +21,16 @@ export function TrainingArenaLobby(props: ITrainingArenaLobbyProps) {
   return (
     <section className="mx-auto flex h-full w-full max-w-6xl flex-col items-center justify-center gap-6 px-4 text-cyan-100">
       <p className="rounded-full border border-cyan-300/45 bg-cyan-400/10 px-4 py-1 text-xs font-black uppercase tracking-[0.16em]">
-        Arena - Tier {props.tier}
+        Arena - Tier {props.tier} ({props.tierCode})
+      </p>
+      <div className="grid w-full max-w-4xl gap-2 rounded-xl border border-cyan-300/30 bg-slate-950/70 p-3 text-[11px] font-bold uppercase tracking-[0.08em] text-cyan-200 sm:grid-cols-2 md:grid-cols-4">
+        <p>Dificultad: {props.tierDifficultyLabel}</p>
+        <p>XP victoria: +{props.tierRewardPreview.playerExperience}</p>
+        <p>Nexus victoria: +{props.tierRewardPreview.nexus}</p>
+        <p>{props.nextTierRequirementLabel}</p>
+      </div>
+      <p className="rounded-full border border-cyan-400/30 bg-cyan-500/10 px-4 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-cyan-100">
+        Arquetipo rival activo: {props.opponentDeckVariantLabel}
       </p>
       <div className="grid w-full items-center gap-4 md:grid-cols-[1fr_auto_1fr]">
         <article className="rounded-2xl border border-cyan-300/35 bg-slate-950/70 p-4">

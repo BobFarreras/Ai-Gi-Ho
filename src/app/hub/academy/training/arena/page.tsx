@@ -15,10 +15,13 @@ export default async function TrainingArenaPage({ searchParams }: TrainingArenaP
   const selectedTier = Number.parseInt(resolvedSearchParams?.tier ?? "1", 10);
   const runtime = await getTrainingArenaRuntimeData(selectedTier);
   const currentTier = runtime.tiers.find((tier) => tier.tier === runtime.effectiveTier) ?? runtime.tiers[0];
+  const currentTierStats = runtime.progress.tierStats.find((tierStats) => tierStats.tier === (currentTier?.tier ?? 1));
   const opponentLoadout = resolveTrainingOpponentLoadout({
     tier: currentTier?.tier ?? 1,
     aiDifficulty: currentTier?.aiDifficulty ?? "EASY",
     deckTemplateId: currentTier?.deckTemplateId ?? "training-tier-1",
+    tierWins: currentTierStats?.wins ?? 0,
+    tierMatches: currentTierStats?.matches ?? 0,
   });
   const loadout = runtime.loadout;
   const isDeckReady = Boolean(loadout.deck && loadout.deck.length === HOME_DECK_SIZE);
@@ -41,10 +44,20 @@ export default async function TrainingArenaPage({ searchParams }: TrainingArenaP
         opponentName={opponentLoadout.displayName}
         opponentAvatarUrl={opponentLoadout.avatarUrl}
         opponentIntroUrl={opponentLoadout.introUrl}
+        opponentDeckVariantLabel={opponentLoadout.deckVariantLabel}
         opponentDifficulty={opponentLoadout.difficulty}
         selectedTier={runtime.effectiveTier}
         highestUnlockedTier={runtime.highestUnlockedTier}
-        tiers={runtime.tiers.map((tier) => ({ tier: tier.tier, isUnlocked: tier.isUnlocked, missingWins: tier.missingWins }))}
+        tiers={runtime.tiers.map((tier) => ({
+          tier: tier.tier,
+          code: tier.code,
+          aiDifficulty: tier.aiDifficulty,
+          rewardMultiplier: tier.rewardMultiplier,
+          requiredWinsInPreviousTier: tier.requiredWinsInPreviousTier,
+          winsInPreviousTier: tier.winsInPreviousTier,
+          isUnlocked: tier.isUnlocked,
+          missingWins: tier.missingWins,
+        }))}
       />
     </main>
   );

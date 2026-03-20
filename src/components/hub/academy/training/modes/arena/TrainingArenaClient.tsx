@@ -11,6 +11,8 @@ import { OpponentDifficulty } from "@/core/services/opponent/difficulty/types";
 import { ACADEMY_HOME_ROUTE, ACADEMY_TRAINING_ARENA_ROUTE } from "@/core/constants/routes/academy-routes";
 import { postTrainingMatchCompletion } from "./training-match-completion-client";
 import { TrainingArenaLobby } from "@/components/hub/academy/training/modes/arena/internal/TrainingArenaLobby";
+import { resolveTrainingResultAction } from "@/components/hub/academy/training/modes/arena/internal/resolve-training-result-action";
+import { resolveTrainingTierReward } from "@/core/services/training/resolve-training-tier-reward";
 
 interface ITrainingArenaClientProps {
   deck: ICard[];
@@ -20,10 +22,20 @@ interface ITrainingArenaClientProps {
   opponentName: string;
   opponentAvatarUrl: string;
   opponentIntroUrl: string;
+  opponentDeckVariantLabel: string;
   opponentDifficulty: OpponentDifficulty;
   selectedTier: number;
   highestUnlockedTier: number;
-  tiers: Array<{ tier: number; isUnlocked: boolean; missingWins: number }>;
+  tiers: Array<{
+    tier: number;
+    code: string;
+    aiDifficulty: OpponentDifficulty;
+    rewardMultiplier: number;
+    requiredWinsInPreviousTier: number;
+    winsInPreviousTier: number;
+    isUnlocked: boolean;
+    missingWins: number;
+  }>;
 }
 
 function resolveOutcome(result: { winnerPlayerId: string | "DRAW"; playerId: string }): IMatchOutcome {
@@ -36,11 +48,22 @@ export function TrainingArenaClient(props: ITrainingArenaClientProps) {
   const [isBattleStarted, setIsBattleStarted] = useState(false);
   const [rewardSummary, setRewardSummary] = useState<IDuelResultRewardSummary | null>(null);
   const [highestUnlockedTier, setHighestUnlockedTier] = useState(props.highestUnlockedTier);
+  const [resultAction, setResultAction] = useState(() => ({ label: "Volver a selección", href: ACADEMY_HOME_ROUTE }));
   const hasPostedRef = useRef(false);
+  const selectedTierMeta = props.tiers.find((tier) => tier.tier === props.selectedTier) ?? props.tiers[0];
   const opponentStrategy = useMemo(
     () => new HeuristicOpponentStrategy({ difficulty: props.opponentDifficulty }),
     [props.opponentDifficulty],
   );
+  const tierRewardPreview = useMemo(() => {
+    return resolveTrainingTierReward("WIN", selectedTierMeta?.rewardMultiplier ?? 1);
+  }, [selectedTierMeta?.rewardMultiplier]);
+  const nextTierRequirementLabel = useMemo(() => {
+    if (!selectedTierMeta) return "Sin datos de progreso";
+    const nextTier = props.tiers.find((tier) => tier.tier === selectedTierMeta.tier + 1);
+    if (!nextTier) return "Último tier disponible";
+    return `Siguiente tier: ${nextTier.winsInPreviousTier}/${nextTier.requiredWinsInPreviousTier} victorias`;
+  }, [props.tiers, selectedTierMeta]);
 
   /**
    * Sincroniza cierre de duelo una única vez para mantener idempotencia por `matchSeed`.
@@ -60,6 +83,7 @@ export function TrainingArenaClient(props: ITrainingArenaClientProps) {
         rewardPlayerExperience: payload.reward.playerExperience,
         rewardCards: [],
       });
+      setResultAction(resolveTrainingResultAction({ selectedTier: props.selectedTier, newlyUnlockedTiers: payload.newlyUnlockedTiers }));
       setHighestUnlockedTier(payload.highestUnlockedTier);
       setStatus(payload.newlyUnlockedTiers.length > 0 ? `Nuevo tier desbloqueado: ${payload.newlyUnlockedTiers.join(", ")}` : "Resultado sincronizado.");
     } catch {
@@ -73,7 +97,12 @@ export function TrainingArenaClient(props: ITrainingArenaClientProps) {
       {!isBattleStarted ? (
         <TrainingArenaLobby
           tier={props.selectedTier}
+          tierCode={selectedTierMeta?.code ?? "TIER"}
+          tierDifficultyLabel={selectedTierMeta?.aiDifficulty ?? "EASY"}
+          tierRewardPreview={tierRewardPreview}
+          nextTierRequirementLabel={nextTierRequirementLabel}
           opponentName={props.opponentName}
+          opponentDeckVariantLabel={props.opponentDeckVariantLabel}
           playerIntroUrl="/assets/story/player/bob.png"
           opponentIntroUrl={props.opponentIntroUrl}
           onStart={() => setIsBattleStarted(true)}
@@ -112,8 +141,8 @@ export function TrainingArenaClient(props: ITrainingArenaClientProps) {
           opponentAvatarUrl={props.opponentAvatarUrl}
           opponentStrategyOverride={opponentStrategy}
           duelResultRewardSummary={rewardSummary}
-          resultActionLabel="Volver a selección"
-          onResultAction={() => window.location.replace(ACADEMY_HOME_ROUTE)}
+          resultActionLabel={resultAction.label}
+          onResultAction={() => window.location.replace(resultAction.href)}
           onExitMatch={() => window.location.replace(ACADEMY_HOME_ROUTE)}
           onMatchResolved={handleMatchResolved}
         />
