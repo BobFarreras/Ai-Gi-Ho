@@ -66,6 +66,10 @@
    - progreso por nodo del tutorial (`arsenal`, `combat`, `market`, `reward`).
 27. `public.player_tutorial_reward_claims`:
    - claim único de recompensa final del onboarding tutorial.
+28. `public.starter_deck_template_slots`:
+   - plantilla persistente del deck inicial para jugadores nuevos.
+29. `public.player_progress.has_seen_academy_intro / has_skipped_tutorial`:
+   - flags de onboarding para controlar intro inicial de Academy y salto opcional de tutorial.
 
 ## Fase 2 (Perfil y Progreso)
 
@@ -309,6 +313,23 @@
 4. Uso previsto:
    - `POST /api/tutorial/nodes/complete` persiste completion idempotente de cada nodo.
    - `POST /api/tutorial/reward/claim` aplica una sola vez la recompensa final del tutorial.
+
+## Fase O.1 (Plantilla de deck inicial onboarding)
+
+1. Ejecuta `docs/supabase/sql/024_phase_onboarding_starter_deck_template.sql`.
+2. Verifica tabla:
+   - `public.starter_deck_template_slots`.
+3. Uso previsto:
+   - `GetOrCreateStarterDeckUseCase` hidrata el deck base desde plantilla activa (`academy-starter-v1`).
+
+## Fase O.2 (Flags de intro y salto tutorial)
+
+1. Ejecuta `docs/supabase/sql/025_phase_onboarding_progress_flags.sql`.
+2. Verifica columnas:
+   - `public.player_progress.has_seen_academy_intro`
+   - `public.player_progress.has_skipped_tutorial`
+3. Uso previsto:
+   - `PATCH /api/player/onboarding` persiste decisiones de intro en Hub.
 
 ## Notas
 
