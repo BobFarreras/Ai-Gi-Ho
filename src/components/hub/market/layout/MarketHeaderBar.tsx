@@ -2,13 +2,11 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowDownUp, Layers3, ListFilter, Search } from "lucide-react";
-import { GameSelect } from "@/components/ui/GameSelect";
+import { Search } from "lucide-react";
 import { BackButton } from "@/components/ui/BackButton";
 import { useHubModuleSfx } from "@/components/hub/internal/use-hub-module-sfx";
-import { MARKET_ORDER_OPTIONS, MARKET_TYPE_OPTIONS } from "@/components/hub/market/layout/market-filter-options";
 import { IMarketTutorialActions } from "@/components/hub/market/internal/market-tutorial-contract";
+import { MarketHeaderFilters } from "@/components/hub/market/layout/internal/MarketHeaderFilters";
 import {
   MarketOrderDirection,
   MarketOrderField,
@@ -74,101 +72,32 @@ export function MarketHeaderBar(props: MarketHeaderBarProps) {
           </button>
         </div>
         <div className="hidden flex-wrap items-center justify-start gap-x-2 gap-y-3 min-w-0 overflow-visible min-[900px]:flex min-[900px]:justify-end">
-          <div data-tutorial-id="market-type-filter" className="w-[110px] sm:w-[120px] shrink-0 relative z-50">
-            <GameSelect
-              label="TIPO"
-              value={props.typeFilter}
-              onChange={(value) => {
-                props.onTypeFilterChange(value as MarketTypeFilter);
-                props.tutorialActions?.onTypeFilterChange?.();
-              }}
-              onOpen={() => play("FILTER_OPEN")}
-              onClose={() => play("FILTER_CLOSE")}
-              ariaLabel="Filtro de tipo"
-              Icon={ListFilter}
-              options={MARKET_TYPE_OPTIONS}
-            />
-          </div>
-          <div data-tutorial-id="market-order-filter" className="w-[110px] sm:w-[120px] shrink-0 relative z-40">
-            <GameSelect
-              label="ORDEN"
-              value={props.orderField}
-              onChange={(value) => {
-                props.onOrderFieldChange(value as MarketOrderField);
-                props.tutorialActions?.onOrderFieldChange?.();
-              }}
-              onOpen={() => play("FILTER_OPEN")}
-              onClose={() => play("FILTER_CLOSE")}
-              ariaLabel="Campo de orden"
-              Icon={Layers3}
-              options={MARKET_ORDER_OPTIONS}
-            />
-          </div>
-          <motion.button
-            type="button"
-            data-tutorial-id="market-order-direction"
-            aria-label="Dirección de orden"
-            onClick={() => {
-              props.onOrderDirectionToggle();
-              props.tutorialActions?.onOrderDirectionToggle?.();
-            }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex h-[38px] mt-[16px] items-center justify-center gap-1 rounded-lg border border-cyan-500/40 bg-[linear-gradient(180deg,rgba(4,34,56,0.8),rgba(3,22,38,0.9))] px-3 shadow-[inset_0_0_10px_rgba(34,211,238,0.1)] hover:border-cyan-300/80 shrink-0 relative z-30"
-          >
-            <motion.div animate={{ rotate: props.orderDirection === "ASC" ? 0 : 180 }}>
-              <ArrowDownUp size={14} className="text-cyan-400" />
-            </motion.div>
-          </motion.button>
+          <MarketHeaderFilters
+            isMobile={false}
+            typeFilter={props.typeFilter}
+            orderField={props.orderField}
+            orderDirection={props.orderDirection}
+            onTypeFilterChange={props.onTypeFilterChange}
+            onOrderFieldChange={props.onOrderFieldChange}
+            onOrderDirectionToggle={props.onOrderDirectionToggle}
+            tutorialActions={props.tutorialActions}
+            playSfx={play}
+          />
         </div>
       </div>
       {isMobileFiltersOpenEffective ? (
         <div className="relative mt-3 grid grid-cols-[1fr_1fr_auto] gap-2 min-[900px]:hidden">
-          <div data-tutorial-id="market-type-filter">
-            <GameSelect
-              label="TIPO"
-              value={props.typeFilter}
-              onChange={(value) => {
-                props.onTypeFilterChange(value as MarketTypeFilter);
-                props.tutorialActions?.onTypeFilterChange?.();
-              }}
-              onOpen={() => play("FILTER_OPEN")}
-              onClose={() => play("FILTER_CLOSE")}
-              ariaLabel="Filtro de tipo"
-              Icon={ListFilter}
-              options={MARKET_TYPE_OPTIONS}
-            />
-          </div>
-          <div data-tutorial-id="market-order-filter">
-            <GameSelect
-              label="ORDEN"
-              value={props.orderField}
-              onChange={(value) => {
-                props.onOrderFieldChange(value as MarketOrderField);
-                props.tutorialActions?.onOrderFieldChange?.();
-              }}
-              onOpen={() => play("FILTER_OPEN")}
-              onClose={() => play("FILTER_CLOSE")}
-              ariaLabel="Campo de orden"
-              Icon={Layers3}
-              options={MARKET_ORDER_OPTIONS}
-            />
-          </div>
-          <motion.button
-            type="button"
-            data-tutorial-id="market-order-direction"
-            aria-label="Dirección de orden"
-            onClick={() => {
-              props.onOrderDirectionToggle();
-              props.tutorialActions?.onOrderDirectionToggle?.();
-            }}
-            whileTap={{ scale: 0.95 }}
-            className="mt-[16px] flex h-[38px] items-center justify-center gap-1 rounded-lg border border-cyan-500/40 bg-[linear-gradient(180deg,rgba(4,34,56,0.8),rgba(3,22,38,0.9))] px-3"
-          >
-            <motion.div animate={{ rotate: props.orderDirection === "ASC" ? 0 : 180 }}>
-              <ArrowDownUp size={14} className="text-cyan-300" />
-            </motion.div>
-          </motion.button>
+          <MarketHeaderFilters
+            isMobile={true}
+            typeFilter={props.typeFilter}
+            orderField={props.orderField}
+            orderDirection={props.orderDirection}
+            onTypeFilterChange={props.onTypeFilterChange}
+            onOrderFieldChange={props.onOrderFieldChange}
+            onOrderDirectionToggle={props.onOrderDirectionToggle}
+            tutorialActions={props.tutorialActions}
+            playSfx={play}
+          />
         </div>
       ) : null}
     </header>
