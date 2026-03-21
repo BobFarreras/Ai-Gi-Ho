@@ -1,15 +1,18 @@
-// src/components/hub/academy/tutorial/TutorialMapSelection.tsx
+// src/components/hub/academy/tutorial/TutorialMapSelection.tsx - Renderiza mapa de tutorial con guía inicial de BigLog hacia Preparar Deck.
 import Image from "next/image";
 import { ITutorialMapNodeRuntime } from "@/core/entities/tutorial/ITutorialMapNode";
 import { ACADEMY_HOME_ROUTE } from "@/core/constants/routes/academy-routes";
 import { TutorialCircuitMap } from "./TutorialCircuitMap";
 import { AcademyBackButton } from "@/components/hub/academy/AcademyBackButton";
+import { resolvePrepareDeckGuideVisibility } from "@/components/hub/academy/tutorial/internal/resolve-prepare-deck-guide-visibility";
 
 interface ITutorialMapSelectionProps {
   nodes: ITutorialMapNodeRuntime[];
 }
 
 export function TutorialMapSelection({ nodes }: ITutorialMapSelectionProps) {
+  const shouldGuidePrepareDeck = resolvePrepareDeckGuideVisibility(nodes);
+  const guidedNodeId = shouldGuidePrepareDeck ? "tutorial-arsenal-basics" : null;
   return (
     // Max-w ajustado y altura contenida para forzar una sola pantalla si es posible
     <section className="relative mx-auto flex w-full max-w-5xl flex-col rounded-3xl border border-cyan-900/50 bg-[#020813]/90 shadow-[0_0_60px_rgba(2,16,30,0.9)] backdrop-blur-xl">
@@ -51,7 +54,7 @@ export function TutorialMapSelection({ nodes }: ITutorialMapSelectionProps) {
 
         {/* Matriz 2x2 de Tutoriales */}
         <div className="flex-1">
-          <TutorialCircuitMap nodes={nodes} />
+          <TutorialCircuitMap nodes={nodes} guidedNodeId={guidedNodeId} />
         </div>
 
         {/* Footer Minimalista */}
