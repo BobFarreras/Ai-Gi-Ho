@@ -5,7 +5,7 @@
 
 1. `app/page.tsx`: landing pública.
 2. `app/login` y `app/register`: autenticación de acceso.
-3. `app/hub/*`: módulos del juego (home/market/story/training/multiplayer).
+3. `app/hub/*`: módulos del juego (`/hub`, `/hub/home`, `/hub/market`, `/hub/story`, `/hub/multiplayer`, `/hub/academy/*`).
 4. `app/api/*`: endpoints HTTP finos sin reglas de negocio embebidas.
 
 ## Orquestación en runtime
