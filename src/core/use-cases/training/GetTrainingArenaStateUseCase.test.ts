@@ -19,7 +19,7 @@ describe("GetTrainingArenaStateUseCase", () => {
     const output = useCase.execute({
       progress: {
         ...createInitialTrainingProgress("p1"),
-        tierStats: [{ tier: 1, wins: 2, matches: 2 }],
+        tierStats: [{ tier: 1, wins: 5, matches: 5 }],
         highestUnlockedTier: 2,
       },
       selectedTier: 2,
