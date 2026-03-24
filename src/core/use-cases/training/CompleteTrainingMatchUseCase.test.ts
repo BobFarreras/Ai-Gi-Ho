@@ -10,7 +10,7 @@ import { CompleteTrainingMatchUseCase } from "./CompleteTrainingMatchUseCase";
 function createDependencies() {
   const claimRepository: ITrainingMatchClaimRepository = { tryReserveMatch: vi.fn() };
   const trainingProgressRepository: ITrainingProgressRepository = { getByPlayerId: vi.fn(), upsert: vi.fn() };
-  const walletRepository: IWalletRepository = { getBalance: vi.fn(), creditNexus: vi.fn(), debitNexus: vi.fn() };
+  const walletRepository: IWalletRepository = { getWallet: vi.fn(), creditNexus: vi.fn(), debitNexus: vi.fn() };
   const playerProgressRepository: IPlayerProgressRepository = { getByPlayerId: vi.fn(), create: vi.fn(), update: vi.fn() };
   return { claimRepository, trainingProgressRepository, walletRepository, playerProgressRepository };
 }

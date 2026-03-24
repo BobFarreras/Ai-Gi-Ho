@@ -7,6 +7,7 @@ import { GameSelect } from "@/components/ui/GameSelect";
 import { MARKET_ORDER_OPTIONS, MARKET_TYPE_OPTIONS } from "@/components/hub/market/layout/market-filter-options";
 import { IMarketTutorialActions } from "@/components/hub/market/internal/market-tutorial-contract";
 import { MarketOrderDirection, MarketOrderField, MarketTypeFilter } from "@/components/hub/market/market-filters";
+import { HubModuleSfxId } from "@/components/hub/internal/use-hub-module-sfx";
 
 interface IMarketHeaderFiltersProps {
   isMobile: boolean;
@@ -16,7 +17,7 @@ interface IMarketHeaderFiltersProps {
   onTypeFilterChange: (value: MarketTypeFilter) => void;
   onOrderFieldChange: (value: MarketOrderField) => void;
   onOrderDirectionToggle: () => void;
-  playSfx: (name: string) => void;
+  playSfx: (name: HubModuleSfxId) => void;
   tutorialActions?: IMarketTutorialActions;
 }
 
