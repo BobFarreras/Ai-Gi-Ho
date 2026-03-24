@@ -5,6 +5,7 @@ import { startTransition, useMemo, useState } from "react";
 import { ICard } from "@/core/entities/ICard";
 import { IMarketCardListing } from "@/core/entities/market/IMarketCardListing";
 import { MobilePanel } from "@/components/hub/market/layout/MarketMobileStack";
+import { HubModuleSfxId } from "@/components/hub/internal/use-hub-module-sfx";
 
 const TUTORIAL_PRIMARY_PACK_ID = "tutorial-market-pack-gemgpt";
 
@@ -18,7 +19,7 @@ interface IUseMarketMobileStackStateInput {
   onShowFreeListings: () => void;
   onSelectListing: (listing: IMarketCardListing) => void;
   onSelectVaultCard: (card: ICard) => void;
-  playSfx: (name: string) => void;
+  playSfx: (name: HubModuleSfxId) => void;
 }
 
 /**

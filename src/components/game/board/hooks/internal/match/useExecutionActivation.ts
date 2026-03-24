@@ -25,7 +25,7 @@ function isExecutionWaitingForFusionMaterials(state: GameState, executionInstanc
   return (
     state.pendingTurnAction?.playerId === state.playerA.id &&
     state.pendingTurnAction.type === "SELECT_FUSION_MATERIALS" &&
-    state.pendingTurnAction.sourceExecutionInstanceId === executionInstanceId
+    state.pendingTurnAction.fusionFromExecutionInstanceId === executionInstanceId
   );
 }
 

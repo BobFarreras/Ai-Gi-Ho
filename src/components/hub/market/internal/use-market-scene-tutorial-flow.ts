@@ -5,6 +5,7 @@ import { startTransition, useCallback, useEffect, useRef } from "react";
 import { ICard } from "@/core/entities/ICard";
 import { IMarketPurchaseActionOverrides, IMarketTutorialActions } from "@/components/hub/market/internal/market-tutorial-contract";
 import { useMarketSceneState } from "@/components/hub/market/internal/useMarketSceneState";
+import { MobilePanel } from "@/components/hub/market/layout/MarketMobileStack";
 
 const TUTORIAL_PRIMARY_PACK_ID = "tutorial-market-pack-gemgpt";
 
@@ -21,7 +22,7 @@ interface IUseMarketSceneTutorialFlowInput {
  */
 export function useMarketSceneTutorialFlow(input: IUseMarketSceneTutorialFlowInput) {
   const { state, tutorialActions, tutorialCurrentStepId, tutorialAutoBuyPackRequestId } = input;
-  const tutorialForcedMobilePanel =
+  const tutorialForcedMobilePanel: MobilePanel =
     tutorialCurrentStepId === "market-mobile-section-packs" ||
     tutorialCurrentStepId === "market-pack-selection" ||
     tutorialCurrentStepId === "market-pack-preview-cards" ||
