@@ -11,7 +11,7 @@ import {
 interface IUseAdminStarterDeckEditorResult {
   data: IAdminStarterDeckApiResponse;
   selectedSlotIndex: number | null;
-  setSelectedSlotIndex: (slotIndex: number) => void;
+  setSelectedSlotIndex: (slotIndex: number | null) => void;
   selectedCollectionCardId: string | null;
   setSelectedCollectionCardId: (cardId: string | null) => void;
   isEditMode: boolean;
