@@ -1,4 +1,4 @@
-// src/app/admin-portal/[portalSlug]/catalog/page.tsx - Renderiza módulo admin de catálogo y mercado con snapshot inicial server-side.
+// src/app/admin-portal/[portalSlug]/catalog/page.tsx - Renderiza módulo admin de catálogo de cartas con snapshot inicial server-side.
 import { AdminCatalogPanel } from "@/components/admin/AdminCatalogPanel";
 import { getAdminCatalogSnapshot } from "@/services/admin/get-admin-catalog-snapshot";
 

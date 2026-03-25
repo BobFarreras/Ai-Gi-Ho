@@ -13,9 +13,12 @@ export default async function AdminPortalPage({ params }: AdminPortalPageProps) 
       <p className="text-sm text-slate-200">
         Usa las secciones superiores para gestionar datos. La edición está separada por dominio para reducir errores operativos.
       </p>
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-4">
         <Link href={`${basePath}/catalog`} className="rounded-lg border border-slate-600 bg-slate-950/70 p-4 text-sm text-slate-100 hover:border-cyan-400">
-          Catálogo y Mercado
+          Card Catalog
+        </Link>
+        <Link href={`${basePath}/market`} className="rounded-lg border border-slate-600 bg-slate-950/70 p-4 text-sm text-slate-100 hover:border-cyan-400">
+          Market
         </Link>
         <Link href={`${basePath}/starter-deck`} className="rounded-lg border border-slate-600 bg-slate-950/70 p-4 text-sm text-slate-100 hover:border-cyan-400">
           Starter Deck

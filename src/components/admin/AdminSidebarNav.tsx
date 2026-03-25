@@ -20,6 +20,7 @@ function buildItems(portalSlug: string): IAdminSidebarItem[] {
   return [
     { href: base, shortLabel: "R", label: "Resumen" },
     { href: `${base}/catalog`, shortLabel: "C", label: "Card Catalog" },
+    { href: `${base}/market`, shortLabel: "M", label: "Market" },
     { href: `${base}/starter-deck`, shortLabel: "S", label: "Starter Deck" },
     { href: `${base}/story-decks`, shortLabel: "T", label: "Story Decks" },
   ];
