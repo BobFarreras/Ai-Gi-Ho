@@ -1,23 +1,29 @@
-// src/app/admin-portal/[portalSlug]/page.tsx - Renderiza landing inicial del panel administrativo para futuras herramientas de gestión.
-import { AdminCatalogPanel } from "@/components/admin/AdminCatalogPanel";
-import { getAdminCatalogSnapshot } from "@/services/admin/get-admin-catalog-snapshot";
+// src/app/admin-portal/[portalSlug]/page.tsx - Muestra resumen operativo del panel admin y próximos módulos disponibles.
+import Link from "next/link";
 
 interface AdminPortalPageProps {
   params: Promise<{ portalSlug: string }>;
 }
 
 export default async function AdminPortalPage({ params }: AdminPortalPageProps) {
-  await params;
-  const initialSnapshot = await getAdminCatalogSnapshot();
+  const { portalSlug } = await params;
+  const basePath = `/admin-portal/${portalSlug}`;
   return (
-    <main className="min-h-dvh bg-slate-950 px-6 py-10 text-slate-100">
-      <section className="mx-auto max-w-4xl rounded-xl border border-slate-700 bg-slate-900/70 p-6">
-        <h1 className="text-2xl font-bold">Panel de administración</h1>
-        <p className="mt-2 text-sm text-slate-300">
-          Acceso concedido. Fase B habilitada para gestión de cartas y mercado.
-        </p>
-        <AdminCatalogPanel initialSnapshot={initialSnapshot} />
-      </section>
-    </main>
+    <div className="space-y-4">
+      <p className="text-sm text-slate-200">
+        Usa las secciones superiores para gestionar datos. La edición está separada por dominio para reducir errores operativos.
+      </p>
+      <div className="grid gap-3 md:grid-cols-3">
+        <Link href={`${basePath}/catalog`} className="rounded-lg border border-slate-600 bg-slate-950/70 p-4 text-sm text-slate-100 hover:border-cyan-400">
+          Catálogo y Mercado
+        </Link>
+        <Link href={`${basePath}/starter-deck`} className="rounded-lg border border-slate-600 bg-slate-950/70 p-4 text-sm text-slate-100 hover:border-cyan-400">
+          Starter Deck
+        </Link>
+        <Link href={`${basePath}/story-decks`} className="rounded-lg border border-slate-600 bg-slate-950/70 p-4 text-sm text-slate-100 hover:border-cyan-400">
+          Story Decks
+        </Link>
+      </div>
+    </div>
   );
 }
