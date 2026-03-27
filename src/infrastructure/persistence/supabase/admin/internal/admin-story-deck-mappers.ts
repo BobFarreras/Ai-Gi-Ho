@@ -1,6 +1,7 @@
 // src/infrastructure/persistence/supabase/admin/internal/admin-story-deck-mappers.ts - Mapeadores y tipos de fila para repositorio admin de Story Decks.
 import { IAdminStoryOpponentSummary } from "@/core/entities/admin/IAdminStoryDeck";
 import { IAdminStoryDuelAiProfile, IAdminStoryDuelDeckOverride } from "@/core/entities/admin/IAdminStoryDuelConfig";
+import { normalizeStoryAiProfile } from "@/core/services/opponent/difficulty/story-ai-profile";
 
 export interface IStoryDeckCardRow { slot_index: number; card_id: string; copies: number }
 export interface IStoryDeckListRow { id: string; opponent_id: string; name: string; description: string | null; version: number; is_active: boolean }
@@ -48,7 +49,7 @@ export function buildOpponentSummaries(opponents: IStoryOpponentRow[], decks: IS
 }
 
 export function mapDuelAiProfileRow(row: IStoryDuelAiProfileRow): IAdminStoryDuelAiProfile {
-  return { duelId: row.duel_id, difficulty: row.difficulty, aiProfile: row.ai_profile ?? {}, isActive: row.is_active };
+  return { duelId: row.duel_id, difficulty: row.difficulty, aiProfile: normalizeStoryAiProfile(row.ai_profile, row.difficulty), isActive: row.is_active };
 }
 
 export function mapDuelDeckOverrideRow(row: IStoryDuelDeckOverrideRow): IAdminStoryDuelDeckOverride {

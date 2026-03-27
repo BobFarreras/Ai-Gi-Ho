@@ -26,11 +26,22 @@ Este módulo separa la dificultad del rival de la historia real de campaña.
    - Traduce progreso (`chapterIndex`, `duelIndex`, `victories`) a nivel de dificultad.
    - Diseñado para sustituir fácilmente por lógica narrativa real.
 
+4. `story-ai-profile.ts`
+   - Normaliza `ai_profile` (`style`, `aggression`) con defaults seguros.
+   - Evita payloads incompletos o inválidos en runtime/admin.
+
+5. `resolve-opponent-difficulty-profile.ts`
+   - Combina dificultad base (`EASY|NORMAL|HARD|BOSS`) con `ai_profile`.
+   - Traduce `style/aggression` a pesos heurísticos finales.
+   - Es la puerta recomendada para ajustar personalidad de IA sin tocar motor.
+
 ## Cómo se usa hoy
 
 1. `useBoard` crea un `campaignProgress` temporal.
 2. `resolveDifficultyFromCampaign` devuelve el nivel.
-3. `HeuristicOpponentStrategy` recibe ese nivel y aplica el perfil.
+3. `HeuristicOpponentStrategy` usa `resolve-opponent-difficulty-profile`:
+   - en modos genéricos: sólo dificultad base.
+   - en Story: dificultad base + `ai_profile` del duelo.
 
 ## Qué cambiar cuando exista campaña real
 

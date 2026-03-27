@@ -106,7 +106,7 @@ export class SupabaseAdminStoryDeckRepository implements IAdminStoryDeckReposito
     const aiUpsert = await this.client.from("story_duel_ai_profiles").upsert({
       duel_id: duelConfig.duelId,
       difficulty: duelConfig.difficulty,
-      ai_profile: {},
+      ai_profile: duelConfig.aiProfile,
       is_active: true,
     }, { onConflict: "duel_id" });
     if (aiUpsert.error) throw new ValidationError(`No se pudo guardar la dificultad del duelo. (${aiUpsert.error.message})`);
@@ -131,12 +131,14 @@ export class SupabaseAdminStoryDeckRepository implements IAdminStoryDeckReposito
     if (insertOverrides.error) throw new ValidationError(`No se pudieron guardar overrides de duelo. (${insertOverrides.error.message})`);
   }
 
-  async saveDeck(deckListId: string, cardIds: string[], duelConfig: IAdminSaveStoryDuelConfigCommand | null): Promise<void> {
-    const deleteResult = await this.client.from("story_deck_list_cards").delete().eq("deck_list_id", deckListId);
-    if (deleteResult.error) throw new ValidationError(`No se pudo limpiar el deck Story previo. (${deleteResult.error.message})`);
-    const payload = toDeckRows(cardIds).map((row) => ({ deck_list_id: deckListId, ...row }));
-    const insertResult = await this.client.from("story_deck_list_cards").insert(payload);
-    if (insertResult.error) throw new ValidationError(`No se pudo guardar el deck Story. (${insertResult.error.message})`);
+  async saveDeck(deckListId: string, cardIds: string[], duelConfig: IAdminSaveStoryDuelConfigCommand | null, updateBaseDeck: boolean): Promise<void> {
+    if (updateBaseDeck) {
+      const deleteResult = await this.client.from("story_deck_list_cards").delete().eq("deck_list_id", deckListId);
+      if (deleteResult.error) throw new ValidationError(`No se pudo limpiar el deck Story previo. (${deleteResult.error.message})`);
+      const payload = toDeckRows(cardIds).map((row) => ({ deck_list_id: deckListId, ...row }));
+      const insertResult = await this.client.from("story_deck_list_cards").insert(payload);
+      if (insertResult.error) throw new ValidationError(`No se pudo guardar el deck Story. (${insertResult.error.message})`);
+    }
     if (duelConfig) await this.saveDuelConfig(deckListId, duelConfig);
   }
 

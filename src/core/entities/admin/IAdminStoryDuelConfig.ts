@@ -1,10 +1,11 @@
 // src/core/entities/admin/IAdminStoryDuelConfig.ts - Contratos admin para editar perfiles de dificultad y overrides estáticos por duelo Story.
+import { IStoryAiProfile } from "@/core/services/opponent/difficulty/story-ai-profile";
 import { StoryOpponentDifficulty } from "@/core/entities/opponent/IStoryDuelDefinition";
 
 export interface IAdminStoryDuelAiProfile {
   duelId: string;
   difficulty: StoryOpponentDifficulty;
-  aiProfile: Record<string, unknown>;
+  aiProfile: IStoryAiProfile;
   isActive: boolean;
 }
 
@@ -21,4 +22,3 @@ export interface IAdminStoryDuelDeckOverride {
   effectOverride: Record<string, unknown> | null;
   isActive: boolean;
 }
-

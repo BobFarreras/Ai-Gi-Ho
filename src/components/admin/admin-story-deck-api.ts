@@ -11,6 +11,7 @@ interface ISaveStoryDeckPayload {
   deckListId: string;
   cardIds: string[];
   duelConfig: IAdminSaveStoryDuelConfigCommand | null;
+  updateBaseDeck: boolean;
 }
 
 async function parseApiError(response: Response, fallback: string): Promise<Error> {

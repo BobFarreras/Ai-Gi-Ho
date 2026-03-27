@@ -1,6 +1,7 @@
 // src/services/story/get-story-duel-runtime-data.ts - Resuelve datos de ejecución de un duelo Story (jugador, oponente, mazos y acceso).
 import { ICard } from "@/core/entities/ICard";
 import { GetStoryWorldStateUseCase } from "@/core/use-cases/story/GetStoryWorldStateUseCase";
+import { IStoryAiProfile, normalizeStoryAiProfile } from "@/core/services/opponent/difficulty/story-ai-profile";
 import { StoryOpponentDifficulty } from "@/core/entities/opponent/IStoryDuelDefinition";
 import { getCurrentUserSession } from "@/services/auth/get-current-user-session";
 import { getPlayerBoardLoadout } from "@/services/game/get-player-board-deck";
@@ -27,6 +28,7 @@ export interface IStoryDuelRuntimeData {
   opponentName: string;
   opponentAvatarUrl?: string | null;
   opponentDifficulty: StoryOpponentDifficulty;
+  opponentAiProfile: IStoryAiProfile;
 }
 
 function applyStoryDeckEntryToCard(
@@ -87,5 +89,6 @@ export async function getStoryDuelRuntimeData(chapter: number, duelIndex: number
     opponentName: duel.opponentName,
     opponentAvatarUrl: duel.opponentAvatarUrl ?? null,
     opponentDifficulty: duel.opponentDifficulty,
+    opponentAiProfile: normalizeStoryAiProfile(duel.opponentAiProfile, duel.opponentDifficulty),
   };
 }

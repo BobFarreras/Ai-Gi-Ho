@@ -1,6 +1,7 @@
 // src/services/admin/api/read-admin-story-deck-command.ts - Parsea comando de guardado Story Deck admin con validación de payload JSON.
 import { NextRequest } from "next/server";
 import { IAdminSaveStoryDeckCommand, IAdminSaveStoryDuelConfigCommand } from "@/core/entities/admin/IAdminStoryDeckCommands";
+import { normalizeStoryAiProfile } from "@/core/services/opponent/difficulty/story-ai-profile";
 import { ValidationError } from "@/core/errors/ValidationError";
 import { JsonObject, readJsonObjectBody } from "@/services/security/api/request-body-parser";
 
@@ -22,6 +23,7 @@ function readOptionalDuelConfig(payload: JsonObject): IAdminSaveStoryDeckCommand
   return {
     duelId: String(config.duelId ?? ""),
     difficulty: String(config.difficulty ?? "") as IAdminSaveStoryDuelConfigCommand["difficulty"],
+    aiProfile: normalizeStoryAiProfile(config.aiProfile, String(config.difficulty ?? "") as IAdminSaveStoryDuelConfigCommand["difficulty"]),
     slotOverrides: slotOverrides.map((entry) => {
       if (!entry || typeof entry !== "object" || Array.isArray(entry)) throw new ValidationError("slotOverrides contiene entradas inválidas.");
       const slot = entry as JsonObject;
@@ -42,6 +44,7 @@ export async function readAdminSaveStoryDeckCommand(request: NextRequest): Promi
     deckListId: String(payload.deckListId ?? ""),
     cardIds: readStringArray(payload, "cardIds"),
     duelConfig: readOptionalDuelConfig(payload),
+    updateBaseDeck: payload.updateBaseDeck === true,
   };
 }
 

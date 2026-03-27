@@ -16,7 +16,7 @@ export interface IAdminStoryDeckRepository {
   listDuelAiProfiles(duelIds: string[]): Promise<IAdminStoryDuelAiProfile[]>;
   listDuelDeckOverrides(duelIds: string[]): Promise<IAdminStoryDuelDeckOverride[]>;
   getDeck(deckListId: string): Promise<IAdminStoryDeck | null>;
-  saveDeck(deckListId: string, cardIds: string[], duelConfig: IAdminSaveStoryDuelConfigCommand | null): Promise<void>;
+  saveDeck(deckListId: string, cardIds: string[], duelConfig: IAdminSaveStoryDuelConfigCommand | null, updateBaseDeck: boolean): Promise<void>;
   listAvailableCards(): Promise<ICard[]>;
 }
 

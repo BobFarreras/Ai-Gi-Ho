@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { Board, BoardBossThemeVariant } from "@/components/game/board";
 import { IDuelResultRewardSummary } from "@/components/game/board/ui/internal/duel-result/duel-result-reward-summary";
 import { ICard } from "@/core/entities/ICard";
+import { IStoryAiProfile } from "@/core/services/opponent/difficulty/story-ai-profile";
 import { HeuristicOpponentStrategy } from "@/core/services/opponent/HeuristicOpponentStrategy";
 import { mapStoryDifficultyToOpponentDifficulty } from "@/core/services/opponent/difficulty/map-story-difficulty-to-opponent";
 import { StoryOpponentDifficulty } from "@/core/entities/opponent/IStoryDuelDefinition";
@@ -25,6 +26,7 @@ interface StoryDuelClientProps {
   opponentName: string;
   opponentAvatarUrl?: string | null;
   opponentDifficulty: StoryOpponentDifficulty;
+  opponentAiProfile: IStoryAiProfile;
   playerDeck: ICard[];
   playerFusionDeck: ICard[];
   opponentDeck: ICard[];
@@ -61,8 +63,8 @@ export function StoryDuelClient(props: StoryDuelClientProps) {
     isStopped: isBossSoundtrackStopped,
   });
   const opponentStrategy = useMemo(
-    () => new HeuristicOpponentStrategy({ difficulty: mapStoryDifficultyToOpponentDifficulty(props.opponentDifficulty) }),
-    [props.opponentDifficulty],
+    () => new HeuristicOpponentStrategy({ difficulty: mapStoryDifficultyToOpponentDifficulty(props.opponentDifficulty), aiProfile: props.opponentAiProfile }),
+    [props.opponentDifficulty, props.opponentAiProfile],
   );
   const pushBackToStory = (input: { outcome: StoryDuelOutcome; duelNodeId: string; returnNodeId: string }) => {
     const query = new URLSearchParams({
