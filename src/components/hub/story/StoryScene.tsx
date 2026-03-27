@@ -103,6 +103,10 @@ export function StoryScene({ runtime, briefing, postDuelTransition = null, shoul
     interactionFeedback,
     smartActionLabel: smartAction.label,
     canRunSmartAction: smartAction.isEnabled && !isBusy,
+    onExitToHub: () => {
+      sceneSfx.playButtonClick();
+      router.push("/hub");
+    },
     onSmartAction: () => { sceneSfx.playButtonClick(); void handleSmartAction(); },
     onDeselect: () => { sceneSfx.playButtonClick(); setSelectedNodeId(null); },
   };
@@ -129,10 +133,6 @@ export function StoryScene({ runtime, briefing, postDuelTransition = null, shoul
     onRequestCenterPlayer: () => {
       sceneSfx.playButtonClick();
       setCenterRequestKey((value) => value + 1);
-    },
-    onExitToHub: () => {
-      sceneSfx.playButtonClick();
-      router.push("/hub");
     },
     onRewardCollectAnimationComplete: () => { setCollectingRewardNodeId(null); setCollectingRewardVisual(null); },
     onRetreatAnimationComplete: () => setRetreatingNodeId(null),
