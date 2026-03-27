@@ -12,7 +12,7 @@ Este módulo separa la dificultad del rival de la historia real de campaña.
 ## Archivos
 
 1. `types.ts`
-   - `OpponentDifficulty`: niveles soportados (`EASY`, `NORMAL`, `HARD`, `BOSS`).
+   - `OpponentDifficulty`: niveles soportados (`EASY`, `NORMAL`, `HARD`, `BOSS`, `MASTER`, `MYTHIC`).
    - `ICampaignProgress`: datos mínimos de progreso para resolver nivel.
    - `IOpponentDifficultyProfile`: pesos heurísticos por dificultad.
 
@@ -20,7 +20,7 @@ Este módulo separa la dificultad del rival de la historia real de campaña.
    - Mapa de pesos por nivel.
    - Controla agresividad, aversión al riesgo y umbral de ataque.
    - `EASY` acepta más jugadas malas.
-   - `HARD/BOSS` castiga más autodaño y pérdidas de valor.
+   - `HARD/BOSS/MASTER/MYTHIC` castiga más autodaño y pérdidas de valor.
 
 3. `resolveDifficultyFromCampaign.ts`
    - Traduce progreso (`chapterIndex`, `duelIndex`, `victories`) a nivel de dificultad.
@@ -35,6 +35,10 @@ Este módulo separa la dificultad del rival de la historia real de campaña.
    - Traduce `style/aggression` a pesos heurísticos finales.
    - Es la puerta recomendada para ajustar personalidad de IA sin tocar motor.
 
+6. `src/services/training/internal/training-card-scaling.ts`
+   - Aplica `versionTier`, `level` y `xp` por dificultad efectiva de Training.
+   - Mantiene mismas stats para todas las copias del mismo deck rival.
+
 ## Cómo se usa hoy
 
 1. `useBoard` crea un `campaignProgress` temporal.
@@ -42,6 +46,9 @@ Este módulo separa la dificultad del rival de la historia real de campaña.
 3. `HeuristicOpponentStrategy` usa `resolve-opponent-difficulty-profile`:
    - en modos genéricos: sólo dificultad base.
    - en Story: dificultad base + `ai_profile` del duelo.
+4. En Training:
+   - `resolve-training-opponent-loadout` calcula dificultad adaptativa.
+   - Con esa dificultad aplica escalado estático de cartas (`training-card-scaling`).
 
 ## Qué cambiar cuando exista campaña real
 

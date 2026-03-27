@@ -9,6 +9,6 @@ export function mapStoryDifficultyToOpponentDifficulty(storyDifficulty: StoryOpp
   if (storyDifficulty === "ROOKIE") return "EASY";
   if (storyDifficulty === "STANDARD") return "NORMAL";
   if (storyDifficulty === "ELITE") return "HARD";
-  return "BOSS";
+  if (storyDifficulty === "BOSS") return "BOSS";
+  return "MYTHIC";
 }
-

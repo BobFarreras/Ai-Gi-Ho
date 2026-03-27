@@ -11,7 +11,6 @@ describe("mapStoryDifficultyToOpponentDifficulty", () => {
   it("mapea niveles altos a perfiles agresivos", () => {
     expect(mapStoryDifficultyToOpponentDifficulty("ELITE")).toBe("HARD");
     expect(mapStoryDifficultyToOpponentDifficulty("BOSS")).toBe("BOSS");
-    expect(mapStoryDifficultyToOpponentDifficulty("MYTHIC")).toBe("BOSS");
+    expect(mapStoryDifficultyToOpponentDifficulty("MYTHIC")).toBe("MYTHIC");
   });
 });
-
