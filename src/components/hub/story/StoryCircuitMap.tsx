@@ -4,18 +4,12 @@
 import { useMemo, useRef } from "react";
 import { useTransform } from "framer-motion";
 import { IStoryMapNodeRuntime } from "@/services/story/story-map-runtime-data";
-import {
-  buildStoryNodePositionMap,
-  resolveStoryPathSegments,
-  resolveStoryNodeTokenAnchor,
-} from "@/components/hub/story/internal/map/layout/story-circuit-layout";
-import {
-  rotateStoryPositionMapForMobile,
-  resolveStoryCanvasSize,
-} from "@/components/hub/story/internal/map/layout/story-circuit-map-geometry";
+import { buildStoryNodePositionMap, resolveStoryPathSegments, resolveStoryNodeTokenAnchor } from "@/components/hub/story/internal/map/layout/story-circuit-layout";
+import { rotateStoryPositionMapForMobile, resolveStoryCanvasSize } from "@/components/hub/story/internal/map/layout/story-circuit-map-geometry";
 import { StoryMapZoomControls } from "./internal/map/components/StoryMapZoomControls";
 import { StoryCircuitCanvas } from "./internal/map/components/StoryCircuitCanvas";
 import { useStoryMapZoom } from "./internal/map/hooks/use-story-map-zoom";
+import { useStoryCameraBounds } from "./internal/map/hooks/use-story-camera-bounds";
 import { useStoryCircuitMotion } from "./internal/map/hooks/use-story-circuit-motion";
 import { resolveStoryNodeSideOffsetPx } from "./internal/map/constants/story-map-geometry";
 import { resolveStoryRetreatTrail } from "./internal/map/layout/resolve-story-retreat-trail";
@@ -36,7 +30,6 @@ interface StoryCircuitMapProps {
   isMobileVerticalFlow?: boolean;
   centerRequestKey?: number;
   onSelectNode: (nodeId: string | null) => void;
-  onExitToHub?: () => void;
   onRewardCollectAnimationComplete?: () => void;
   onRetreatAnimationComplete?: () => void;
 }
@@ -56,7 +49,6 @@ export function StoryCircuitMap({
   isMobileVerticalFlow = false,
   centerRequestKey = 0,
   onSelectNode,
-  onExitToHub,
   onRewardCollectAnimationComplete,
   onRetreatAnimationComplete,
 }: StoryCircuitMapProps) {
@@ -88,7 +80,7 @@ export function StoryCircuitMap({
   );
   const retreatingAvatarUrl = resolveStoryOpponentAvatarUrl(retreatingNode);
   const retreatingAvatarAlt = retreatingNode?.opponentName ? `Retirada de ${retreatingNode.opponentName}` : "Retirada de oponente";
-  const { cameraX, cameraY, cinematicScale, avatarX, avatarY, avatarScale, centerCameraOnAvatarNode } = useStoryCircuitMotion({
+  const { cameraX, cameraY, cinematicScale, avatarX, avatarY, avatarScale, centerCameraOnAvatarNode, keepCameraCenterOnZoom } = useStoryCircuitMotion({
     mapContainerRef,
     avatarPos,
     avatarAnchor: { x: avatarAnchorX, y: avatarAnchorY },
@@ -102,14 +94,16 @@ export function StoryCircuitMap({
     setZoom,
   });
   const mapScale = useTransform(() => zoom.get() * cinematicScale.get());
-
+  const applyCameraBounds = useStoryCameraBounds({ mapContainerRef, canvasWidth: canvasSize.width, canvasHeight: canvasSize.height, getScale: () => zoom.get() * cinematicScale.get(), cameraX, cameraY });
   return (
     <div
       ref={mapContainerRef}
       className="relative h-full w-full cursor-grab overflow-hidden active:cursor-grabbing"
       onWheel={(event) => {
+        const previousZoom = zoom.get();
         const nextZoom = applyWheelZoom(event.deltaY);
-        centerCameraOnAvatarNode(nextZoom, false, false);
+        keepCameraCenterOnZoom(previousZoom, nextZoom);
+        applyCameraBounds();
       }}
       onClick={() => {
         if (!isInteractionLocked) onSelectNode(null);
@@ -144,9 +138,10 @@ export function StoryCircuitMap({
         retreatingAvatarUrl={retreatingAvatarUrl}
         retreatingAvatarAlt={retreatingAvatarAlt}
         isCameraDragEnabled={!isInteractionLocked && !duelFocusNodeId}
+        onCameraDrag={applyCameraBounds}
         onRetreatAnimationComplete={onRetreatAnimationComplete}
       />
-      {!isMobileVerticalFlow ? <StoryMapZoomControls onCenterPlayerNode={centerCameraOnAvatarNode} onExitToHub={onExitToHub} /> : null}
+      {!isMobileVerticalFlow ? <StoryMapZoomControls onCenterPlayerNode={centerCameraOnAvatarNode} /> : null}
     </div>
   );
 }

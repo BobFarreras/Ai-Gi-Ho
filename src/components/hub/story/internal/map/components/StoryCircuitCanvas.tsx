@@ -51,6 +51,7 @@ interface IStoryCircuitCanvasProps {
   retreatingAvatarUrl: string;
   retreatingAvatarAlt: string;
   isCameraDragEnabled: boolean;
+  onCameraDrag?: () => void;
   onRetreatAnimationComplete?: () => void;
 }
 
@@ -64,8 +65,9 @@ export function StoryCircuitCanvas(props: IStoryCircuitCanvasProps) {
       dragMomentum={false}
       dragConstraints={props.dragConstraintsRef}
       dragElastic={0.1}
-      style={{ x: props.cameraX, y: props.cameraY, scale: props.mapScale, width: props.width, height: props.height }}
-      className="absolute left-0 top-0 isolate"
+      onDrag={props.onCameraDrag}
+      style={{ x: props.cameraX, y: props.cameraY, scale: props.mapScale, width: props.width, height: props.height, transformOrigin: "0 0" }}
+      className="absolute left-0 top-0 isolate will-change-transform"
     >
       <svg className="pointer-events-none absolute inset-0 z-0 h-full w-full">
         {props.segments.map((segment, index) => (
