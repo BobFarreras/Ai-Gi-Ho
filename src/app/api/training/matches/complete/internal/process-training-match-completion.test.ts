@@ -22,7 +22,7 @@ describe("processTrainingMatchCompletion", () => {
       dependencies: {
         claimRepository: { tryReserveMatch: vi.fn() },
         trainingProgressRepository: { getByPlayerId: vi.fn(), upsert: vi.fn() },
-        walletRepository: { getBalance: vi.fn(), creditNexus: vi.fn(), debitNexus: vi.fn() },
+        walletRepository: { getWallet: vi.fn(), creditNexus: vi.fn(), debitNexus: vi.fn() },
         playerProgressRepository: { getByPlayerId: vi.fn(), create: vi.fn(), update: vi.fn() },
       },
       nowIso: "2026-03-17T12:00:00.000Z",

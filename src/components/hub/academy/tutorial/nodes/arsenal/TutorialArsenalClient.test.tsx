@@ -2,6 +2,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { TutorialArsenalClient } from "@/components/hub/academy/tutorial/nodes/arsenal/TutorialArsenalClient";
+import { ICollectionCard } from "@/core/entities/home/ICollectionCard";
 
 vi.mock("@/components/hub/home/HomeDeckActionBar", () => ({
   HomeDeckActionBar: (props: { onInsert: () => Promise<unknown>; onRemove: () => Promise<unknown>; onEvolve: () => Promise<unknown> }) => (
@@ -33,7 +34,7 @@ vi.mock("@/components/hub/home/HomeEvolutionOverlay", () => ({ HomeEvolutionOver
 describe("TutorialArsenalClient", () => {
   it("muestra intro y permite avanzar por los pasos del nodo", () => {
     const deck = { playerId: "p1", slots: [{ index: 0, cardId: "mock-material-a" }], fusionSlots: [{ index: 0, cardId: "mock-fusion-core" }, { index: 1, cardId: null }] };
-    const collection = [{
+    const collection: ICollectionCard[] = [{
       card: { id: "mock-evolve-spark", name: "Spark", description: "", type: "ENTITY", faction: "OPEN_SOURCE", cost: 1, attack: 1000, defense: 1000 },
       ownedCopies: 10,
     }];

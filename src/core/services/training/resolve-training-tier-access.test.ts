@@ -17,7 +17,7 @@ describe("resolveTrainingTierAccess", () => {
     const catalog = resolveTrainingTierCatalog();
     const progress = {
       ...createInitialTrainingProgress("player-a"),
-      tierStats: [{ tier: 1, wins: 2, matches: 3 }],
+      tierStats: [{ tier: 1, wins: 5, matches: 6 }],
     };
     const access = resolveTrainingTierAccess({ catalog, progress });
 
@@ -36,6 +36,6 @@ describe("resolveTrainingTierAccess", () => {
 
     const tier2 = access.tiers.find((item) => item.tier === 2);
     expect(tier2?.isUnlocked).toBe(false);
-    expect(tier2?.missingWins).toBe(1);
+    expect(tier2?.missingWins).toBe(4);
   });
 });
