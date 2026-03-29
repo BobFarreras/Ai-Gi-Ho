@@ -226,4 +226,28 @@ on conflict (id) do update set
   fusion_energy_requirement = excluded.fusion_energy_requirement,
   is_active = excluded.is_active;
 
+insert into public.market_card_listings (
+  id,
+  card_id,
+  rarity,
+  price_nexus,
+  stock,
+  is_available
+) values
+('listing-trap-mirror-buff-injection', 'trap-mirror-buff-injection', 'EPIC', 170, null, true),
+('listing-trap-force-overclock-lock', 'trap-force-overclock-lock', 'RARE', 125, null, true),
+('listing-trap-nexus-reset-barrier', 'trap-nexus-reset-barrier', 'EPIC', 190, null, true),
+('listing-trap-nullify-opponent-trap', 'trap-nullify-opponent-trap', 'RARE', 130, null, true),
+('listing-exec-docker-defense-1000', 'exec-docker-defense-1000', 'RARE', 120, null, true),
+('listing-exec-duckduckgo-power-up', 'exec-duckduckgo-power-up', 'EPIC', 180, null, true),
+('listing-exec-drain-opponent-energy', 'exec-drain-opponent-energy', 'EPIC', 190, null, true),
+('listing-exec-reveal-opponent-set-card', 'exec-reveal-opponent-set-card', 'RARE', 110, null, true),
+('listing-exec-steal-opponent-graveyard-card', 'exec-steal-opponent-graveyard-card', 'EPIC', 200, null, true)
+on conflict (id) do update set
+  card_id = excluded.card_id,
+  rarity = excluded.rarity,
+  price_nexus = excluded.price_nexus,
+  stock = excluded.stock,
+  is_available = excluded.is_available;
+
 commit;
