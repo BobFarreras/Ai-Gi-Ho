@@ -21,9 +21,7 @@ export interface SlotCellProps {
   cardXpCardId: string | null;
   cardXpAmount: number | null;
   cardXpEventId: string | null;
-  canActivateSelectedExecution: boolean;
   isMobileLayout?: boolean;
-  onActivateSelectedExecution: () => void;
   onEntityClick: (entity: IBoardEntity | null, isOpponentSide: boolean, event: MouseEvent) => void;
 }
 

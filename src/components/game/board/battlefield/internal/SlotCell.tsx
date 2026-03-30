@@ -30,9 +30,7 @@ function SlotCellComponent({
   cardXpCardId,
   cardXpAmount,
   cardXpEventId,
-  canActivateSelectedExecution,
   isMobileLayout = false,
-  onActivateSelectedExecution,
   onEntityClick,
 }: SlotCellProps) {
   countRender("SlotCell");
@@ -56,13 +54,11 @@ function SlotCellComponent({
             isSelectedByCard={isSelectedByCard}
             selectedCardId={selectedCardId}
             selectedBoardEntityInstanceId={selectedBoardEntityInstanceId}
-            canActivateSelectedExecution={canActivateSelectedExecution}
             isAttacking={isAttacking}
             isActivating={Boolean(isActivating)}
             isHighlighted={isHighlighted}
             isSelectedMaterial={isSelectedMaterial}
             onEntityClick={onEntityClick}
-            onActivateSelectedExecution={onActivateSelectedExecution}
           />
         ) : (
           <motion.span 

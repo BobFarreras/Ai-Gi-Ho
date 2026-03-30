@@ -52,8 +52,6 @@ export function BattlefieldView(props: BattlefieldViewProps) {
             cardXpCardId={props.cardXpActorPlayerId === props.opponentId ? (props.cardXpCardId ?? null) : null}
             cardXpAmount={props.cardXpActorPlayerId === props.opponentId ? (props.cardXpAmount ?? null) : null}
             cardXpEventId={props.cardXpActorPlayerId === props.opponentId ? (props.cardXpEventId ?? null) : null}
-            canActivateSelectedExecution={false}
-            onActivateSelectedExecution={props.onActivateSelectedExecution}
             onGraveyardClick={props.onGraveyardClick}
             onFusionDeckClick={props.onFusionDeckClick}
             onDestroyedClick={props.onDestroyedClick}
@@ -85,8 +83,6 @@ export function BattlefieldView(props: BattlefieldViewProps) {
             cardXpCardId={props.cardXpActorPlayerId === props.playerId ? (props.cardXpCardId ?? null) : null}
             cardXpAmount={props.cardXpActorPlayerId === props.playerId ? (props.cardXpAmount ?? null) : null}
             cardXpEventId={props.cardXpActorPlayerId === props.playerId ? (props.cardXpEventId ?? null) : null}
-            canActivateSelectedExecution={props.canActivateSelectedExecution}
-            onActivateSelectedExecution={props.onActivateSelectedExecution}
             onGraveyardClick={props.onGraveyardClick}
             onFusionDeckClick={props.onFusionDeckClick}
             onDestroyedClick={props.onDestroyedClick}

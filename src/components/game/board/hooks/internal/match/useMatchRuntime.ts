@@ -78,6 +78,7 @@ export function useMatchRuntime({
     (trapCard: ICard, trigger: "ON_OPPONENT_ATTACK_DECLARED" | "ON_OPPONENT_EXECUTION_ACTIVATED" | "ON_OPPONENT_TRAP_ACTIVATED"): Promise<boolean> =>
       new Promise<boolean>((resolve) => {
         trapDecisionResolverRef.current = resolve;
+        uiState.setSelectedCard(trapCard);
         uiState.setPendingTrapActivationPrompt({ trapCard, trigger });
       }),
     [uiState],
@@ -86,6 +87,7 @@ export function useMatchRuntime({
   const resolveTrapActivationDecision = useCallback(
     (activate: boolean) => {
       uiState.setPendingTrapActivationPrompt(null);
+      uiState.clearSelection();
       const resolver = trapDecisionResolverRef.current;
       trapDecisionResolverRef.current = null;
       resolver?.(activate);

@@ -20,9 +20,7 @@ export function areEqualSlotCellProps(previous: SlotCellProps, next: SlotCellPro
     previous.cardXpCardId === next.cardXpCardId &&
     previous.cardXpAmount === next.cardXpAmount &&
     previous.cardXpEventId === next.cardXpEventId &&
-    previous.canActivateSelectedExecution === next.canActivateSelectedExecution &&
     previous.isMobileLayout === next.isMobileLayout &&
-    previous.onActivateSelectedExecution === next.onActivateSelectedExecution &&
     previous.onEntityClick === next.onEntityClick
   );
 }

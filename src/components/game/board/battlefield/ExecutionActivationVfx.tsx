@@ -31,7 +31,7 @@ export function ExecutionActivationVfx({ entity, isOpponentSide }: ExecutionActi
 
   const action = entity.card.effect.action;
   if (shouldReduceCombatEffects) {
-    const label = action === "HEAL" ? "HEAL" : action === "DAMAGE" ? "DMG" : "BUFF";
+    const label = action === "HEAL" ? "HEAL" : action === "DAMAGE" ? "DMG" : "EFFECT";
     const textClass = action === "HEAL" ? "text-cyan-200" : action === "DAMAGE" ? "text-red-200" : "text-amber-200";
     return (
       <div className="pointer-events-none absolute inset-0 z-[210] flex items-center justify-center">

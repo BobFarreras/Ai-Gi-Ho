@@ -10,14 +10,20 @@ import { GameState } from "@/core/use-cases/GameEngine";
 import { Card } from "../card/Card";
 import { CombatLogEventRow } from "./ui/CombatLogEventRow";
 import { resolveLiveSelectedCard } from "@/components/game/board/internal/resolve-live-selected-card";
+import { ITrapActivationPrompt } from "@/components/game/board/hooks/internal/board-state/useBoardUiState";
 
 interface SidePanelsProps {
   selectedCard: ICard | null;
   gameState: GameState;
   isHistoryOpen: boolean;
+  canActivateSelectedExecution?: boolean;
+  pendingTrapActivationPrompt?: ITrapActivationPrompt | null;
   onSelectCard: (card: ICard) => void;
   onCloseCard: () => void;
   onCloseHistory: () => void;
+  onActivateSelectedExecution?: () => void;
+  onActivatePendingTrap?: () => void;
+  onSkipPendingTrap?: () => void;
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -29,7 +35,19 @@ const detailPanelClass =
 const historyPanelClass =
   "absolute right-3 md:right-5 top-[clamp(5.75rem,11vh,8.5rem)] bottom-[clamp(6.75rem,18vh,11.75rem)] w-[clamp(17rem,34vw,24rem)] bg-zinc-950/88 border-l-2 border-red-500/50 z-[90] p-4 md:p-5 backdrop-blur-2xl shadow-[-20px_0_50px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden rounded-l-3xl min-h-0";
 
-export function SidePanels({ selectedCard, gameState, isHistoryOpen, onSelectCard, onCloseCard, onCloseHistory }: SidePanelsProps) {
+export function SidePanels({
+  selectedCard,
+  gameState,
+  isHistoryOpen,
+  canActivateSelectedExecution = false,
+  pendingTrapActivationPrompt = null,
+  onSelectCard,
+  onCloseCard,
+  onCloseHistory,
+  onActivateSelectedExecution = () => undefined,
+  onActivatePendingTrap = () => undefined,
+  onSkipPendingTrap = () => undefined,
+}: SidePanelsProps) {
   const [turnFilter, setTurnFilter] = useState<number | "ALL">("ALL");
   const [actorFilter, setActorFilter] = useState<"ALL" | "PLAYER" | "OPPONENT">("ALL");
   const [detailCardScale, setDetailCardScale] = useState(0.6);
@@ -74,6 +92,9 @@ export function SidePanels({ selectedCard, gameState, isHistoryOpen, onSelectCar
     () => resolveLiveSelectedCard(selectedCard, gameState),
     [gameState, selectedCard],
   );
+  const isTrapPromptForSelectedCard = Boolean(
+    liveSelectedCard && pendingTrapActivationPrompt && pendingTrapActivationPrompt.trapCard.id === liveSelectedCard.id,
+  );
 
   return (
     <AnimatePresence>
@@ -89,6 +110,26 @@ export function SidePanels({ selectedCard, gameState, isHistoryOpen, onSelectCar
             <h2 className="text-xl md:text-2xl font-black text-cyan-300 uppercase tracking-tight">{liveSelectedCard.name}</h2>
             <span className="text-zinc-500 text-[11px] md:text-xs tracking-widest uppercase font-bold mb-3 block border-b border-zinc-800 pb-2">{liveSelectedCard.faction} {liveSelectedCard.type}</span>
             <p className="text-zinc-300 text-sm leading-relaxed whitespace-pre-line">{liveSelectedCard.description}</p>
+            {(canActivateSelectedExecution || isTrapPromptForSelectedCard) ? (
+              <div className="mt-4 flex items-center gap-2 border-t border-zinc-800 pt-3">
+                <button
+                  type="button"
+                  aria-label="Confirmar activación de carta seleccionada"
+                  onClick={isTrapPromptForSelectedCard ? onActivatePendingTrap : onActivateSelectedExecution}
+                  className="rounded-lg border border-emerald-300/70 bg-emerald-700/35 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-emerald-100 hover:bg-emerald-700/50"
+                >
+                  Activar
+                </button>
+                <button
+                  type="button"
+                  aria-label="Cancelar activación de carta seleccionada"
+                  onClick={isTrapPromptForSelectedCard ? onSkipPendingTrap : onCloseCard}
+                  className="rounded-lg border border-zinc-500/60 bg-zinc-900/75 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-zinc-100 hover:border-zinc-300"
+                >
+                  Cancelar
+                </button>
+              </div>
+            ) : null}
           </div>
         </motion.div>
       )}

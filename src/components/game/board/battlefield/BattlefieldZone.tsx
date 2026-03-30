@@ -32,8 +32,6 @@ interface BattlefieldZoneProps {
   cardXpCardId: string | null;
   cardXpAmount: number | null;
   cardXpEventId: string | null;
-  canActivateSelectedExecution: boolean;
-  onActivateSelectedExecution: () => void;
   onGraveyardClick: (side: "player" | "opponent") => void;
   onFusionDeckClick?: (side: "player" | "opponent") => void;
   onDestroyedClick?: (side: "player" | "opponent") => void;
@@ -65,8 +63,6 @@ export function BattlefieldZone({
   cardXpCardId,
   cardXpAmount,
   cardXpEventId,
-  canActivateSelectedExecution,
-  onActivateSelectedExecution,
   onGraveyardClick,
   onFusionDeckClick = () => undefined,
   onDestroyedClick = () => undefined,
@@ -107,9 +103,7 @@ export function BattlefieldZone({
         cardXpCardId={cardXpCardId}
         cardXpAmount={cardXpAmount}
         cardXpEventId={cardXpEventId}
-        canActivateSelectedExecution={canActivateSelectedExecution}
         isMobileLayout={isMobileLayout}
-        onActivateSelectedExecution={onActivateSelectedExecution}
         onEntityClick={onEntityClick}
       />
       <div className={sideStackClass}>

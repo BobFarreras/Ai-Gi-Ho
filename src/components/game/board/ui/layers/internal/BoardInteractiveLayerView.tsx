@@ -45,10 +45,8 @@ export function BoardInteractiveLayerView(props: IBoardInteractiveLayerViewProps
           cardXpActorPlayerId={props.lastCardXpActorPlayerId}
           playerId={props.player.id}
           opponentId={props.opponent.id}
-          canActivateSelectedExecution={props.canActivateSelectedExecution}
           viewportBoardScale={props.viewport.boardScale}
           isMobileLayout={props.isMobileLayout}
-          onActivateSelectedExecution={props.onActivateSelectedExecution}
           onGraveyardClick={props.onGraveyardClick}
           onFusionDeckClick={props.onFusionDeckClick}
           onDestroyedClick={props.onDestroyedClick}
@@ -104,9 +102,14 @@ export function BoardInteractiveLayerView(props: IBoardInteractiveLayerViewProps
             selectedCard={props.selectedCard}
             gameState={props.gameState}
             isHistoryOpen={props.isHistoryOpen}
+            canActivateSelectedExecution={props.canActivateSelectedExecution}
+            pendingTrapActivationPrompt={props.pendingTrapActivationPrompt ?? null}
             onSelectCard={props.onSelectCard}
             onCloseCard={props.onCloseCard}
             onCloseHistory={props.onCloseHistory}
+            onActivateSelectedExecution={props.onActivateSelectedExecution}
+            onActivatePendingTrap={props.onActivatePendingTrap}
+            onSkipPendingTrap={props.onSkipPendingTrap}
           />
         </div>
       )}

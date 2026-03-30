@@ -4,10 +4,8 @@
 import { ICard } from "@/core/entities/ICard";
 import { ICombatLogEvent } from "@/core/entities/ICombatLog";
 import { IPendingZoneReplacement } from "@/components/game/board/hooks/internal/board-state/pending-replacement";
-import { ITrapActivationPrompt } from "@/components/game/board/hooks/internal/board-state/useBoardUiState";
 import { BattleBannerCenter } from "../../BattleBannerCenter";
 import { EntityReplacementConfirmOverlay } from "../EntityReplacementConfirmOverlay";
-import { TrapActivationPromptOverlay } from "./TrapActivationPromptOverlay";
 
 interface IBoardActionOverlaysProps {
   pendingActionHint: string | null;
@@ -20,9 +18,6 @@ interface IBoardActionOverlaysProps {
   playerBName: string;
   externalBannerSignal: { id: string; left: string; right: string } | null;
   showBattleBanners: boolean;
-  pendingTrapActivationPrompt: ITrapActivationPrompt | null;
-  onActivatePendingTrap: () => void;
-  onSkipPendingTrap: () => void;
   onConfirmEntityReplacement: () => void;
   onCancelEntityReplacement: () => void;
 }
@@ -38,9 +33,6 @@ export function BoardActionOverlays({
   playerBName,
   externalBannerSignal,
   showBattleBanners,
-  pendingTrapActivationPrompt,
-  onActivatePendingTrap,
-  onSkipPendingTrap,
   onConfirmEntityReplacement,
   onCancelEntityReplacement,
 }: IBoardActionOverlaysProps) {
@@ -51,13 +43,6 @@ export function BoardActionOverlays({
           <p className="text-sm font-black tracking-[0.16em] uppercase text-amber-300">Acción obligatoria</p>
           <p className="mt-1 text-lg font-black leading-tight sm:text-2xl">{pendingActionHint}</p>
         </div>
-      ) : null}
-      {pendingTrapActivationPrompt ? (
-        <TrapActivationPromptOverlay
-          prompt={pendingTrapActivationPrompt}
-          onActivate={onActivatePendingTrap}
-          onSkip={onSkipPendingTrap}
-        />
       ) : null}
       {pendingEntityReplacement && pendingEntityReplacementTargetCard ? (
         <EntityReplacementConfirmOverlay

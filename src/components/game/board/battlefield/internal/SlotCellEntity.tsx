@@ -1,7 +1,7 @@
 // src/components/game/board/battlefield/internal/SlotCellEntity.tsx - Render de entidad ocupando un slot con motion, carta y CTA de ejecución.
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { MouseEvent } from "react";
 import { BattleMode, IBoardEntity } from "@/core/entities/IPlayer";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,6 @@ import { CardBack } from "@/components/game/card/CardBack";
 import { resolveEntityMotionState } from "@/components/game/board/battlefield/internal/entity-motion";
 import { resolveEntityVisibility } from "@/components/game/board/battlefield/internal/entity-visibility";
 import { SummonHologramVfx } from "@/components/game/board/battlefield/internal/SummonHologramVfx";
-import { ExecutionActivateButton } from "@/components/game/board/battlefield/internal/ExecutionActivateButton";
 import { TrapActivationVfx } from "@/components/game/board/battlefield/TrapActivationVfx";
 import { useBoardPerformanceProfile } from "@/components/game/board/internal/use-board-performance-profile";
 
@@ -23,13 +22,11 @@ interface ISlotCellEntityProps {
   isSelectedByCard: boolean;
   selectedCardId: string | null;
   selectedBoardEntityInstanceId: string | null;
-  canActivateSelectedExecution: boolean;
   isAttacking: boolean;
   isActivating: boolean;
   isHighlighted: boolean;
   isSelectedMaterial: boolean;
   onEntityClick: (entity: IBoardEntity | null, isOpponentSide: boolean, event: MouseEvent) => void;
-  onActivateSelectedExecution: () => void;
 }
 
 export function SlotCellEntity({
@@ -41,21 +38,23 @@ export function SlotCellEntity({
   isSelectedByCard,
   selectedCardId,
   selectedBoardEntityInstanceId,
-  canActivateSelectedExecution,
   isAttacking,
   isActivating,
   isHighlighted,
   isSelectedMaterial,
   onEntityClick,
-  onActivateSelectedExecution,
 }: ISlotCellEntityProps) {
   const { shouldReduceCombatEffects } = useBoardPerformanceProfile();
-  const isExecutionSelectedForActivation =
-    !isOpponentSide && entity.mode === "SET" && entity.card.type === "EXECUTION" && selectedBoardEntityInstanceId === entity.instanceId && canActivateSelectedExecution;
   const isBoardEntitySelected = selectedBoardEntityInstanceId === entity.instanceId || isSelectedByCard;
   const isTrapActivating = entity.card.type === "TRAP" && isAttacking;
   const visibility = resolveEntityVisibility(entity, isRevealed);
   const forceTrapReveal = isTrapActivating && entity.card.type === "TRAP";
+  const resolvedBoardMode: BattleMode =
+    forceTrapReveal
+      ? "ACTIVATE"
+      : !visibility.isFaceDown && entity.mode === "SET" && entity.card.type === "ENTITY"
+        ? "DEFENSE"
+        : (entity.mode as BattleMode);
   const motionState = resolveEntityMotionState({ isAttacking, isActivating, isOpponentSide, isHorizontal: visibility.isHorizontal });
   const targetX = -120 - index * 105;
 
@@ -87,7 +86,7 @@ export function SlotCellEntity({
       ) : (
         <div className="absolute w-full h-full flex items-center justify-center">
           <SummonHologramVfx show={Boolean((entity.isNewlySummoned && (entity.card.type === "ENTITY" || entity.card.type === "FUSION" || entity.card.type === "TRAP")) || forceTrapReveal)} />
-          <Card card={entity.card} isSelected={selectedCardId === entity.card.id} hologramMode={isMobileLayout ? "lite" : "full"} boardMode={!visibility.isFaceDown && entity.mode === "SET" && entity.card.type === "ENTITY" ? "DEFENSE" : (entity.mode as BattleMode)} />
+          <Card card={entity.card} isSelected={selectedCardId === entity.card.id} hologramMode={isMobileLayout ? "lite" : "full"} boardMode={resolvedBoardMode} />
           <TrapActivationVfx entity={entity} isOpponentSide={isOpponentSide} isTrapActivating={isTrapActivating} />
           {isActivating ? (
             shouldReduceCombatEffects ? (
@@ -99,7 +98,6 @@ export function SlotCellEntity({
           {isSelectedMaterial ? <span className="absolute top-2 left-2 px-2 py-0.5 text-[10px] font-black rounded-md bg-cyan-300 text-cyan-950 shadow-[0_0_14px_rgba(34,211,238,0.9)]">MATERIAL</span> : null}
         </div>
       )}
-      <AnimatePresence>{isExecutionSelectedForActivation ? <ExecutionActivateButton onActivateSelectedExecution={onActivateSelectedExecution} /> : null}</AnimatePresence>
     </motion.div>
   );
 }

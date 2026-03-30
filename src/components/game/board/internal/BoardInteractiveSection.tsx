@@ -36,6 +36,7 @@ export function BoardInteractiveSection({ board, screen, isMobile, suppressComba
       pendingFusionSelectedEntityIds={board.pendingFusionSelectedEntityIds}
       isHistoryOpen={board.isHistoryOpen}
       isPlayerTurn={board.isPlayerTurn}
+      pendingTrapActivationPrompt={board.pendingTrapActivationPrompt}
       lastDamageTargetPlayerId={suppressCombatFeedback ? null : board.lastDamageTargetPlayerId}
       lastDamageEventId={suppressCombatFeedback ? null : board.lastDamageEventId}
       lastBuffTargetEntityIds={suppressCombatFeedback ? [] : board.lastBuffTargetEntityIds}
@@ -56,6 +57,8 @@ export function BoardInteractiveSection({ board, screen, isMobile, suppressComba
       onCardClick={board.toggleCardSelection}
       onPlayAction={screen.handlePlayAction}
       onActivateSelectedExecution={screen.handleActivateSelectedExecution}
+      onActivatePendingTrap={board.activatePendingTrap}
+      onSkipPendingTrap={board.skipPendingTrap}
       onSelectCard={board.previewCard}
       onCloseCard={board.clearSelection}
       onSetSelectedEntityToAttack={board.setSelectedEntityToAttack}

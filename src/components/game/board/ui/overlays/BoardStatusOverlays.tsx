@@ -12,7 +12,6 @@ import { BoardActionOverlays } from "./internal/BoardActionOverlays";
 import { BoardErrorOverlay } from "./internal/BoardErrorOverlay";
 import { BoardZoneBrowsers } from "./internal/BoardZoneBrowsers";
 import { IFusionMaterialCandidate, FusionMaterialBrowser } from "./internal/FusionMaterialBrowser";
-import { ITrapActivationPrompt } from "@/components/game/board/hooks/internal/board-state/useBoardUiState";
 
 interface BoardStatusOverlaysProps {
   lastError: IBoardUiError | null;
@@ -51,9 +50,6 @@ interface BoardStatusOverlaysProps {
   onCancelAdvancePhase: () => void;
   externalBannerSignal?: { id: string; left: string; right: string } | null;
   showBattleBanners?: boolean;
-  pendingTrapActivationPrompt?: ITrapActivationPrompt | null;
-  onActivatePendingTrap?: () => void;
-  onSkipPendingTrap?: () => void;
   isFusionMaterialBrowserOpen?: boolean;
   fusionMaterialCandidates?: IFusionMaterialCandidate[];
   fusionSelectedCount?: number;
@@ -97,9 +93,6 @@ export function BoardStatusOverlays({
   onCancelAdvancePhase,
   externalBannerSignal = null,
   showBattleBanners = true,
-  pendingTrapActivationPrompt = null,
-  onActivatePendingTrap = () => undefined,
-  onSkipPendingTrap = () => undefined,
   isFusionMaterialBrowserOpen = false,
   fusionMaterialCandidates = [],
   fusionSelectedCount = 0,
@@ -119,9 +112,6 @@ export function BoardStatusOverlays({
         playerBName={playerBName}
         externalBannerSignal={externalBannerSignal}
         showBattleBanners={showBattleBanners}
-        pendingTrapActivationPrompt={pendingTrapActivationPrompt}
-        onActivatePendingTrap={onActivatePendingTrap}
-        onSkipPendingTrap={onSkipPendingTrap}
         onConfirmEntityReplacement={onConfirmEntityReplacement}
         onCancelEntityReplacement={onCancelEntityReplacement}
       />
