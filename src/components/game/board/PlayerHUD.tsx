@@ -82,7 +82,7 @@ export function PlayerHUD({
       )}
     >
       <HudFloatingDelta value={damageTaken} sign="-" isOpponent={isOpponent} color="red" />
-      <HudFloatingDelta value={healGained} sign="+" isOpponent={isOpponent} color="blue" />
+      <HudFloatingDelta value={healGained} sign="+" isOpponent={isOpponent} color="green" />
       <HudDialogueBubble isOpponent={isOpponent} message={dialogueMessage} />
       <HudPortraitCard
         isOpponent={isOpponent}

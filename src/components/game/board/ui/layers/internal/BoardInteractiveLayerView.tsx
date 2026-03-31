@@ -6,6 +6,7 @@ import { MobilePlayerHand } from "@/components/game/board/MobilePlayerHand";
 import { PlayerHand } from "@/components/game/board/PlayerHand";
 import { SidePanels } from "@/components/game/board/SidePanels";
 import { BoardMobileSelectedCardOverlay } from "@/components/game/board/ui/overlays/BoardMobileSelectedCardOverlay";
+import { DrawCardFlowVfx } from "@/components/game/board/ui/layers/internal/DrawCardFlowVfx";
 import { IBoardInteractiveLayerViewProps } from "@/components/game/board/ui/layers/internal/board-interactive-types";
 
 export function BoardInteractiveLayerView(props: IBoardInteractiveLayerViewProps) {
@@ -113,6 +114,7 @@ export function BoardInteractiveLayerView(props: IBoardInteractiveLayerViewProps
           />
         </div>
       )}
+      <DrawCardFlowVfx combatLog={props.gameState.combatLog} playerId={props.player.id} />
     </>
   );
 }

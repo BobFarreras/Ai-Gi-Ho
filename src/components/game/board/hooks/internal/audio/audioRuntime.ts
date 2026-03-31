@@ -12,6 +12,16 @@ export function createAudio(trackId: AudioTrackId, isMusic: boolean): HTMLAudioE
   return audio;
 }
 
+/** Crea instancia de audio por ruta directa (útil para efectos por acción). */
+export function createAudioFromPath(path: string, volume = 0.75): HTMLAudioElement | null {
+  if (typeof window === "undefined" || typeof window.Audio === "undefined" || path.trim().length === 0) return null;
+  const audio = new Audio(path);
+  audio.preload = "auto";
+  audio.loop = false;
+  audio.volume = Math.max(0, Math.min(1, volume * AUDIO_CHANNEL_VOLUME.sfx));
+  return audio;
+}
+
 export function mapEventToTrack(event: ICombatLogEvent): AudioTrackId | null {
   if (event.eventType === "TURN_STARTED") return "TURN_PASS";
   if (event.eventType === "PHASE_CHANGED") return "BANNER";
@@ -51,5 +61,17 @@ export function safePlay(audio: HTMLAudioElement | null): void {
   if (playPromise && typeof playPromise.catch === "function") {
     playPromise.catch(() => undefined);
   }
+}
+
+/** Reproduce audio principal y, si falla, intenta fallback para no perder feedback sonoro. */
+export function safePlayWithFallback(audio: HTMLAudioElement | null, buildFallback: () => HTMLAudioElement | null): void {
+  const playPromise = audio?.play();
+  if (!playPromise || typeof playPromise.catch !== "function") {
+    safePlay(buildFallback());
+    return;
+  }
+  playPromise.catch(() => {
+    safePlay(buildFallback());
+  });
 }
 

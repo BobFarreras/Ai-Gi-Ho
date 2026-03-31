@@ -52,16 +52,27 @@ export function ExecutionActivationVfx({ entity, isOpponentSide }: ExecutionActi
         initial={{ opacity: 0, scale: 0.6 }}
         animate={{ opacity: [0, 1, 0], scale: [0.6, 1.35, 1.1] }}
         transition={{ duration: 1.1, ease: "easeOut" }}
-        className="absolute -inset-6 rounded-full pointer-events-none z-[210] bg-[radial-gradient(circle,rgba(56,189,248,0.6)_0%,rgba(56,189,248,0.18)_45%,rgba(56,189,248,0)_80%)]"
+        className="absolute -inset-6 rounded-full pointer-events-none z-[210] bg-[radial-gradient(circle,rgba(16,185,129,0.65)_0%,rgba(16,185,129,0.18)_45%,rgba(16,185,129,0)_80%)]"
       >
         <motion.div
           initial={{ y: 14, opacity: 0 }}
           animate={{ y: -48, opacity: [0, 1, 0] }}
           transition={{ duration: 1.1, ease: "easeOut" }}
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 text-4xl font-black text-cyan-200 drop-shadow-[0_0_18px_rgba(125,211,252,1)]"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 text-4xl font-black text-emerald-200 drop-shadow-[0_0_18px_rgba(52,211,153,1)]"
         >
           HEAL
         </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.6, x: 0, y: 0 }}
+          animate={{
+            opacity: [0, 1, 0],
+            scale: [0.6, 1, 0.72],
+            x: [0, isOpponentSide ? 330 : -330],
+            y: [0, isOpponentSide ? -280 : 280],
+          }}
+          transition={{ duration: 0.95, ease: "easeOut" }}
+          className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-300/70 blur-[1px] shadow-[0_0_32px_rgba(16,185,129,0.95)]"
+        />
       </motion.div>
     );
   }
