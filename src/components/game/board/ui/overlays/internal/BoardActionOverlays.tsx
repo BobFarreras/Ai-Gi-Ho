@@ -7,6 +7,7 @@ import { IPendingZoneReplacement } from "@/components/game/board/hooks/internal/
 import { BattleBannerCenter } from "../../BattleBannerCenter";
 import { EntityReplacementConfirmOverlay } from "../EntityReplacementConfirmOverlay";
 import { DirectDamageBeamOverlay } from "./DirectDamageBeamOverlay";
+import { EffectTargetedOverlay } from "./EffectTargetedOverlay";
 
 interface IBoardActionOverlaysProps {
   pendingActionHint: string | null;
@@ -39,6 +40,7 @@ export function BoardActionOverlays({
 }: IBoardActionOverlaysProps) {
   return (
     <>
+      <EffectTargetedOverlay events={combatLog} playerAId={playerAId} />
       <DirectDamageBeamOverlay events={combatLog} playerAId={playerAId} />
       {pendingActionHint ? (
         <div className="absolute left-1/2 top-[34%] z-[155] w-[94%] max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-amber-300/60 bg-amber-950/90 px-6 py-5 text-amber-100 shadow-[0_0_45px_rgba(251,191,36,0.3)] pointer-events-none">

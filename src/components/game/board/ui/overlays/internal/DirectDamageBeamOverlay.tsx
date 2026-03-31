@@ -28,13 +28,14 @@ export function DirectDamageBeamOverlay({ events, playerAId }: IDirectDamageBeam
 
   useEffect(() => {
     if (!signalId) return;
-    const beamTimer = window.setTimeout(() => play("/audio/sfx/damage.mp3", 0.82), DIRECT_DAMAGE_BEAM_START_MS);
-    const impactTimer = window.setTimeout(() => play("/audio/sfx/damage.mp3", 0.64), DIRECT_DAMAGE_BEAM_START_MS + DIRECT_DAMAGE_BEAM_MS);
+    const startDelay = signal?.startDelayMs ?? 0;
+    const beamTimer = window.setTimeout(() => play("/audio/sfx/damage.mp3", 0.82), startDelay + DIRECT_DAMAGE_BEAM_START_MS);
+    const impactTimer = window.setTimeout(() => play("/audio/sfx/damage.mp3", 0.64), startDelay + DIRECT_DAMAGE_BEAM_START_MS + DIRECT_DAMAGE_BEAM_MS);
     return () => {
       window.clearTimeout(beamTimer);
       window.clearTimeout(impactTimer);
     };
-  }, [signalId]);
+  }, [signalId, signal?.startDelayMs]);
 
   useEffect(() => {
     const frameId = window.requestAnimationFrame(() => {
@@ -76,12 +77,12 @@ export function DirectDamageBeamOverlay({ events, playerAId }: IDirectDamageBeam
       <motion.div
         initial={{ opacity: 0, scale: 0.8, x: trajectory.source.x - 500, y: trajectory.source.y - 500 }}
         animate={{ opacity: [0, 1, 0], scale: [0.8, 1.2, 0.95] }}
-        transition={{ duration: DIRECT_DAMAGE_BEAM_START_MS / 1000, ease: "easeOut" }}
+        transition={{ duration: DIRECT_DAMAGE_BEAM_START_MS / 1000, delay: (signal.startDelayMs ?? 0) / 1000, ease: "easeOut" }}
         className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-red-400/80 via-orange-200/90 to-cyan-200/80 blur-sm"
       />
       <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1000 1000" preserveAspectRatio="none">
-        <motion.path d={beamPath} fill="none" stroke="rgba(254,242,242,0.96)" strokeWidth={9} strokeLinecap="round" initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: [0, 1], opacity: [0, 1, 0] }} transition={{ duration: DIRECT_DAMAGE_BEAM_MS / 1000, delay: DIRECT_DAMAGE_BEAM_START_MS / 1000, ease: "easeInOut" }} style={{ filter: "drop-shadow(0 0 16px rgba(239,68,68,0.95)) drop-shadow(0 0 24px rgba(34,211,238,0.66))" }} />
-        <motion.path d={beamPath} fill="none" stroke="rgba(248,113,113,0.72)" strokeWidth={16} strokeLinecap="round" initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: [0, 1], opacity: [0, 0.85, 0] }} transition={{ duration: DIRECT_DAMAGE_BEAM_MS / 1000, delay: DIRECT_DAMAGE_BEAM_START_MS / 1000, ease: "easeInOut" }} style={{ filter: "blur(1.2px)" }} />
+        <motion.path d={beamPath} fill="none" stroke="rgba(254,242,242,0.96)" strokeWidth={9} strokeLinecap="round" initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: [0, 1], opacity: [0, 1, 0] }} transition={{ duration: DIRECT_DAMAGE_BEAM_MS / 1000, delay: (signal.startDelayMs + DIRECT_DAMAGE_BEAM_START_MS) / 1000, ease: "easeInOut" }} style={{ filter: "drop-shadow(0 0 16px rgba(239,68,68,0.95)) drop-shadow(0 0 24px rgba(34,211,238,0.66))" }} />
+        <motion.path d={beamPath} fill="none" stroke="rgba(248,113,113,0.72)" strokeWidth={16} strokeLinecap="round" initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: [0, 1], opacity: [0, 0.85, 0] }} transition={{ duration: DIRECT_DAMAGE_BEAM_MS / 1000, delay: (signal.startDelayMs + DIRECT_DAMAGE_BEAM_START_MS) / 1000, ease: "easeInOut" }} style={{ filter: "blur(1.2px)" }} />
       </svg>
     </div>
   );

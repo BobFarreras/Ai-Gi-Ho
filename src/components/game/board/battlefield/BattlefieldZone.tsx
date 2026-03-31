@@ -32,6 +32,7 @@ interface BattlefieldZoneProps {
   cardXpCardId: string | null;
   cardXpAmount: number | null;
   cardXpEventId: string | null;
+  hasBlockingTrapActivation: boolean;
   onGraveyardClick: (side: "player" | "opponent") => void;
   onFusionDeckClick?: (side: "player" | "opponent") => void;
   onDestroyedClick?: (side: "player" | "opponent") => void;
@@ -63,6 +64,7 @@ export function BattlefieldZone({
   cardXpCardId,
   cardXpAmount,
   cardXpEventId,
+  hasBlockingTrapActivation,
   onGraveyardClick,
   onFusionDeckClick = () => undefined,
   onDestroyedClick = () => undefined,
@@ -83,7 +85,7 @@ export function BattlefieldZone({
       )}
     >
       <div className={sideStackClass}>
-        <DeckPile deckCount={deckCount} />
+        <DeckPile deckCount={deckCount} side={isOpponentSide ? "opponent" : "player"} />
         <FusionDeckPile fusionDeckCount={fusionDeckCount} isOpponentSide={isOpponentSide} onClick={onFusionDeckClick} />
       </div>
       <BattlefieldLanes
@@ -103,6 +105,7 @@ export function BattlefieldZone({
         cardXpCardId={cardXpCardId}
         cardXpAmount={cardXpAmount}
         cardXpEventId={cardXpEventId}
+        hasBlockingTrapActivation={hasBlockingTrapActivation}
         isMobileLayout={isMobileLayout}
         onEntityClick={onEntityClick}
       />

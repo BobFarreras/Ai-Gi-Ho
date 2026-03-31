@@ -21,6 +21,7 @@ export interface SlotCellProps {
   cardXpCardId: string | null;
   cardXpAmount: number | null;
   cardXpEventId: string | null;
+  hasBlockingTrapActivation: boolean;
   isMobileLayout?: boolean;
   onEntityClick: (entity: IBoardEntity | null, isOpponentSide: boolean, event: MouseEvent) => void;
 }

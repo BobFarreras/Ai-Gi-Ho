@@ -24,6 +24,7 @@ interface ISlotCellEntityProps {
   selectedBoardEntityInstanceId: string | null;
   isAttacking: boolean;
   isActivating: boolean;
+  shouldShowBlockedLock: boolean;
   isHighlighted: boolean;
   isSelectedMaterial: boolean;
   onEntityClick: (entity: IBoardEntity | null, isOpponentSide: boolean, event: MouseEvent) => void;
@@ -40,6 +41,7 @@ export function SlotCellEntity({
   selectedBoardEntityInstanceId,
   isAttacking,
   isActivating,
+  shouldShowBlockedLock,
   isHighlighted,
   isSelectedMaterial,
   onEntityClick,
@@ -87,6 +89,17 @@ export function SlotCellEntity({
         <div className="absolute w-full h-full flex items-center justify-center">
           <SummonHologramVfx show={Boolean((entity.isNewlySummoned && (entity.card.type === "ENTITY" || entity.card.type === "FUSION" || entity.card.type === "TRAP")) || forceTrapReveal)} />
           <Card card={entity.card} isSelected={selectedCardId === entity.card.id} hologramMode={isMobileLayout ? "lite" : "full"} boardMode={resolvedBoardMode} />
+          {shouldShowBlockedLock ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.7, y: 8 }}
+              animate={{ opacity: [0, 1, 0], scale: [0.7, 1.16, 0.92], y: [8, -6, -18] }}
+              transition={{ duration: 0.9, ease: "easeOut" }}
+              className="absolute left-1/2 top-1/2 z-[225] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-red-300/85 bg-red-950/70 px-3 py-2 text-sm font-black tracking-[0.2em] text-red-100 shadow-[0_0_20px_rgba(248,113,113,0.95)]"
+              aria-hidden
+            >
+              LOCK
+            </motion.div>
+          ) : null}
           <TrapActivationVfx entity={entity} isOpponentSide={isOpponentSide} isTrapActivating={isTrapActivating} />
           {isActivating ? (
             shouldReduceCombatEffects ? (

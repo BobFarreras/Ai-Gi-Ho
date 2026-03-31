@@ -9,7 +9,7 @@ Este documento resume el estado actual de los efectos del juego en esta rama.
 |---|---|---|---|---|
 | `DAMAGE` | Daño directo al objetivo (`PLAYER`/`OPPONENT`). | ✅ | ✅ Carga + rayo + impacto HUD. | ✅ `cargar.mp3` + `damage.mp3` |
 | `HEAL` | Cura LP del propietario. | ✅ | ✅ Aura de curación + etiqueta `HEAL` + proyectil al HUD. | ✅ `heal.mp3` (si existe) |
-| `DRAW_CARD` | Roba `N` cartas del deck a la mano. | ✅ | ✅ Flujo visual deck -> mano. | ✅ `draw_card.mp3` |
+| `DRAW_CARD` | Roba `N` cartas del deck a la mano. | ✅ | ✅ Flujo visual lento deck -> mano con aparición diferida en mano al terminar la animación. | ✅ `draw_card.mp3` |
 | `RESTORE_ENERGY` | Recupera energía (normalmente hasta máximo). | ✅ | ✅ Carga amarilla + transferencia al HUD del propietario. | ✅ `cargar.mp3` + `restore_energy.mp3` |
 | `BOOST_ATTACK_ALLIED_ENTITY` | Sube ATK a la mejor entidad aliada. | ✅ | ✅ Impacto de buff por entidad. | ✅ Audio genérico de buff (`stat_up.mp3`) |
 | `BOOST_DEFENSE_BY_ARCHETYPE` | Sube DEF a entidades de un arquetipo. | ✅ | ✅ Impacto de buff por entidad. | ✅ Audio genérico de buff (`stat_up.mp3`) |
@@ -31,9 +31,9 @@ Este documento resume el estado actual de los efectos del juego en esta rama.
 | `DAMAGE` | Daño directo por activación de trampa. | ✅ | ✅ Reutiliza flujo de daño (rayo). | ✅ `cargar.mp3` + `damage.mp3` |
 | `REDUCE_OPPONENT_ATTACK` | Baja ATK de entidades rivales. | ✅ | ✅ Impacto de debuff lila por entidad. | ✅ `bajada.mp3` |
 | `REDUCE_OPPONENT_DEFENSE` | Baja DEF de entidades rivales. | ✅ | ✅ Impacto de debuff lila por entidad. | ✅ `bajada.mp3` |
-| `NEGATE_ATTACK_AND_DESTROY_ATTACKER` | Niega ataque y destruye atacante. | ✅ | ✅ VFX de bloqueo `LOCK` (reutilizable). | ✅ `block.mp3` |
+| `NEGATE_ATTACK_AND_DESTROY_ATTACKER` | Niega ataque y destruye atacante. | ✅ | ✅ VFX de bloqueo `LOCK` sobre la carta bloqueada (atacante), reusable para bloqueos. | ✅ `block.mp3` |
 | `COPY_OPPONENT_BUFF_TO_ALLIED_ENTITIES` | Copia buff rival a entidades propias. | ✅ | 🟡 Usa buff impact base. | 🟡 Fallback/pendiente dedicado |
-| `FORCE_SUMMONED_DEFENSE_TO_ATTACK_LOCKED` | Fuerza modo `ATTACK` y bloquea postura. | ✅ | ✅ VFX de bloqueo `LOCK` (reutilizable). | ✅ `block.mp3` |
+| `FORCE_SUMMONED_DEFENSE_TO_ATTACK_LOCKED` | Fuerza modo `ATTACK` y bloquea postura. | ✅ | ✅ VFX de bloqueo `LOCK` sobre objetivo bloqueado (reutilizable). | ✅ `block.mp3` |
 | `DIRECT_ATTACK_ENERGY_DRAIN_AND_SET_SELF_TO_TEN` | En ataque directo: rival a 0 energía, dueño a 10. | ✅ | 🟡 Lógica OK, VFX dedicado pendiente para doble HUD. | 🟡 Fallback/pendiente dedicado |
 
 ## Convenciones de audio activas

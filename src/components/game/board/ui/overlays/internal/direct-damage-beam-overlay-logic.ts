@@ -6,6 +6,7 @@ export interface IDirectDamageSignal {
   towardsPlayer: boolean;
   fromPlayerA: boolean;
   sourceCardId: string | null;
+  startDelayMs: number;
 }
 
 export interface IPoint { x: number; y: number; }
@@ -42,11 +43,17 @@ export function resolveLatestEffectDamageSignal(events: ICombatLogEvent[], playe
     const markerB = events[index - 2]?.eventType;
     const comesFromAttack = markerA === "ATTACK_DECLARED" || markerA === "BATTLE_RESOLVED" || markerB === "ATTACK_DECLARED";
     if (comesFromAttack) return null;
+    const previousEvent = events[index - 1];
+    const previousPayload = previousEvent && typeof previousEvent.payload === "object" && previousEvent.payload !== null ? (previousEvent.payload as Record<string, unknown>) : null;
+    const fromTrap = previousEvent?.eventType === "TRAP_TRIGGERED";
+    const trapAction = previousPayload && typeof previousPayload.effectAction === "string" ? previousPayload.effectAction : null;
+    const needsBlockPhase = fromTrap && (trapAction === "NEGATE_ATTACK_AND_DESTROY_ATTACKER" || trapAction === "NEGATE_OPPONENT_TRAP_AND_DESTROY" || trapAction === "FORCE_SUMMONED_DEFENSE_TO_ATTACK_LOCKED");
     return {
       id: events[index].id,
       towardsPlayer: targetPlayerId === playerAId,
       fromPlayerA: events[index].actorPlayerId === playerAId,
       sourceCardId: resolveSourceCardId(events, index, events[index].actorPlayerId),
+      startDelayMs: needsBlockPhase ? 480 : 0,
     };
   }
   return null;

@@ -93,6 +93,14 @@ export function PlayerHUD({
       <HudFloatingDelta value={damageTaken} sign="-" isOpponent={isOpponent} color="red" />
       <HudFloatingDelta value={healGained} sign="+" isOpponent={isOpponent} color="green" />
       <HudFloatingDelta value={energyGained} sign="+" isOpponent={isOpponent} color="yellow" />
+      {healGained ? (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.72 }}
+          animate={{ opacity: [0, 1, 0], scale: [0.72, 1.26, 1.02] }}
+          transition={{ duration: 1.28, ease: "easeOut" }}
+          className={cn("absolute z-[192] h-28 w-28 rounded-full bg-emerald-400/42 blur-xl", isOpponent ? "left-7 bottom-1" : "right-7 top-1")}
+        />
+      ) : null}
       {energyGained ? (
         <motion.div
           initial={{ opacity: 0, scale: 0.7 }}

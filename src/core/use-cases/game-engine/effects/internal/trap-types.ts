@@ -15,7 +15,12 @@ export interface ITrapResolutionResult {
   player: IPlayer;
   opponent: IPlayer;
   damage: number;
+  buffTargetEntityIds: string[];
+  buffStat: "ATTACK" | "DEFENSE" | null;
+  buffAmount: number;
+  blockedTargetEntityInstanceId: string | null;
   destroyedOpponentEntityCardId: string | null;
+  destroyedOpponentEntityInstanceId: string | null;
   destroyedOpponentEntityDestination: "GRAVEYARD" | "DESTROYED" | null;
 }
 

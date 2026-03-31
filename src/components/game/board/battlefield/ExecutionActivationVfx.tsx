@@ -5,6 +5,7 @@ import { DigitalBeam } from "./DigitalBeam";
 import { useBoardPerformanceProfile } from "@/components/game/board/internal/use-board-performance-profile";
 import { ExecutionChargedActionVfx } from "@/components/game/board/battlefield/internal/ExecutionChargedActionVfx";
 import { ChargeCastSfx } from "@/components/game/board/battlefield/internal/ChargeCastSfx";
+import { ExecutionHealVfx } from "@/components/game/board/battlefield/internal/ExecutionHealVfx";
 
 interface ExecutionActivationVfxProps {
   entity: IBoardEntity;
@@ -57,35 +58,7 @@ export function ExecutionActivationVfx({ entity, isOpponentSide }: ExecutionActi
   }
 
   if (action === "HEAL") {
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.55 }}
-        animate={{ opacity: [0, 1, 0], scale: [0.55, 1.45, 1.06] }}
-        transition={{ duration: 1.28, ease: "easeOut" }}
-        className="absolute -inset-10 rounded-full pointer-events-none z-[220] bg-[radial-gradient(circle,rgba(16,185,129,0.82)_0%,rgba(16,185,129,0.24)_42%,rgba(16,185,129,0)_82%)]"
-      >
-        <ChargeCastSfx enabled path="/audio/sfx/cargar.mp3" volume={0.7} />
-        <motion.div
-          initial={{ y: 14, opacity: 0 }}
-          animate={{ y: -48, opacity: [0, 1, 0] }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 text-5xl font-black text-emerald-100 drop-shadow-[0_0_24px_rgba(52,211,153,1)]"
-        >
-          HEAL
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.6, x: 0, y: 0 }}
-          animate={{
-            opacity: [0, 1, 0],
-            scale: [0.6, 1, 0.72],
-            x: [0, isOpponentSide ? 330 : -330],
-            y: [0, isOpponentSide ? -280 : 280],
-          }}
-          transition={{ duration: 0.95, ease: "easeOut" }}
-          className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-300/70 blur-[1px] shadow-[0_0_32px_rgba(16,185,129,0.95)]"
-        />
-      </motion.div>
-    );
+    return <ExecutionHealVfx isOpponentSide={isOpponentSide} />;
   }
 
   if (isBuffAction(action)) {

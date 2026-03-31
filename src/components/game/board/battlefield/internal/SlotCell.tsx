@@ -30,6 +30,7 @@ function SlotCellComponent({
   cardXpCardId,
   cardXpAmount,
   cardXpEventId,
+  hasBlockingTrapActivation,
   isMobileLayout = false,
   onEntityClick,
 }: SlotCellProps) {
@@ -56,6 +57,7 @@ function SlotCellComponent({
             selectedBoardEntityInstanceId={selectedBoardEntityInstanceId}
             isAttacking={isAttacking}
             isActivating={Boolean(isActivating)}
+            shouldShowBlockedLock={Boolean(isAttacking && hasBlockingTrapActivation)}
             isHighlighted={isHighlighted}
             isSelectedMaterial={isSelectedMaterial}
             onEntityClick={onEntityClick}

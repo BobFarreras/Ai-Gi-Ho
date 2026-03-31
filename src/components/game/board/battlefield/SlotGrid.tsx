@@ -25,6 +25,7 @@ interface SlotGridProps {
   cardXpCardId: string | null;
   cardXpAmount: number | null;
   cardXpEventId: string | null;
+  hasBlockingTrapActivation: boolean;
   isMobileLayout?: boolean;
   onEntityClick: (entity: IBoardEntity | null, isOpponentSide: boolean, event: React.MouseEvent) => void;
 }
@@ -47,6 +48,7 @@ export function SlotGrid({
   cardXpCardId,
   cardXpAmount,
   cardXpEventId,
+  hasBlockingTrapActivation,
   isMobileLayout = false,
   onEntityClick,
 }: SlotGridProps) {
@@ -88,6 +90,7 @@ export function SlotGrid({
             cardXpCardId={cardXpCardId}
             cardXpAmount={cardXpAmount}
             cardXpEventId={cardXpEventId}
+            hasBlockingTrapActivation={hasBlockingTrapActivation}
             isMobileLayout={isMobileLayout}
             onEntityClick={onEntityClick}
           />

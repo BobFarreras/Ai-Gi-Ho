@@ -71,17 +71,6 @@ export function TrapActivationVfx({ entity, isOpponentSide, isTrapActivating }: 
       className={`pointer-events-none absolute -inset-8 z-[210] rounded-3xl ${gradient}`}
     >
       {isBlockAction ? <ChargeCastSfx enabled path="/audio/sfx/effects/execution/block.mp3" volume={0.78} /> : null}
-      {isBlockAction ? (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.72, y: 12 }}
-          animate={{ opacity: [0, 1, 0], scale: [0.72, 1.2, 0.95], y: [12, -12, -26] }}
-          transition={{ duration: 0.9, ease: "easeOut" }}
-          className="absolute left-1/2 top-1/2 z-[220] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-red-300/85 bg-red-900/65 px-3 py-2 text-sm font-black tracking-[0.24em] text-red-100 drop-shadow-[0_0_20px_rgba(248,113,113,0.9)]"
-          aria-hidden
-        >
-          LOCK
-        </motion.div>
-      ) : null}
       <div className="absolute inset-0 flex items-center justify-center">
         <span className="rounded-md border border-fuchsia-300/70 bg-fuchsia-950/65 px-3 py-1 text-xs font-black tracking-[0.16em] text-fuchsia-100">
           {resolveTrapLabel(action)}

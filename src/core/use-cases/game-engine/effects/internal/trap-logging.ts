@@ -21,6 +21,9 @@ export function appendTrapResolutionLogs(params: ITrapLoggingParams): GameState 
     trapCardId: trap.card.id,
     trigger,
     effectAction: trap.card.effect?.action ?? null,
+    blockedTargetEntityInstanceId: resolved.blockedTargetEntityInstanceId,
+    destroyedOpponentEntityCardId: resolved.destroyedOpponentEntityCardId,
+    destroyedOpponentEntityInstanceId: resolved.destroyedOpponentEntityInstanceId,
   });
   withLogs = appendCombatLogEvent(withLogs, reactivePlayerId, "CARD_TO_GRAVEYARD", {
     cardId: trap.card.id,
@@ -31,6 +34,15 @@ export function appendTrapResolutionLogs(params: ITrapLoggingParams): GameState 
     withLogs = appendCombatLogEvent(withLogs, reactivePlayerId, "DIRECT_DAMAGE", {
       targetPlayerId: trap.card.effect.target === "OPPONENT" ? targetOpponentId : targetPlayerId,
       amount: resolved.damage,
+    });
+  }
+  if (resolved.buffTargetEntityIds.length > 0 && resolved.buffStat && resolved.buffAmount !== 0) {
+    const ownerPlayerId = trap.card.effect?.action === "COPY_OPPONENT_BUFF_TO_ALLIED_ENTITIES" ? reactivePlayerId : targetOpponentId;
+    withLogs = appendCombatLogEvent(withLogs, reactivePlayerId, "STAT_BUFF_APPLIED", {
+      ownerPlayerId,
+      stat: resolved.buffStat,
+      amount: resolved.buffAmount,
+      targetEntityIds: resolved.buffTargetEntityIds,
     });
   }
   if (resolved.destroyedOpponentEntityCardId) {
