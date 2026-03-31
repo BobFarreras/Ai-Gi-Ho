@@ -9,11 +9,12 @@ interface HudFloatingDeltaProps {
   value: number | null;
   sign: "+" | "-";
   isOpponent: boolean;
-  color: "red" | "green";
+  color: "red" | "green" | "yellow";
 }
 
 export function HudFloatingDelta({ value, sign, isOpponent, color }: HudFloatingDeltaProps) {
   const isRed = color === "red";
+  const isYellow = color === "yellow";
   const { shouldReduceCombatEffects } = useBoardPerformanceProfile();
 
   if (value === null) return null;
@@ -23,7 +24,7 @@ export function HudFloatingDelta({ value, sign, isOpponent, color }: HudFloating
       <div
         className={cn(
           "absolute z-[200] text-2xl font-black",
-          isRed ? "text-red-500" : "text-emerald-400",
+          isRed ? "text-red-500" : isYellow ? "text-yellow-400" : "text-emerald-400",
           isOpponent ? "bottom-[-24px]" : "top-[-24px]",
         )}
       >
@@ -42,7 +43,11 @@ export function HudFloatingDelta({ value, sign, isOpponent, color }: HudFloating
           exit={{ opacity: 0, scale: 0.8 }}
           className={cn(
             "absolute font-black text-4xl z-[200]",
-            isRed ? "drop-shadow-[0_0_20px_rgba(239,68,68,1)] text-red-500" : "drop-shadow-[0_0_20px_rgba(16,185,129,1)] text-emerald-400",
+            isRed
+              ? "drop-shadow-[0_0_20px_rgba(239,68,68,1)] text-red-500"
+              : isYellow
+                ? "drop-shadow-[0_0_20px_rgba(250,204,21,1)] text-yellow-400"
+                : "drop-shadow-[0_0_20px_rgba(16,185,129,1)] text-emerald-400",
             isOpponent ? "bottom-[-40px]" : "top-[-40px]",
           )}
         >

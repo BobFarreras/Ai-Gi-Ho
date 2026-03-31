@@ -29,12 +29,24 @@ export function BuffImpactVfx({ eventId, entityId, stat, amount }: BuffImpactVfx
   return (
     <>
       <motion.div
+        key={`${eventId}-${entityId}-aura`}
+        initial={{ opacity: 0, scale: 0.7 }}
+        animate={{ opacity: [0, 0.85, 0], scale: [0.7, 1.35, 1.1] }}
+        transition={{ duration: 1.45, ease: "easeOut" }}
+        className={cn(
+          "absolute inset-0 z-[78] rounded-2xl",
+          isAttack
+            ? "bg-[radial-gradient(circle,rgba(248,113,113,0.52)_0%,rgba(248,113,113,0.12)_45%,rgba(248,113,113,0)_80%)]"
+            : "bg-[radial-gradient(circle,rgba(96,165,250,0.52)_0%,rgba(96,165,250,0.12)_45%,rgba(96,165,250,0)_80%)]",
+        )}
+      />
+      <motion.div
         key={`${eventId}-${entityId}-amount`}
         initial={{ opacity: 0, y: 14, scale: 0.84 }}
-        animate={{ opacity: [0, 1, 0], y: [14, -26, -46], scale: [0.84, 1.02, 1] }}
-        transition={{ duration: 0.95, ease: "easeOut" }}
+        animate={{ opacity: [0, 1, 1, 0], y: [14, -26, -54], scale: [0.84, 1.18, 1.08] }}
+        transition={{ duration: 1.45, ease: "easeOut" }}
         className={cn(
-          "absolute top-1 left-1/2 -translate-x-1/2 z-[80] font-black text-2xl leading-none drop-shadow-[0_0_12px_rgba(0,0,0,0.9)]",
+          "absolute top-1 left-1/2 -translate-x-1/2 z-[80] font-black text-3xl leading-none drop-shadow-[0_0_20px_rgba(0,0,0,0.95)]",
           colorClass,
         )}
       >

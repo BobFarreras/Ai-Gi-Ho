@@ -15,6 +15,9 @@ interface BoardPlayersLayerProps {
   lastHealTargetPlayerId: string | null;
   lastHealAmount: number | null;
   lastHealEventId: string | null;
+  lastEnergyTargetPlayerId: string | null;
+  lastEnergyAmount: number | null;
+  lastEnergyEventId: string | null;
   playerAvatarUrl?: string | null;
   opponentAvatarUrl?: string | null;
   playerDialogueMessage?: string | null;
@@ -33,6 +36,9 @@ export function BoardPlayersLayer({
   lastHealTargetPlayerId,
   lastHealAmount,
   lastHealEventId,
+  lastEnergyTargetPlayerId,
+  lastEnergyAmount,
+  lastEnergyEventId,
   playerAvatarUrl = null,
   opponentAvatarUrl = null,
   playerDialogueMessage = null,
@@ -53,6 +59,9 @@ export function BoardPlayersLayer({
         wasHealedThisAction={lastHealTargetPlayerId === opponent.id}
         healAmount={lastHealAmount}
         healPulseKey={lastHealEventId}
+        wasEnergyGainedThisAction={lastEnergyTargetPlayerId === opponent.id}
+        energyAmount={lastEnergyAmount}
+        energyPulseKey={lastEnergyEventId}
         avatarUrl={opponentAvatarUrl}
         dialogueMessage={opponentDialogueMessage}
         containerClassName="!top-[clamp(0.35rem,1.1vh,0.9rem)]"
@@ -67,6 +76,9 @@ export function BoardPlayersLayer({
         wasHealedThisAction={lastHealTargetPlayerId === player.id}
         healAmount={lastHealAmount}
         healPulseKey={lastHealEventId}
+        wasEnergyGainedThisAction={lastEnergyTargetPlayerId === player.id}
+        energyAmount={lastEnergyAmount}
+        energyPulseKey={lastEnergyEventId}
         avatarUrl={playerAvatarUrl}
         dialogueMessage={playerDialogueMessage}
         phase={phase}

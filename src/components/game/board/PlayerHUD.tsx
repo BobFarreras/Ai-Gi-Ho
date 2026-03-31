@@ -21,6 +21,9 @@ interface PlayerHUDProps {
   wasHealedThisAction?: boolean;
   healPulseKey?: string | null;
   healAmount?: number | null;
+  wasEnergyGainedThisAction?: boolean;
+  energyPulseKey?: string | null;
+  energyAmount?: number | null;
   avatarUrl?: string | null;
   dialogueMessage?: string | null;
   phase?: string;
@@ -42,6 +45,9 @@ export function PlayerHUD({
   wasHealedThisAction = false,
   healPulseKey = null,
   healAmount = null,
+  wasEnergyGainedThisAction = false,
+  energyPulseKey = null,
+  energyAmount = null,
   avatarUrl = null,
   dialogueMessage = null,
   phase = "MAIN_1",
@@ -51,13 +57,16 @@ export function PlayerHUD({
   showPhaseControls = true,
   showEnergy = true,
 }: PlayerHUDProps) {
-  const { damageTaken, healGained, isShaking } = useHudFeedback(
+  const { damageTaken, healGained, energyGained, isShaking } = useHudFeedback(
     wasDamagedThisAction,
     damagePulseKey,
     damageAmount,
     wasHealedThisAction,
     healPulseKey,
     healAmount,
+    wasEnergyGainedThisAction,
+    energyPulseKey,
+    energyAmount,
   );
 
   const shakeAnimation = isShaking ? { x: isOpponent ? [0, -8, 8, -5, 5, 0] : [0, 8, -8, 5, -5, 0] } : { x: 0 };
@@ -83,6 +92,15 @@ export function PlayerHUD({
     >
       <HudFloatingDelta value={damageTaken} sign="-" isOpponent={isOpponent} color="red" />
       <HudFloatingDelta value={healGained} sign="+" isOpponent={isOpponent} color="green" />
+      <HudFloatingDelta value={energyGained} sign="+" isOpponent={isOpponent} color="yellow" />
+      {energyGained ? (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.7 }}
+          animate={{ opacity: [0, 1, 0], scale: [0.7, 1.2, 1] }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+          className={cn("absolute z-[190] h-24 w-24 rounded-full bg-yellow-400/35 blur-xl", isOpponent ? "left-8 bottom-2" : "right-8 top-2")}
+        />
+      ) : null}
       <HudDialogueBubble isOpponent={isOpponent} message={dialogueMessage} />
       <HudPortraitCard
         isOpponent={isOpponent}

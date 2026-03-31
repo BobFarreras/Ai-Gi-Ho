@@ -99,8 +99,21 @@ export function SidePanels({
   return (
     <AnimatePresence>
       {liveSelectedCard && (
-        <motion.div key={`left-panel-${liveSelectedCard.runtimeId ?? liveSelectedCard.id}`} initial={{ x: "-100%", opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: "-100%", opacity: 0 }} transition={{ type: "spring", stiffness: 500, damping: 30 }} className={detailPanelClass}>
-          <button aria-label="Cerrar detalle" onClick={onCloseCard} className="absolute top-4 right-4 text-cyan-500 hover:text-white z-20"><X size={24} /></button>
+        <motion.div
+          key={`left-panel-${liveSelectedCard.runtimeId ?? liveSelectedCard.id}`}
+          initial={{ x: "-100%", opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: "-100%", opacity: 0 }}
+          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          className={`${detailPanelClass} ${isTrapPromptForSelectedCard ? "ring-2 ring-fuchsia-300/75 shadow-[0_0_34px_rgba(217,70,239,0.45)] animate-pulse" : ""}`}
+        >
+          <button
+            aria-label="Cerrar detalle"
+            onClick={isTrapPromptForSelectedCard ? onSkipPendingTrap : onCloseCard}
+            className="absolute top-4 right-4 text-cyan-500 hover:text-white z-20"
+          >
+            <X size={24} />
+          </button>
           <div className="relative mt-1 mb-2 flex justify-center z-10 shrink-0 h-[clamp(12rem,28vh,15rem)] overflow-hidden">
             <div key={liveSelectedCard.runtimeId ?? liveSelectedCard.id} className="origin-top" style={{ transform: `scale(${detailCardScale})` }}>
               <Card card={liveSelectedCard} />

@@ -95,6 +95,13 @@ export function useMatchRuntime({
     [uiState],
   );
 
+  useEffect(() => {
+    const prompt = uiState.pendingTrapActivationPrompt;
+    if (!prompt) return;
+    if (uiState.selectedCard?.id === prompt.trapCard.id) return;
+    resolveTrapActivationDecision(false);
+  }, [resolveTrapActivationDecision, uiState.pendingTrapActivationPrompt, uiState.selectedCard]);
+
   useOpponentTurn({
     gameState: uiState.gameState,
     isAnimating: uiState.isActionLocked,
