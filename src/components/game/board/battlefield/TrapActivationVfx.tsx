@@ -58,7 +58,7 @@ export function TrapActivationVfx({ entity, isOpponentSide, isTrapActivating }: 
   const isDebuff = action === "REDUCE_OPPONENT_ATTACK" || action === "REDUCE_OPPONENT_DEFENSE";
   const isNegate = action === "NEGATE_ATTACK_AND_DESTROY_ATTACKER" || action === "NEGATE_OPPONENT_TRAP_AND_DESTROY";
   const gradient = isDebuff
-    ? "bg-[radial-gradient(circle,rgba(251,191,36,0.55)_0%,rgba(251,191,36,0.16)_44%,rgba(251,191,36,0)_80%)]"
+    ? "bg-[radial-gradient(circle,rgba(192,132,252,0.58)_0%,rgba(192,132,252,0.18)_44%,rgba(192,132,252,0)_80%)]"
     : isNegate
       ? "bg-[radial-gradient(circle,rgba(239,68,68,0.58)_0%,rgba(239,68,68,0.17)_45%,rgba(239,68,68,0)_82%)]"
       : "bg-[radial-gradient(circle,rgba(217,70,239,0.58)_0%,rgba(217,70,239,0.16)_45%,rgba(217,70,239,0)_82%)]";

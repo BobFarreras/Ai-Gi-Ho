@@ -66,6 +66,12 @@ describe("Trap triggers on attack", () => {
     expect(next.playerA.graveyard.some((card) => card.id === "atk-card")).toBe(false);
     expect(next.playerB.healthPoints).toBe(8000);
     expect(next.combatLog.some((event) => event.eventType === "TRAP_TRIGGERED")).toBe(true);
+    const trapTriggered = next.combatLog.find((event) => event.eventType === "TRAP_TRIGGERED");
+    expect(
+      typeof trapTriggered?.payload === "object" &&
+      trapTriggered.payload !== null &&
+      (trapTriggered.payload as Record<string, unknown>).destroyedOpponentEntitySlotIndex === 0,
+    ).toBe(true);
   });
 
   it("debería negar trampa rival y destruirla con counter-trap", () => {

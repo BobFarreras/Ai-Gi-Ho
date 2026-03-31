@@ -12,10 +12,13 @@ export interface ITargetedStatSignal {
 export interface ITrapBlockSignal {
   id: string;
   trapCardId: string;
+  trapSlotIndex: number;
   action: string;
   actorIsPlayerA: boolean;
+  targetIsPlayerA: boolean;
   blockedTargetEntityInstanceId: string | null;
   destroyedTargetEntityInstanceId: string | null;
+  destroyedTargetEntitySlotIndex: number | null;
 }
 
 function asPayload(event: ICombatLogEvent): Record<string, unknown> | null {
@@ -75,10 +78,13 @@ export function resolveLatestTrapBlockSignal(events: ICombatLogEvent[], playerAI
     return {
       id: event.id,
       trapCardId: payload.trapCardId,
+      trapSlotIndex: typeof payload.trapSlotIndex === "number" ? payload.trapSlotIndex : 0,
       action,
       actorIsPlayerA: event.actorPlayerId === playerAId,
+      targetIsPlayerA: event.actorPlayerId !== playerAId,
       blockedTargetEntityInstanceId: typeof payload.blockedTargetEntityInstanceId === "string" ? payload.blockedTargetEntityInstanceId : null,
       destroyedTargetEntityInstanceId: typeof payload.destroyedOpponentEntityInstanceId === "string" ? payload.destroyedOpponentEntityInstanceId : null,
+      destroyedTargetEntitySlotIndex: typeof payload.destroyedOpponentEntitySlotIndex === "number" ? payload.destroyedOpponentEntitySlotIndex : null,
     };
   }
   return null;

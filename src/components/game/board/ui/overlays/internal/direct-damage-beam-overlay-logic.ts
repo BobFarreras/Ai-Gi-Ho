@@ -27,6 +27,11 @@ function resolveSourceCardId(events: ICombatLogEvent[], fromIndex: number, actor
     const event = events[index];
     if (event.actorPlayerId !== actorPlayerId) continue;
     if (event.eventType === "TRAP_TRIGGERED") return readCardIdFromPayload(event, "trapCardId");
+    if (event.eventType === "CARD_PLAYED") {
+      const payload = typeof event.payload === "object" && event.payload !== null ? (event.payload as Record<string, unknown>) : null;
+      const isExecutionActivation = payload?.cardType === "EXECUTION" && payload?.mode === "ACTIVATE";
+      if (isExecutionActivation && typeof payload.cardId === "string") return payload.cardId;
+    }
     if (event.eventType !== "CARD_TO_GRAVEYARD") continue;
     const payload = typeof event.payload === "object" && event.payload !== null ? (event.payload as Record<string, unknown>) : null;
     if (payload && payload.from === "EXECUTION_ZONE" && typeof payload.cardId === "string") return payload.cardId;
@@ -56,11 +61,13 @@ export function resolveLatestEffectDamageSignal(events: ICombatLogEvent[], playe
     if (events[index].eventType !== "DIRECT_DAMAGE") continue;
     const targetPlayerId = readTargetPlayerId(events[index]);
     if (!targetPlayerId) continue;
+    const trapContext = resolveTrapContextSignal(events, index, events[index].actorPlayerId);
+    const sourceCardId = resolveSourceCardId(events, index, events[index].actorPlayerId);
+    if (!trapContext.fromTrap && !sourceCardId) continue;
     const markerA = events[index - 1]?.eventType;
     const markerB = events[index - 2]?.eventType;
     const comesFromAttack = markerA === "ATTACK_DECLARED" || markerA === "BATTLE_RESOLVED" || markerB === "ATTACK_DECLARED";
-    if (comesFromAttack) return null;
-    const trapContext = resolveTrapContextSignal(events, index, events[index].actorPlayerId);
+    if (comesFromAttack && !trapContext.fromTrap) continue;
     const needsBlockPhase = trapContext.fromTrap && (
       trapContext.trapAction === "NEGATE_ATTACK_AND_DESTROY_ATTACKER" ||
       trapContext.trapAction === "NEGATE_OPPONENT_TRAP_AND_DESTROY" ||
@@ -70,7 +77,7 @@ export function resolveLatestEffectDamageSignal(events: ICombatLogEvent[], playe
       id: events[index].id,
       towardsPlayer: targetPlayerId === playerAId,
       fromPlayerA: events[index].actorPlayerId === playerAId,
-      sourceCardId: resolveSourceCardId(events, index, events[index].actorPlayerId),
+      sourceCardId,
       startDelayMs: needsBlockPhase ? 520 : trapContext.fromTrap ? 260 : 0,
     };
   }

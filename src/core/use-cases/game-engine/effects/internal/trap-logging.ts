@@ -10,20 +10,23 @@ interface ITrapLoggingParams {
   reactivePlayerId: string;
   trigger: TrapTrigger;
   trap: IBoardEntity;
+  trapSlotIndex: number;
   targetOpponentId: string;
   targetPlayerId: string;
   resolved: ITrapResolutionResult;
 }
 
 export function appendTrapResolutionLogs(params: ITrapLoggingParams): GameState {
-  const { state, reactivePlayerId, trigger, trap, targetOpponentId, targetPlayerId, resolved } = params;
+  const { state, reactivePlayerId, trigger, trap, trapSlotIndex, targetOpponentId, targetPlayerId, resolved } = params;
   let withLogs = appendCombatLogEvent(state, reactivePlayerId, "TRAP_TRIGGERED", {
     trapCardId: trap.card.id,
+    trapSlotIndex,
     trigger,
     effectAction: trap.card.effect?.action ?? null,
     blockedTargetEntityInstanceId: resolved.blockedTargetEntityInstanceId,
     destroyedOpponentEntityCardId: resolved.destroyedOpponentEntityCardId,
     destroyedOpponentEntityInstanceId: resolved.destroyedOpponentEntityInstanceId,
+    destroyedOpponentEntitySlotIndex: resolved.destroyedOpponentEntitySlotIndex,
   });
   if (resolved.damage > 0 && trap.card.effect?.action === "DAMAGE") {
     withLogs = appendCombatLogEvent(withLogs, reactivePlayerId, "DIRECT_DAMAGE", {

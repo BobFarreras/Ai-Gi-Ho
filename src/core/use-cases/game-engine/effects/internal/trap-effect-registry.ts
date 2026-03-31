@@ -8,7 +8,7 @@ type TrapEffect = Extract<ICardEffect, { action: TrapAction }>;
 type TrapHandler<K extends TrapAction> = (player: IPlayer, opponent: IPlayer, trap: IBoardEntity, effect: Extract<TrapEffect, { action: K }>, context?: ITrapTriggerContext) => ITrapResolutionResult;
 
 function createNeutralResult(player: IPlayer, opponent: IPlayer): ITrapResolutionResult {
-  return { player, opponent, damage: 0, buffTargetEntityIds: [], buffStat: null, buffAmount: 0, blockedTargetEntityInstanceId: null, destroyedOpponentEntityCardId: null, destroyedOpponentEntityInstanceId: null, destroyedOpponentEntityDestination: null };
+  return { player, opponent, damage: 0, buffTargetEntityIds: [], buffStat: null, buffAmount: 0, blockedTargetEntityInstanceId: null, destroyedOpponentEntityCardId: null, destroyedOpponentEntityInstanceId: null, destroyedOpponentEntitySlotIndex: null, destroyedOpponentEntityDestination: null };
 }
 
 function reduceOpponentStat(opponent: IPlayer, stat: "attack" | "defense", value: number): { opponent: IPlayer; targetIds: string[] } {
@@ -29,11 +29,16 @@ function forceSummonedDefenseToAttackLocked(opponent: IPlayer, context?: ITrapTr
   return { ...opponent, activeEntities: opponent.activeEntities.map((entity) => (entity.instanceId === context.summonedInstanceId ? { ...entity, mode: "ATTACK", modeLock: "ATTACK" } : entity)) };
 }
 
-function destroyAttackerIfPresent(opponent: IPlayer, context?: ITrapTriggerContext): { opponent: IPlayer; cardId: string | null } {
-  if (!context?.attackerPlayerId || !context.attackerInstanceId || context.attackerPlayerId !== opponent.id) return { opponent, cardId: null };
-  const attacker = opponent.activeEntities.find((entity) => entity.instanceId === context.attackerInstanceId);
-  if (!attacker) return { opponent, cardId: null };
-  return { opponent: { ...opponent, activeEntities: opponent.activeEntities.filter((entity) => entity.instanceId !== context.attackerInstanceId), destroyedPile: [...(opponent.destroyedPile ?? []), attacker.card] }, cardId: attacker.card.id };
+function destroyAttackerIfPresent(opponent: IPlayer, context?: ITrapTriggerContext): { opponent: IPlayer; cardId: string | null; slotIndex: number | null } {
+  if (!context?.attackerPlayerId || !context.attackerInstanceId || context.attackerPlayerId !== opponent.id) return { opponent, cardId: null, slotIndex: null };
+  const attackerIndex = opponent.activeEntities.findIndex((entity) => entity.instanceId === context.attackerInstanceId);
+  const attacker = attackerIndex >= 0 ? opponent.activeEntities[attackerIndex] : null;
+  if (!attacker) return { opponent, cardId: null, slotIndex: null };
+  return {
+    opponent: { ...opponent, activeEntities: opponent.activeEntities.filter((entity) => entity.instanceId !== context.attackerInstanceId), destroyedPile: [...(opponent.destroyedPile ?? []), attacker.card] },
+    cardId: attacker.card.id,
+    slotIndex: attackerIndex,
+  };
 }
 
 function resolveBlockedTargetEntityInstanceId(context?: ITrapTriggerContext): string | null {
@@ -54,7 +59,14 @@ const trapEffectHandlers: { [K in TrapAction]: TrapHandler<K> } = {
   },
   NEGATE_ATTACK_AND_DESTROY_ATTACKER: (player, opponent, _trap, _effect, context) => {
     const destroyed = destroyAttackerIfPresent(opponent, context);
-    return { ...createNeutralResult(player, destroyed.opponent), blockedTargetEntityInstanceId: resolveBlockedTargetEntityInstanceId(context), destroyedOpponentEntityCardId: destroyed.cardId, destroyedOpponentEntityInstanceId: context?.attackerInstanceId ?? null, destroyedOpponentEntityDestination: destroyed.cardId ? "DESTROYED" : null };
+    return {
+      ...createNeutralResult(player, destroyed.opponent),
+      blockedTargetEntityInstanceId: resolveBlockedTargetEntityInstanceId(context),
+      destroyedOpponentEntityCardId: destroyed.cardId,
+      destroyedOpponentEntityInstanceId: context?.attackerInstanceId ?? null,
+      destroyedOpponentEntitySlotIndex: destroyed.slotIndex,
+      destroyedOpponentEntityDestination: destroyed.cardId ? "DESTROYED" : null,
+    };
   },
   COPY_OPPONENT_BUFF_TO_ALLIED_ENTITIES: (player, opponent, _trap, _effect, context) => {
     if (!context?.buffSourcePlayerId || context.buffSourcePlayerId !== opponent.id) return createNeutralResult(player, opponent);

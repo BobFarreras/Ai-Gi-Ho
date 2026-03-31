@@ -45,6 +45,20 @@ Este documento resume el estado actual de los efectos del juego en esta rama.
   - Debuffs (`REDUCE_*`) -> `bajada.mp3`.
   - Bloqueos de trampa -> `block.mp3`.
 
+## Actualización de sesión (2026-03-31)
+
+- Se corrigió la detección de `DIRECT_DAMAGE` para que no se corte la animación de trampas cuando después ocurre daño de ataque normal en la misma secuencia.
+- Se añadió cobertura de tests para:
+  - daño de trampa durante `ATTACK_DECLARED`,
+  - cola `daño de trampa -> daño de ataque` sin perder el VFX de trampa.
+- Se sincronizó la animación de trampas que destruyen entidades usando metadatos de slot:
+  - `trapSlotIndex` en `TRAP_TRIGGERED`,
+  - `destroyedOpponentEntitySlotIndex` para ancla de impacto cuando la entidad ya salió del campo.
+- Se reforzó la legibilidad de buff/debuff:
+  - flotante de atributo más grande, más recorrido vertical y desvanecimiento progresivo,
+  - paleta unificada: debuff/energy drain en lila, buff en amarillo, damage rojo, heal verde.
+- Se añadió animación progresiva de números de `ATK/DEF` en carta para mostrar transición del valor anterior al nuevo.
+
 ## Checklist rápido para nuevos efectos
 
 1. Registrar acción en el motor (`execution-effect-registry` o `trap-effect-registry`).

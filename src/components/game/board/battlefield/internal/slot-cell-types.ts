@@ -3,6 +3,7 @@ import { MouseEvent } from "react";
 import { IBoardEntity } from "@/core/entities/IPlayer";
 
 export interface SlotCellProps {
+  laneType: "ENTITIES" | "EXECUTIONS";
   index: number;
   entity: IBoardEntity | null;
   isOpponentSide: boolean;

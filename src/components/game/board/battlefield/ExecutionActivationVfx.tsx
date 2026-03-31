@@ -62,36 +62,24 @@ export function ExecutionActivationVfx({ entity, isOpponentSide }: ExecutionActi
   }
 
   if (isBuffAction(action)) {
-    const isAttackBuff = action !== "BOOST_DEFENSE_BY_ARCHETYPE";
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.72, rotate: -8 }}
         animate={{ opacity: [0, 1, 0], scale: [0.72, 1.3, 1.06], rotate: [-8, 8, -8, 0] }}
         transition={{ duration: 1.45, ease: "easeOut" }}
-        className={`absolute -inset-8 rounded-3xl pointer-events-none z-[210] ${
-          isAttackBuff
-            ? "bg-[radial-gradient(circle,rgba(248,113,113,0.58)_0%,rgba(248,113,113,0.16)_42%,rgba(248,113,113,0)_78%)]"
-            : "bg-[radial-gradient(circle,rgba(147,197,253,0.58)_0%,rgba(147,197,253,0.16)_42%,rgba(147,197,253,0)_78%)]"
-        }`}
+        className="absolute -inset-8 rounded-3xl pointer-events-none z-[210] bg-[radial-gradient(circle,rgba(250,204,21,0.62)_0%,rgba(250,204,21,0.2)_42%,rgba(250,204,21,0)_78%)]"
       >
         <motion.div
           initial={{ opacity: 0, x: -34 }}
           animate={{ opacity: [0, 1, 0], x: [-34, 18, 54] }}
           transition={{ duration: 1.2, ease: "easeOut" }}
-          className={`absolute inset-0 mix-blend-screen ${
-            isAttackBuff
-              ? "bg-[linear-gradient(120deg,transparent_0%,rgba(248,113,113,0.95)_50%,transparent_100%)]"
-              : "bg-[linear-gradient(120deg,transparent_0%,rgba(147,197,253,0.95)_50%,transparent_100%)]"
-          }`}
+          className="absolute inset-0 mix-blend-screen bg-[linear-gradient(120deg,transparent_0%,rgba(253,224,71,0.96)_50%,transparent_100%)]"
         />
         <motion.div
           initial={{ opacity: 0, y: 30, scale: 0.85 }}
           animate={{ opacity: [0, 1, 0], y: [30, -25, -55], scale: [0.85, 1.15, 0.95] }}
           transition={{ duration: 1.35, ease: "easeOut" }}
-          className={isAttackBuff
-            ? "absolute inset-x-8 bottom-2 h-20 rounded-full bg-[radial-gradient(circle,rgba(251,146,60,0.72)_0%,rgba(249,115,22,0.34)_42%,rgba(249,115,22,0)_82%)] blur-md"
-            : "absolute inset-x-8 bottom-2 h-20 rounded-full bg-[radial-gradient(circle,rgba(125,211,252,0.66)_0%,rgba(59,130,246,0.3)_42%,rgba(59,130,246,0)_82%)] blur-md"
-          }
+          className="absolute inset-x-8 bottom-2 h-20 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.76)_0%,rgba(245,158,11,0.34)_42%,rgba(245,158,11,0)_82%)] blur-md"
         />
       </motion.div>
     );

@@ -71,6 +71,7 @@ export function SlotGrid({
         const entityCardKey = entity ? (entity.card.runtimeId ?? entity.card.id) : null;
         return (
           <SlotCell
+            laneType={laneType}
             key={index}
             index={index}
             entity={entity}

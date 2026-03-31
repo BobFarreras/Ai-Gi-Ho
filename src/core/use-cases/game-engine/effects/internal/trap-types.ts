@@ -21,6 +21,7 @@ export interface ITrapResolutionResult {
   blockedTargetEntityInstanceId: string | null;
   destroyedOpponentEntityCardId: string | null;
   destroyedOpponentEntityInstanceId: string | null;
+  destroyedOpponentEntitySlotIndex: number | null;
   destroyedOpponentEntityDestination: "GRAVEYARD" | "DESTROYED" | null;
 }
 
