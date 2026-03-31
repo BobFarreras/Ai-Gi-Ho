@@ -51,6 +51,23 @@ pnpm build
 pnpm quality:check
 ```
 
+## Memoria Engram (obligatorio)
+
+Para evitar pérdida de contexto entre sesiones, el uso de Engram es obligatorio en tareas de refactor, bugfix y decisiones de arquitectura.
+
+Flujo mínimo por bloque de trabajo:
+
+```bash
+engram context
+engram search "tema-del-bloque"
+engram save "topic_key" "decisión/cambio validado y archivos tocados"
+```
+
+Guía completa:
+
+1. [docs/engram/engram-guia.md](./docs/engram/engram-guia.md)
+2. [skills/engram-memory-protocol/SKILL.md](./skills/engram-memory-protocol/SKILL.md)
+
 ## Comandos de baseline de rendimiento
 
 ```bash
@@ -117,3 +134,4 @@ Regla de dependencia: `components -> services/use-cases -> core`.
 4. `pnpm build` en verde.
 5. Sin warnings nuevos.
 6. Documentación actualizada en español cuando cambie arquitectura o comportamiento.
+7. Evidencia de uso de Engram en el PR (context/search/save y `topic_key`).
