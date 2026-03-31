@@ -32,8 +32,7 @@ interface BattlefieldZoneProps {
   cardXpCardId: string | null;
   cardXpAmount: number | null;
   cardXpEventId: string | null;
-  canActivateSelectedExecution: boolean;
-  onActivateSelectedExecution: () => void;
+  hasBlockingTrapActivation: boolean;
   onGraveyardClick: (side: "player" | "opponent") => void;
   onFusionDeckClick?: (side: "player" | "opponent") => void;
   onDestroyedClick?: (side: "player" | "opponent") => void;
@@ -65,8 +64,7 @@ export function BattlefieldZone({
   cardXpCardId,
   cardXpAmount,
   cardXpEventId,
-  canActivateSelectedExecution,
-  onActivateSelectedExecution,
+  hasBlockingTrapActivation,
   onGraveyardClick,
   onFusionDeckClick = () => undefined,
   onDestroyedClick = () => undefined,
@@ -87,7 +85,7 @@ export function BattlefieldZone({
       )}
     >
       <div className={sideStackClass}>
-        <DeckPile deckCount={deckCount} />
+        <DeckPile deckCount={deckCount} side={isOpponentSide ? "opponent" : "player"} />
         <FusionDeckPile fusionDeckCount={fusionDeckCount} isOpponentSide={isOpponentSide} onClick={onFusionDeckClick} />
       </div>
       <BattlefieldLanes
@@ -107,9 +105,8 @@ export function BattlefieldZone({
         cardXpCardId={cardXpCardId}
         cardXpAmount={cardXpAmount}
         cardXpEventId={cardXpEventId}
-        canActivateSelectedExecution={canActivateSelectedExecution}
+        hasBlockingTrapActivation={hasBlockingTrapActivation}
         isMobileLayout={isMobileLayout}
-        onActivateSelectedExecution={onActivateSelectedExecution}
         onEntityClick={onEntityClick}
       />
       <div className={sideStackClass}>

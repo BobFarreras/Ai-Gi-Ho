@@ -29,11 +29,7 @@ export function appendExecutionResolutionLogs(params: IExecutionLoggingParams): 
     buffEntityIds,
   } = params;
 
-  let withLog = appendCombatLogEvent(state, playerId, "CARD_TO_GRAVEYARD", {
-    cardId: executionCardId,
-    ownerPlayerId: playerId,
-    from: "EXECUTION_ZONE",
-  });
+  let withLog = state;
   if (damageTargetPlayerId && damageAmount > 0) {
     withLog = appendCombatLogEvent(withLog, playerId, "DIRECT_DAMAGE", {
       targetPlayerId: damageTargetPlayerId,
@@ -60,6 +56,10 @@ export function appendExecutionResolutionLogs(params: IExecutionLoggingParams): 
       targetEntityIds: buffEntityIds,
     });
   }
-  return withLog;
+  return appendCombatLogEvent(withLog, playerId, "CARD_TO_GRAVEYARD", {
+    cardId: executionCardId,
+    ownerPlayerId: playerId,
+    from: "EXECUTION_ZONE",
+  });
 }
 

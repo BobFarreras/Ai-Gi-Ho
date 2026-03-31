@@ -46,9 +46,9 @@ export function GraveyardPile({ isOpponentSide, topGraveCard, graveyardCount, on
   );
 }
 
-export function DeckPile({ deckCount }: { deckCount: number }) {
+export function DeckPile({ deckCount, side }: { deckCount: number; side: "player" | "opponent" }) {
   return (
-    <div className="relative w-24 h-36 border-2 border-zinc-700/80 rounded-lg shadow-[0_0_30px_rgba(0,0,0,0.8)] flex flex-col items-center justify-center bg-black/50 overflow-hidden">
+    <div data-board-deck-side={side} className="relative w-24 h-36 border-2 border-zinc-700/80 rounded-lg shadow-[0_0_30px_rgba(0,0,0,0.8)] flex flex-col items-center justify-center bg-black/50 overflow-hidden">
       {deckCount > 0 && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="scale-[0.25] origin-center opacity-80">

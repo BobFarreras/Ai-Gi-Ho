@@ -5,8 +5,11 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { BattlefieldZone } from "@/components/game/board/battlefield/BattlefieldZone";
 import { BattlefieldViewProps } from "@/components/game/board/battlefield/internal/battlefield-types";
+import { hasActiveBlockingTrap } from "@/components/game/board/battlefield/internal/trap-block-actions";
 
 export function BattlefieldView(props: BattlefieldViewProps) {
+  const hasBlockingTrapActivation = hasActiveBlockingTrap([...props.playerActiveExecutions, ...props.opponentActiveExecutions]);
+
   return (
     <div data-tutorial-id="tutorial-board-battlefield" className="absolute inset-0 pointer-events-auto" onWheel={props.onWheel}>
       <motion.div
@@ -52,8 +55,7 @@ export function BattlefieldView(props: BattlefieldViewProps) {
             cardXpCardId={props.cardXpActorPlayerId === props.opponentId ? (props.cardXpCardId ?? null) : null}
             cardXpAmount={props.cardXpActorPlayerId === props.opponentId ? (props.cardXpAmount ?? null) : null}
             cardXpEventId={props.cardXpActorPlayerId === props.opponentId ? (props.cardXpEventId ?? null) : null}
-            canActivateSelectedExecution={false}
-            onActivateSelectedExecution={props.onActivateSelectedExecution}
+            hasBlockingTrapActivation={hasBlockingTrapActivation}
             onGraveyardClick={props.onGraveyardClick}
             onFusionDeckClick={props.onFusionDeckClick}
             onDestroyedClick={props.onDestroyedClick}
@@ -85,8 +87,7 @@ export function BattlefieldView(props: BattlefieldViewProps) {
             cardXpCardId={props.cardXpActorPlayerId === props.playerId ? (props.cardXpCardId ?? null) : null}
             cardXpAmount={props.cardXpActorPlayerId === props.playerId ? (props.cardXpAmount ?? null) : null}
             cardXpEventId={props.cardXpActorPlayerId === props.playerId ? (props.cardXpEventId ?? null) : null}
-            canActivateSelectedExecution={props.canActivateSelectedExecution}
-            onActivateSelectedExecution={props.onActivateSelectedExecution}
+            hasBlockingTrapActivation={hasBlockingTrapActivation}
             onGraveyardClick={props.onGraveyardClick}
             onFusionDeckClick={props.onFusionDeckClick}
             onDestroyedClick={props.onDestroyedClick}

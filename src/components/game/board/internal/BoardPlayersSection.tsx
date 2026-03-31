@@ -32,6 +32,9 @@ export function BoardPlayersSection({
         lastHealTargetPlayerId={board.lastHealTargetPlayerId}
         lastHealAmount={board.lastHealAmount}
         lastHealEventId={board.lastHealEventId}
+        lastEnergyTargetPlayerId={board.lastEnergyTargetPlayerId}
+        lastEnergyAmount={board.lastEnergyAmount}
+        lastEnergyEventId={board.lastEnergyEventId}
         playerAvatarUrl={playerAvatarUrl}
         opponentAvatarUrl={opponentAvatarUrl}
         playerDialogueMessage={screen.narration.hudDialogueByPlayerId[player.id] ?? null}
@@ -54,6 +57,9 @@ export function BoardPlayersSection({
         wasHealedThisAction={board.lastHealTargetPlayerId === opponent.id}
         healAmount={board.lastHealAmount}
         healPulseKey={board.lastHealEventId}
+        wasEnergyGainedThisAction={board.lastEnergyTargetPlayerId === opponent.id}
+        energyAmount={board.lastEnergyAmount}
+        energyPulseKey={board.lastEnergyEventId}
         avatarUrl={opponentAvatarUrl}
         dialogueMessage={screen.narration.hudDialogueByPlayerId[opponent.id] ?? null}
         containerClassName="!top-0 !right-0 !z-[280] !w-[clamp(11.8rem,35vw,16.4rem)] !h-[clamp(5.4rem,10.2vh,6.9rem)]"
@@ -70,6 +76,9 @@ export function BoardPlayersSection({
         wasHealedThisAction={board.lastHealTargetPlayerId === player.id}
         healAmount={board.lastHealAmount}
         healPulseKey={board.lastHealEventId}
+        wasEnergyGainedThisAction={board.lastEnergyTargetPlayerId === player.id}
+        energyAmount={board.lastEnergyAmount}
+        energyPulseKey={board.lastEnergyEventId}
         avatarUrl={playerAvatarUrl}
         dialogueMessage={screen.narration.hudDialogueByPlayerId[player.id] ?? null}
         phase={board.gameState.phase}

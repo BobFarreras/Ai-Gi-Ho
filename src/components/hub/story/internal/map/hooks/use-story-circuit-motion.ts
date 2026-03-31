@@ -77,6 +77,18 @@ export function useStoryCircuitMotion(input: IUseStoryCircuitMotionInput) {
     }
   }, [avatarAnchor, cameraX, cameraY, cinematicScale, currentNodeAnchor, mapContainerRef, setZoom, zoom]);
 
+  const keepCameraCenterOnZoom = useCallback((previousZoom: number, nextZoom: number) => {
+    if (!mapContainerRef.current) return;
+    const previousScale = previousZoom * cinematicScale.get();
+    const nextScale = nextZoom * cinematicScale.get();
+    if (previousScale <= 0 || nextScale <= 0) return;
+    const centerX = mapContainerRef.current.clientWidth / 2;
+    const centerY = mapContainerRef.current.clientHeight / 2;
+    const ratio = nextScale / previousScale;
+    cameraX.set(centerX - (centerX - cameraX.get()) * ratio);
+    cameraY.set(centerY - (centerY - cameraY.get()) * ratio);
+  }, [cameraX, cameraY, cinematicScale, mapContainerRef]);
+
   useLayoutEffect(() => {
     if (hasInitializedAvatarRef.current) return;
     avatarX.set(avatarPos.x);
@@ -147,5 +159,5 @@ export function useStoryCircuitMotion(input: IUseStoryCircuitMotionInput) {
     centerCameraOnAvatarNode();
   }, [centerCameraOnAvatarNode, centerRequestKey]);
 
-  return { cameraX, cameraY, cinematicScale, avatarX, avatarY, avatarScale, centerCameraOnAvatarNode };
+  return { cameraX, cameraY, cinematicScale, avatarX, avatarY, avatarScale, centerCameraOnAvatarNode, keepCameraCenterOnZoom };
 }

@@ -164,7 +164,7 @@ CREATE TABLE IF NOT EXISTS "public"."cards_catalog" (
     CONSTRAINT "cards_catalog_faction_check" CHECK (("faction" = ANY (ARRAY['OPEN_SOURCE'::"text", 'BIG_TECH'::"text", 'NO_CODE'::"text", 'NEUTRAL'::"text"]))),
     CONSTRAINT "cards_catalog_fusion_energy_requirement_check" CHECK ((("fusion_energy_requirement" IS NULL) OR ("fusion_energy_requirement" >= 0))),
     CONSTRAINT "cards_catalog_schema_version_check" CHECK (("schema_version" > 0)),
-    CONSTRAINT "cards_catalog_trigger_check" CHECK ((("trigger" IS NULL) OR ("trigger" = ANY (ARRAY['ON_OPPONENT_ATTACK_DECLARED'::"text", 'ON_OPPONENT_EXECUTION_ACTIVATED'::"text", 'ON_OPPONENT_TRAP_ACTIVATED'::"text"])))),
+    CONSTRAINT "cards_catalog_trigger_check" CHECK ((("trigger" IS NULL) OR ("trigger" = ANY (ARRAY['ON_OPPONENT_ATTACK_DECLARED'::"text", 'ON_OPPONENT_EXECUTION_ACTIVATED'::"text", 'ON_OPPONENT_TRAP_ACTIVATED'::"text", 'ON_OPPONENT_STAT_BUFF_APPLIED'::"text", 'ON_OPPONENT_ENTITY_SET_PLAYED'::"text", 'ON_OPPONENT_DIRECT_ATTACK_DECLARED'::"text"])))),
     CONSTRAINT "cards_catalog_type_check" CHECK (("type" = ANY (ARRAY['ENTITY'::"text", 'EXECUTION'::"text", 'TRAP'::"text", 'FUSION'::"text", 'ENVIRONMENT'::"text"])))
 );
 

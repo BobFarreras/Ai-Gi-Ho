@@ -6,6 +6,8 @@ import { ICombatLogEvent } from "@/core/entities/ICombatLog";
 import { IPendingZoneReplacement } from "@/components/game/board/hooks/internal/board-state/pending-replacement";
 import { BattleBannerCenter } from "../../BattleBannerCenter";
 import { EntityReplacementConfirmOverlay } from "../EntityReplacementConfirmOverlay";
+import { DirectDamageBeamOverlay } from "./DirectDamageBeamOverlay";
+import { EffectTargetedOverlay } from "./EffectTargetedOverlay";
 
 interface IBoardActionOverlaysProps {
   pendingActionHint: string | null;
@@ -38,8 +40,10 @@ export function BoardActionOverlays({
 }: IBoardActionOverlaysProps) {
   return (
     <>
+      <EffectTargetedOverlay events={combatLog} playerAId={playerAId} />
+      <DirectDamageBeamOverlay events={combatLog} playerAId={playerAId} />
       {pendingActionHint ? (
-        <div className="absolute left-1/2 top-1/2 z-[155] w-[94%] max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-amber-300/60 bg-amber-950/90 px-6 py-5 text-amber-100 shadow-[0_0_45px_rgba(251,191,36,0.3)] pointer-events-none">
+        <div className="absolute left-1/2 top-[34%] z-[155] w-[94%] max-w-4xl -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-amber-300/60 bg-amber-950/90 px-6 py-5 text-amber-100 shadow-[0_0_45px_rgba(251,191,36,0.3)] pointer-events-none">
           <p className="text-sm font-black tracking-[0.16em] uppercase text-amber-300">Acción obligatoria</p>
           <p className="mt-1 text-lg font-black leading-tight sm:text-2xl">{pendingActionHint}</p>
         </div>

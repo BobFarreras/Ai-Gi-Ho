@@ -3,6 +3,7 @@ import { MouseEvent } from "react";
 import { IBoardEntity } from "@/core/entities/IPlayer";
 
 export interface SlotCellProps {
+  laneType: "ENTITIES" | "EXECUTIONS";
   index: number;
   entity: IBoardEntity | null;
   isOpponentSide: boolean;
@@ -21,9 +22,8 @@ export interface SlotCellProps {
   cardXpCardId: string | null;
   cardXpAmount: number | null;
   cardXpEventId: string | null;
-  canActivateSelectedExecution: boolean;
+  hasBlockingTrapActivation: boolean;
   isMobileLayout?: boolean;
-  onActivateSelectedExecution: () => void;
   onEntityClick: (entity: IBoardEntity | null, isOpponentSide: boolean, event: MouseEvent) => void;
 }
 
