@@ -45,14 +45,14 @@ function resolveCounterTrapNegation(
     trigger: "ON_OPPONENT_TRAP_ACTIVATED",
     effectAction: counterTrap.card.effect?.action ?? null,
   });
-  withLogs = appendCombatLogEvent(withLogs, counterOwner.id, "CARD_TO_GRAVEYARD", {
-    cardId: counterTrap.card.id,
-    ownerPlayerId: counterOwner.id,
-    from: "EXECUTION_ZONE",
-  });
-  return appendCombatLogEvent(withLogs, counterOwner.id, "CARD_TO_DESTROYED", {
+  withLogs = appendCombatLogEvent(withLogs, counterOwner.id, "CARD_TO_DESTROYED", {
     cardId: trappedCard.card.id,
     ownerPlayerId: trapOwner.id,
+    from: "EXECUTION_ZONE",
+  });
+  return appendCombatLogEvent(withLogs, counterOwner.id, "CARD_TO_GRAVEYARD", {
+    cardId: counterTrap.card.id,
+    ownerPlayerId: counterOwner.id,
     from: "EXECUTION_ZONE",
   });
 }

@@ -1,7 +1,6 @@
 // src/components/game/board/ui/layers/internal/BoardInteractiveLayerView.tsx - Renderiza las capas visuales/interactivas del tablero usando estado derivado precomputado.
 "use client";
 
-import { useCallback, useRef, useState } from "react";
 import { Battlefield } from "@/components/game/board/Battlefield";
 import { MobilePlayerHand } from "@/components/game/board/MobilePlayerHand";
 import { PlayerHand } from "@/components/game/board/PlayerHand";
@@ -11,26 +10,6 @@ import { DrawCardFlowVfx } from "@/components/game/board/ui/layers/internal/Draw
 import { IBoardInteractiveLayerViewProps } from "@/components/game/board/ui/layers/internal/board-interactive-types";
 
 export function BoardInteractiveLayerView(props: IBoardInteractiveLayerViewProps) {
-  const [hiddenDrawRuntimeId, setHiddenDrawRuntimeId] = useState<string | null>(null);
-  const activeDrawSignalRef = useRef<string | null>(null);
-  const visiblePlayerHand = hiddenDrawRuntimeId
-    ? props.player.hand.filter((card) => card.runtimeId !== hiddenDrawRuntimeId)
-    : props.player.hand;
-
-  const handleDrawFlowStart = useCallback((signalId: string, isOpponent: boolean) => {
-    if (isOpponent || activeDrawSignalRef.current === signalId) return;
-    activeDrawSignalRef.current = signalId;
-    const drawnCard = props.player.hand[props.player.hand.length - 1];
-    if (!drawnCard?.runtimeId) return;
-    setHiddenDrawRuntimeId(drawnCard.runtimeId);
-  }, [props.player.hand]);
-
-  const handleDrawFlowEnd = useCallback((signalId: string, isOpponent: boolean) => {
-    if (isOpponent || activeDrawSignalRef.current !== signalId) return;
-    activeDrawSignalRef.current = null;
-    setHiddenDrawRuntimeId(null);
-  }, []);
-
   return (
     <>
       <div onClick={(event) => event.stopPropagation()}>
@@ -77,7 +56,7 @@ export function BoardInteractiveLayerView(props: IBoardInteractiveLayerViewProps
       </div>
       {props.isMobileLayout ? (
         <MobilePlayerHand
-          hand={visiblePlayerHand}
+          hand={props.player.hand}
           playingCard={props.playingCard}
           isPlayerTurn={props.isPlayerTurn}
           highlightedCardIds={props.pendingDiscardCardIds}
@@ -86,7 +65,7 @@ export function BoardInteractiveLayerView(props: IBoardInteractiveLayerViewProps
         />
       ) : (
         <PlayerHand
-          hand={visiblePlayerHand}
+          hand={props.player.hand}
           playingCard={props.playingCard}
           hasSummoned={props.hasNormalSummonedThisTurn}
           isPlayerTurn={props.isPlayerTurn}
@@ -138,8 +117,6 @@ export function BoardInteractiveLayerView(props: IBoardInteractiveLayerViewProps
       <DrawCardFlowVfx
         combatLog={props.gameState.combatLog}
         playerId={props.player.id}
-        onDrawFlowStart={handleDrawFlowStart}
-        onDrawFlowEnd={handleDrawFlowEnd}
       />
     </>
   );

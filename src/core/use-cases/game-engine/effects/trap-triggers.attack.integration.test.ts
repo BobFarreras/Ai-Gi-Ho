@@ -32,6 +32,18 @@ describe("Trap triggers on attack", () => {
     expect(next.playerB.activeExecutions).toHaveLength(0);
     expect(next.playerB.graveyard.some((card) => card.id === "trap-on-attack")).toBe(true);
     expect(next.combatLog.some((event) => event.eventType === "TRAP_TRIGGERED")).toBe(true);
+    const trapTriggeredIndex = next.combatLog.findIndex((event) => event.eventType === "TRAP_TRIGGERED");
+    const directDamageIndex = next.combatLog.findIndex((event) => event.eventType === "DIRECT_DAMAGE");
+    const trapToGraveyardIndex = next.combatLog.findIndex(
+      (event) =>
+        event.eventType === "CARD_TO_GRAVEYARD" &&
+        typeof event.payload === "object" &&
+        event.payload !== null &&
+        (event.payload as Record<string, unknown>).cardId === "trap-on-attack",
+    );
+    expect(trapTriggeredIndex).toBeGreaterThanOrEqual(0);
+    expect(directDamageIndex).toBeGreaterThan(trapTriggeredIndex);
+    expect(trapToGraveyardIndex).toBeGreaterThan(directDamageIndex);
   });
 
   it("debería anular ataque y destruir atacante con trampa de negación", () => {
@@ -76,6 +88,18 @@ describe("Trap triggers on attack", () => {
     expect(next.playerA.graveyard.some((card) => card.id === "trap-counter-trap")).toBe(true);
     expect((next.playerB.destroyedPile ?? []).some((card) => card.id === "trap-on-attack")).toBe(true);
     expect(next.playerB.graveyard.some((card) => card.id === "trap-on-attack")).toBe(false);
+    const trapTriggeredIndex = next.combatLog.findIndex((event) => event.eventType === "TRAP_TRIGGERED");
+    const destroyedIndex = next.combatLog.findIndex((event) => event.eventType === "CARD_TO_DESTROYED");
+    const counterToGraveyardIndex = next.combatLog.findIndex(
+      (event) =>
+        event.eventType === "CARD_TO_GRAVEYARD" &&
+        typeof event.payload === "object" &&
+        event.payload !== null &&
+        (event.payload as Record<string, unknown>).cardId === "trap-counter-trap",
+    );
+    expect(trapTriggeredIndex).toBeGreaterThanOrEqual(0);
+    expect(destroyedIndex).toBeGreaterThan(trapTriggeredIndex);
+    expect(counterToGraveyardIndex).toBeGreaterThan(destroyedIndex);
   });
 
   it("debería drenar energía del atacante y fijar energía del defensor a 10 en ataque directo", () => {

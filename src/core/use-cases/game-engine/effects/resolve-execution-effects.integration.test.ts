@@ -28,6 +28,41 @@ describe("resolveExecution effects", () => {
     expect(state.playerA.deck).toHaveLength(0);
   });
 
+  it("debería conservar la mano existente y añadir la carta robada al resolver DRAW_CARD", () => {
+    const keepA: ICard = {
+      id: "entity-keep-a",
+      name: "Keep A",
+      description: "",
+      type: "ENTITY",
+      faction: "OPEN_SOURCE",
+      cost: 1,
+      attack: 500,
+      defense: 500,
+    };
+    const keepB: ICard = {
+      id: "entity-keep-b",
+      name: "Keep B",
+      description: "",
+      type: "ENTITY",
+      faction: "OPEN_SOURCE",
+      cost: 1,
+      attack: 600,
+      defense: 400,
+    };
+    let state = createResolveExecutionBaseState({
+      deck: [{ id: "entity-deck-2", name: "Deck Entity 2", description: "", type: "ENTITY", faction: "OPEN_SOURCE", cost: 2, attack: 900, defense: 900 }],
+      hand: [drawExecution, keepA, keepB],
+    });
+    state = GameEngine.playCard(state, "p1", "exec-draw-test", "ACTIVATE");
+    state = GameEngine.resolveExecution(state, "p1", state.playerA.activeExecutions[0].instanceId);
+
+    expect(state.playerA.hand).toHaveLength(3);
+    expect(state.playerA.hand.some((card) => card.id === "entity-keep-a")).toBe(true);
+    expect(state.playerA.hand.some((card) => card.id === "entity-keep-b")).toBe(true);
+    expect(state.playerA.hand.some((card) => card.id === "entity-deck-2")).toBe(true);
+    expect(state.playerA.deck).toHaveLength(0);
+  });
+
   it("debería aplicar BOOST_ATTACK_ALLIED_ENTITY sobre la mejor entidad aliada", () => {
     const buffExecution: ICard = {
       id: "exec-atk-buff-test",

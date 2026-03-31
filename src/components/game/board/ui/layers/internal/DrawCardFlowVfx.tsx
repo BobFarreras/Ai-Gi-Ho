@@ -44,7 +44,9 @@ function resolveDrawAnchors(isOpponent: boolean): IDrawAnchors {
   const fallback = isOpponent ? { startX: 340, startY: -250, endX: 70, endY: -360 } : { startX: -340, startY: 210, endX: -70, endY: 350 };
   if (typeof window === "undefined") return fallback;
   const deckNode = document.querySelector<HTMLElement>(`[data-board-deck-side="${isOpponent ? "opponent" : "player"}"]`);
-  const handNode = document.querySelector<HTMLElement>('[data-tutorial-id="tutorial-board-hand"]');
+  const handNode = document.querySelector<HTMLElement>(
+    isOpponent ? '[data-board-hand-side="opponent"]' : '[data-tutorial-id="tutorial-board-hand"]',
+  );
   if (!deckNode || !handNode) return fallback;
   const source = readOffsetFromViewportCenter(deckNode);
   const target = readOffsetFromViewportCenter(handNode);
