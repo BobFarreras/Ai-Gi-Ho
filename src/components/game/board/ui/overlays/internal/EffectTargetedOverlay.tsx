@@ -1,16 +1,20 @@
-// src/components/game/board/ui/overlays/internal/EffectTargetedOverlay.tsx - Overlay global para rayos de buff/debuff y secuencia de bloqueo de trampas sobre objetivos.
+// src/components/game/board/ui/overlays/internal/EffectTargetedOverlay.tsx - Overlay global con cola secuencial de bloqueo y buff/debuff para respetar orden del combatLog.
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ICombatLogEvent } from "@/core/entities/ICombatLog";
 import { IPoint, resolveFallbackTrajectory, resolveSourceFromBoard } from "./direct-damage-beam-overlay-logic";
-import { ITargetedStatSignal, ITrapBlockSignal, resolveLatestStatSignal, resolveLatestTrapBlockSignal } from "./effect-targeted-overlay-logic";
+import { ITargetedStatSignal, ITrapBlockSignal, resolveStatSignalAt, resolveTrapBlockSignalAt } from "./effect-targeted-overlay-logic";
 
 interface IEffectTargetedOverlayProps {
   events: ICombatLogEvent[];
   playerAId: string;
 }
+
+type OverlaySignal =
+  | { kind: "TRAP"; payload: ITrapBlockSignal }
+  | { kind: "STAT"; payload: ITargetedStatSignal };
 
 function findEntityPoint(root: HTMLDivElement, instanceId: string): IPoint | null {
   const node = document.querySelector<HTMLElement>(`[data-board-entity-instance-id="${instanceId}"]`);
@@ -53,20 +57,59 @@ function renderBeam(source: IPoint, target: IPoint, color: { glow: string; core:
 
 export function EffectTargetedOverlay({ events, playerAId }: IEffectTargetedOverlayProps) {
   const overlayRef = useRef<HTMLDivElement | null>(null);
-  const statSignal = useMemo<ITargetedStatSignal | null>(() => resolveLatestStatSignal(events, playerAId), [events, playerAId]);
-  const trapSignal = useMemo<ITrapBlockSignal | null>(() => resolveLatestTrapBlockSignal(events, playerAId), [events, playerAId]);
+  const processedEventIndexRef = useRef(0);
+  const [queuedSignals, setQueuedSignals] = useState<OverlaySignal[]>([]);
+  const [activeSignal, setActiveSignal] = useState<OverlaySignal | null>(null);
   const [statTargetPoints, setStatTargetPoints] = useState<IPoint[]>([]);
   const [statSourcePoint, setStatSourcePoint] = useState<IPoint | null>(null);
   const [trapTargetPoint, setTrapTargetPoint] = useState<IPoint | null>(null);
   const [trapSourcePoint, setTrapSourcePoint] = useState<IPoint | null>(null);
 
   useEffect(() => {
-    const id = window.requestAnimationFrame(() => {
-      if (!overlayRef.current || !statSignal) {
+    const startIndex = processedEventIndexRef.current;
+    if (events.length <= startIndex) return;
+    const nextSignals: OverlaySignal[] = [];
+    for (let index = startIndex; index < events.length; index += 1) {
+      const trapSignal = resolveTrapBlockSignalAt(events, index, playerAId);
+      if (trapSignal) {
+        nextSignals.push({ kind: "TRAP", payload: trapSignal });
+        continue;
+      }
+      const statSignal = resolveStatSignalAt(events, index, playerAId);
+      if (statSignal) nextSignals.push({ kind: "STAT", payload: statSignal });
+    }
+    processedEventIndexRef.current = events.length;
+    if (nextSignals.length === 0) return;
+    const timer = window.setTimeout(() => {
+      setQueuedSignals((previous) => [...previous, ...nextSignals]);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [events, playerAId]);
+
+  useEffect(() => {
+    if (activeSignal || queuedSignals.length === 0) return;
+    const timer = window.setTimeout(() => {
+      setActiveSignal(queuedSignals[0]);
+      setQueuedSignals((previous) => previous.slice(1));
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [activeSignal, queuedSignals]);
+
+  useEffect(() => {
+    if (!activeSignal) return;
+    const durationMs = activeSignal.kind === "TRAP" ? 760 : 1100;
+    const timer = window.setTimeout(() => setActiveSignal(null), durationMs);
+    return () => window.clearTimeout(timer);
+  }, [activeSignal]);
+
+  useEffect(() => {
+    const frameId = window.requestAnimationFrame(() => {
+      if (!overlayRef.current || !activeSignal || activeSignal.kind !== "STAT") {
         setStatSourcePoint(null);
         setStatTargetPoints([]);
         return;
       }
+      const statSignal = activeSignal.payload;
       const source = statSignal.sourceCardId
         ? resolveSourceFromBoard(overlayRef.current, statSignal.sourceCardId, statSignal.actorIsPlayerA)
         : resolveFallbackTrajectory(false, statSignal.actorIsPlayerA).source;
@@ -74,16 +117,17 @@ export function EffectTargetedOverlay({ events, playerAId }: IEffectTargetedOver
       setStatSourcePoint(source);
       setStatTargetPoints(targets);
     });
-    return () => window.cancelAnimationFrame(id);
-  }, [statSignal]);
+    return () => window.cancelAnimationFrame(frameId);
+  }, [activeSignal]);
 
   useEffect(() => {
-    const id = window.requestAnimationFrame(() => {
-      if (!overlayRef.current || !trapSignal) {
+    const frameId = window.requestAnimationFrame(() => {
+      if (!overlayRef.current || !activeSignal || activeSignal.kind !== "TRAP") {
         setTrapSourcePoint(null);
         setTrapTargetPoint(null);
         return;
       }
+      const trapSignal = activeSignal.payload;
       const source = resolveSourceFromBoard(overlayRef.current, trapSignal.trapCardId, trapSignal.actorIsPlayerA)
         ?? findSlotPoint(overlayRef.current, !trapSignal.actorIsPlayerA, "EXECUTIONS", trapSignal.trapSlotIndex)
         ?? resolveFallbackTrajectory(false, trapSignal.actorIsPlayerA).source;
@@ -96,39 +140,41 @@ export function EffectTargetedOverlay({ events, playerAId }: IEffectTargetedOver
       setTrapSourcePoint(source);
       setTrapTargetPoint(target);
     });
-    return () => window.cancelAnimationFrame(id);
-  }, [trapSignal]);
+    return () => window.cancelAnimationFrame(frameId);
+  }, [activeSignal]);
 
-  const statColor = resolveStatColor(statSignal?.amount ?? 0);
+  const currentStatSignal = activeSignal?.kind === "STAT" ? activeSignal.payload : null;
+  const currentTrapSignal = activeSignal?.kind === "TRAP" ? activeSignal.payload : null;
+  const statColor = resolveStatColor(currentStatSignal?.amount ?? 0);
   const trapDestroyColor = { glow: "drop-shadow(0 0 18px rgba(248,113,113,0.95))", core: "rgba(248,113,113,0.94)" };
 
   return (
     <div ref={overlayRef} className="pointer-events-none absolute inset-0 z-[390] overflow-hidden">
-      {trapSignal && trapTargetPoint ? (
+      {currentTrapSignal && trapTargetPoint ? (
         <motion.div initial={{ opacity: 0, scale: 0.68, y: 10 }} animate={{ opacity: [0, 1, 0], scale: [0.68, 1.2, 0.92], y: [10, -6, -18] }} transition={{ duration: 0.48, ease: "easeOut" }} className="absolute z-[391] rounded-full border-2 border-red-300/90 bg-red-950/78 px-3 py-2 text-sm font-black tracking-[0.2em] text-red-100 shadow-[0_0_20px_rgba(248,113,113,0.95)]" style={{ left: `${(trapTargetPoint.x / 1000) * 100}%`, top: `${(trapTargetPoint.y / 1000) * 100}%`, transform: "translate(-50%,-50%)" }}>
           LOCK
         </motion.div>
       ) : null}
-      {trapSignal && trapTargetPoint && trapSourcePoint && trapSignal.action === "NEGATE_ATTACK_AND_DESTROY_ATTACKER" ? renderBeam(trapSourcePoint, trapTargetPoint, trapDestroyColor, `${trapSignal.id}-destroy`, 0.16) : null}
-      {statSignal && statSourcePoint ? (
+      {currentTrapSignal && trapTargetPoint && trapSourcePoint && currentTrapSignal.action === "NEGATE_ATTACK_AND_DESTROY_ATTACKER" ? renderBeam(trapSourcePoint, trapTargetPoint, trapDestroyColor, `${currentTrapSignal.id}-destroy`, 0.16) : null}
+      {currentStatSignal && statSourcePoint ? (
         <>
           <motion.div
             initial={{ opacity: 0, scale: 0.64 }}
             animate={{ opacity: [0, 1, 0.88, 0], scale: [0.64, 1.06, 1.22, 1.02] }}
             transition={{ duration: 0.64, ease: "easeOut" }}
-            className={statSignal.amount >= 0 ? "absolute h-20 w-20 rounded-full bg-yellow-300/70 blur-sm" : "absolute h-20 w-20 rounded-full bg-violet-300/70 blur-sm"}
+            className={currentStatSignal.amount >= 0 ? "absolute h-20 w-20 rounded-full bg-yellow-300/70 blur-sm" : "absolute h-20 w-20 rounded-full bg-violet-300/70 blur-sm"}
             style={{ left: `${(statSourcePoint.x / 1000) * 100}%`, top: `${(statSourcePoint.y / 1000) * 100}%`, transform: "translate(-50%,-50%)" }}
           />
           <motion.div
             initial={{ opacity: 0, y: 12, scale: 0.68 }}
             animate={{ opacity: [0, 0.92, 0], y: [12, -20, -42], scale: [0.68, 1.04, 0.9] }}
             transition={{ duration: 0.62, ease: "easeOut" }}
-            className={statSignal.amount >= 0 ? "absolute h-16 w-10 rounded-full bg-amber-300/70 blur-md" : "absolute h-16 w-10 rounded-full bg-fuchsia-300/70 blur-md"}
+            className={currentStatSignal.amount >= 0 ? "absolute h-16 w-10 rounded-full bg-amber-300/70 blur-md" : "absolute h-16 w-10 rounded-full bg-fuchsia-300/70 blur-md"}
             style={{ left: `${(statSourcePoint.x / 1000) * 100}%`, top: `${(statSourcePoint.y / 1000) * 100}%`, transform: "translate(-50%,-50%)" }}
           />
         </>
       ) : null}
-      {statSignal && statSourcePoint ? statTargetPoints.map((targetPoint, index) => renderBeam(statSourcePoint, targetPoint, statColor, `${statSignal.id}-target-${index}`, 0.38 + index * 0.08)) : null}
+      {currentStatSignal && statSourcePoint ? statTargetPoints.map((targetPoint, index) => renderBeam(statSourcePoint, targetPoint, statColor, `${currentStatSignal.id}-target-${index}`, 0.38 + index * 0.08)) : null}
     </div>
   );
 }

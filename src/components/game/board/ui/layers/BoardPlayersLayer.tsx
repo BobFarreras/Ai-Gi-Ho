@@ -18,6 +18,9 @@ interface BoardPlayersLayerProps {
   lastEnergyTargetPlayerId: string | null;
   lastEnergyAmount: number | null;
   lastEnergyEventId: string | null;
+  lastEnergyLossTargetPlayerId: string | null;
+  lastEnergyLossAmount: number | null;
+  lastEnergyLossEventId: string | null;
   playerAvatarUrl?: string | null;
   opponentAvatarUrl?: string | null;
   playerDialogueMessage?: string | null;
@@ -39,6 +42,9 @@ export function BoardPlayersLayer({
   lastEnergyTargetPlayerId,
   lastEnergyAmount,
   lastEnergyEventId,
+  lastEnergyLossTargetPlayerId,
+  lastEnergyLossAmount,
+  lastEnergyLossEventId,
   playerAvatarUrl = null,
   opponentAvatarUrl = null,
   playerDialogueMessage = null,
@@ -62,6 +68,9 @@ export function BoardPlayersLayer({
         wasEnergyGainedThisAction={lastEnergyTargetPlayerId === opponent.id}
         energyAmount={lastEnergyAmount}
         energyPulseKey={lastEnergyEventId}
+        wasEnergyLostThisAction={lastEnergyLossTargetPlayerId === opponent.id}
+        energyLossAmount={lastEnergyLossAmount}
+        energyLossPulseKey={lastEnergyLossEventId}
         avatarUrl={opponentAvatarUrl}
         dialogueMessage={opponentDialogueMessage}
         containerClassName="!top-[clamp(0.35rem,1.1vh,0.9rem)]"
@@ -79,6 +88,9 @@ export function BoardPlayersLayer({
         wasEnergyGainedThisAction={lastEnergyTargetPlayerId === player.id}
         energyAmount={lastEnergyAmount}
         energyPulseKey={lastEnergyEventId}
+        wasEnergyLostThisAction={lastEnergyLossTargetPlayerId === player.id}
+        energyLossAmount={lastEnergyLossAmount}
+        energyLossPulseKey={lastEnergyLossEventId}
         avatarUrl={playerAvatarUrl}
         dialogueMessage={playerDialogueMessage}
         phase={phase}

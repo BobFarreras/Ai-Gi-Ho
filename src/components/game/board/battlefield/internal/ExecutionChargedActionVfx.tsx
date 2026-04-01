@@ -45,7 +45,7 @@ export function ExecutionChargedActionVfx({ action, isOpponentSide }: IExecution
     const releaseTimer = window.setTimeout(() => {
       chargeAudio?.pause();
       if (action === "RESTORE_ENERGY") playAudio(["/audio/sfx/effects/execution/restore_energy.mp3", "/audio/sfx/damage.mp3"], 0.78);
-      if (action === "DRAIN_OPPONENT_ENERGY") playAudio(["/audio/sfx/effects/execution/drain_opponent_energy.mp3", "/audio/sfx/damage.mp3"], 0.78);
+      if (action === "DRAIN_OPPONENT_ENERGY") playAudio(["/audio/sfx/effects/execution/bajada.mp3"], 0.78);
       if (action === "SET_CARD_DUEL_PROGRESS") playAudio(["/audio/hub/arsenal/evolution.mp3"], 0.76);
     }, CHARGE_MS);
     return () => {
@@ -99,6 +99,25 @@ export function ExecutionChargedActionVfx({ action, isOpponentSide }: IExecution
         transition={{ duration: (CHARGE_MS + RELEASE_MS) / 1000, delay: CHARGE_MS / 1000, ease: "easeInOut" }}
         className={`absolute left-1/2 top-1/2 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full ${orbClass}`}
       />
+      {!isRestore ? (
+        <>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <motion.div
+              key={`drain-smoke-${index}`}
+              initial={{ opacity: 0, y: 10 + index * 2, scale: 0.7 }}
+              animate={{ opacity: [0, 0.92, 0], y: [10 + index * 2, -20 - index * 4, -48 - index * 6], scale: [0.7, 1.08, 0.9] }}
+              transition={{ duration: 0.56 + index * 0.06, ease: "easeOut" }}
+              className="absolute left-1/2 top-1/2 h-10 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-300/70 blur-md"
+            />
+          ))}
+          <motion.div
+            initial={{ opacity: 0, x: 0, y: 0, scaleX: 0.4 }}
+            animate={{ opacity: [0, 0.95, 0], x: [0, target.x], y: [0, target.y], scaleX: [0.4, 1.2, 0.7] }}
+            transition={{ duration: 0.58, delay: CHARGE_MS / 1000, ease: "easeInOut" }}
+            className="absolute left-1/2 top-1/2 h-2 w-60 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-300/90 blur-[1px]"
+          />
+        </>
+      ) : null}
     </div>
   );
 }

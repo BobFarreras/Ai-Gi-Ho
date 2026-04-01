@@ -28,6 +28,8 @@ function createBaseResult(player: IPlayer, opponent: IPlayer): IExecutionEffectR
     opponent,
     healApplied: 0,
     energyRecovered: 0,
+    energyDrainedTargetPlayerId: null,
+    energyDrainedAmount: 0,
     buff: { entityIds: [], stat: null, amount: 0 },
     damageTargetPlayerId: null,
     damageAmount: 0,
@@ -146,7 +148,14 @@ const executionEffectHandlers: { [K in ExecutionAction]: ExecutionHandler<K> } =
     const boosted = boostDefenseByCardId(player, effect.targetCardId, effect.value);
     return { ...createBaseResult(boosted.updatedPlayer, opponent), buff: { entityIds: boosted.buffIds, stat: "DEFENSE", amount: effect.value } };
   },
-  DRAIN_OPPONENT_ENERGY: (player, opponent) => createBaseResult(player, { ...opponent, currentEnergy: 0 }),
+  DRAIN_OPPONENT_ENERGY: (player, opponent) => {
+    const drainedAmount = Math.max(0, opponent.currentEnergy);
+    return {
+      ...createBaseResult(player, { ...opponent, currentEnergy: 0 }),
+      energyDrainedTargetPlayerId: opponent.id,
+      energyDrainedAmount: drainedAmount,
+    };
+  },
   SET_CARD_DUEL_PROGRESS: (player, opponent, effect) => createBaseResult(setCardDuelProgress(player, effect.targetCardId, effect.level, effect.versionTier), opponent),
 };
 

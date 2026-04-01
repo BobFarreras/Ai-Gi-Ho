@@ -25,6 +25,8 @@ function appendExecutionResultLogs(state: GameState, playerId: string, execution
     damageAmount: effectResult.damageAmount,
     healApplied: effectResult.healApplied,
     energyRecovered: effectResult.energyRecovered,
+    energyDrainedTargetPlayerId: effectResult.energyDrainedTargetPlayerId,
+    energyDrainedAmount: effectResult.energyDrainedAmount,
     buffStat: effectResult.buff.stat,
     buffAmount: effectResult.buff.amount,
     buffEntityIds: effectResult.buff.entityIds,

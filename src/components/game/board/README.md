@@ -101,17 +101,22 @@ Guía rápida para entender la lógica de tablero y batalla.
 1. `PlayerHUD` solo parpadea en rojo para el jugador realmente dañado en la última acción.
 2. La zona del tablero del jugador dañado también recibe flash rojo localizado.
 3. Las curaciones muestran texto flotante azul `+LP` en el HUD del objetivo.
-4. Los buffs de estadísticas muestran aura temporal en cartas afectadas (ATK rojo, DEF azul).
-5. Las ejecuciones `ACTIVATE` usan VFX por tipo de efecto:
+4. Los deltas flotantes nacen desde su zona de origen del HUD:
+   - LP (`HEALTH`) para daño/curación.
+   - energía (`ENERGY`) para ganancia/pérdida de energía.
+5. Los deltas se reinician por `eventId` (`pulseKey`) para no perder animación cuando se repite el mismo valor.
+6. El HUD fuera de turno mantiene estado atenuado, pero recupera color completo durante feedback activo.
+7. Los buffs de estadísticas muestran aura temporal en cartas afectadas (ATK rojo, DEF azul).
+8. Las ejecuciones `ACTIVATE` usan VFX por tipo de efecto:
    - daño directo: haz ofensivo,
    - curación: pulso azul,
    - buff de estadísticas: impacto energético rojo/azul y número `+valor` grande sobre entidad objetivo.
-6. El HUD consume deltas (`damageAmount`/`healAmount`) solo por `eventId`, evitando mezclar daño antiguo con curación nueva.
-7. `SidePanels` incluye filtros por turno y actor para depurar partidas.
-8. `BattleBannerCenter` muestra solo turno y subturno (fase), con transición de entrada/salida.
-9. `GraveyardTransitionLayer` anima cualquier evento `CARD_TO_GRAVEYARD` (descarte, sacrificio, destrucción, fusión).
-10. `GraveyardBrowser` permite abrir el cementerio desde el tablero y previsualizar cualquier carta en el panel lateral.
-11. Para QA de fusión, `initialDeckFactory` usa mazos mock con más consistencia de materiales + cartas mágicas de fusión para ambos lados.
+9. El HUD consume deltas (`damageAmount`/`healAmount`) solo por `eventId`, evitando mezclar daño antiguo con curación nueva.
+10. `SidePanels` incluye filtros por turno y actor para depurar partidas.
+11. `BattleBannerCenter` muestra solo turno y subturno (fase), con transición de entrada/salida.
+12. `GraveyardTransitionLayer` anima cualquier evento `CARD_TO_GRAVEYARD` (descarte, sacrificio, destrucción, fusión).
+13. `GraveyardBrowser` permite abrir el cementerio desde el tablero y previsualizar cualquier carta en el panel lateral.
+14. Para QA de fusión, `initialDeckFactory` usa mazos mock con más consistencia de materiales + cartas mágicas de fusión para ambos lados.
 
 ## Sonido y resultado
 

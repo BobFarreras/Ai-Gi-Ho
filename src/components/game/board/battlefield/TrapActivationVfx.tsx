@@ -54,6 +54,29 @@ export function TrapActivationVfx({ entity, isOpponentSide, isTrapActivating }: 
       </>
     );
   }
+  if (action === "DIRECT_ATTACK_ENERGY_DRAIN_AND_SET_SELF_TO_TEN") {
+    return (
+      <>
+        <ChargeCastSfx enabled path="/audio/sfx/effects/execution/bajada.mp3" volume={0.78} />
+        {Array.from({ length: 5 }).map((_, index) => (
+          <motion.div
+            key={`trap-drain-smoke-${index}`}
+            initial={{ opacity: 0, y: 10 + index * 2, scale: 0.7 }}
+            animate={{ opacity: [0, 0.92, 0], y: [10 + index * 2, -20 - index * 4, -48 - index * 6], scale: [0.7, 1.08, 0.9] }}
+            transition={{ duration: 0.56 + index * 0.06, ease: "easeOut" }}
+            className="absolute left-1/2 top-1/2 z-[210] h-10 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-300/70 blur-md"
+          />
+        ))}
+        <DigitalBeam direction={isOpponentSide ? "towards-player" : "towards-opponent"} onComplete={() => undefined} />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: [0, 1, 0], scale: [0.8, 1.24, 1] }}
+          transition={{ duration: 0.9, ease: "easeOut" }}
+          className="absolute -inset-7 z-[210] rounded-3xl bg-[radial-gradient(circle,rgba(192,132,252,0.55)_0%,rgba(192,132,252,0.15)_46%,rgba(192,132,252,0)_82%)]"
+        />
+      </>
+    );
+  }
 
   const isDebuff = action === "REDUCE_OPPONENT_ATTACK" || action === "REDUCE_OPPONENT_DEFENSE";
   const isNegate = action === "NEGATE_ATTACK_AND_DESTROY_ATTACKER" || action === "NEGATE_OPPONENT_TRAP_AND_DESTROY";

@@ -56,30 +56,36 @@ function resolveTrapContextSignal(events: ICombatLogEvent[], fromIndex: number, 
   return { fromTrap: false, trapAction: null };
 }
 
+export function resolveEffectDamageSignalAt(events: ICombatLogEvent[], index: number, playerAId: string): IDirectDamageSignal | null {
+  const event = events[index];
+  if (!event || event.eventType !== "DIRECT_DAMAGE") return null;
+  const targetPlayerId = readTargetPlayerId(event);
+  if (!targetPlayerId) return null;
+  const trapContext = resolveTrapContextSignal(events, index, event.actorPlayerId);
+  const sourceCardId = resolveSourceCardId(events, index, event.actorPlayerId);
+  if (!trapContext.fromTrap && !sourceCardId) return null;
+  const markerA = events[index - 1]?.eventType;
+  const markerB = events[index - 2]?.eventType;
+  const comesFromAttack = markerA === "ATTACK_DECLARED" || markerA === "BATTLE_RESOLVED" || markerB === "ATTACK_DECLARED";
+  if (comesFromAttack && !trapContext.fromTrap) return null;
+  const needsBlockPhase = trapContext.fromTrap && (
+    trapContext.trapAction === "NEGATE_ATTACK_AND_DESTROY_ATTACKER" ||
+    trapContext.trapAction === "NEGATE_OPPONENT_TRAP_AND_DESTROY" ||
+    trapContext.trapAction === "FORCE_SUMMONED_DEFENSE_TO_ATTACK_LOCKED"
+  );
+  return {
+    id: event.id,
+    towardsPlayer: targetPlayerId === playerAId,
+    fromPlayerA: event.actorPlayerId === playerAId,
+    sourceCardId,
+    startDelayMs: needsBlockPhase ? 520 : trapContext.fromTrap ? 260 : 0,
+  };
+}
+
 export function resolveLatestEffectDamageSignal(events: ICombatLogEvent[], playerAId: string): IDirectDamageSignal | null {
   for (let index = events.length - 1; index >= 0; index -= 1) {
-    if (events[index].eventType !== "DIRECT_DAMAGE") continue;
-    const targetPlayerId = readTargetPlayerId(events[index]);
-    if (!targetPlayerId) continue;
-    const trapContext = resolveTrapContextSignal(events, index, events[index].actorPlayerId);
-    const sourceCardId = resolveSourceCardId(events, index, events[index].actorPlayerId);
-    if (!trapContext.fromTrap && !sourceCardId) continue;
-    const markerA = events[index - 1]?.eventType;
-    const markerB = events[index - 2]?.eventType;
-    const comesFromAttack = markerA === "ATTACK_DECLARED" || markerA === "BATTLE_RESOLVED" || markerB === "ATTACK_DECLARED";
-    if (comesFromAttack && !trapContext.fromTrap) continue;
-    const needsBlockPhase = trapContext.fromTrap && (
-      trapContext.trapAction === "NEGATE_ATTACK_AND_DESTROY_ATTACKER" ||
-      trapContext.trapAction === "NEGATE_OPPONENT_TRAP_AND_DESTROY" ||
-      trapContext.trapAction === "FORCE_SUMMONED_DEFENSE_TO_ATTACK_LOCKED"
-    );
-    return {
-      id: events[index].id,
-      towardsPlayer: targetPlayerId === playerAId,
-      fromPlayerA: events[index].actorPlayerId === playerAId,
-      sourceCardId,
-      startDelayMs: needsBlockPhase ? 520 : trapContext.fromTrap ? 260 : 0,
-    };
+    const signal = resolveEffectDamageSignalAt(events, index, playerAId);
+    if (signal) return signal;
   }
   return null;
 }
