@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ICombatLogEvent } from "@/core/entities/ICombatLog";
 import { DIRECT_DAMAGE_BEAM_MS, DIRECT_DAMAGE_BEAM_START_MS } from "@/core/config/direct-damage-vfx";
-import { IDirectDamageSignal, IPoint, ITrajectory, resolveEffectDamageSignalAt, resolveFallbackTrajectory, resolveSourceFromBoard } from "./direct-damage-beam-overlay-logic";
+import { IDirectDamageSignal, IPoint, ITrajectory, resolveEffectDamageSignalAt, resolveFallbackTrajectory, resolveSourceFromBoard, resolveSourceFromSlot } from "./direct-damage-beam-overlay-logic";
 
 interface IDirectDamageBeamOverlayProps { events: ICombatLogEvent[]; playerAId: string; }
 
@@ -75,7 +75,18 @@ export function DirectDamageBeamOverlay({ events, playerAId }: IDirectDamageBeam
 
   useEffect(() => {
     const frameId = window.requestAnimationFrame(() => {
-      if (!activeSignal?.sourceCardId || !overlayRef.current) {
+      if (!overlayRef.current) {
+        setSourcePoint(null);
+        return;
+      }
+      const slotSource = typeof activeSignal?.sourceSlotIndex === "number" && activeSignal.sourceLaneType
+        ? resolveSourceFromSlot(overlayRef.current, activeSignal.fromPlayerA, activeSignal.sourceLaneType, activeSignal.sourceSlotIndex)
+        : null;
+      if (slotSource) {
+        setSourcePoint(slotSource);
+        return;
+      }
+      if (!activeSignal?.sourceCardId) {
         setSourcePoint(null);
         return;
       }

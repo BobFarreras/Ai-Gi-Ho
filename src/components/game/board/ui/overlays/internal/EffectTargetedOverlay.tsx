@@ -97,7 +97,7 @@ export function EffectTargetedOverlay({ events, playerAId }: IEffectTargetedOver
 
   useEffect(() => {
     if (!activeSignal) return;
-    const durationMs = activeSignal.kind === "TRAP" ? 760 : 1100;
+    const durationMs = activeSignal.kind === "TRAP" ? 980 : 1240;
     const timer = window.setTimeout(() => setActiveSignal(null), durationMs);
     return () => window.clearTimeout(timer);
   }, [activeSignal]);

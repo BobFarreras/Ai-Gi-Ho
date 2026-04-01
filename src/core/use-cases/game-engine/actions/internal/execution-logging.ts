@@ -6,6 +6,7 @@ interface IExecutionLoggingParams {
   state: GameState;
   playerId: string;
   executionCardId: string;
+  executionSlotIndex: number;
   damageTargetPlayerId: string | null;
   damageAmount: number;
   healApplied: number;
@@ -22,6 +23,7 @@ export function appendExecutionResolutionLogs(params: IExecutionLoggingParams): 
     state,
     playerId,
     executionCardId,
+    executionSlotIndex,
     damageTargetPlayerId,
     damageAmount,
     healApplied,
@@ -38,6 +40,9 @@ export function appendExecutionResolutionLogs(params: IExecutionLoggingParams): 
     withLog = appendCombatLogEvent(withLog, playerId, "DIRECT_DAMAGE", {
       targetPlayerId: damageTargetPlayerId,
       amount: damageAmount,
+      sourceCardId: executionCardId,
+      sourceSlotIndex: executionSlotIndex,
+      sourceLaneType: "EXECUTIONS",
     });
   }
   if (healApplied > 0) {

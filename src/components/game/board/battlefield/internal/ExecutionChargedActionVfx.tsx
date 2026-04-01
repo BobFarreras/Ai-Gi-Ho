@@ -41,22 +41,19 @@ function resolveEnergyTarget(action: ChargedExecutionAction, isOpponentSide: boo
 
 export function ExecutionChargedActionVfx({ action, isOpponentSide }: IExecutionChargedActionVfxProps) {
   useEffect(() => {
-    const chargeAudio = playAudio(["/audio/sfx/cargar.mp3"], 0.76);
     const releaseTimer = window.setTimeout(() => {
-      chargeAudio?.pause();
       if (action === "RESTORE_ENERGY") playAudio(["/audio/sfx/effects/execution/restore_energy.mp3", "/audio/sfx/damage.mp3"], 0.78);
       if (action === "DRAIN_OPPONENT_ENERGY") playAudio(["/audio/sfx/effects/execution/bajada.mp3"], 0.78);
       if (action === "SET_CARD_DUEL_PROGRESS") playAudio(["/audio/hub/arsenal/evolution.mp3"], 0.76);
     }, CHARGE_MS);
     return () => {
       window.clearTimeout(releaseTimer);
-      chargeAudio?.pause();
     };
   }, [action]);
 
   if (action === "SET_CARD_DUEL_PROGRESS") {
     return (
-      <div className="pointer-events-none absolute inset-0 z-[210]">
+      <div className="pointer-events-none absolute inset-0 z-[260]">
         <motion.div
           initial={{ opacity: 0, scale: 0.72 }}
           animate={{ opacity: [0, 0.95, 0], scale: [0.72, 1.26, 1] }}
@@ -83,7 +80,7 @@ export function ExecutionChargedActionVfx({ action, isOpponentSide }: IExecution
     : "bg-[radial-gradient(circle,rgba(216,180,254,0.95)_0%,rgba(168,85,247,0.8)_42%,rgba(147,51,234,0.3)_80%)] shadow-[0_0_36px_rgba(168,85,247,0.95)]";
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-[210]">
+    <div className="pointer-events-none absolute inset-0 z-[260]">
       <motion.div
         initial={{ opacity: 0, scale: 0.72 }}
         animate={{ opacity: [0, 0.95, 0], scale: [0.72, 1.24, 1.02] }}
