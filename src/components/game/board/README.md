@@ -70,6 +70,7 @@ Guía rápida para entender la lógica de tablero y batalla.
    - espada: pasar a `ATTACK`,
    - escudo: pasar a `DEFENSE`.
 7. Las entidades ya elegidas como material quedan marcadas visualmente con estado dedicado (`MATERIAL` + ring cian).
+8. Cuando existe decisión pendiente de trampa (`activar/cancelar`), el panel de detalle entra en estado resaltado y se muestra banner contextual de decisión para evitar pérdida de foco del jugador.
 6. Al confirmarse la fusión, la cinemática sigue flujo en 2 etapas:
    - vídeo de fusión,
    - transición de carta invocada desde centro a slot final.

@@ -105,8 +105,16 @@ export function SidePanels({
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: "-100%", opacity: 0 }}
           transition={{ type: "spring", stiffness: 500, damping: 30 }}
-          className={`${detailPanelClass} ${isTrapPromptForSelectedCard ? "ring-2 ring-fuchsia-300/75 shadow-[0_0_34px_rgba(217,70,239,0.45)] animate-pulse" : ""}`}
+          className={`${detailPanelClass} ${isTrapPromptForSelectedCard ? "ring-2 ring-fuchsia-300/80 shadow-[0_0_40px_rgba(217,70,239,0.55)]" : ""}`}
         >
+          {isTrapPromptForSelectedCard ? (
+            <motion.div
+              initial={{ opacity: 0.4, boxShadow: "0 0 18px rgba(217,70,239,0.32)" }}
+              animate={{ opacity: [0.42, 0.86, 0.42], boxShadow: ["0 0 18px rgba(217,70,239,0.32)", "0 0 34px rgba(217,70,239,0.58)", "0 0 18px rgba(217,70,239,0.32)"] }}
+              transition={{ duration: 1.15, repeat: Infinity, ease: "easeInOut" }}
+              className="pointer-events-none absolute inset-0 rounded-r-3xl border-2 border-fuchsia-300/65"
+            />
+          ) : null}
           <button
             aria-label="Cerrar detalle"
             onClick={isTrapPromptForSelectedCard ? onSkipPendingTrap : onCloseCard}
