@@ -6,17 +6,12 @@ import { motion } from "framer-motion";
 import { ICombatLogEvent } from "@/core/entities/ICombatLog";
 import { DIRECT_DAMAGE_BEAM_MS, DIRECT_DAMAGE_BEAM_START_MS } from "@/core/config/direct-damage-vfx";
 import { IDirectDamageSignal, IPoint, ITrajectory, resolveEffectDamageSignalAt, resolveFallbackTrajectory, resolveSourceFromBoard, resolveSourceFromSlot } from "./direct-damage-beam-overlay-logic";
+import { createAudioFromPath, safePlay } from "@/components/game/board/hooks/internal/audio/audioRuntime";
 
 interface IDirectDamageBeamOverlayProps { events: ICombatLogEvent[]; playerAId: string; }
 
 function play(path: string, volume: number): void {
-  if (typeof window === "undefined" || typeof window.Audio === "undefined") return;
-  const audio = new Audio(path);
-  audio.preload = "auto";
-  audio.loop = false;
-  audio.volume = Math.max(0, Math.min(1, volume));
-  const result = audio.play();
-  if (result && typeof result.catch === "function") result.catch(() => undefined);
+  safePlay(createAudioFromPath(path, volume));
 }
 
 export function DirectDamageBeamOverlay({ events, playerAId }: IDirectDamageBeamOverlayProps) {

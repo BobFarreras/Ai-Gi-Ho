@@ -93,6 +93,7 @@ export function useBoardScreenState(input: IUseBoardScreenStateInput) {
     playerId,
     opponentId: input.opponentId,
     isMuted: board.isMuted,
+    isPaused: board.isPaused,
     narrationPack: input.narrationPack,
     isLocked: input.isNarrationLocked ?? false,
   });

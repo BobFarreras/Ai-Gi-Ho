@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { createAudioFromPath, safePlay } from "@/components/game/board/hooks/internal/audio/audioRuntime";
 
 interface IChargeCastSfxProps {
   enabled: boolean;
@@ -31,22 +32,14 @@ export function ChargeCastSfx({
       lastPlayedByKey.set(playKey, now);
     }
     const normalizedVolume = Math.max(0, Math.min(1, volume));
-    const audio = new Audio(path);
-    audio.preload = "auto";
-    audio.loop = false;
-    audio.volume = normalizedVolume;
-    audio.onerror = () => {
-      if (!fallbackPath) return;
-      const fallback = new Audio(fallbackPath);
-      fallback.preload = "auto";
-      fallback.loop = false;
-      fallback.volume = normalizedVolume;
-      const fallbackResult = fallback.play();
-      if (fallbackResult && typeof fallbackResult.catch === "function") fallbackResult.catch(() => undefined);
-    };
-    const result = audio.play();
-    if (result && typeof result.catch === "function") result.catch(() => undefined);
-    // No pausamos en unmount para no cortar el SFX en activaciones rápidas.
+    const primaryAudio = createAudioFromPath(path, normalizedVolume);
+    if (primaryAudio) {
+      primaryAudio.onerror = () => {
+        if (!fallbackPath) return;
+        safePlay(createAudioFromPath(fallbackPath, normalizedVolume));
+      };
+      safePlay(primaryAudio);
+    }
     return;
   }, [enabled, fallbackPath, path, playKey, volume]);
   return null;

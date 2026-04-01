@@ -3,6 +3,7 @@
 
 import { useEffect } from "react";
 import { motion } from "framer-motion";
+import { createAudioFromPath, safePlay } from "@/components/game/board/hooks/internal/audio/audioRuntime";
 
 type ChargedExecutionAction = "RESTORE_ENERGY" | "DRAIN_OPPONENT_ENERGY" | "SET_CARD_DUEL_PROGRESS";
 
@@ -15,21 +16,13 @@ const CHARGE_MS = 260;
 const RELEASE_MS = 170;
 
 function playAudio(paths: string[], volume: number): HTMLAudioElement | null {
-  if (typeof window === "undefined" || typeof window.Audio === "undefined") return null;
   const [path, ...fallbacks] = paths;
-  const audio = new Audio(path);
-  audio.preload = "auto";
-  audio.volume = Math.max(0, Math.min(1, volume));
-  audio.loop = false;
+  const audio = createAudioFromPath(path, volume);
+  if (!audio) return null;
   audio.onerror = () => {
     if (fallbacks.length > 0) playAudio(fallbacks, volume);
   };
-  const result = audio.play();
-  if (result && typeof result.catch === "function") {
-    result.catch(() => {
-      if (fallbacks.length > 0) playAudio(fallbacks, volume);
-    });
-  }
+  safePlay(audio);
   return audio;
 }
 

@@ -66,7 +66,10 @@ Guía rápida para entender la lógica de tablero y batalla.
 3. En fase de combate, mantener selección del atacante usa click simple y cambiar a defensa usa doble click sobre la misma entidad.
 4. La activación de cartas en `SET` dispone de dos entradas: botón flotante centrado sobre carta y botón `Activar` en la barra de acciones inferior derecha.
 5. Se ajustó la vertical del `PlayerHUD` rival en desktop para alinear mejor con el bloque de `TurnTimer`.
-5. Las entidades ya elegidas como material quedan marcadas visualmente con estado dedicado (`MATERIAL` + ring cian).
+6. Se añadió atajo explícito para cambio de postura en combate desde la barra de acciones:
+   - espada: pasar a `ATTACK`,
+   - escudo: pasar a `DEFENSE`.
+7. Las entidades ya elegidas como material quedan marcadas visualmente con estado dedicado (`MATERIAL` + ring cian).
 6. Al confirmarse la fusión, la cinemática sigue flujo en 2 etapas:
    - vídeo de fusión,
    - transición de carta invocada desde centro a slot final.
@@ -133,6 +136,9 @@ Guía rápida para entender la lógica de tablero y batalla.
    - aviso de 5 segundos y fin de temporizador,
    - apertura/cierre de sidebars,
    - victoria/derrota/empate.
+8. `mute` y `pause` aplican corte global de audio:
+   - no se encolan nuevos SFX/VO,
+   - los audios activos se detienen y se reinician (`currentTime = 0`).
 
 ## Narración reactiva
 
