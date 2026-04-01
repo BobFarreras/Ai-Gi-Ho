@@ -5,6 +5,7 @@ import { GameEngine, GameState } from "@/core/use-cases/GameEngine";
 import { useAutoAdvanceBattle } from "./useAutoAdvanceBattle";
 import { useAdvancePhaseGuard } from "./useAdvancePhaseGuard";
 import { useHandleTimerExpired } from "./useHandleTimerExpired";
+import { useSelectedEntityModeActions } from "./useSelectedEntityModeActions";
 import { useTurnTelemetry } from "./useTurnTelemetry";
 
 interface IUseBoardTurnControlsParams {
@@ -34,7 +35,9 @@ interface IUseBoardTurnControlsResult {
   handleTimerExpired: () => void;
   resolvePendingHandDiscard: (cardId: string) => void;
   setSelectedEntityToAttack: () => void;
+  setSelectedEntityToDefense: () => void;
   canSetSelectedEntityToAttack: boolean;
+  canSetSelectedEntityToDefense: boolean;
 }
 
 export function useBoardTurnControls({
@@ -55,12 +58,19 @@ export function useBoardTurnControls({
   setPlayingCard,
 }: IUseBoardTurnControlsParams): IUseBoardTurnControlsResult {
   const telemetry = useTurnTelemetry({ applyTransition });
-  const selectedDefenseEntity = selectedCard
-    ? gameState.playerA.activeEntities.find(
-        (entity) => entity.card.id === selectedCard.id && (entity.mode === "DEFENSE" || entity.mode === "SET") && !entity.hasAttackedThisTurn,
-      ) ?? null
-    : null;
-  const canSetSelectedEntityToAttack = Boolean(selectedDefenseEntity) && !winnerPlayerId && !isAnimating && isPlayerTurn && gameState.phase === "BATTLE" && gameState.pendingTurnAction?.playerId !== gameState.playerA.id;
+  const { canSetSelectedEntityToAttack, canSetSelectedEntityToDefense, setSelectedEntityToAttack, setSelectedEntityToDefense } =
+    useSelectedEntityModeActions({
+      gameState,
+      selectedCard,
+      winnerPlayerId,
+      isAnimating,
+      isPlayerTurn,
+      assertPlayerTurn,
+      applyTransition,
+      clearError,
+      setActiveAttackerId,
+      setPlayingCard,
+    });
 
   const resolvePendingTurnAction = useCallback(
     (selectedId: string) => {
@@ -120,17 +130,6 @@ export function useBoardTurnControls({
     },
     [gameState.pendingTurnAction, gameState.playerA.id, resolvePendingTurnAction],
   );
-  const setSelectedEntityToAttack = useCallback(() => {
-    if (!canSetSelectedEntityToAttack || !selectedDefenseEntity || !assertPlayerTurn()) return;
-    const nextState = applyTransition((state) =>
-      GameEngine.changeEntityMode(state, state.playerA.id, selectedDefenseEntity.instanceId, "ATTACK"),
-    );
-    if (!nextState) return;
-    setActiveAttackerId(selectedDefenseEntity.instanceId);
-    setPlayingCard(null);
-    clearError();
-  }, [applyTransition, assertPlayerTurn, canSetSelectedEntityToAttack, clearError, selectedDefenseEntity, setActiveAttackerId, setPlayingCard]);
-
   return {
     advancePhase,
     confirmAdvancePhase,
@@ -140,6 +139,8 @@ export function useBoardTurnControls({
     handleTimerExpired,
     resolvePendingHandDiscard,
     setSelectedEntityToAttack,
+    setSelectedEntityToDefense,
     canSetSelectedEntityToAttack,
+    canSetSelectedEntityToDefense,
   };
 }
