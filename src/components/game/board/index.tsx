@@ -131,7 +131,7 @@ export function Board({ initialPlayerDeck, mode = "TRAINING", initialConfig, due
         />
       ) : null}
       <DuelResultOverlay
-        winnerPlayerId={board.winnerPlayerId}
+        winnerPlayerId={screen.resultWinnerPlayerId}
         playerA={player}
         playerB={opponent}
         battleExperienceSummary={board.battleExperienceSummary}

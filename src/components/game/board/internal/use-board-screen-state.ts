@@ -7,6 +7,7 @@ import { IMatchNarrationPack } from "@/components/game/board/narration/types";
 import { useMatchNarration } from "@/components/game/board/hooks/internal/match/useMatchNarration";
 import { useBoard } from "@/components/game/board/hooks/useBoard";
 import { useBoardScreenInteractions } from "./use-board-screen-interactions";
+import { useDelayedDuelResult } from "./use-delayed-duel-result";
 
 interface IUseBoardScreenStateInput {
   board: ReturnType<typeof useBoard>;
@@ -87,6 +88,13 @@ export function useBoardScreenState(input: IUseBoardScreenStateInput) {
     if (!board.winnerPlayerId) return;
     board.setIsHistoryOpen(false);
   }, [board]);
+  const resultWinnerPlayerId = useDelayedDuelResult({
+    board,
+    playerId,
+    playerName: input.playerName,
+    opponentName: input.opponentName,
+    setBannerSignal: setAutoModeBannerSignal,
+  });
   const narration = useMatchNarration({
     combatLog: board.gameState.combatLog,
     winnerPlayerId: board.winnerPlayerId,
@@ -119,7 +127,8 @@ export function useBoardScreenState(input: IUseBoardScreenStateInput) {
     visibleGraveyardOwner: effectiveGraveyardView === "player" ? input.playerName : input.opponentName,
     visibleFusionDeckOwner: fusionDeckView === "player" ? input.playerName : input.opponentName,
     visibleDestroyedOwner: destroyedView === "player" ? input.playerName : input.opponentName,
-    isResultVisible: Boolean(board.winnerPlayerId),
+    isResultVisible: Boolean(resultWinnerPlayerId),
+    resultWinnerPlayerId,
     duelResultRewardSummary: input.duelResultRewardSummary ?? null,
   };
 }
