@@ -6,6 +6,27 @@ y versionado [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Fixed
+- **Olimpo — salir de un combate encallado**: si el envío final de un duelo no lo acepta el servidor (el desenlace del tablero y el que deriva el replay autoritativo no coinciden), la batalla se quedaba en `ISSUED` y volver a entrar te devolvía al mismo combate una y otra vez hasta que caducaba. Ahora aparece un banner que explica la consecuencia y cierra la batalla con la RPC transaccional de siempre: el intento ya gastado se conserva, no se reparte botín y vuelves al selector con los intentos recargados desde el servidor. No se debilita la validación del diario. Decisión y alternativas descartadas en [ADR 10](docs/architecture/10-olympus-stuck-battle-recovery.md).
+
+### Internal
+- **Runbook de los modos PvE al día**: [despliegue-modos-pve.md](docs/supabase/despliegue-modos-pve.md) listaba doce migraciones (149→160) escritas a mano, pero la entrega llevaba **cuatro más** (los fixes de Supervivencia del 30-07, con timestamp real, que ordenan después de la 160). Se aplicaron en producción el 2026-09-10, cinco semanas tarde: durante ese tiempo el código llamaba a `invalidate_survival_battle`, una RPC que no existía en producción, así que renovar un combate caducado de Supervivencia fallaba. El runbook incorpora ahora las cuatro migraciones, un paso de comparación real entre `supabase/migrations/` y el historial de producción (por **nombre**, no por posición: producción registra el timestamp del día en que se aplica) y el historial de aplicación.
+
+## [1.20.1] - 2026-08-05
+
+### Fixed
+- **Supervivencia — expediciones que se quedaban encalladas**: un envío final que el servidor no liquidaba (`settled: false`) hacía que "Ver informe" no respondiera, y volver a pulsarlo repetía el silencio. Ahora avisa y da salida: reintentar es idempotente y salir conserva el avance. El mismo agujero estaba en Olimpo. (No arregla la divergencia de fondo entre el desenlace del tablero y el que deriva el servidor.)
+- **Supervivencia — los combates no contaban para nada**: no se contabilizaban en las misiones diarias ni en el ranking de actividad, porque la ruta de liquidación no emitía acciones de progresión. Ahora el modo cuenta como Entrenamiento (`PLAY_DUEL`+`PLAY_ARENA`, `WIN_DUEL`+`WIN_ARENA`) y solo en la primera liquidación real, nunca en un checkpoint ni en un duplicado.
+- **Supervivencia — el árbol de habilidades no se aplicaba**: los modificadores de combate (LP, techo de energía y Arranque en Frío) no llegaban al duelo. Ahora el snapshot firmado los incluye para que el replay del servidor aplique exactamente los mismos valores. El bonus de LP del árbol se omite del arranque de la expedición, porque los LP iniciales los fija la RPC y sumarle el bonus rompía su validación.
+- **La carta de recompensa no se anunciaba**: se resolvía contra el catálogo escrito en código (`CARD_BY_ID`), que no conoce las cartas creadas desde el panel de admin —esas viven solo en `cards_catalog`—, así que el jugador la recibía sin verla ni en el carrusel ni en el informe. Ahora la resuelve el servidor.
+- **Hologramas congelados al volver al juego en móvil**: al restaurar la pestaña desde bfcache el navegador dispara `pageshow`, no `visibilitychange`, así que el estado se quedaba en "oculto", el `frameloop` en `never` y el canvas muerto mientras las animaciones CSS seguían. Afectaba a las **tres** escenas 3D (hub, Academia y portal de Arena).
+- **Olimpo — el campeón elegido se reseteaba a GenNvim** en cada visita; ahora se recuerda. Y el árbol de mejoras no decía cuánto Éter tienes, que es justo donde se gasta.
+- **Fusión — cartas resueltas desde el snapshot**: las recetas se resolvían contra el catálogo de código en vez de contra el snapshot del duelo, así que una carta que no estuviera escrita en `.ts` no podía participar en una fusión.
+
+### Internal
+- Los hooks de visibilidad y de campeón recordado usan `useSyncExternalStore` en lugar de estado + efecto: es el primitivo correcto para leer estado del navegador y evita el `setState` en efecto que prohíbe la regla de lint del proyecto.
+- `applySkillBonusesToSide` extraída a `core` para que Board y Supervivencia compartan la misma lógica.
+
 ## [1.20.0] - 2026-08-03
 
 ### Added
@@ -448,6 +469,7 @@ y versionado [Semantic Versioning](https://semver.org/lang/es/).
 - Presentación TFM web interna en `/presentacion-tfm`.
 
 [Unreleased]: https://github.com/BobFarreras/Ai-Gi-Oh/compare/v1.20.0...HEAD
+[1.20.1]: https://github.com/BobFarreras/Ai-Gi-Oh/compare/v1.20.0...v1.20.1
 [1.20.0]: https://github.com/BobFarreras/Ai-Gi-Oh/compare/v1.19.3...v1.20.0
 [1.19.3]: https://github.com/BobFarreras/Ai-Gi-Oh/compare/v1.19.2...v1.19.3
 [1.19.2]: https://github.com/BobFarreras/Ai-Gi-Oh/compare/v1.19.1...v1.19.2
