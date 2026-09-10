@@ -4,6 +4,10 @@ import { buildAct1OverworldTilemap } from "@/services/story/overworld/act-1-over
 import { buildAct2OverworldTilemap } from "@/services/story/overworld/act-2-overworld-tilemap";
 import { buildAct3OverworldTilemap } from "@/services/story/overworld/act-3-overworld-tilemap";
 import { buildAct4OverworldTilemap } from "@/services/story/overworld/act-4-overworld-tilemap";
+import { buildAct5OverworldTilemap } from "@/services/story/overworld/act-5-overworld-tilemap";
+import { buildAct6OverworldTilemap } from "@/services/story/overworld/act-6-overworld-tilemap";
+import { buildAct7OverworldTilemap } from "@/services/story/overworld/act-7-overworld-tilemap";
+import { buildAct8OverworldTilemap } from "@/services/story/overworld/act-8-overworld-tilemap";
 
 /** mapId -> constructor del tilemap. Añadir aquí cada acto nuevo. */
 const TILEMAP_BUILDERS: Record<string, () => IOverworldTilemap> = {
@@ -11,6 +15,10 @@ const TILEMAP_BUILDERS: Record<string, () => IOverworldTilemap> = {
   "act-2": buildAct2OverworldTilemap,
   "act-3": buildAct3OverworldTilemap,
   "act-4": buildAct4OverworldTilemap,
+  "act-5": buildAct5OverworldTilemap,
+  "act-6": buildAct6OverworldTilemap,
+  "act-7": buildAct7OverworldTilemap,
+  "act-8": buildAct8OverworldTilemap,
 };
 
 /** mapId por defecto al entrar al overworld sin estado guardado. */

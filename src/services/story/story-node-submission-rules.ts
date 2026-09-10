@@ -50,6 +50,20 @@ const SUBMISSION_CONFIG_BY_NODE_ID: Record<string, IStoryNodeSubmissionConfig> =
     emptyAnswerError: "Introduce la clave de purga para ejecutar el terminal.",
     invalidCodeError: "Clave rechazada. El cortafuegos sigue activo: revisa el registro corrupto.",
   },
+  // Acto 6: terminal del borde de la red pública. La clave se compone leyendo las TRES llaves de router,
+  // así que el terminal no se puede resolver por fuerza bruta antes de haber hecho las tres regiones.
+  "story-ch6-edge-terminal": {
+    title: "Terminal del Borde",
+    hint: "Encadena las tres claves de router (norte, este y sur) para autorizar la salida al borde de la red.",
+    placeholder: "EDGE-XXXX-XXXX",
+    activationLabel: "Autorizar salida",
+    generatedCode: "EDGE-4021-8830",
+    requiredNodeIds: ["story-ch6-key-north", "story-ch6-key-east", "story-ch6-key-south"],
+    missingRequirementsError:
+      "El terminal rechaza la conexión: faltan claves de router. Toma las tres antes de volver.",
+    emptyAnswerError: "Introduce la clave del borde para autorizar la salida.",
+    invalidCodeError: "Clave rechazada. Vuelve a leer las tres claves de router: el orden importa.",
+  },
 };
 
 function resolveConfig(nodeId: string): IStoryNodeSubmissionConfig | null {

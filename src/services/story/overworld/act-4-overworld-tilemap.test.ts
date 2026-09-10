@@ -176,10 +176,10 @@ describe("buildAct4OverworldTilemap", () => {
     expect(buildAct4OverworldTilemap().collision[9][26]).toBe(1);
   });
 
-  it("el portal al Acto 5 existe SIN destino (aún no construido) y sólo tras vencer a Midutech", () => {
+  it("el portal al Acto 5 salta al Core Invertido y sólo tras vencer a Midutech", () => {
     const portal = buildAct4OverworldTilemap().objects.find((object) => object.id === ACT_5_PORTAL_ID)!;
     expect(portal.kind).toBe("WARP");
-    expect(portal.warp).toBeUndefined(); // sin destino: la escena narra que el Acto 5 está en construcción
+    expect(portal.warp).toEqual({ toMapId: "act-5", toSpawnId: "spawn-entry", direction: "forward" });
     expect(portal.gateRequiredNodeIds).toEqual(["story-ch4-duel-7"]);
   });
 
