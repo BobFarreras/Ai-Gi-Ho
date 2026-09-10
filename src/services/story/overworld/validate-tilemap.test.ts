@@ -190,7 +190,7 @@ describe("validateOverworldTilemap", () => {
 
   it("rechaza ambient desconocido", () => {
     expect(() => validateOverworldTilemap({ ...buildValidRawTilemap(), ambient: "FOGGY" })).toThrow(
-      /'NORMAL', 'DARK' o 'TERMINAL'/,
+      /se esperaba uno de: NORMAL, DARK, TERMINAL, MIRROR, CLOUD, FORGE, SINGULARITY/,
     );
   });
 

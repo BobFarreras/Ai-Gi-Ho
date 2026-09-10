@@ -44,6 +44,25 @@ import {
   HYDRA_AMBUSH_DUEL_ID,
   HYDRA_AMBUSH_TRIGGER_ID,
 } from "@/services/story/overworld/act-4-overworld-tilemap";
+import { buildAct5MirrorCutscene } from "@/services/story/overworld/act-5-mirror-cutscene";
+import { buildAct6SwarmCutscene } from "@/services/story/overworld/act-6-swarm-cutscene";
+import { buildAct7CastingCutscene } from "@/services/story/overworld/act-7-casting-cutscene";
+import { buildAct8ChoirCutscene } from "@/services/story/overworld/act-8-choir-cutscene";
+import {
+  MIRROR_SCENE_DUEL_ID,
+  MIRROR_SCENE_TRIGGER_ID,
+} from "@/services/story/overworld/act-5-overworld-tilemap";
+import {
+  SWARM_SCENE_DUEL_ID,
+  SWARM_SCENE_TRIGGER_ID,
+} from "@/services/story/overworld/act-6-overworld-tilemap";
+import {
+  CASTING_SCENERY_ALQUIMISTA_ID,
+  CASTING_SCENERY_MIDUTECH_ID,
+  CASTING_SCENE_DUEL_ID,
+  CASTING_SCENE_TRIGGER_ID,
+} from "@/services/story/overworld/act-7-overworld-tilemap";
+import { CHOIR_SCENE_TRIGGER_ID } from "@/services/story/overworld/act-8-overworld-tilemap";
 import { resolveOverworldEventDialogue } from "@/services/story/overworld/resolve-overworld-event-dialogue";
 import { markOverworldEventInteracted, purgeLegacyOverworldSeenEventsCache } from "@/services/story/overworld/overworld-persistence-client";
 import { IPlayerOverworldPosition } from "@/core/entities/story/IPlayerOverworldState";
@@ -65,6 +84,10 @@ const REREADABLE_EVENT_IDS = new Set<string>(["story-ch3-event-corrupt-log"]);
 const FIRST_STEP_INTRO_BY_MAP: Record<string, string> = {
   "act-3": "story-ch3-event-intro",
   "act-4": "story-ch4-event-intro",
+  "act-5": "story-ch5-event-intro",
+  "act-6": "story-ch6-event-intro",
+  "act-7": "story-ch7-event-intro",
+  "act-8": "story-ch8-event-intro",
 };
 
 interface IOverworldDevSceneProps {
@@ -136,6 +159,40 @@ const AMBUSH_BY_TRIGGER_ID: Record<string, IOverworldAmbush> = {
     // el relevo los NPCs guionizados, que sí se mueven; tras vencer el duelo no se vuelven a dibujar.
     sceneryNodeIds: [CARD_FORGE_SCENERY_GENNVIM_ID, CARD_FORGE_SCENERY_MIDUTECH_ID],
   },
+  // Acto 5: el doble te imita al otro lado de la línea de espejos y, cuando deja de hacerlo, sale Verso.
+  [MIRROR_SCENE_TRIGGER_ID]: {
+    duelId: MIRROR_SCENE_DUEL_ID,
+    dialogueNodeId: MIRROR_SCENE_DUEL_ID,
+    buildCutscene: buildAct5MirrorCutscene,
+  },
+  // Acto 6: cinco copias entran andando por cinco bocas y cierran el círculo; se queda la que entró de frente.
+  [SWARM_SCENE_TRIGGER_ID]: {
+    duelId: SWARM_SCENE_DUEL_ID,
+    dialogueNodeId: SWARM_SCENE_DUEL_ID,
+    buildCutscene: buildAct6SwarmCutscene,
+  },
+  // Acto 7: la Colada. Como la Fábrica del Acto 4, los dos rivales son atrezzo hasta que arranca la escena.
+  [CASTING_SCENE_TRIGGER_ID]: {
+    duelId: CASTING_SCENE_DUEL_ID,
+    dialogueNodeId: CASTING_SCENE_DUEL_ID,
+    buildCutscene: buildAct7CastingCutscene,
+    sceneryNodeIds: [CASTING_SCENERY_ALQUIMISTA_ID, CASTING_SCENERY_MIDUTECH_ID],
+  },
+};
+
+/**
+ * Cutscenes NARRATIVAS: escenas que se ven y ya está, sin combate detrás (a diferencia de las emboscadas).
+ * Se disparan al pisar/activar su nodo, se marcan vistas como cualquier evento y, al terminar, devuelven el
+ * control al jugador. La narración la aportan los pasos `EVENT` del propio guion.
+ */
+const NARRATIVE_CUTSCENE_BY_TRIGGER_ID: Record<
+  string,
+  (tilemap: IOverworldTilemap, options: { isCompactViewport: boolean }) => OverworldCutsceneStep[]
+> = {
+  // Acto 1: BigLog aparece para avisar de la subruta difícil.
+  [ECHO_TRIGGER_NODE_ID]: () => buildAct1EchoCutscene(),
+  // Acto 8: el Coro. Los cuatro jefes anteriores se materializan, dicen media línea cada uno y se apagan.
+  [CHOIR_SCENE_TRIGGER_ID]: buildAct8ChoirCutscene,
 };
 
 /** Atrezzo que hay que dejar de dibujar de entrada porque su escena ya está resuelta. */
@@ -686,10 +743,11 @@ export function OverworldDevScene({ mapId, completedNodeIds, initialPosition, in
               // local cubre la sesión actual y se reintenta al volver a activarlo.
               void markOverworldEventInteracted(object.id);
             }
-            // Subruta difícil: aparece BigLog (cutscene) y narra el aviso.
-            if (object.id === ECHO_TRIGGER_NODE_ID) {
+            // Cutscene narrativa (BigLog en el Acto 1, el Coro en el Acto 8): se ve y se devuelve el control.
+            const narrativeCutscene = NARRATIVE_CUTSCENE_BY_TRIGGER_ID[object.id];
+            if (narrativeCutscene) {
               engine.setInteractionSuspended(true);
-              engine.startCutscene(buildAct1EchoCutscene());
+              engine.startCutscene(narrativeCutscene(tilemap, { isCompactViewport }));
               return;
             }
             const dialogue = resolveOverworldEventDialogue(object.id);

@@ -6,6 +6,14 @@ y versionado [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added
+- **Modo Historia — Actos 5, 6, 7 y 8 (el tramo final)**: la campaña pasa de cuatro actos a ocho y se cierra. Cada acto trae mapa propio, mecánica propia, una cinemática firma y un salto de dificultad real (niveles 72 → 100, `version_tier` 2 → 5).
+  - **Acto 5 · El Núcleo Invertido** (ambiente `MIRROR`): un mapa simétrico donde todo lo que hay a la izquierda existe también a la derecha, cajas y placas incluidas. La escena firma es tu propio reflejo: camina en espejo contigo hasta que deja de hacerlo.
+  - **Acto 6 · La Red Abierta** (ambiente `CLOUD`): el único mapa apaisado y **no lineal** — tres regiones en el orden que quieras, cada una con su clave de router. Las tres claves componen el código del terminal del borde, así que no hay atajo por fuerza bruta. La escena firma es un enjambre de cinco copias que te rodea andando.
+  - **Acto 7 · La Fundición Cuántica** (ambiente `FORGE`): el único acto que **se juega hacia abajo**, cuatro plantas hasta el sótano. La pasarela de descenso arranca subiendo y hay que invertirla; el gemelo de abajo la restaura, así que no hay forma de quedarse encerrado. Midutech vuelve, y de empleado.
+  - **Acto 8 · La Singularidad** (ambiente `SINGULARITY`): un anillo con cuatro ecos y un pozo de una casilla de ancho. Las tres fases del jefe final están escalonadas dentro del pozo: no se puede salir entre fases porque no hay por dónde. Único duelo a nivel 100 de todo el juego.
+  - Contenido de rivales, mazos, perfiles de IA y recompensas en las migraciones `161`→`164`. Documentación por acto en [docs/story/acts](docs/story/acts/README.md) y diseño conjunto en [ACTS-5-8-MASTER-GUIDE.md](docs/story/acts/ACTS-5-8-MASTER-GUIDE.md).
+
 ### Fixed
 - **Olimpo — salir de un combate encallado**: si el envío final de un duelo no lo acepta el servidor (el desenlace del tablero y el que deriva el replay autoritativo no coinciden), la batalla se quedaba en `ISSUED` y volver a entrar te devolvía al mismo combate una y otra vez hasta que caducaba. Ahora aparece un banner que explica la consecuencia y cierra la batalla con la RPC transaccional de siempre: el intento ya gastado se conserva, no se reparte botín y vuelves al selector con los intentos recargados desde el servidor. No se debilita la validación del diario. Decisión y alternativas descartadas en [ADR 10](docs/architecture/10-olympus-stuck-battle-recovery.md).
 

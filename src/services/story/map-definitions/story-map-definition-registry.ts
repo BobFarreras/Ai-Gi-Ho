@@ -3,6 +3,10 @@ import { storyAct1MapDefinition } from "@/services/story/map-definitions/act-1-m
 import { storyAct2MapDefinition } from "@/services/story/map-definitions/act-2-map-definition";
 import { storyAct3MapDefinition } from "@/services/story/map-definitions/act-3-map-definition";
 import { storyAct4MapDefinition } from "@/services/story/map-definitions/act-4-map-definition";
+import { storyAct5MapDefinition } from "@/services/story/map-definitions/act-5-map-definition";
+import { storyAct6MapDefinition } from "@/services/story/map-definitions/act-6-map-definition";
+import { storyAct7MapDefinition } from "@/services/story/map-definitions/act-7-map-definition";
+import { storyAct8MapDefinition } from "@/services/story/map-definitions/act-8-map-definition";
 import {
   IStoryActMapDefinition,
   IStoryMapVirtualNodeDefinition,
@@ -14,6 +18,10 @@ const storyActDefinitions: IStoryActMapDefinition[] = [
   storyAct2MapDefinition,
   storyAct3MapDefinition,
   storyAct4MapDefinition,
+  storyAct5MapDefinition,
+  storyAct6MapDefinition,
+  storyAct7MapDefinition,
+  storyAct8MapDefinition,
 ];
 
 /**

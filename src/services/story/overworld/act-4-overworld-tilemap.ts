@@ -55,8 +55,8 @@ export const CARD_FORGE_SCENERY_MIDUTECH_ID = "story-ch4-npc-forge-midutech";
 export const CARD_FORGE_DUEL_ID = "story-ch4-duel-10";
 
 /**
- * Portal al Acto 5 al final de la sala del jefe. Es un WARP **sin destino** a propósito: el Acto 5 no existe
- * todavía, así que al usarlo se cuenta que el Core sigue en construcción en vez de saltar de mapa.
+ * Portal al Acto 5 al final de la sala del jefe. Nació sin destino (el Acto 5 no existía y al usarlo se
+ * contaba que el Core seguía en construcción); ahora salta de verdad al Core Invertido.
  */
 export const ACT_5_PORTAL_ID = "story-ch4-transition-to-act5";
 
@@ -566,9 +566,8 @@ export function buildAct4OverworldTilemap(): IOverworldTilemap {
       { id: "story-ch4-event-pre-midutech", kind: "EVENT", tileX: 26, tileY: 7, sprite: "hidden", trigger: "STEP_ON", hidden: true },
       { id: "story-ch4-event-core-key", kind: "EVENT", tileX: 26, tileY: 3, sprite: "hidden", trigger: "STEP_ON", hidden: true },
 
-      // ── Portal al Acto 5: SIN destino a propósito (el acto no existe todavía). Se dibuja como portal y, al
-      // usarlo, cuenta que el Core sigue en construcción. Sólo accesible tras vencer a Midutech.
-      { id: ACT_5_PORTAL_ID, kind: "WARP", tileX: 28, tileY: 3, sprite: "portal", trigger: "STEP_ON", gateRequiredNodeIds: ["story-ch4-duel-7"] },
+      // ── Portal al Acto 5 (Core Invertido). Sólo accesible tras vencer a Midutech y quitarle la llave.
+      { id: ACT_5_PORTAL_ID, kind: "WARP", tileX: 28, tileY: 3, sprite: "portal", trigger: "STEP_ON", gateRequiredNodeIds: ["story-ch4-duel-7"], warp: { toMapId: "act-5", toSpawnId: "spawn-entry", direction: "forward" } },
     ],
     spawns: [{ id: "spawn-entry", tileX: 26, tileY: 66, facing: "UP" }],
     defaultSpawnId: "spawn-entry",
