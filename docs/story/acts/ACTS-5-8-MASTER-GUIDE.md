@@ -377,3 +377,18 @@ que van **antes** del deploy, como las del paquete PvE y por el mismo motivo: el
 duelos que tienen que estar ahí. Y como siempre, antes de dar la entrega por cerrada, comparar
 `supabase/migrations/` con el historial de producción **por nombre** — la lección del runbook de los
 modos PvE ([despliegue-modos-pve.md](../../supabase/despliegue-modos-pve.md)).
+
+### Historial de aplicación
+
+| Migración | Producción (`fbnfveukgjnirjsmrbny`) | Local |
+|---|---|---|
+| `161_story_act5_core_invertido` | ✅ 2026-09-10 | ❌ (stack apagado) |
+| `162_story_act6_red_abierta` | ✅ 2026-09-10 | ❌ |
+| `163_story_act7_fundicion_cuantica` | ✅ 2026-09-10 | ❌ |
+| `164_story_act8_singularidad` | ✅ 2026-09-10 | ❌ |
+
+Se aplicaron a producción **antes** de desplegar el código —y no en local— porque el `.env.local` de
+desarrollo apunta al Supabase de producción: jugando en local, el duelo del Acto 5 se busca allí. Tras
+aplicarlas, producción tiene los 22 duelos de los capítulos 5-8, todos con perfil de IA y con overrides
+de mazo (niveles 72→100). Si algún día se vuelve a jugar contra el Supabase local, hay que aplicarlas
+con `pnpm db:migrate` (nunca `db:reset`).
