@@ -6,6 +6,8 @@ y versionado [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [1.21.0] - 2026-09-10
+
 ### Added
 - **Modo Historia — Actos 5, 6, 7 y 8 (el tramo final)**: la campaña pasa de cuatro actos a ocho y se cierra. Cada acto trae mapa propio, mecánica propia, una cinemática firma y un salto de dificultad real (niveles 72 → 100, `version_tier` 2 → 5).
   - **Acto 5 · El Núcleo Invertido** (ambiente `MIRROR`): un mapa simétrico donde todo lo que hay a la izquierda existe también a la derecha, cajas y placas incluidas. La escena firma es tu propio reflejo: camina en espejo contigo hasta que deja de hacerlo.
@@ -477,7 +479,8 @@ y versionado [Semantic Versioning](https://semver.org/lang/es/).
 - Quality gates automáticos en CI (`lint`, `typecheck`, `test:coverage`, `audit`, `build`).
 - Presentación TFM web interna en `/presentacion-tfm`.
 
-[Unreleased]: https://github.com/BobFarreras/Ai-Gi-Oh/compare/v1.20.0...HEAD
+[Unreleased]: https://github.com/BobFarreras/Ai-Gi-Oh/compare/v1.21.0...HEAD
+[1.21.0]: https://github.com/BobFarreras/Ai-Gi-Oh/compare/v1.20.1...v1.21.0
 [1.20.1]: https://github.com/BobFarreras/Ai-Gi-Oh/compare/v1.20.0...v1.20.1
 [1.20.0]: https://github.com/BobFarreras/Ai-Gi-Oh/compare/v1.19.3...v1.20.0
 [1.19.3]: https://github.com/BobFarreras/Ai-Gi-Oh/compare/v1.19.2...v1.19.3
