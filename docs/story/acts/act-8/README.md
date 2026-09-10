@@ -43,14 +43,15 @@ siguiente. El test lo comprueba celda a celda: a los lados de cada fase hay muro
 ## Rivales
 | Duelo | Rival | Dificultad | Nivel/tier | Herencia |
 |---|---|---|---|---|
-| 1 | Coro: Kernel | MYTHIC | 90 / t5 | GenNvim — entidades pesadas y presión. |
-| 2 | Coro: Marea | MYTHIC | 92 / t5 | Leviatán — muros de infraestructura y contadores. |
-| 3 | Coro: Molde | MYTHIC | 94 / t5 | Prototipo — cuatro fusiones. |
-| 4 | Coro: Espejo | MYTHIC | 96 / t5 | Verso — robo puro. |
-| 5-7 | La Entidad | MYTHIC | 98 / 99 / **100** | Tu propio mazo, sin cartas muertas. |
+| 1 | Coro: Kernel | MYTHIC | 100 / t5 | GenNvim — entidades pesadas y presión. ATK efectivo 3920. |
+| 2 | Coro: Marea | MYTHIC | 100 / t5 | Leviatán — muros: DEF efectiva 3100, la más alta del juego. |
+| 3 | Coro: Molde | MYTHIC | 100 / t5 | Prototipo — cuatro fusiones. |
+| 4 | Coro: Espejo | MYTHIC | 100 / t5 | Verso — robo puro. |
+| 5-7 | La Entidad | MYTHIC | 100 / t5 | Tu propio mazo, sin cartas muertas. ATK efectivo 3980 → 4080 → **4230**. |
 
-La **fase III** además baja la mano inicial del rival a 3: es el techo del juego, y el único duelo de la
-campaña a nivel 100.
+La **fase III** además baja la mano inicial del rival a 3, y es el techo del juego: 4230 de ATK efectivo
+medio. La mejor fusión del jugador (KaClauli/GemGPT, 3800) con una mejora de +400 llega a 4200 — se gana con
+la fusión y el remate preparados, no a pelo.
 
 ## Cinemática firma — "El Coro"
 La única escena firma de los cuatro actos que **no desemboca en combate**: es narrativa pura, y por eso entra
@@ -64,3 +65,11 @@ tienes delante. Esa ausencia es la amenaza.
   fases encadenan, el pozo es de una casilla, y **no hay ningún warp `forward`** (fin de campaña).
 - `act-8-choir-cutscene.test.ts`: cuatro caras distintas, nadie anda, nadie aparece en el centro, y el orden
   de apagado es por distancia descendente.
+
+## Curva de dificultad
+
+Los niveles y los **atributos base** de los rivales los fija la migración
+[`165_story_acts_5_8_dificultad.sql`](../../../supabase/sql/165_story_acts_5_8_dificultad.sql), no las
+migraciones de contenido: aquéllas dejaron los mazos con los stats pelados del catálogo y el acto salía más
+blando que el Acto 4. El override fija la BASE de la carta y encima se aplica la curva de nivel, así que el
+ATK que ve el jugador es `base + bonus de nivel`.

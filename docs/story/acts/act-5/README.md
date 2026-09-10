@@ -44,9 +44,9 @@ reflejada sobre el eje `x = 24`.
 ## Rivales
 | Duelo | Rival | Dificultad | Nivel/tier | Idea de mazo |
 |---|---|---|---|---|
-| 1-3 | Eco | ELITE | 72-76 / t2-t3 | **Tu propia baraja**, mal copiada. Sube sólo por escalado. |
-| 4 | Verso | ELITE | 78 / t3 | Robo puro: ejecuciones, entidades y cementerio del rival. |
-| 5 | El Reflejo | BOSS | 80 / t3 | Las dos mitades: copia de mejoras + robo, con fusiones de remate. |
+| 1-3 | Eco | ELITE | 75-81 / t3 | **Tu propia baraja**, mal copiada. ATK efectivo 2700→2850. |
+| 4 | Verso | ELITE | 84 / t4 | Robo puro: ejecuciones, entidades y cementerio del rival. |
+| 5 | El Reflejo | BOSS | 87 / t4 | Las dos mitades: copia de mejoras + robo, con fusiones. ATK efectivo 3180. |
 
 ## Cinemática firma — "El Reflejo"
 La **única** cutscene del juego que mueve al jugador (`PLAYER_STEP`). Al pisar el eje aparece un doble con tu
@@ -61,3 +61,11 @@ desplaza la partida.
 - `act-5-mirror-cutscene.test.ts`: el doble refleja cada paso, todas las casillas pisadas son suelo, y Verso
   acaba pegado al jugador.
 - Todos los nodos virtuales del mapa están registrados en el registro de definiciones.
+
+## Curva de dificultad
+
+Los niveles y los **atributos base** de los rivales los fija la migración
+[`165_story_acts_5_8_dificultad.sql`](../../../supabase/sql/165_story_acts_5_8_dificultad.sql), no las
+migraciones de contenido: aquéllas dejaron los mazos con los stats pelados del catálogo y el acto salía más
+blando que el Acto 4. El override fija la BASE de la carta y encima se aplica la curva de nivel, así que el
+ATK que ve el jugador es `base + bonus de nivel`.

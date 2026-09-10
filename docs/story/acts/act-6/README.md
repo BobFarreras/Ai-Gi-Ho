@@ -43,10 +43,10 @@ resolver por fuerza bruta antes de haber hecho las tres regiones.
 ## Rivales
 | Duelo | Rival | Dificultad | Nivel/tier | Idea de mazo |
 |---|---|---|---|---|
-| 1-2 | Nimbus | ELITE | 78-80 / t3 | Infraestructura y muros. Gana por agotamiento, no por daño. |
-| 3 | Enjambre | ELITE | 82 / t3 | Inundación: entidades baratas + invocación doble. |
-| 4 | Enjambre Mayor | BOSS | 84 / t4 | El enjambre ya coordinado: la misma inundación, con remates. |
-| 5 | Leviatán del Borde | MYTHIC | 86 / t4 | Todo lo anterior en un cuerpo: control pesado y golpes de 900. |
+| 1-2 | Nimbus | ELITE | 88-90 / t4 | Infraestructura y muros: más DEF que ATK. Gana por agotamiento. |
+| 3 | Enjambre | ELITE | 92 / t4 | Inundación: entidades baratas + invocación doble. |
+| 4 | Enjambre Mayor | BOSS | 94 / t4 | El enjambre ya coordinado: la misma inundación, con remates. |
+| 5 | Leviatán del Borde | MYTHIC | 96 / t5 | Todo lo anterior en un cuerpo. ATK efectivo 3490, DEF 2620. |
 
 ## Cinemática firma — "El Enjambre"
 En una plaza abierta y sin paredes, **cinco** copias degradadas entran **andando** desde cinco bocas y cierran
@@ -61,3 +61,11 @@ desfasados, que es exactamente el efecto buscado.
 - `act-6-overworld-tilemap.test.ts`: las tres llaves son alcanzables de salida (simultaneidad real), la boca
   oeste no se abre con dos, y el Leviatán exige terminal + Enjambre.
 - `act-6-swarm-cutscene.test.ts`: cinco bocas con ruta real, avance intercalado, y despawn de cuatro.
+
+## Curva de dificultad
+
+Los niveles y los **atributos base** de los rivales los fija la migración
+[`165_story_acts_5_8_dificultad.sql`](../../../supabase/sql/165_story_acts_5_8_dificultad.sql), no las
+migraciones de contenido: aquéllas dejaron los mazos con los stats pelados del catálogo y el acto salía más
+blando que el Acto 4. El override fija la BASE de la carta y encima se aplica la curva de nivel, así que el
+ATK que ve el jugador es `base + bonus de nivel`.

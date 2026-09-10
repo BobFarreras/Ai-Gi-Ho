@@ -42,10 +42,10 @@ así que nunca hay forma de quedarse encerrado abajo — los dos actúan sobre e
 ## Rivales
 | Duelo | Rival | Dificultad | Nivel/tier | Idea de mazo |
 |---|---|---|---|---|
-| 1-2 | Operario de Colada | ELITE | 84-86 / t4 | Entidades de sistema, sobrecarga y castigo en runtime. |
-| 3 | Alquimista | MYTHIC | 88 / t4 | **Cuatro fusiones** encadenadas: cada turno sale algo mayor del molde. |
-| 4 | Midutech Recompilado | MYTHIC | 90 / t5 | El control del Acto 4, sin las ataduras del Núcleo. |
-| 5 | Prototipo Cero | MYTHIC | 93 / t5 | Lo mejor de la cadena montado encima: fusiones, remates y bloqueo. |
+| 1-2 | Operario de Colada | ELITE | 96-97 / t5 | Entidades de sistema, sobrecarga y castigo en runtime. |
+| 3 | Alquimista | MYTHIC | 98 / t5 | **Cuatro fusiones** encadenadas: cada turno sale algo mayor del molde. |
+| 4 | Midutech Recompilado | MYTHIC | 99 / t5 | El control del Acto 4, sin las ataduras del Núcleo. |
+| 5 | Prototipo Cero | MYTHIC | 100 / t5 | Fusiones, remates y bloqueo. ATK efectivo 3910, DEF 2750. |
 
 ## Cinemática firma — "La Colada"
 Misma gramática que la Fábrica de Cartas del Acto 4 (dos NPCs, narración dentro del guion) con el remate
@@ -61,3 +61,11 @@ BFS que arranca en su propia casilla, y sobre celda bloqueada no habría camino.
   del tramo de descenso son `BELT_UP` de salida (bajarla a pelo no es una opción).
 - `act-7-casting-cutscene.test.ts`: los dos se miran antes de hablar, giran los dos hacia el jugador después,
   y el Alquimista sube casilla a casilla por suelo real hasta quedarse a una del trigger.
+
+## Curva de dificultad
+
+Los niveles y los **atributos base** de los rivales los fija la migración
+[`165_story_acts_5_8_dificultad.sql`](../../../supabase/sql/165_story_acts_5_8_dificultad.sql), no las
+migraciones de contenido: aquéllas dejaron los mazos con los stats pelados del catálogo y el acto salía más
+blando que el Acto 4. El override fija la BASE de la carta y encima se aplica la curva de nivel, así que el
+ATK que ve el jugador es `base + bonus de nivel`.

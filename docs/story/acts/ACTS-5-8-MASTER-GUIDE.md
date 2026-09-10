@@ -386,9 +386,33 @@ modos PvE ([despliegue-modos-pve.md](../../supabase/despliegue-modos-pve.md)).
 | `162_story_act6_red_abierta` | ✅ 2026-09-10 | ❌ |
 | `163_story_act7_fundicion_cuantica` | ✅ 2026-09-10 | ❌ |
 | `164_story_act8_singularidad` | ✅ 2026-09-10 | ❌ |
+| `165_story_acts_5_8_dificultad` | ✅ 2026-09-10 | ❌ |
 
 Se aplicaron a producción **antes** de desplegar el código —y no en local— porque el `.env.local` de
 desarrollo apunta al Supabase de producción: jugando en local, el duelo del Acto 5 se busca allí. Tras
 aplicarlas, producción tiene los 22 duelos de los capítulos 5-8, todos con perfil de IA y con overrides
 de mazo (niveles 72→100). Si algún día se vuelve a jugar contra el Supabase local, hay que aplicarlas
 con `pnpm db:migrate` (nunca `db:reset`).
+
+### La corrección de dificultad (migración 165)
+
+Las migraciones 161-164 dejaron los mazos de los Actos 5-8 **sin `attack_override`/`defense_override`**, es
+decir con los stats pelados del catálogo (1263-1920 de ATK base de media), mientras que los rivales de los
+Actos 1-4 sí los llevan (2000-2600). Y la curva de nivel sólo aporta **+150 ATK entre el nivel 72 y el 100**
+(`card-level-bonus-rules.ts`: 20 hitos que suman +750/+750 al llegar a 100, y a nivel 72 ya van +600/+450).
+Resultado: el primer rival del Acto 5 pegaba **menos** que el primero del Acto 4. La campaña se ablandaba
+justo en el tramo final.
+
+La 165 lo arregla sumando un **delta por duelo sobre el stat de catálogo** —no un número plano— para que la
+identidad de cada carta se conserve dentro del mazo, y subiendo el nivel y el tier de versión acto a acto:
+
+| Tramo | Nivel | Tier | ATK efectivo medio |
+|---|---|---|---|
+| Acto 4 (referencia) | 40-70 | 0-5 | 2250 → 2775 |
+| Acto 5 | 75 → 87 | 3-4 | 2700 → 3180 |
+| Acto 6 | 88 → 96 | 4-5 | 3000 → 3490 |
+| Acto 7 | 96 → 100 | 5 | 3520 → 3910 |
+| Acto 8 | 100 | 5 | 3640 → **4230** |
+
+Sólo se tocan las **entidades**: magias y trampas no tienen ATK/DEF (de ellas sube el nivel, que es lo que
+les rebaja el coste de energía a partir del 50).
