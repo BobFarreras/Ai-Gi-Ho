@@ -121,8 +121,59 @@ const TERMINAL_PALETTE: IAmbientPalette = {
   tint: "rgba(16, 90, 45, 0.12)",
 };
 
+/**
+ * Acto 5 — Core Invertido. El único mapa CLARO del juego: fondo hueso, rejilla oscura, lanes grafito. Es la
+ * misma geometría de siempre revelada como un negativo fotográfico, que es exactamente lo que cuenta el acto.
+ */
+const MIRROR_PALETTE: IAmbientPalette = {
+  background: "#e9e6dd",
+  gridLine: "rgba(15, 23, 42, 0.10)",
+  laneCore: "#c6c1b2",
+  laneGlow: "rgba(51, 65, 85, 0.55)",
+  veinRgb: "51, 65, 85",
+  tint: "rgba(226, 232, 240, 0.10)",
+};
+
+/** Acto 6 — Red Abierta: azul de cielo abierto, muy luminoso. El primer mapa que no aprieta. */
+const CLOUD_PALETTE: IAmbientPalette = {
+  background: "#08192c",
+  gridLine: "rgba(191, 219, 254, 0.10)",
+  laneCore: "#123f5e",
+  laneGlow: "rgba(125, 211, 252, 0.60)",
+  veinRgb: "186, 230, 253",
+  tint: "rgba(56, 130, 220, 0.10)",
+};
+
+/** Acto 7 — Fundición Cuántica: ámbar y magma, la cadena de montaje al rojo vivo. */
+const FORGE_PALETTE: IAmbientPalette = {
+  background: "#150703",
+  gridLine: "rgba(251, 146, 60, 0.11)",
+  laneCore: "#4a1c05",
+  laneGlow: "rgba(251, 146, 60, 0.60)",
+  veinRgb: "251, 146, 60",
+  tint: "rgba(140, 50, 10, 0.14)",
+};
+
+/** Acto 8 — Singularidad: violeta saturado, el punto de convergencia. El más cargado del juego a propósito. */
+const SINGULARITY_PALETTE: IAmbientPalette = {
+  background: "#0a0416",
+  gridLine: "rgba(216, 180, 254, 0.12)",
+  laneCore: "#331060",
+  laneGlow: "rgba(192, 132, 252, 0.65)",
+  veinRgb: "233, 213, 255",
+  tint: "rgba(120, 50, 190, 0.16)",
+};
+
+const PALETTE_BY_AMBIENT: Record<string, IAmbientPalette> = {
+  TERMINAL: TERMINAL_PALETTE,
+  MIRROR: MIRROR_PALETTE,
+  CLOUD: CLOUD_PALETTE,
+  FORGE: FORGE_PALETTE,
+  SINGULARITY: SINGULARITY_PALETTE,
+};
+
 function resolveAmbientPalette(ambient: IOverworldTilemap["ambient"]): IAmbientPalette {
-  return ambient === "TERMINAL" ? TERMINAL_PALETTE : DEFAULT_PALETTE;
+  return (ambient && PALETTE_BY_AMBIENT[ambient]) ?? DEFAULT_PALETTE;
 }
 
 /**

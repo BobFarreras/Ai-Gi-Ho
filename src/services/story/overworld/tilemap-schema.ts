@@ -36,11 +36,24 @@ export type OverworldObjectKind =
   | "BOX_RESET"; // botón que devuelve las cajas a su posición inicial (anti soft-lock).
 
 /**
- * Ambiente visual del mapa.
+ * Ambiente visual del mapa. Cada acto estrena el suyo: el ambiente elige la paleta entera del renderer
+ * (fondo, rejilla, lanes de circuito, venas y velo de pantalla), que es lo que hace que dos actos con el
+ * mismo motor no se parezcan en nada.
  * - `DARK` activa el pase de oscuridad + radios de luz (Acto 3).
  * - `TERMINAL` tiñe el mundo de verde fósforo ciberpunk (Acto 4, GenNvim): rejilla neón verde y scanlines.
+ * - `MIRROR` invierte el mundo (Acto 5, Core Invertido): claro sobre oscuro, como un negativo fotográfico.
+ * - `CLOUD` abre el mundo a un azul luminoso (Acto 6, Red Abierta): el primer acto que no es claustrofóbico.
+ * - `FORGE` lo pone al rojo vivo (Acto 7, Fundición): ámbar y magma.
+ * - `SINGULARITY` lo satura de violeta (Acto 8): la pantalla vibra con lo que hay dentro.
  */
-export type OverworldAmbient = "NORMAL" | "DARK" | "TERMINAL";
+export type OverworldAmbient =
+  | "NORMAL"
+  | "DARK"
+  | "TERMINAL"
+  | "MIRROR"
+  | "CLOUD"
+  | "FORGE"
+  | "SINGULARITY";
 
 /** Rectángulo de celdas (inclusivo) que un interruptor ilumina por completo. */
 export interface IOverworldLightRect {

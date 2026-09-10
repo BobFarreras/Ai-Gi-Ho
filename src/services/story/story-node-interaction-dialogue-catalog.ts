@@ -1,11 +1,15 @@
 // src/services/story/story-node-interaction-dialogue-catalog.ts - Catálogo de secuencias narrativas Story para eventos y recompensas del mapa.
 import { IStoryNodeInteractionDialogue } from "@/services/story/story-node-interaction-dialogue-types";
+import { STORY_ACTS_5_8_DIALOGUE_BY_NODE_ID } from "@/services/story/story-node-interaction-dialogue-acts-5-8";
 
 // Retratos de los villanos del Acto 4 (para que sus líneas muestren SU avatar, no el de BigLog por defecto).
 const GENNVIM_PORTRAIT = "/assets/story/opponents/opp-ch1-apprentice/avatar-GenNvim.webp";
 const MIDUTECH_PORTRAIT = "/assets/story/opponents/opp-ch1-midutech/avatar-Midutech.webp";
 
 export const STORY_NODE_INTERACTION_DIALOGUE_BY_NODE_ID: Record<string, IStoryNodeInteractionDialogue> = {
+  // Actos 5-8 (el tramo final). Viven en su propio fichero por volumen; se mezclan aquí para que el
+  // resolutor de diálogos siga teniendo una sola tabla que consultar.
+  ...STORY_ACTS_5_8_DIALOGUE_BY_NODE_ID,
   // ── Acto 4 — Núcleo GenNvim (terminal verde) ────────────────────────────────
   // BigLog es el MENTOR (bueno): habla claro y te guía. Las amenazas las dicen los villanos GenNvim/Midutech.
   // E1 YA es vídeo (`/assets/videos/story/act-4/genNvim.mp4`); E4/E6 lo serán, de momento van como narración.

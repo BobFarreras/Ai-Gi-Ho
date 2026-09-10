@@ -14,6 +14,10 @@
 5. [Acto 3](./act-3/README.md)
 6. [Acto 4](./act-4/README.md)
 7. [Acto 5](./act-5/README.md)
+8. [Acto 6](./act-6/README.md)
+9. [Acto 7](./act-7/README.md)
+10. [Acto 8](./act-8/README.md) — cierre de campaña
+11. [Guía maestra de los Actos 5-8](./ACTS-5-8-MASTER-GUIDE.md)
 
 ## Convención de nodos
 1. `MOVE`: tránsito y posicionamiento.
