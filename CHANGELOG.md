@@ -6,6 +6,8 @@ y versionado [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [1.21.2] - 2026-09-12
+
 ### Internal
 - **Corregido el runbook de cuota de Vercel**: la "política de retención" que se recomendaba en v1.21.1 **no existe en el plan Hobby** (la ruta del panel da 404 y no hay sección equivalente; es función de Pro). En este plan la única palanca contra la acumulación de despliegues es borrarlos a mano con `pnpm vercel:prune:deployments`. Documentado también que *Web Analytics* ya quedó activado y que las variables de entorno del proyecto son de tipo `Secret`, así que **su valor no se puede leer desde el panel**: el flag `STORY_OVERWORLD_ENABLED` solo se verifica por su efecto, entrando a `/hub/story` en producción. Todo en [docs/vercel/avisos-de-cuota.md](docs/vercel/avisos-de-cuota.md).
 
@@ -489,7 +491,8 @@ y versionado [Semantic Versioning](https://semver.org/lang/es/).
 - Quality gates automáticos en CI (`lint`, `typecheck`, `test:coverage`, `audit`, `build`).
 - Presentación TFM web interna en `/presentacion-tfm`.
 
-[Unreleased]: https://github.com/BobFarreras/Ai-Gi-Oh/compare/v1.21.1...HEAD
+[Unreleased]: https://github.com/BobFarreras/Ai-Gi-Oh/compare/v1.21.2...HEAD
+[1.21.2]: https://github.com/BobFarreras/Ai-Gi-Oh/compare/v1.21.1...v1.21.2
 [1.21.1]: https://github.com/BobFarreras/Ai-Gi-Oh/compare/v1.21.0...v1.21.1
 [1.21.0]: https://github.com/BobFarreras/Ai-Gi-Oh/compare/v1.20.1...v1.21.0
 [1.20.1]: https://github.com/BobFarreras/Ai-Gi-Oh/compare/v1.20.0...v1.20.1
