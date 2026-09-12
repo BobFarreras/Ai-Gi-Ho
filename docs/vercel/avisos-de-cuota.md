@@ -38,11 +38,12 @@ Ajustable con `--keep-production=5` y `--keep-days=14`. El token se saca de
 Borrar un despliegue es **irreversible**: se pierde la posibilidad de hacer rollback instantáneo a él.
 Por eso el script nunca borra sin `--yes` y por eso conserva los más recientes.
 
-### 2. Política de retención (para que no vuelva a pasar)
+### 2. Política de retención — NO disponible en Hobby
 
-Panel de Vercel → proyecto → *Settings* → *Deployment Retention*. Pon a caducar los **previews** y los
-**cancelados/errored** (30 días va bien) y deja producción con más margen. A partir de ahí se limpia solo
-y el script de arriba pasa a ser algo excepcional.
+Comprobado el 2026-09-12 en el panel: `/settings/deployment-retention` da **404** y en *Settings* solo
+hay General, Build and Deployment, Environments, Git y Deployment Protection. La retención automática es
+función de **Pro**, así que en este plan **no existe esta palanca**: la limpieza es manual (el script de
+arriba) o no hay. Reevaluar si algún día se sube de plan.
 
 ### 3. Que cada despliegue pese menos
 
@@ -88,13 +89,16 @@ Ese es de **Web Analytics** y no tiene nada que ver con la cuota. Faltaban dos c
 
 1. El paquete `@vercel/analytics` con `<Analytics />` montado en el layout raíz. **Hecho** el 2026-09-12
    ([layout.tsx](../../src/app/layout.tsx)).
-2. Activar *Web Analytics* en la pestaña **Analytics** del proyecto en el panel de Vercel. **Esto hay que
-   hacerlo a mano**: sin activarlo, el script se carga pero los eventos se descartan. En Hobby el plan
-   incluye 2.500 eventos al mes.
+2. Activar *Web Analytics* en la pestaña **Analytics** del proyecto en el panel de Vercel. **Hecho**: el
+   panel ya muestra Visitors / Page Views / Bounce Rate. En Hobby el plan incluye 2.500 eventos al mes.
+   (Al activarlo, el Vercel Agent abrió el PR #41 proponiendo exactamente este mismo cambio; se cerró por
+   duplicado.)
 
 No confundirlo con la **telemetría propia** (`AnalyticsInitializer`), que escribe en Supabase y alimenta
-el panel de admin. Esa es independiente y sigue apagada en producción: necesita las dos variables a la
-vez, porque el cliente no emite sin la primera y la API `/api/analytics/batch` rechaza sin la segunda.
+el panel de admin. Esa es independiente y necesita las dos variables a la vez, porque el cliente no emite
+sin la primera y la API `/api/analytics/batch` rechaza sin la segunda. Las dos **existen** en el proyecto
+desde el 28/06, pero su valor no se puede leer (ver más abajo); si el panel de admin no recibe eventos,
+es que alguna no está en `true`.
 
 ```
 NEXT_PUBLIC_ANALYTICS_ENABLED=true
@@ -102,3 +106,16 @@ ANALYTICS_ENABLED=true
 ```
 
 Las variables de entorno se aplican **en build**, así que después de añadirlas hay que redesplegar.
+
+## Las variables están guardadas como Secret: no se pueden leer
+
+Las tres (`STORY_OVERWORLD_ENABLED`, `NEXT_PUBLIC_ANALYTICS_ENABLED`, `ANALYTICS_ENABLED`) son de tipo
+**Secret**, y Vercel avisa de que *"You can't reveal this value after saving"*. Eso significa que **nadie**
+—tampoco el dueño de la cuenta— puede comprobar su valor desde el panel: la única forma de asegurarlo es
+sobrescribirlo (Edit → escribir el valor → Save) y redesplegar.
+
+Para un flag booleano esto es más incordio que seguridad. Si algún día se recrean, el tipo **Config** sí
+deja leerlas; sólo los secretos de verdad (service-role, tokens de Upstash) necesitan ser Secret.
+
+**Cómo verificar el flag sin poder leerlo:** entrar a `/hub/story` con sesión iniciada. Si redirige a
+`/hub/story/overworld`, `STORY_OVERWORLD_ENABLED` está en `true`; si se queda en el panel clásico, no.
