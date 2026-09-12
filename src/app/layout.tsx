@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from "next";
 import { Chakra_Petch, Geist, Geist_Mono, Orbitron } from "next/font/google";
 import { PerformanceProfileToggle } from "@/components/internal/PerformanceProfileToggle";
 import { shouldRenderPerformanceToggle } from "@/components/internal/should-render-performance-toggle";
+import { Analytics } from "@vercel/analytics/next";
 import { AnalyticsInitializer } from "@/services/analytics/client/AnalyticsInitializer";
 import {
   SITE_DESCRIPTION,
@@ -166,6 +167,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {children}
+        <Analytics />
         <AnalyticsInitializer />
         {shouldRenderPerformanceToggle(process.env.NODE_ENV) ? <PerformanceProfileToggle /> : null}
       </body>
