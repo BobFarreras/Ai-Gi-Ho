@@ -6,6 +6,11 @@ y versionado [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Internal
+- **Vercel avisaba de cuota al 89% de Deployment Storage**: Vercel guarda una copia entera del build de cada despliegue, y con `public/` en 236 MB cada push costaba un cuarto de giga. Los vídeos venían a 20-23 Mbps (bitrate de edición, no de web), así que se recomprimen a CRF 26 —comparado fotograma a fotograma contra el máster, no se distingue— y pasan de **119,9 MB a 56,2 MB**. Las rutas y la resolución no cambian: no hay nada que tocar en la app. Script repetible en `pnpm media:compress:videos` y runbook completo, con las tres palancas (borrar despliegues, política de retención y peso del build), en [docs/vercel/avisos-de-cuota.md](docs/vercel/avisos-de-cuota.md).
+- **Limpieza de despliegues viejos automatizable**: `pnpm vercel:prune:deployments` lista qué sobra sin tocar nada (conserva producción en vivo, los 3 últimos de producción y lo de la última semana) y solo borra con `--yes`. El token va por entorno, nunca al repo.
+- **Web Analytics de Vercel**: faltaba el paquete y el `<Analytics />` del layout, por eso el panel decía que no recogía datos. Queda pendiente activarlo en la pestaña *Analytics* del proyecto, que es cosa del panel. No se toca la telemetría propia que alimenta el panel de admin.
+
 ## [1.21.0] - 2026-09-10
 
 ### Added

@@ -2,6 +2,7 @@
 // perfil de efectos visuales.
 import type { Metadata, Viewport } from "next";
 import { Chakra_Petch, Geist, Geist_Mono, Orbitron } from "next/font/google";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import { PerformanceProfileToggle } from "@/components/internal/PerformanceProfileToggle";
 import { shouldRenderPerformanceToggle } from "@/components/internal/should-render-performance-toggle";
 import { AnalyticsInitializer } from "@/services/analytics/client/AnalyticsInitializer";
@@ -166,7 +167,11 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {children}
+        {/* Telemetria propia (Supabase -> panel de admin). Solo emite si NEXT_PUBLIC_ANALYTICS_ENABLED=true. */}
         <AnalyticsInitializer />
+        {/* Web Analytics de Vercel: visitas y paginas vistas en el panel del proyecto. Es independiente
+            de la telemetria propia y no envia datos de jugador. */}
+        <VercelAnalytics />
         {shouldRenderPerformanceToggle(process.env.NODE_ENV) ? <PerformanceProfileToggle /> : null}
       </body>
     </html>
