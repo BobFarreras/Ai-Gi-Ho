@@ -6,6 +6,9 @@ y versionado [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Internal
+- **Corregido el runbook de cuota de Vercel**: la "política de retención" que se recomendaba en v1.21.1 **no existe en el plan Hobby** (la ruta del panel da 404 y no hay sección equivalente; es función de Pro). En este plan la única palanca contra la acumulación de despliegues es borrarlos a mano con `pnpm vercel:prune:deployments`. Documentado también que *Web Analytics* ya quedó activado y que las variables de entorno del proyecto son de tipo `Secret`, así que **su valor no se puede leer desde el panel**: el flag `STORY_OVERWORLD_ENABLED` solo se verifica por su efecto, entrando a `/hub/story` en producción. Todo en [docs/vercel/avisos-de-cuota.md](docs/vercel/avisos-de-cuota.md).
+
 ## [1.21.1] - 2026-09-12
 
 ### Internal
